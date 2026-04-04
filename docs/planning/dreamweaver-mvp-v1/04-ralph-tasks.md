@@ -134,13 +134,13 @@ AI 指令:
     - 运行 E2E 测试
     - 确认所有测试通过
 
-- [~] **2.2.4 重构优化 (Refactor)**
+- [x] **2.2.4 重构优化 (Refactor)**
     - 提取表单组件
     - 优化代码结构
     - 确保测试仍然通过
 
 ### 2.3 认证状态管理
-- [ ] **2.3.1 编写 auth-store 单元测试 (Red)**
+- [~] **2.3.1 编写 auth-store 单元测试 (Red)**
     - 创建 `tests/unit/stores/auth-store.test.ts`
     - 测试: 登录状态管理
     - 测试: Token 存储
