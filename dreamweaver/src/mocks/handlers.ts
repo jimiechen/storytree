@@ -329,4 +329,86 @@ export const handlers = [
       },
     });
   }),
+
+  // Chapters: Update (by chapter id only)
+  http.put('/api/chapters/:id', async ({ request, params }) => {
+    // Find the chapter across all projects
+    let targetChapter: any = null;
+    let targetProject: any = null;
+    
+    for (const project of mockProjects.values()) {
+      const chapter = project.chapters.find((c: any) => c.id === params.id);
+      if (chapter) {
+        targetChapter = chapter;
+        targetProject = project;
+        break;
+      }
+    }
+    
+    if (!targetChapter) {
+      return HttpResponse.json({
+        result: {
+          code: 10404,
+          message: '章节不存在',
+        },
+      }, { status: 404 });
+    }
+
+    const body = (await request.json()) as { title?: string; content?: string };
+    
+    if (body.title !== undefined) {
+      targetChapter.title = body.title;
+    }
+    if (body.content !== undefined) {
+      targetChapter.content = body.content;
+      // Recalculate word count
+      targetChapter.wordCount = body.content.length;
+    }
+
+    return HttpResponse.json({
+      result: {
+        code: 10200,
+        message: '更新成功',
+        data: {
+          id: targetChapter.id,
+          title: targetChapter.title,
+          wordCount: targetChapter.wordCount,
+          status: targetChapter.status,
+          updatedAt: new Date().toISOString(),
+        },
+      },
+    });
+  }),
+
+  // Chapters: Delete
+  http.delete('/api/chapters/:id', ({ params }) => {
+    // Find and remove the chapter across all projects
+    let chapterFound = false;
+    
+    for (const project of mockProjects.values()) {
+      const chapterIndex = project.chapters.findIndex((c: any) => c.id === params.id);
+      if (chapterIndex !== -1) {
+        project.chapters.splice(chapterIndex, 1);
+        chapterFound = true;
+        break;
+      }
+    }
+    
+    if (!chapterFound) {
+      return HttpResponse.json({
+        result: {
+          code: 10404,
+          message: '章节不存在',
+        },
+      }, { status: 404 });
+    }
+
+    return HttpResponse.json({
+      result: {
+        code: 10200,
+        message: '删除成功',
+      },
+    });
+  }),
 ];
+

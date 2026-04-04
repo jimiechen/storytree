@@ -110,4 +110,8 @@ test.describe('项目列表页面', () => {
         await nextButton.click();
         
         // 验证页面更新
-        await expect(page).toHaveURL(/.*page=
+        await expect(page).toHaveURL(/.*page=\d+/);
+      }
+    }
+  });
+});
