@@ -82,7 +82,9 @@ async function createRecord(config: FeishuConfig, fields: Record<string, any>): 
     const cmd = `lark-cli base +record-upsert --base-token ${config.base.app_token} --table-id ${config.base.table_id} --json '${jsonPayload}'`;
     const result = execSync(cmd, { encoding: 'utf-8', stdio: ['pipe', 'pipe', 'pipe'] });
     const data = JSON.parse(result);
-    if (data.ok && data.data?.record?.record_id) return data.data.record.record_id;
+    if (data.ok && data.data?.record?.record_id_list?.length > 0) {
+      return data.data.record.record_id_list[0];
+    }
     console.error('   创建记录失败:', data.error || data);
     return null;
   } catch (error) {

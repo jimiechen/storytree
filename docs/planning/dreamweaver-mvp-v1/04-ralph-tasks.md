@@ -36,52 +36,52 @@ AI 指令:
     - 添加 pre-commit hook (husky + lint-staged)
     - 验证代码格式化正常工作
 
-- [ ] **1.1.3 配置项目目录结构**
+- [x] **1.1.3 配置项目目录结构**
     - 创建 `src/app`, `src/components`, `src/lib`, `src/stores`, `src/types`, `src/hooks`, `src/mocks`
     - 创建 `tests/e2e/`, `tests/unit/`
     - 创建 `.env.example` 文件
 
 ### 1.2 配置测试框架 (Vitest + Playwright)
-- [ ] **1.2.1 配置 Vitest 单元测试**
+- [x] **1.2.1 配置 Vitest 单元测试**
     - 安装 Vitest 和 React Testing Library
     - 配置 `vitest.config.ts`
     - 编写示例单元测试验证配置
 
-- [ ] **1.2.2 配置 Playwright E2E 测试**
+- [x] **1.2.2 配置 Playwright E2E 测试**
     - 安装 Playwright 和浏览器
     - 配置 `playwright.config.ts`
-    - 编写首页访问测试验证配置
+    - 配置测试目录结构编写首页访问测试验证配置
 
 ### 1.3 搭建 MSW Mock 服务
-- [ ] **1.3.1 安装配置 MSW**
+- [x] **1.3.1 安装配置 MSW**
     - 安装 MSW 和 @faker-js/faker
     - 创建 `src/mocks/browser.ts` 浏览器端初始化
     - 配置 Mock Service Worker
 
-- [ ] **1.3.2 创建 Mock 数据生成器**
+- [x] **1.3.2 创建 Mock 数据生成器**
     - 创建 `src/mocks/data.ts`
     - 实现 generateMockUser 函数
     - 实现 generateMockProject 函数
     - 实现 generateMockChapter 函数
 
-- [ ] **1.3.3 创建 Mock API 处理器**
+- [x] **1.3.3 创建 Mock API 处理器**
     - 创建 `src/mocks/handlers.ts`
     - 实现认证模块 Mock API (register, login)
     - 实现项目管理 Mock API (list, create, get)
     - 实现章节管理 Mock API (list, get, create, update)
     - 所有响应遵循 `{result: {code: 10200, message: "", data: {}}}` 格式
 
-- [ ] **1.3.4 验证 Mock 服务正常工作**
+- [x] **1.3.4 验证 Mock 服务正常工作**
     - 编写测试调用 Mock API
     - 验证响应格式正确
 
 ### 1.4 配置 API 请求封装
-- [ ] **1.4.1 创建 API 类型定义**
+- [x] **1.4.1 创建 API 类型定义**
     - 创建 `src/types/api.ts`
     - 定义 ApiResponse<T> 接口
     - 定义 ApiErrorCode 枚举
 
-- [ ] **1.4.2 创建 API 请求封装**
+- [x] **1.4.2 创建 API 请求封装**
     - 创建 `src/lib/api.ts`
     - 封装 axios 实例
     - 实现请求拦截器 (添加 token)
