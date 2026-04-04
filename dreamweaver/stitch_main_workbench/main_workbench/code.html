@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>织梦笔 DreamWeaver - 创作空间</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&amp;family=Noto+Sans+SC:wght@300;400;500;700&amp;family=Noto+Serif+SC:wght@400;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "error-container": "#93000a",
+                        "tertiary": "#83da85",
+                        "tertiary-container": "#002908",
+                        "on-secondary-fixed-variant": "#633f00",
+                        "secondary-fixed": "#ffddb4",
+                        "background": "#111125",
+                        "on-secondary": "#452b00",
+                        "secondary": "#ffb954",
+                        "primary-fixed": "#c2e8ff",
+                        "inverse-on-surface": "#2f2e44",
+                        "primary-container": "#002535",
+                        "on-surface": "#e2e0fc",
+                        "error": "#ffb4ab",
+                        "on-error": "#690005",
+                        "inverse-surface": "#e2e0fc",
+                        "on-secondary-fixed": "#291800",
+                        "on-secondary-container": "#3c2500",
+                        "on-error-container": "#ffdad6",
+                        "secondary-container": "#c3841b",
+                        "inverse-primary": "#006688",
+                        "surface-variant": "#333348",
+                        "secondary-fixed-dim": "#ffb954",
+                        "on-primary-container": "#0094c4",
+                        "on-primary": "#003548",
+                        "on-tertiary-fixed-variant": "#005318",
+                        "surface-container-high": "#28283d",
+                        "on-tertiary": "#00390e",
+                        "surface-container": "#1e1e32",
+                        "on-tertiary-container": "#469a4e",
+                        "primary-fixed-dim": "#75d1ff",
+                        "surface-tint": "#75d1ff",
+                        "surface": "#111125",
+                        "tertiary-fixed-dim": "#83da85",
+                        "surface-dim": "#111125",
+                        "surface-container-low": "#1a1a2e",
+                        "surface-container-highest": "#333348",
+                        "on-background": "#e2e0fc",
+                        "on-surface-variant": "#c6c6ce",
+                        "tertiary-fixed": "#9ff79f",
+                        "outline-variant": "#45464d",
+                        "surface-bright": "#37374d",
+                        "outline": "#909098",
+                        "on-primary-fixed": "#001e2b",
+                        "primary": "#75d1ff",
+                        "surface-container-lowest": "#0c0c20",
+                        "on-primary-fixed-variant": "#004d67",
+                        "on-tertiary-fixed": "#002105"
+                    },
+                    fontFamily: {
+                        "headline": ["Manrope", "Noto Sans SC"],
+                        "body": ["Noto Serif SC"],
+                        "label": ["Manrope", "Noto Sans SC"]
+                    },
+                    borderRadius: { "DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem" },
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+        }
+        ::-webkit-scrollbar { width: 4px; height: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #333348; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #75d1ff66; }
+        .glass-panel {
+            background: rgba(30, 30, 50, 0.6);
+            backdrop-filter: blur(12px);
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface font-label selection:bg-primary/30 h-screen overflow-hidden flex">
+<!-- Activity Bar (Fixed Left) -->
+<aside class="fixed left-0 top-0 h-full z-50 flex flex-col bg-[#111125] w-[48px] h-full flex flex-col items-center py-4">
+<div class="text-xl font-bold text-[#75d1ff] mb-8 font-headline">织</div>
+<nav class="flex flex-col gap-6 items-center flex-1 w-full">
+<button class="relative text-[#75d1ff] before:content-[''] before:absolute before:left-0 before:w-[2px] before:h-6 before:bg-[#75d1ff] before:shadow-[0_0_8px_#75d1ff] group" title="Outline">
+<span class="material-symbols-outlined" data-icon="menu_book">menu_book</span>
+</button>
+<button class="text-slate-500 hover:text-slate-300 transition-colors group" title="Branches">
+<span class="material-symbols-outlined" data-icon="herb">cannabis</span>
+</button>
+<button class="text-slate-500 hover:text-slate-300 transition-colors group" title="Knowledge Base">
+<span class="material-symbols-outlined" data-icon="library_books">library_books</span>
+</button>
+<button class="text-slate-500 hover:text-slate-300 transition-colors group" title="AI Assistant">
+<span class="material-symbols-outlined" data-icon="smart_toy">smart_toy</span>
+</button>
+<button class="text-slate-500 hover:text-slate-300 transition-colors group" title="Statistics">
+<span class="material-symbols-outlined" data-icon="bar_chart">bar_chart</span>
+</button>
+</nav>
+<div class="flex flex-col gap-6 items-center pb-4">
+<button class="text-slate-500 hover:text-slate-300 transition-colors" title="Settings">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+</button>
+</div>
+</aside>
+<!-- App Shell -->
+<main class="flex flex-1 ml-[48px] h-full overflow-hidden">
+<!-- Primary Sidebar (Story Explorer) -->
+<section class="w-[260px] bg-surface-container flex flex-col shrink-0">
+<header class="p-6 pb-2">
+<h2 class="text-[11px] uppercase tracking-widest text-primary font-bold">Story Explorer</h2>
+</header>
+<div class="flex-1 overflow-y-auto px-4 py-2 space-y-1">
+<div class="group flex items-center gap-2 p-2 rounded-lg bg-surface-container-highest cursor-pointer">
+<span class="material-symbols-outlined text-[16px] text-primary" data-icon="expand_more">expand_more</span>
+<span class="material-symbols-outlined text-[16px] text-primary" data-icon="auto_awesome">auto_awesome</span>
+<span class="text-sm font-medium">第一卷：浮光</span>
+</div>
+<div class="pl-8 space-y-1">
+<div class="flex items-center gap-2 p-1.5 hover:bg-surface-container-high rounded cursor-pointer group">
+<span class="material-symbols-outlined text-[14px] text-outline" data-icon="description">description</span>
+<span class="text-xs text-on-surface-variant group-hover:text-on-surface">第一章：初现</span>
+</div>
+<div class="flex items-center gap-2 p-1.5 hover:bg-surface-container-high rounded cursor-pointer group">
+<span class="material-symbols-outlined text-[14px] text-outline" data-icon="description">description</span>
+<span class="text-xs text-on-surface-variant group-hover:text-on-surface">第二章：迷局</span>
+</div>
+<div class="flex items-center gap-2 p-1.5 bg-primary/10 border-l-2 border-primary rounded-r cursor-pointer group">
+<span class="material-symbols-outlined text-[14px] text-primary" data-icon="auto_fix_high" style="font-variation-settings: 'FILL' 1;">auto_fix_high</span>
+<span class="text-xs text-primary font-semibold">第三章：命运的转折</span>
+</div>
+<div class="pl-4 border-l border-outline-variant ml-2 space-y-1 py-1">
+<div class="flex items-center gap-2 p-1 hover:bg-surface-container-high rounded cursor-pointer group">
+<span class="material-symbols-outlined text-[14px] text-secondary" data-icon="psychology">psychology</span>
+<span class="text-[10px] text-on-surface-variant">🔮 IF-线：苏婉逃生</span>
+</div>
+<div class="flex items-center gap-2 p-1 hover:bg-surface-container-high rounded cursor-pointer group opacity-60">
+<span class="material-symbols-outlined text-[14px] text-outline" data-icon="archive">archive</span>
+<span class="text-[10px] text-on-surface-variant">📦 归档：废弃大纲</span>
+</div>
+</div>
+</div>
+</div>
+<div class="p-4 bg-surface-container-low mt-auto space-y-2">
+<button class="w-full flex items-center justify-center gap-2 py-2 px-4 rounded-xl bg-gradient-to-br from-primary to-on-primary-container text-on-primary text-[11px] font-black uppercase tracking-widest hover:shadow-[0_0_15px_rgba(117,209,255,0.4)] transition-all">
+<span class="material-symbols-outlined text-[16px]" data-icon="add">add</span>
+                    New Branch
+                </button>
+<div class="flex gap-2">
+<button class="flex-1 flex items-center justify-center gap-1 py-1.5 rounded-lg border border-outline-variant hover:bg-surface-container-highest transition-colors text-[10px] text-on-surface-variant">
+<span class="material-symbols-outlined text-[14px]" data-icon="call_merge">call_merge</span>
+                        Merge
+                    </button>
+<button class="flex-1 flex items-center justify-center gap-1 py-1.5 rounded-lg border border-outline-variant hover:bg-surface-container-highest transition-colors text-[10px] text-on-surface-variant">
+<span class="material-symbols-outlined text-[14px]" data-icon="ios_share">ios_share</span>
+                        Export
+                    </button>
+</div>
+</div>
+</section>
+<!-- Main Editor Area -->
+<section class="flex-1 flex flex-col bg-surface-container-lowest relative">
+<!-- Editor Toolbar -->
+<header class="h-12 border-b border-outline-variant/20 flex items-center justify-between px-6 bg-surface-container-lowest/80 backdrop-blur">
+<div class="flex items-center gap-4 text-outline text-[14px]">
+<button class="hover:text-primary transition-colors"><span class="material-symbols-outlined" data-icon="format_bold">format_bold</span></button>
+<button class="hover:text-primary transition-colors"><span class="material-symbols-outlined" data-icon="format_italic">format_italic</span></button>
+<span class="w-[1px] h-4 bg-outline-variant"></span>
+<button class="text-[11px] font-bold hover:text-primary transition-colors">H1</button>
+<button class="text-[11px] font-bold hover:text-primary transition-colors">H2</button>
+<button class="text-[11px] font-bold hover:text-primary transition-colors">H3</button>
+<span class="w-[1px] h-4 bg-outline-variant"></span>
+<button class="hover:text-primary transition-colors"><span class="material-symbols-outlined" data-icon="format_quote">format_quote</span></button>
+</div>
+<div class="flex items-center gap-4">
+<span class="text-[10px] uppercase tracking-widest text-outline">Autosaved 2m ago</span>
+<button class="text-primary hover:text-on-primary-container"><span class="material-symbols-outlined text-[20px]" data-icon="cloud_done">cloud_done</span></button>
+</div>
+</header>
+<div class="flex-1 overflow-y-auto scroll-smooth py-12 px-24 flex flex-col items-center">
+<article class="max-w-[700px] w-full relative pl-8 border-l-2 border-primary/20">
+<h1 class="font-headline text-4xl font-black mb-12 text-on-surface tracking-tight">第三章：命运的转折</h1>
+<div class="font-body text-[16px] leading-[1.8] text-on-surface/90 space-y-6 text-justify">
+<p>长街的尽头，残阳如血。李云握紧了怀中的白玉佩，那冰凉的触感并未能平复他狂跳的心。苏婉的身影早已消失在街角的阴影里，只留下一抹淡淡的寒梅清香。他知道，这不再是一场简单的躲避，而是一场关乎生死的博弈。</p>
+<p>“你终究还是选择了这条路。”一个低沉的声音从暗影处传来。李云猛地回头，只见一名黑衣蒙面人正倚墙而立，指尖拨弄着一枚寒光凛冽的暗器。</p>
+<p>李云深吸一口气，目光变得坚毅。苏婉的嘱托仿佛还在耳畔回响：玉佩即是钥匙，亦是诅咒。若非身陷绝境，绝不可开启其中的封印。然而此刻，他已无路可退。</p>
+<p>天空中的云层层叠叠，压得人透不过气来。一场暴雨即将来临，而大齐王朝的命运，似乎也如同这即将崩塌的天色，在这一刻悄然发生了偏移。他缓缓将真气注入玉佩，感受到一股前所未有的力量正从指尖蔓延开来，带着远古的呢喃与血脉的律动。</p>
+<p class="border-b border-primary/40 pb-1 inline-block">那一刻，李云看到了苏婉眼中的挣扎。</p>
+</div>
+</article>
+</div>
+<!-- Status Bar -->
+<footer class="h-8 bg-surface-container flex items-center justify-between px-6 text-[10px] text-outline uppercase tracking-wider">
+<div class="flex items-center gap-6">
+<span>字数: <span class="text-on-surface">3,847</span></span>
+<span>今日: <span class="text-on-surface">2,150</span></span>
+<span>总计: <span class="text-on-surface">128,450</span></span>
+</div>
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-1.5">
+<span class="w-1.5 h-1.5 rounded-full bg-tertiary shadow-[0_0_5px_#83da85]"></span>
+<span>模型: CLAUDE 4 OPUS</span>
+</div>
+<div class="flex items-center gap-1.5 text-tertiary">
+<span class="material-symbols-outlined text-[14px]" data-icon="check_circle">check_circle</span>
+<span>一致性已校验</span>
+</div>
+</div>
+</footer>
+</section>
+<!-- Secondary Sidebar (AI Panel) -->
+<section class="w-[320px] bg-surface-container border-l border-outline-variant/10 flex flex-col h-full overflow-hidden">
+<div class="p-6 flex flex-col gap-4">
+<div class="flex items-center justify-between">
+<div class="flex flex-col">
+<span class="text-[10px] text-outline font-bold uppercase tracking-widest">Selected Model</span>
+<div class="flex items-center gap-2 text-on-surface">
+<span class="font-bold text-sm">Claude 4 Opus</span>
+<span class="material-symbols-outlined text-[14px]" data-icon="expand_more">expand_more</span>
+</div>
+</div>
+<div class="bg-primary/10 text-primary px-2 py-1 rounded text-[10px] font-bold border border-primary/20">
+                        ⭐ 文学创作 9.2
+                    </div>
+</div>
+<div class="grid grid-cols-3 gap-2">
+<button class="flex flex-col items-center justify-center gap-1 p-3 rounded-xl bg-surface-container-highest hover:bg-surface-bright transition-colors group">
+<span class="material-symbols-outlined text-[18px] text-primary" data-icon="edit_note">edit_note</span>
+<span class="text-[10px]">续写</span>
+</button>
+<button class="flex flex-col items-center justify-center gap-1 p-3 rounded-xl bg-surface-container-highest hover:bg-surface-bright transition-colors group">
+<span class="material-symbols-outlined text-[18px] text-primary" data-icon="unfold_more">unfold_more</span>
+<span class="text-[10px]">扩写</span>
+</button>
+<button class="flex flex-col items-center justify-center gap-1 p-3 rounded-xl bg-surface-container-highest hover:bg-surface-bright transition-colors group">
+<span class="material-symbols-outlined text-[18px] text-primary" data-icon="auto_fix">auto_fix</span>
+<span class="text-[10px]">改写</span>
+</button>
+<button class="flex flex-col items-center justify-center gap-1 p-3 rounded-xl bg-surface-container-highest hover:bg-surface-bright transition-colors group">
+<span class="material-symbols-outlined text-[18px] text-secondary" data-icon="chat_bubble">chat_bubble</span>
+<span class="text-[10px]">对话</span>
+</button>
+<button class="flex flex-col items-center justify-center gap-1 p-3 rounded-xl bg-surface-container-highest hover:bg-surface-bright transition-colors group">
+<span class="material-symbols-outlined text-[18px] text-secondary" data-icon="palette">palette</span>
+<span class="text-[10px]">描写</span>
+</button>
+<button class="flex flex-col items-center justify-center gap-1 p-3 rounded-xl bg-surface-container-highest hover:bg-surface-bright transition-colors group">
+<span class="material-symbols-outlined text-[18px] text-secondary" data-icon="account_tree">account_tree</span>
+<span class="text-[10px]">推演</span>
+</button>
+</div>
+</div>
+<div class="flex-1 overflow-y-auto px-6 space-y-6">
+<!-- Context Reference -->
+<div class="space-y-3">
+<div class="flex items-center justify-between cursor-pointer group">
+<h3 class="text-[11px] font-black uppercase tracking-widest text-outline">Context Reference</h3>
+<span class="material-symbols-outlined text-[14px] text-outline group-hover:text-on-surface" data-icon="expand_less">expand_less</span>
+</div>
+<div class="p-3 rounded-xl bg-surface-container-low border border-outline-variant/10 space-y-3">
+<div>
+<span class="text-[10px] text-primary font-bold">Characters</span>
+<div class="flex flex-wrap gap-2 mt-1">
+<span class="px-2 py-0.5 rounded bg-surface-container-highest text-[10px]">李云 (主角)</span>
+<span class="px-2 py-0.5 rounded bg-surface-container-highest text-[10px]">苏婉 (女主)</span>
+</div>
+</div>
+<div>
+<span class="text-[10px] text-secondary font-bold">Foreshadowing</span>
+<div class="mt-1 space-y-1">
+<div class="text-[10px] flex items-center gap-2">
+<span class="w-1 h-1 rounded-full bg-secondary"></span>
+<span>玉佩秘密 (关键线索)</span>
+</div>
+<div class="text-[10px] flex items-center gap-2 text-outline">
+<span class="w-1 h-1 rounded-full bg-outline"></span>
+<span>已5章未回收</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Consistency Check -->
+<div class="space-y-3 pb-8">
+<h3 class="text-[11px] font-black uppercase tracking-widest text-outline">Consistency Check</h3>
+<div class="space-y-2">
+<div class="flex items-center justify-between p-2 rounded bg-tertiary/5 border-l-2 border-tertiary">
+<span class="text-[11px]">角色一致性</span>
+<span class="material-symbols-outlined text-[16px] text-tertiary" data-icon="check">check</span>
+</div>
+<div class="flex items-center justify-between p-2 rounded bg-tertiary/5 border-l-2 border-tertiary">
+<span class="text-[11px]">时间线校对</span>
+<span class="material-symbols-outlined text-[16px] text-tertiary" data-icon="check">check</span>
+</div>
+<div class="flex items-center justify-between p-2 rounded bg-secondary/5 border-l-2 border-secondary">
+<span class="text-[11px]">伏笔状态</span>
+<span class="material-symbols-outlined text-[16px] text-secondary" data-icon="warning">warning</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Bottom Panel Container (Nested within side shell logic for layout) -->
+<div class="h-[180px] border-t border-outline-variant/10 bg-surface-container-low flex flex-col">
+<div class="flex border-b border-outline-variant/10">
+<button class="px-4 py-2 text-[10px] font-bold text-primary border-b border-primary">AI LOG</button>
+<button class="px-4 py-2 text-[10px] font-bold text-outline hover:text-on-surface">REPORT</button>
+<button class="px-4 py-2 text-[10px] font-bold text-outline hover:text-on-surface">VERSIONS</button>
+</div>
+<div class="flex-1 overflow-y-auto p-3 space-y-2 font-mono text-[10px]">
+<div class="flex gap-2">
+<span class="text-primary shrink-0">[14:22:15]</span>
+<span class="text-on-surface-variant">Generation started using 'Claude 4 Opus'...</span>
+</div>
+<div class="flex gap-2">
+<span class="text-tertiary shrink-0">[14:22:18]</span>
+<span class="text-on-surface-variant">Scene context updated: 38% stylistic alignment.</span>
+</div>
+<div class="flex gap-2">
+<span class="text-primary shrink-0">[14:23:02]</span>
+<span class="text-on-surface-variant">Suggestion created: "Add rain sound for tension".</span>
+</div>
+<div class="flex gap-2">
+<span class="text-secondary shrink-0">[14:24:45]</span>
+<span class="text-on-surface-variant">Warning: '玉佩' location mismatch in branch #2.</span>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Floating UI Element: AI Recommendation (Glassmorphism) -->
+<div class="fixed bottom-12 right-[340px] w-64 glass-panel border border-primary/20 rounded-xl p-4 shadow-2xl z-[100]">
+<div class="flex items-center gap-2 mb-2">
+<span class="material-symbols-outlined text-primary text-[18px]" data-icon="lightbulb">lightbulb</span>
+<span class="text-[10px] font-black uppercase tracking-widest text-primary">AI Suggestion</span>
+</div>
+<p class="text-xs text-on-surface leading-relaxed italic">
+            "此刻李云的真气运行路径与第一卷第七章的描写略有冲突，建议修改为'逆流而上'..."
+        </p>
+<div class="mt-3 flex justify-end gap-2">
+<button class="px-2 py-1 rounded text-[9px] text-outline hover:text-on-surface">Discard</button>
+<button class="px-2 py-1 rounded bg-primary/20 text-primary text-[9px] font-bold">Apply Fix</button>
+</div>
+</div>
+</body></html>

@@ -1,0 +1,30 @@
+{
+  "version": "1.0",
+  "project": "storytree2",
+  "mappings": [
+    {
+      "localId": "Auth Module-8",
+      "localDesc": "配置 NextAuth.js 基础环境",
+      "feishuRecordId": "recvfOjLaMGD9t",
+      "feishuTaskId": "RALPH-storytree2-AUTH-001",
+      "createdAt": "2026-04-04T08:53:42.007Z",
+      "updatedAt": "2026-04-04T08:53:47.005Z"
+    },
+    {
+      "localId": "Auth Module-9",
+      "localDesc": "配置数据库连接",
+      "feishuRecordId": "recvfOjLyNPQeH",
+      "feishuTaskId": "RALPH-storytree2-AUTH-002",
+      "createdAt": "2026-04-04T08:53:43.539Z",
+      "updatedAt": "2026-04-04T08:53:43.539Z"
+    },
+    {
+      "localId": "Auth Module-13",
+      "localDesc": "实现用户登录接口",
+      "feishuRecordId": "recvfOjM4PvJAb",
+      "feishuTaskId": "RALPH-storytree2-AUTH-003",
+      "createdAt": "2026-04-04T08:53:45.517Z",
+      "updatedAt": "2026-04-04T08:53:45.517Z"
+    }
+  ]
+}
