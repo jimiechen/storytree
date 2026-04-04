@@ -1,0 +1,118 @@
+{
+  "version": "1.0",
+  "project": "storytree2",
+  "mappings": [
+    {
+      "localId": "Auth Module-8",
+      "localDesc": "配置 NextAuth.js 基础环境",
+      "feishuRecordId": "rec_1775291078542_b20kwvsx2",
+      "feishuTaskId": "RALPH-storytree2-AUTH-001",
+      "createdAt": "2026-04-04T08:24:38.542Z",
+      "updatedAt": "2026-04-04T08:26:36.980Z"
+    },
+    {
+      "localId": "Auth Module-9",
+      "localDesc": "配置数据库连接",
+      "feishuRecordId": "rec_1775291078542_8y58ucegx",
+      "feishuTaskId": "RALPH-storytree2-AUTH-002",
+      "createdAt": "2026-04-04T08:24:38.542Z",
+      "updatedAt": "2026-04-04T08:26:36.977Z"
+    },
+    {
+      "localId": "Auth Module-13",
+      "localDesc": "实现用户登录接口",
+      "feishuRecordId": "rec_1775291078542_732cadths",
+      "feishuTaskId": "RALPH-storytree2-AUTH-003",
+      "createdAt": "2026-04-04T08:24:38.542Z",
+      "updatedAt": "2026-04-04T08:26:36.977Z"
+    },
+    {
+      "localId": "Auth Module-14",
+      "localDesc": "实现用户注册接口",
+      "feishuRecordId": "rec_1775291078542_whejj91sr",
+      "feishuTaskId": "RALPH-storytree2-AUTH-004",
+      "createdAt": "2026-04-04T08:24:38.542Z",
+      "updatedAt": "2026-04-04T08:26:36.977Z"
+    },
+    {
+      "localId": "Auth Module-18",
+      "localDesc": "实现登录页面",
+      "feishuRecordId": "rec_1775291078542_8zmq1m58f",
+      "feishuTaskId": "RALPH-storytree2-AUTH-005",
+      "createdAt": "2026-04-04T08:24:38.542Z",
+      "updatedAt": "2026-04-04T08:26:36.977Z"
+    },
+    {
+      "localId": "Auth Module-19",
+      "localDesc": "实现注册页面",
+      "feishuRecordId": "rec_1775291078542_qsy0kgeup",
+      "feishuTaskId": "RALPH-storytree2-AUTH-006",
+      "createdAt": "2026-04-04T08:24:38.542Z",
+      "updatedAt": "2026-04-04T08:26:36.977Z"
+    },
+    {
+      "localId": "User Module-25",
+      "localDesc": "实现用户信息查询接口",
+      "feishuRecordId": "rec_1775291078542_hywhsm91x",
+      "feishuTaskId": "RALPH-storytree2-USER-007",
+      "createdAt": "2026-04-04T08:24:38.542Z",
+      "updatedAt": "2026-04-04T08:26:36.977Z"
+    },
+    {
+      "localId": "User Module-26",
+      "localDesc": "实现用户信息更新接口",
+      "feishuRecordId": "rec_1775291078542_k0sy2xtrl",
+      "feishuTaskId": "RALPH-storytree2-USER-008",
+      "createdAt": "2026-04-04T08:24:38.542Z",
+      "updatedAt": "2026-04-04T08:26:36.977Z"
+    },
+    {
+      "localId": "User Module-30",
+      "localDesc": "实现角色权限配置",
+      "feishuRecordId": "rec_1775291078542_r0wg5mgqv",
+      "feishuTaskId": "RALPH-storytree2-USER-009",
+      "createdAt": "2026-04-04T08:24:38.542Z",
+      "updatedAt": "2026-04-04T08:26:36.977Z"
+    },
+    {
+      "localId": "User Module-31",
+      "localDesc": "实现权限校验中间件",
+      "feishuRecordId": "rec_1775291078542_w4f5i81hh",
+      "feishuTaskId": "RALPH-storytree2-USER-010",
+      "createdAt": "2026-04-04T08:24:38.542Z",
+      "updatedAt": "2026-04-04T08:26:36.977Z"
+    },
+    {
+      "localId": "Order Module-37",
+      "localDesc": "实现订单创建接口",
+      "feishuRecordId": "rec_1775291078542_o6spz5cr5",
+      "feishuTaskId": "RALPH-storytree2-ORDE-011",
+      "createdAt": "2026-04-04T08:24:38.542Z",
+      "updatedAt": "2026-04-04T08:26:36.977Z"
+    },
+    {
+      "localId": "Order Module-38",
+      "localDesc": "实现订单查询接口",
+      "feishuRecordId": "rec_1775291078542_l2te5n1za",
+      "feishuTaskId": "RALPH-storytree2-ORDE-012",
+      "createdAt": "2026-04-04T08:24:38.542Z",
+      "updatedAt": "2026-04-04T08:26:36.977Z"
+    },
+    {
+      "localId": "Order Module-42",
+      "localDesc": "集成支付宝支付",
+      "feishuRecordId": "rec_1775291078542_7d0usxbec",
+      "feishuTaskId": "RALPH-storytree2-ORDE-013",
+      "createdAt": "2026-04-04T08:24:38.542Z",
+      "updatedAt": "2026-04-04T08:26:36.977Z"
+    },
+    {
+      "localId": "Order Module-43",
+      "localDesc": "集成微信支付",
+      "feishuRecordId": "rec_1775291078542_yqas2e00x",
+      "feishuTaskId": "RALPH-storytree2-ORDE-014",
+      "createdAt": "2026-04-04T08:24:38.542Z",
+      "updatedAt": "2026-04-04T08:26:36.977Z"
+    }
+  ]
+}

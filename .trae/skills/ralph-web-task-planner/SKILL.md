@@ -35,6 +35,18 @@ description: Ralph Web 项目规划专用：基于需求和架构文档，生成
 -   **Source**: 基于 `01-requirements.md` 和 `02-architecture.md`。
 -   **Validation**: 确保每个需求点都有对应的任务。
 
+### 4. 飞书同步 (Feishu Sync)
+
+生成 `04-ralph-tasks.md` 后，**如果启用了飞书集成** (`RALPH_FEISHU_ENABLED=true`)：
+
+1. **检查配置**：确认 `.env` 文件存在且配置完整
+2. **调用同步**：调用 `ralph-feishu-sync` Skill 的 `sync-tasks-split` 指令
+3. **处理结果**：
+   - 成功：输出 "✅ 已同步 X 个任务到飞书多维表格"
+   - 失败：输出 "⚠️ 飞书同步失败，请检查配置"
+
+**注意**：飞书同步失败不应阻塞任务生成流程。
+
 ## 示例 (Examples)
 
 ### 示例 1：生成任务列表

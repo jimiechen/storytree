@@ -30,6 +30,15 @@ description: Ralph 流程专用：任务生命周期管理与状态一致性工�
     2.  **Mark**: 将 `[ ]` 改为 `[x]`。
     3.  **Sync**: 重新计算进度并更新 `RALPH_STATE.md`。
     4.  **Check Test**: 提示用户是否需要执行关联的测试用例。
+    5.  **Git 提交** (如启用):
+        - 调用 `ralph-feishu-sync` 的 `git-commit`
+        - 自动提交代码变更
+        - 获取 commit hash
+    6.  **飞书同步** (如启用):
+        - 调用 `ralph-feishu-sync` 的 `sync-task-complete`
+        - 更新飞书多维表格状态
+        - 包含 commit hash 信息
+        - 触发进度通知
 
 ### 2. 测试操作 (Test Operations)
 针对 `05-test-plan.md` 中的测试用例：

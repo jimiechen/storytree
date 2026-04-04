@@ -22,10 +22,27 @@ description: Ralph 通用任务执行器：基于 R-Loop (Load-Implement-Verify-
 #### 1. LOAD (加载与锁定)
 -   **Action**: 读取 `04-ralph-tasks.md`。
 -   **Strict Search**: 从文件顶部开始，找到**第一个**状态为 `[ ]` (Pending) 的任务。
-    -   **Constraint**: 严禁挑选“看起来容易”的任务。必须是**物理顺序上**的第一个未完成项。
+    -   **Constraint**: 严禁挑选"看起来容易"的任务。必须是**物理顺序上**的第一个未完成项。
     -   **Double Check**: 如果 Agent 试图选择 Task N，但 Task N-1 仍是 `[ ]`，系统必须报错并强制回滚到 Task N-1。
 -   **Focus**: 锁定当前任务 ID (e.g., `T-AUTH-001`)。
 -   **Status Update**: 将该任务标记为 `[~]` (In Progress)。
+
+#### 1.5 GIT PULL (Git 拉取)
+
+**如果启用了 Git 集成** (`RALPH_GIT_ENABLED=true`)：
+
+1. **检查工作区**：
+   - 执行 `git status`
+   - 如果有未提交更改，停止并提示用户提交
+
+2. **拉取最新代码**：
+   - 执行 `git pull origin ${RALPH_GIT_BRANCH}`
+   - 如果失败，停止任务执行
+   - 如果有冲突，提示用户解决冲突
+
+3. **记录基线**：
+   - 记录当前 commit hash
+   - 写入任务上下文
 
 #### 2. IMPLEMENT (实现)
 -   **Think**: 分析任务需求，决定修改哪些文件。
@@ -43,7 +60,34 @@ description: Ralph 通用任务执行器：基于 R-Loop (Load-Implement-Verify-
 -   **Fail Handling**: 如果验证失败，回到 **IMPLEMENT** 步骤修复，直到通过。
 
 #### 4. COMMIT (提交)
--   **Git Commit**: 提交代码，Message 必须包含任务编号 (e.g., "feat: implement user login api (Task 2.1.1)").
+
+#### 4.1 GIT COMMIT (Git 提交)
+
+**如果启用了 Git 集成**：
+
+1. **检查变更**：
+   - 执行 `git status`
+   - 确认有文件变更
+
+2. **生成 Commit Message**：
+   - 格式：`${RALPH_GIT_COMMIT_PREFIX} ${task_desc} (Task ${task_id})`
+   - 示例：`feat: implement user login api (Task 2.1.1)`
+
+3. **执行提交**：
+   ```bash
+   git add .
+   git commit -m "${commit_message}"
+   git push origin ${RALPH_GIT_BRANCH}
+   ```
+
+4. **记录结果**：
+   - 保存 commit hash
+   - 用于后续飞书同步
+
+5. **失败处理**：
+   - 提交失败 → 任务视为未完成
+   - 返回 **IMPLEMENT** 步骤修复
+
 -   **Status Update**: 将 `04-ralph-tasks.md` 中的任务标记为 `[x]` (Completed)。
 -   **Sync**:
     1.  **Count**: 重新扫描 `04-ralph-tasks.md`，计算 `[x]` 的数量与总任务数。
