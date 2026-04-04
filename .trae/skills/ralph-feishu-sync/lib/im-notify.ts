@@ -25,26 +25,30 @@ interface NotifyData {
  * 构建任务拆分通知消息
  */
 function buildSplitMessage(data: NotifyData): string {
-  return `📋 **任务拆分完成**
+  return JSON.stringify({
+    text: `📋 任务拆分完成
 ━━━━━━━━━━━━━━━━━━━━
 📁 项目：${data.project}
 📊 任务数：${data.taskCount} 个
 
-✅ 已同步到飞书多维表格`;
+✅ 已同步到飞书多维表格`
+  });
 }
 
 /**
  * 构建任务完成通知消息
  */
 function buildCompleteMessage(data: NotifyData): string {
-  const commitInfo = data.commitHash ? `\n🔖 Commit: \`${data.commitHash}\`` : '';
+  const commitInfo = data.commitHash ? `\n🔖 Commit: ${data.commitHash}` : '';
   
-  return `✅ **任务完成**
+  return JSON.stringify({
+    text: `✅ 任务完成
 ━━━━━━━━━━━━━━━━━━━━
 📁 项目：${data.project}
 📝 任务：${data.taskDescription?.substring(0, 50)}...${commitInfo}
 
-📊 进度已更新`;
+📊 进度已更新`
+  });
 }
 
 /**
@@ -54,27 +58,31 @@ function buildDailyMessage(data: NotifyData): string {
   const { total, completed, percentage } = data.progress || { total: 0, completed: 0, percentage: 0 };
   const remaining = total - completed;
   
-  return `📊 **Ralph 项目日报**
+  return JSON.stringify({
+    text: `📊 Ralph 项目日报
 ━━━━━━━━━━━━━━━━━━━━
 📁 项目：${data.project}
 📅 日期：${new Date().toLocaleDateString()}
 
 ✅ 已完成：${completed}/${total} (${percentage}%)
-📋 剩余任务：${remaining} 个`;
+📋 剩余任务：${remaining} 个`
+  });
 }
 
 /**
  * 构建里程碑通知消息
  */
 function buildMilestoneMessage(data: NotifyData): string {
-  return `🎉 **里程碑达成**
+  return JSON.stringify({
+    text: `🎉 里程碑达成
 ━━━━━━━━━━━━━━━━━━━━
 📁 项目：${data.project}
 🎯 模块：${data.module}
 
 ✅ ${data.module} 模块全部完成！
 
-🚀 进入下一阶段开发`;
+🚀 进入下一阶段开发`
+  });
 }
 
 /**
@@ -111,16 +119,16 @@ export async function notifyProgress(
         messageContent = buildMilestoneMessage(data);
         break;
       default:
-        messageContent = JSON.stringify(data, null, 2);
+        messageContent = JSON.stringify({ text: JSON.stringify(data, null, 2) });
     }
     
     console.log(`📤 发送${type}通知到飞书群聊...`);
     console.log(`   Chat ID: ${config.im.chat_id}`);
     
     // 调用 lark-cli 发送消息
-    // 使用 +messages-send shortcut
+    // 使用 +messages-send shortcut，--content 必须是 JSON 格式
     const cmd = `lark-cli im +messages-send --chat-id ${config.im.chat_id} --msg-type text --content '${messageContent}'`;
-    console.log('   执行命令:', cmd.substring(0, 100) + '...');
+    console.log('   执行命令:', cmd.substring(0, 120) + '...');
     
     const result = execSync(cmd, { encoding: 'utf-8', stdio: ['pipe', 'pipe', 'pipe'] });
     const response = JSON.parse(result);
@@ -165,7 +173,8 @@ export async function sendCustomMessage(
     
     console.log(`📤 发送自定义消息...`);
     
-    const cmd = `lark-cli im +messages-send --chat-id ${config.im.chat_id} --msg-type text --content '${message}'`;
+    const content = JSON.stringify({ text: message });
+    const cmd = `lark-cli im +messages-send --chat-id ${config.im.chat_id} --msg-type text --content '${content}'`;
     const result = execSync(cmd, { encoding: 'utf-8', stdio: ['pipe', 'pipe', 'pipe'] });
     const response = JSON.parse(result);
     
