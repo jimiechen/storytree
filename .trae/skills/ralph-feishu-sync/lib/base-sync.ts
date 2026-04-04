@@ -1,10 +1,11 @@
 /**
  * 多维表格同步模块
- * 将任务同步到飞书多维表格 (Base)
+ * 将任务同步到飞书多维表格 (Base) - 真实 API 实现
  */
 
 import * as fs from 'fs';
 import * as path from 'path';
+import { execSync } from 'child_process';
 import { FeishuConfig } from './config';
 import { TaskItem } from './parser';
 
@@ -82,31 +83,77 @@ function mapStatusToFeishu(status: TaskItem['status']): string {
 }
 
 /**
- * 构建飞书记录字段
+ * 构建飞书记录字段 - 根据实际字段ID
  */
 function buildRecordFields(
   task: TaskItem,
   projectId: string
 ): Record<string, any> {
+  const now = new Date();
+  const timestamp = now.getTime();
+  
   return {
-    任务ID: task.id,
-    任务名称: task.description,
-    模块: task.module,
-    子模块: task.submodule,
-    状态: mapStatusToFeishu(task.status),
-    优先级: task.priority || 'P2',
-    预估工时: task.estimatedHours || 1,
-    创建时间: new Date().toISOString(),
-    本地文件: '04-ralph-tasks.md',
-    行号: task.lineNumber,
+    // 任务ID - fldV7UZaeC
+    'fldV7UZaeC': task.id,
+    // 任务名称 - fldUnb5miD
+    'fldUnb5miD': task.description,
+    // 任务描述 - fldaxqIJ1m
+    'fldaxqIJ1m': `[${task.module}] ${task.submodule || ''}`,
+    // 状态 - fldRJHcSxn
+    'fldRJHcSxn': mapStatusToFeishu(task.status),
+    // 优先级 - fldDUkYmxk
+    'fldDUkYmxk': task.priority || 'P2',
+    // 预计工时 - fldE1AiQBe
+    'fldE1AiQBe': task.estimatedHours || 1,
+    // 开始时间 - fldalVm7gV (如果是进行中)
+    ...(task.status === 'in_progress' && { 'fldalVm7gV': timestamp }),
   };
 }
 
 /**
- * 同步任务到飞书 Base
- * 
- * 注意：这是一个模拟实现，实际使用时需要调用飞书 API
- * 可以通过 lark-base skill 或直接调用飞书 OpenAPI
+ * 调用 lark-cli 创建记录
+ */
+async function createRecord(
+  config: FeishuConfig,
+  fields: Record<string, any>
+): Promise<string | null> {
+  try {
+    const cmd = `lark-cli base +record-upsert --base-token ${config.base.app_token} --table-id ${config.base.table_id} --json '${JSON.stringify({ fields })}'`;
+    const result = execSync(cmd, { encoding: 'utf-8', stdio: ['pipe', 'pipe', 'pipe'] });
+    const data = JSON.parse(result);
+    
+    if (data.ok && data.data?.record?.record_id) {
+      return data.data.record.record_id;
+    }
+    return null;
+  } catch (error) {
+    console.error('❌ 创建记录失败:', error);
+    return null;
+  }
+}
+
+/**
+ * 调用 lark-cli 更新记录
+ */
+async function updateRecord(
+  config: FeishuConfig,
+  recordId: string,
+  fields: Record<string, any>
+): Promise<boolean> {
+  try {
+    const cmd = `lark-cli base +record-upsert --base-token ${config.base.app_token} --table-id ${config.base.table_id} --record-id ${recordId} --json '${JSON.stringify({ fields })}'`;
+    const result = execSync(cmd, { encoding: 'utf-8', stdio: ['pipe', 'pipe', 'pipe'] });
+    const data = JSON.parse(result);
+    
+    return data.ok === true;
+  } catch (error) {
+    console.error('❌ 更新记录失败:', error);
+    return false;
+  }
+}
+
+/**
+ * 同步任务到飞书 Base - 真实 API 实现
  */
 export async function syncTasksToBase(
   tasks: TaskItem[],
@@ -123,63 +170,65 @@ export async function syncTasksToBase(
     }
     
     console.log(`🔄 正在同步 ${tasks.length} 个任务到飞书多维表格...`);
+    console.log(`   Base: ${config.base.app_token}`);
+    console.log(`   Table: ${config.base.table_id}`);
     
     // 加载现有映射
     const mapping = loadMappings(projectId);
     
-    // 准备批量创建记录
-    const recordsToCreate = [];
-    const recordsToUpdate = [];
+    let created = 0;
+    let updated = 0;
+    let failed = 0;
     
     for (const task of tasks) {
       const existing = findMapping(mapping.mappings, task.description);
       const fields = buildRecordFields(task, projectId);
       
-      if (existing) {
+      if (existing?.feishuRecordId) {
         // 更新现有记录
-        recordsToUpdate.push({
-          recordId: existing.feishuRecordId,
-          fields,
-        });
-        existing.updatedAt = new Date().toISOString();
+        console.log(`   更新: ${task.id}`);
+        const success = await updateRecord(config, existing.feishuRecordId, fields);
+        if (success) {
+          updated++;
+          existing.updatedAt = new Date().toISOString();
+        } else {
+          failed++;
+        }
       } else {
         // 创建新记录
-        recordsToCreate.push({
-          task,
-          fields,
-        });
+        console.log(`   创建: ${task.id}`);
+        const recordId = await createRecord(config, fields);
+        if (recordId) {
+          created++;
+          mapping.mappings.push({
+            localId: `${task.module}-${task.lineNumber}`,
+            localDesc: task.description,
+            feishuRecordId: recordId,
+            feishuTaskId: task.id,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+          });
+        } else {
+          failed++;
+        }
       }
-    }
-    
-    // 模拟 API 调用（实际使用时替换为真实的飞书 API 调用）
-    console.log(`   新建: ${recordsToCreate.length} 条记录`);
-    console.log(`   更新: ${recordsToUpdate.length} 条记录`);
-    
-    // 模拟创建记录并获取 recordId
-    for (const item of recordsToCreate) {
-      // 这里应该调用飞书 API 创建记录
-      // const result = await createFeishuRecord(config, item.fields);
-      const mockRecordId = `rec_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
       
-      mapping.mappings.push({
-        localId: `${item.task.module}-${item.task.lineNumber}`,
-        localDesc: item.task.description,
-        feishuRecordId: mockRecordId,
-        feishuTaskId: item.task.id,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      });
+      // 延迟 0.5 秒避免限流
+      await new Promise(resolve => setTimeout(resolve, 500));
     }
     
     // 保存映射
     saveMappings(mapping);
     
     console.log(`✅ 任务同步完成`);
+    console.log(`   新建: ${created}`);
+    console.log(`   更新: ${updated}`);
+    console.log(`   失败: ${failed}`);
     console.log(`   映射文件: ${MAPPING_FILE}`);
     
     return {
-      success: true,
-      message: `成功同步 ${tasks.length} 个任务`,
+      success: failed === 0,
+      message: `同步完成: 新建${created}, 更新${updated}, 失败${failed}`,
     };
   } catch (error) {
     const errorMsg = error instanceof Error ? error.message : String(error);
@@ -192,7 +241,7 @@ export async function syncTasksToBase(
 }
 
 /**
- * 同步任务完成状态
+ * 同步任务完成状态 - 真实 API 实现
  */
 export async function syncTaskComplete(
   taskDescription: string,
@@ -204,7 +253,7 @@ export async function syncTaskComplete(
     const mapping = loadMappings(config.project.id);
     const existing = findMapping(mapping.mappings, taskDescription);
     
-    if (!existing) {
+    if (!existing?.feishuRecordId) {
       return {
         success: false,
         message: `❌ 未找到任务映射: ${taskDescription.substring(0, 50)}...`,
@@ -214,29 +263,36 @@ export async function syncTaskComplete(
     console.log(`🔄 正在更新任务状态: ${existing.feishuTaskId}`);
     
     // 构建更新字段
-    const updateFields = {
-      状态: '已完成',
-      完成时间: new Date().toISOString(),
-      ...(commitHash && { 'Commit Hash': commitHash }),
+    const now = new Date();
+    const updateFields: Record<string, any> = {
+      'fldRJHcSxn': '已完成',
+      'flddhwzCZW': now.getTime(),
     };
     
-    // 这里应该调用飞书 API 更新记录
-    // await updateFeishuRecord(config, existing.feishuRecordId, updateFields);
-    
-    console.log(`   Record ID: ${existing.feishuRecordId}`);
-    console.log(`   状态: 已完成`);
+    // 如果有 commit hash，添加到备注
     if (commitHash) {
-      console.log(`   Commit: ${commitHash}`);
+      updateFields['fldXB7VBoE'] = `Git Commit: ${commitHash}`;
     }
     
-    // 更新映射时间
-    existing.updatedAt = new Date().toISOString();
-    saveMappings(mapping);
+    // 调用 API 更新
+    const success = await updateRecord(config, existing.feishuRecordId, updateFields);
     
-    return {
-      success: true,
-      message: `任务状态已更新: ${existing.feishuTaskId}`,
-    };
+    if (success) {
+      // 更新映射时间
+      existing.updatedAt = new Date().toISOString();
+      saveMappings(mapping);
+      
+      console.log(`✅ 任务状态已更新: ${existing.feishuTaskId}`);
+      return {
+        success: true,
+        message: `任务状态已更新: ${existing.feishuTaskId}`,
+      };
+    } else {
+      return {
+        success: false,
+        message: '❌ 更新飞书记录失败',
+      };
+    }
   } catch (error) {
     const errorMsg = error instanceof Error ? error.message : String(error);
     console.error('❌ 更新任务状态失败:', errorMsg);
@@ -247,33 +303,7 @@ export async function syncTaskComplete(
   }
 }
 
-/**
- * 获取任务统计
- */
-export async function getTaskStats(
-  config: FeishuConfig
-): Promise<{
-  total: number;
-  completed: number;
-  inProgress: number;
-  blocked: number;
-  pending: number;
-}> {
-  // 这里应该调用飞书 API 查询统计
-  // 简化实现，返回本地映射统计
-  const mapping = loadMappings(config.project.id);
-  
-  return {
-    total: mapping.mappings.length,
-    completed: 0,
-    inProgress: 0,
-    blocked: 0,
-    pending: mapping.mappings.length,
-  };
-}
-
 export default {
   syncTasksToBase,
   syncTaskComplete,
-  getTaskStats,
 };
