@@ -83,31 +83,41 @@ function mapStatusToFeishu(status: TaskItem['status']): string {
 }
 
 /**
- * 构建飞书记录字段 - 根据实际字段ID
+ * 格式化日期时间为字符串
+ */
+function formatDateTime(date: Date = new Date()): string {
+  const pad = (n: number) => n.toString().padStart(2, '0');
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
+}
+
+/**
+ * 构建飞书记录字段 - 根据实际字段ID和正确格式
  */
 function buildRecordFields(
   task: TaskItem,
   projectId: string
 ): Record<string, any> {
-  const now = new Date();
-  const timestamp = now.getTime();
-  
-  return {
-    // 任务ID - fldV7UZaeC
+  const fields: Record<string, any> = {
+    // 任务ID - fldV7UZaeC (text)
     'fldV7UZaeC': task.id,
-    // 任务名称 - fldUnb5miD
+    // 任务名称 - fldUnb5miD (text)
     'fldUnb5miD': task.description,
-    // 任务描述 - fldaxqIJ1m
+    // 任务描述 - fldaxqIJ1m (text)
     'fldaxqIJ1m': `[${task.module}] ${task.submodule || ''}`,
-    // 状态 - fldRJHcSxn
+    // 状态 - fldRJHcSxn (text)
     'fldRJHcSxn': mapStatusToFeishu(task.status),
-    // 优先级 - fldDUkYmxk
+    // 优先级 - fldDUkYmxk (text)
     'fldDUkYmxk': task.priority || 'P2',
-    // 预计工时 - fldE1AiQBe
+    // 预计工时 - fldE1AiQBe (number)
     'fldE1AiQBe': task.estimatedHours || 1,
-    // 开始时间 - fldalVm7gV (如果是进行中)
-    ...(task.status === 'in_progress' && { 'fldalVm7gV': timestamp }),
   };
+
+  // 开始时间 - fldalVm7gV (datetime) - 仅当状态为进行中时
+  if (task.status === 'in_progress') {
+    fields['fldalVm7gV'] = formatDateTime();
+  }
+
+  return fields;
 }
 
 /**
@@ -118,13 +128,17 @@ async function createRecord(
   fields: Record<string, any>
 ): Promise<string | null> {
   try {
-    const cmd = `lark-cli base +record-upsert --base-token ${config.base.app_token} --table-id ${config.base.table_id} --json '${JSON.stringify({ fields })}'`;
+    const jsonPayload = JSON.stringify({ fields });
+    console.log('   创建记录 payload:', jsonPayload.substring(0, 200) + '...');
+    
+    const cmd = `lark-cli base +record-upsert --base-token ${config.base.app_token} --table-id ${config.base.table_id} --json '${jsonPayload}'`;
     const result = execSync(cmd, { encoding: 'utf-8', stdio: ['pipe', 'pipe', 'pipe'] });
     const data = JSON.parse(result);
     
     if (data.ok && data.data?.record?.record_id) {
       return data.data.record.record_id;
     }
+    console.error('   创建记录失败:', data.error || data);
     return null;
   } catch (error) {
     console.error('❌ 创建记录失败:', error);
@@ -141,11 +155,18 @@ async function updateRecord(
   fields: Record<string, any>
 ): Promise<boolean> {
   try {
-    const cmd = `lark-cli base +record-upsert --base-token ${config.base.app_token} --table-id ${config.base.table_id} --record-id ${recordId} --json '${JSON.stringify({ fields })}'`;
+    const jsonPayload = JSON.stringify({ fields });
+    console.log('   更新记录 payload:', jsonPayload.substring(0, 200) + '...');
+    
+    const cmd = `lark-cli base +record-upsert --base-token ${config.base.app_token} --table-id ${config.base.table_id} --record-id ${recordId} --json '${jsonPayload}'`;
     const result = execSync(cmd, { encoding: 'utf-8', stdio: ['pipe', 'pipe', 'pipe'] });
     const data = JSON.parse(result);
     
-    return data.ok === true;
+    if (data.ok) {
+      return true;
+    }
+    console.error('   更新记录失败:', data.error || data);
+    return false;
   } catch (error) {
     console.error('❌ 更新记录失败:', error);
     return false;
@@ -263,10 +284,9 @@ export async function syncTaskComplete(
     console.log(`🔄 正在更新任务状态: ${existing.feishuTaskId}`);
     
     // 构建更新字段
-    const now = new Date();
     const updateFields: Record<string, any> = {
       'fldRJHcSxn': '已完成',
-      'flddhwzCZW': now.getTime(),
+      'flddhwzCZW': formatDateTime(),
     };
     
     // 如果有 commit hash，添加到备注

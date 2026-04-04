@@ -25,22 +25,12 @@ interface NotifyData {
  * 构建任务拆分通知消息
  */
 function buildSplitMessage(data: NotifyData): string {
-  return JSON.stringify({
-    msg_type: 'interactive',
-    card: {
-      config: { wide_screen_mode: true },
-      header: {
-        title: { tag: 'plain_text', content: '📋 任务拆分完成' },
-        template: 'blue'
-      },
-      elements: [
-        { tag: 'div', text: { tag: 'lark_md', content: `**项目：** ${data.project}` } },
-        { tag: 'div', text: { tag: 'lark_md', content: `**任务数：** ${data.taskCount} 个` } },
-        { tag: 'hr' },
-        { tag: 'div', text: { tag: 'lark_md', content: '✅ 已同步到飞书多维表格' } }
-      ]
-    }
-  });
+  return `📋 **任务拆分完成**
+━━━━━━━━━━━━━━━━━━━━
+📁 项目：${data.project}
+📊 任务数：${data.taskCount} 个
+
+✅ 已同步到飞书多维表格`;
 }
 
 /**
@@ -49,22 +39,12 @@ function buildSplitMessage(data: NotifyData): string {
 function buildCompleteMessage(data: NotifyData): string {
   const commitInfo = data.commitHash ? `\n🔖 Commit: \`${data.commitHash}\`` : '';
   
-  return JSON.stringify({
-    msg_type: 'interactive',
-    card: {
-      config: { wide_screen_mode: true },
-      header: {
-        title: { tag: 'plain_text', content: '✅ 任务完成' },
-        template: 'green'
-      },
-      elements: [
-        { tag: 'div', text: { tag: 'lark_md', content: `**项目：** ${data.project}` } },
-        { tag: 'div', text: { tag: 'lark_md', content: `**任务：** ${data.taskDescription?.substring(0, 50)}...${commitInfo}` } },
-        { tag: 'hr' },
-        { tag: 'div', text: { tag: 'lark_md', content: '📊 进度已更新' } }
-      ]
-    }
-  });
+  return `✅ **任务完成**
+━━━━━━━━━━━━━━━━━━━━
+📁 项目：${data.project}
+📝 任务：${data.taskDescription?.substring(0, 50)}...${commitInfo}
+
+📊 进度已更新`;
 }
 
 /**
@@ -74,50 +54,32 @@ function buildDailyMessage(data: NotifyData): string {
   const { total, completed, percentage } = data.progress || { total: 0, completed: 0, percentage: 0 };
   const remaining = total - completed;
   
-  return JSON.stringify({
-    msg_type: 'interactive',
-    card: {
-      config: { wide_screen_mode: true },
-      header: {
-        title: { tag: 'plain_text', content: '📊 Ralph 项目日报' },
-        template: 'blue'
-      },
-      elements: [
-        { tag: 'div', text: { tag: 'lark_md', content: `**项目：** ${data.project}` } },
-        { tag: 'div', text: { tag: 'lark_md', content: `**日期：** ${new Date().toLocaleDateString()}` } },
-        { tag: 'hr' },
-        { tag: 'div', text: { tag: 'lark_md', content: `✅ 已完成：${completed}/${total} (${percentage}%)` } },
-        { tag: 'div', text: { tag: 'lark_md', content: `📋 剩余任务：${remaining} 个` } }
-      ]
-    }
-  });
+  return `📊 **Ralph 项目日报**
+━━━━━━━━━━━━━━━━━━━━
+📁 项目：${data.project}
+📅 日期：${new Date().toLocaleDateString()}
+
+✅ 已完成：${completed}/${total} (${percentage}%)
+📋 剩余任务：${remaining} 个`;
 }
 
 /**
  * 构建里程碑通知消息
  */
 function buildMilestoneMessage(data: NotifyData): string {
-  return JSON.stringify({
-    msg_type: 'interactive',
-    card: {
-      config: { wide_screen_mode: true },
-      header: {
-        title: { tag: 'plain_text', content: '🎉 里程碑达成' },
-        template: 'orange'
-      },
-      elements: [
-        { tag: 'div', text: { tag: 'lark_md', content: `**项目：** ${data.project}` } },
-        { tag: 'div', text: { tag: 'lark_md', content: `**模块：** ${data.module}` } },
-        { tag: 'hr' },
-        { tag: 'div', text: { tag: 'lark_md', content: `✅ ${data.module} 模块全部完成！` } },
-        { tag: 'div', text: { tag: 'lark_md', content: '🚀 进入下一阶段开发' } }
-      ]
-    }
-  });
+  return `🎉 **里程碑达成**
+━━━━━━━━━━━━━━━━━━━━
+📁 项目：${data.project}
+🎯 模块：${data.module}
+
+✅ ${data.module} 模块全部完成！
+
+🚀 进入下一阶段开发`;
 }
 
 /**
  * 调用 lark-cli 发送群聊消息 - 真实 API 实现
+ * 使用 lark-cli im +messages-send
  */
 export async function notifyProgress(
   type: NotificationType,
@@ -149,14 +111,17 @@ export async function notifyProgress(
         messageContent = buildMilestoneMessage(data);
         break;
       default:
-        messageContent = JSON.stringify({ msg_type: 'text', content: { text: JSON.stringify(data) } });
+        messageContent = JSON.stringify(data, null, 2);
     }
     
     console.log(`📤 发送${type}通知到飞书群聊...`);
     console.log(`   Chat ID: ${config.im.chat_id}`);
     
     // 调用 lark-cli 发送消息
-    const cmd = `lark-cli chat +message-create --receive-id ${config.im.chat_id} --content '${messageContent}'`;
+    // 使用 +messages-send shortcut
+    const cmd = `lark-cli im +messages-send --chat-id ${config.im.chat_id} --msg-type text --content '${messageContent}'`;
+    console.log('   执行命令:', cmd.substring(0, 100) + '...');
+    
     const result = execSync(cmd, { encoding: 'utf-8', stdio: ['pipe', 'pipe', 'pipe'] });
     const response = JSON.parse(result);
     
@@ -170,7 +135,7 @@ export async function notifyProgress(
       console.error('❌ 消息发送失败:', response);
       return {
         success: false,
-        message: `发送失败: ${response.msg || '未知错误'}`,
+        message: `发送失败: ${response.msg || response.error?.message || '未知错误'}`,
       };
     }
   } catch (error) {
@@ -198,14 +163,9 @@ export async function sendCustomMessage(
       };
     }
     
-    const content = JSON.stringify({
-      msg_type: 'text',
-      content: { text: message }
-    });
-    
     console.log(`📤 发送自定义消息...`);
     
-    const cmd = `lark-cli chat +message-create --receive-id ${config.im.chat_id} --content '${content}'`;
+    const cmd = `lark-cli im +messages-send --chat-id ${config.im.chat_id} --msg-type text --content '${message}'`;
     const result = execSync(cmd, { encoding: 'utf-8', stdio: ['pipe', 'pipe', 'pipe'] });
     const response = JSON.parse(result);
     
@@ -217,7 +177,7 @@ export async function sendCustomMessage(
     } else {
       return {
         success: false,
-        message: `发送失败: ${response.msg || '未知错误'}`,
+        message: `发送失败: ${response.msg || response.error?.message || '未知错误'}`,
       };
     }
   } catch (error) {
