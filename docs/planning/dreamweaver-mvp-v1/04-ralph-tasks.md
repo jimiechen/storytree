@@ -140,20 +140,20 @@ AI 指令:
     - 确保测试仍然通过
 
 ### 2.3 认证状态管理
-- [~] **2.3.1 编写 auth-store 单元测试 (Red)**
+- [x] **2.3.1 编写 auth-store 单元测试 (Red)**
     - 创建 `tests/unit/stores/auth-store.test.ts`
     - 测试: 登录状态管理
     - 测试: Token 存储
     - 测试: 登出功能
     - 运行测试，确认失败
 
-- [ ] **2.3.2 实现 auth-store (Green)**
+- [x] **2.3.2 实现 auth-store (Green)**
     - 创建 `src/stores/auth-store.ts`
     - 实现 Zustand store
     - 实现登录/登出方法
     - 实现 Token 持久化
 
-- [ ] **2.3.3 运行测试验证 (Green)**
+- [x] **2.3.3 运行测试验证 (Green)**
     - 运行单元测试
     - 确认所有测试通过
 
@@ -162,7 +162,7 @@ AI 指令:
 ## Phase 3: 项目管理模块 (TDD模式)
 
 ### 3.1 项目列表功能 (TDD)
-- [ ] **3.1.1 编写项目列表 E2E 测试 (Red)**
+- [~] **3.1.1 编写项目列表 E2E 测试 (Red)**
     - 创建 `tests/e2e/projects/list.spec.ts`
     - 测试: 页面加载显示项目列表
     - 测试: 空状态显示
