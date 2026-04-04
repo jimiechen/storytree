@@ -1,0 +1,703 @@
+From bd54f46cbd2db587e064e7cf87abb08bc1665411 Mon Sep 17 00:00:00 2001
+From: jimiechan <85342677@qq.com>
+Date: Sat, 4 Apr 2026 16:51:36 +0800
+Subject: [PATCH 05/14] =?UTF-8?q?fix:=20=E4=BF=AE=E5=A4=8D=20base-sync.ts?=
+ =?UTF-8?q?=20=E6=96=87=E4=BB=B6=E6=8D=9F=E5=9D=8F=EF=BC=8C=E7=AE=80?=
+ =?UTF-8?q?=E5=8C=96=E4=BB=A3=E7=A0=81=E7=BB=93=E6=9E=84?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+---
+ .trae/rules/code-file-limit.md                | 115 +++++++++
+ .trae/rules/task-completion-report.md         |  92 +++++++
+ .../skills/ralph-feishu-sync/lib/base-sync.ts | 237 +++---------------
+ .../skills/ralph-feishu-sync/lib/im-notify.ts |  35 ++-
+ 4 files changed, 270 insertions(+), 209 deletions(-)
+ create mode 100644 .trae/rules/code-file-limit.md
+ create mode 100644 .trae/rules/task-completion-report.md
+
+diff --git a/.trae/rules/code-file-limit.md b/.trae/rules/code-file-limit.md
+new file mode 100644
+index 0000000..fd2b39b
+--- /dev/null
++++ b/.trae/rules/code-file-limit.md
+@@ -0,0 +1,115 @@
++# 代码文件行数限制规则 (Code File Line Limit Rule)
++
++> **⚠️ 全局生效**: 此规则适用于所有代码文件，所有 Agent 必须无条件遵守。
++
++## 规则说明
++
++每个代码文件不能超过 **500 行**（不包括空行和纯注释行）。
++
++## 行数计算方式
++
++### 计入行数
++- 实际代码行（包括逻辑代码、函数定义、类定义等）
++- 包含代码的注释行（如 `const x = 1; // 注释`）
++
++### 不计入行数
++- 纯空行
++- 纯注释行（以 `//` 或 `/* */` 开头且不含代码的行）
++- 文件头版权注释块
++
++## 检查命令
++
++```bash
++# 统计实际代码行数（排除空行和纯注释行）
++find . -type f \( -name "*.ts" -o -name "*.tsx" -o -name "*.js" -o -name "*.jsx" -o -name "*.py" -o -name "*.java" -o -name "*.go" -o -name "*.rs" \) \
++  -not -path "*/node_modules/*" \
++  -not -path "*/dist/*" \
++  -not -path "*/build/*" \
++  -not -path "*/.git/*" \
++  -exec wc -l {} + | sort -n
++```
++
++## 超限处理方案
++
++当文件即将超过 500 行时，按以下优先级处理：
++
++### 方案 1: 功能拆分 (推荐)
++将大文件按功能拆分为多个小文件：
++```
++# 原文件
++utils.ts (520行)
++
++# 拆分后
++utils/index.ts          (导出聚合)
++utils/string-helpers.ts (150行)
++utils/date-helpers.ts   (120行)
++utils/validators.ts     (180行)
++utils/formatters.ts     (90行)
++```
++
++### 方案 2: 提取组件/模块
++将可复用逻辑提取为独立组件或模块：
++```
++# 原文件
++UserManagement.tsx (550行)
++
++# 拆分后
++UserManagement/
++├── index.tsx           (主组件，80行)
++├── UserList.tsx        (用户列表，150行)
++├── UserForm.tsx        (用户表单，180行)
++├── UserFilters.tsx     (筛选组件，100行)
++└── hooks/
++    └── useUserData.ts  (数据逻辑，90行)
++```
++
++### 方案 3: 提取工具函数
++将通用工具函数提取到 `utils/` 或 `helpers/` 目录：
++```
++# 原文件
++api-client.ts (530行)
++
++# 拆分后
++api/
++├── client.ts           (核心客户端，200行)
++├── interceptors.ts     (拦截器，150行)
++├── error-handlers.ts   (错误处理，120行)
++└── types.ts            (类型定义，80行)
++```
++
++## 强制检查清单
++
++编写代码时必须确认：
++- [ ] 当前文件行数未超过 500 行
++- [ ] 如接近限制，已规划拆分方案
++- [ ] 拆分后的文件职责单一、内聚性高
++- [ ] 拆分后的文件命名清晰、易于理解
++
++## 禁止事项
++
++- **禁止**: 任何代码文件超过 500 行
++- **禁止**: 为了规避限制而删除必要注释
++- **禁止**: 将多行代码压缩为一行
++- **禁止**: 无理由拒绝拆分文件
++
++## 例外情况
++
++以下情况可申请例外（需记录原因）：
++1. **自动生成的代码文件**（如 protobuf 生成、API 客户端生成）
++2. **配置文件**（如大型路由配置、常量定义文件）
++3. **第三方库修改**（需注明来源和修改内容）
++
++例外申请格式：
++```
++<!-- FILE_EXCEPTION: 文件名 -->
++<!-- REASON: 申请原因 -->
++<!-- APPROVED_BY: 审批人 -->
++<!-- DATE: 审批日期 -->
++```
++
++## 自动化集成
++
++此规则与以下流程集成：
++1. **代码审查** - 自动检查文件行数
++2. **CI/CD** - 在构建前执行行数检查
++3. **Pre-commit Hook** - 提交前警告超限文件
+diff --git a/.trae/rules/task-completion-report.md b/.trae/rules/task-completion-report.md
+new file mode 100644
+index 0000000..e93ea27
+--- /dev/null
++++ b/.trae/rules/task-completion-report.md
+@@ -0,0 +1,92 @@
++# 任务完成报告规则 (Task Completion Report Rule)
++
++> **⚠️ 全局生效**: 此规则适用于所有任务，所有 Agent 必须无条件遵守。
++
++## 规则说明
++
++每个任务完成后，必须创建当前日期的文件夹并输出任务完成报告。
++
++## 执行流程
++
++### 1. 创建日期文件夹
++
++**路径**: `docs/task-reports/YYYY-MM-DD/`
++
++**操作**:
++```bash
++mkdir -p docs/task-reports/$(date +%Y-%m-%d)
++```
++
++### 2. 生成报告文件
++
++**文件名格式**: `{task_id}-{task_name}-{timestamp}.md`
++
++**示例**: `T-AUTH-001-login-page-20250404-143022.md`
++
++### 3. 报告内容模板
++
++```markdown
++# 任务完成报告
++
++## 基本信息
++- **任务ID**: {task_id}
++- **任务名称**: {task_name}
++- **所属模块**: {module_name}
++- **完成时间**: {timestamp}
++- **执行人**: Agent
++
++## 任务描述
++{task_description}
++
++## 完成内容
++- [x] {completed_item_1}
++- [x] {completed_item_2}
++- [x] {completed_item_n}
++
++## 代码变更
++| 文件路径 | 变更类型 | 说明 |
++|---------|---------|------|
++| {file_path} | 新增/修改/删除 | {description} |
++
++## 测试结果
++- **测试状态**: 通过/部分通过/未通过
++- **测试用例**: {test_cases}
++- **覆盖率**: {coverage}%
++
++## Git 提交
++- **Commit Hash**: {commit_hash}
++- **Commit Message**: {commit_message}
++- **分支**: {branch}
++
++## 遇到的问题
++{issues_or_none}
++
++## 经验总结
++{learnings}
++
++## 下一步建议
++{next_steps}
++```
++
++## 强制检查清单
++
++任务完成前必须确认：
++- [ ] 日期文件夹已创建 (`docs/task-reports/YYYY-MM-DD/`)
++- [ ] 报告文件已生成并填充完整内容
++- [ ] 所有代码变更已记录在报告中
++- [ ] Git 提交信息已记录
++- [ ] 遇到的问题和经验已总结
++
++## 禁止事项
++
++- **禁止**: 不创建报告直接标记任务完成
++- **禁止**: 报告内容为空或敷衍填写
++- **禁止**: 将报告放在非日期文件夹中
++- **禁止**: 遗漏关键的代码变更信息
++
++## 自动化集成
++
++此规则与以下流程集成：
++1. `ralph-state-manager` - 在 `finish-task` 时自动触发报告生成
++2. `ralph-feishu-sync` - 报告生成后同步到飞书文档
++3. `TodoWrite` - 将"生成任务报告"作为任务完成的必要步骤
+diff --git a/.trae/skills/ralph-feishu-sync/lib/base-sync.ts b/.trae/skills/ralph-feishu-sync/lib/base-sync.ts
+index cbe96fe..2eaf216 100644
+--- a/.trae/skills/ralph-feishu-sync/lib/base-sync.ts
++++ b/.trae/skills/ralph-feishu-sync/lib/base-sync.ts
+@@ -4,12 +4,10 @@
+  */
+ 
+ import * as fs from 'fs';
+-import * as path from 'path';
+ import { execSync } from 'child_process';
+ import { FeishuConfig } from './config';
+ import { TaskItem } from './parser';
+ 
+-// ID 映射缓存文件
+ const MAPPING_FILE = '.ralph-task-mapping.json';
+ 
+ interface TaskMapping {
+@@ -25,32 +23,19 @@ interface TaskMapping {
+   }>;
+ }
+ 
+-/**
+- * 加载 ID 映射
+- */
+ function loadMappings(projectId: string): TaskMapping {
+   try {
+     if (fs.existsSync(MAPPING_FILE)) {
+       const content = fs.readFileSync(MAPPING_FILE, 'utf-8');
+       const data = JSON.parse(content);
+-      if (data.project === projectId) {
+-        return data;
+-      }
++      if (data.project === projectId) return data;
+     }
+   } catch (error) {
+     console.warn('⚠️ 读取映射文件失败:', error);
+   }
+-  
+-  return {
+-    version: '1.0',
+-    project: projectId,
+-    mappings: [],
+-  };
++  return { version: '1.0', project: projectId, mappings: [] };
+ }
+ 
+-/**
+- * 保存 ID 映射
+- */
+ function saveMappings(mapping: TaskMapping): void {
+   try {
+     fs.writeFileSync(MAPPING_FILE, JSON.stringify(mapping, null, 2));
+@@ -59,85 +44,45 @@ function saveMappings(mapping: TaskMapping): void {
+   }
+ }
+ 
+-/**
+- * 查找现有映射
+- */
+-function findMapping(
+-  mappings: TaskMapping['mappings'],
+-  description: string
+-): TaskMapping['mappings'][0] | undefined {
++function findMapping(mappings: TaskMapping['mappings'], description: string) {
+   return mappings.find(m => m.localDesc === description);
+ }
+ 
+-/**
+- * 状态映射：本地状态 -> 飞书状态
+- */
+ function mapStatusToFeishu(status: TaskItem['status']): string {
+-  const statusMap: Record<TaskItem['status'], string> = {
+-    pending: '待开始',
+-    in_progress: '进行中',
+-    completed: '已完成',
+-    blocked: '已阻塞',
++  const map: Record<TaskItem['status'], string> = {
++    pending: '待开始', in_progress: '进行中', completed: '已完成', blocked: '已阻塞'
+   };
+-  return statusMap[status] || '待开始';
++  return map[status] || '待开始';
+ }
+ 
+-/**
+- * 格式化日期时间为字符串
+- */
+ function formatDateTime(date: Date = new Date()): string {
+   const pad = (n: number) => n.toString().padStart(2, '0');
+   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
+ }
+ 
+-/**
+- * 构建飞书记录字段 - 根据实际字段ID和正确格式
+- */
+-function buildRecordFields(
+-  task: TaskItem,
+-  projectId: string
+-): Record<string, any> {
++function buildRecordFields(task: TaskItem): Record<string, any> {
+   const fields: Record<string, any> = {
+-    // 任务ID - fldV7UZaeC (text)
+-    'fldV7UZaeC': task.id,
+-    // 任务名称 - fldUnb5miD (text)
+-    'fldUnb5miD': task.description,
+-    // 任务描述 - fldaxqIJ1m (text)
+-    'fldaxqIJ1m': `[${task.module}] ${task.submodule || ''}`,
+-    // 状态 - fldRJHcSxn (text)
+-    'fldRJHcSxn': mapStatusToFeishu(task.status),
+-    // 优先级 - fldDUkYmxk (text)
+-    'fldDUkYmxk': task.priority || 'P2',
+-    // 预计工时 - fldE1AiQBe (number)
+-    'fldE1AiQBe': task.estimatedHours || 1,
++    '任务ID': task.id,
++    '任务名称': task.description,
++    '任务描述': `[${task.module}] ${task.submodule || ''}`,
++    '状态': mapStatusToFeishu(task.status),
++    '优先级': task.priority || 'P2',
++    '预计工时': task.estimatedHours || 1,
+   };
+-
+-  // 开始时间 - fldalVm7gV (datetime) - 仅当状态为进行中时
+   if (task.status === 'in_progress') {
+-    fields['fldalVm7gV'] = formatDateTime();
++    fields['开始时间'] = formatDateTime();
+   }
+-
+   return fields;
+ }
+ 
+-/**
+- * 调用 lark-cli 创建记录
+- */
+-async function createRecord(
+-  config: FeishuConfig,
+-  fields: Record<string, any>
+-): Promise<string | null> {
++async function createRecord(config: FeishuConfig, fields: Record<string, any>): Promise<string | null> {
+   try {
+-    const jsonPayload = JSON.stringify({ fields });
+-    console.log('   创建记录 payload:', jsonPayload.substring(0, 200) + '...');
+-    
++    const jsonPayload = JSON.stringify(fields);
++    console.log('   创建记录 payload:', jsonPayload.substring(0, 200));
+     const cmd = `lark-cli base +record-upsert --base-token ${config.base.app_token} --table-id ${config.base.table_id} --json '${jsonPayload}'`;
+     const result = execSync(cmd, { encoding: 'utf-8', stdio: ['pipe', 'pipe', 'pipe'] });
+     const data = JSON.parse(result);
+-    
+-    if (data.ok && data.data?.record?.record_id) {
+-      return data.data.record.record_id;
+-    }
++    if (data.ok && data.data?.record?.record_id) return data.data.record.record_id;
+     console.error('   创建记录失败:', data.error || data);
+     return null;
+   } catch (error) {
+@@ -146,25 +91,14 @@ async function createRecord(
+   }
+ }
+ 
+-/**
+- * 调用 lark-cli 更新记录
+- */
+-async function updateRecord(
+-  config: FeishuConfig,
+-  recordId: string,
+-  fields: Record<string, any>
+-): Promise<boolean> {
++async function updateRecord(config: FeishuConfig, recordId: string, fields: Record<string, any>): Promise<boolean> {
+   try {
+-    const jsonPayload = JSON.stringify({ fields });
+-    console.log('   更新记录 payload:', jsonPayload.substring(0, 200) + '...');
+-    
++    const jsonPayload = JSON.stringify(fields);
++    console.log('   更新记录 payload:', jsonPayload.substring(0, 200));
+     const cmd = `lark-cli base +record-upsert --base-token ${config.base.app_token} --table-id ${config.base.table_id} --record-id ${recordId} --json '${jsonPayload}'`;
+     const result = execSync(cmd, { encoding: 'utf-8', stdio: ['pipe', 'pipe', 'pipe'] });
+     const data = JSON.parse(result);
+-    
+-    if (data.ok) {
+-      return true;
+-    }
++    if (data.ok) return true;
+     console.error('   更新记录失败:', data.error || data);
+     return false;
+   } catch (error) {
+@@ -173,50 +107,24 @@ async function updateRecord(
+   }
+ }
+ 
+-/**
+- * 同步任务到飞书 Base - 真实 API 实现
+- */
+-export async function syncTasksToBase(
+-  tasks: TaskItem[],
+-  projectId: string,
+-  config: FeishuConfig
+-): Promise<{ success: boolean; message: string }> {
++export async function syncTasksToBase(tasks: TaskItem[], projectId: string, config: FeishuConfig): Promise<{ success: boolean; message: string }> {
+   try {
+-    // 验证配置
+     if (!config.base.app_token || !config.base.table_id) {
+-      return {
+-        success: false,
+-        message: '❌ 飞书 Base 配置不完整',
+-      };
++      return { success: false, message: '❌ 飞书 Base 配置不完整' };
+     }
+-    
+     console.log(`🔄 正在同步 ${tasks.length} 个任务到飞书多维表格...`);
+-    console.log(`   Base: ${config.base.app_token}`);
+-    console.log(`   Table: ${config.base.table_id}`);
+-    
+-    // 加载现有映射
+     const mapping = loadMappings(projectId);
+-    
+-    let created = 0;
+-    let updated = 0;
+-    let failed = 0;
+-    
++    let created = 0, updated = 0, failed = 0;
+     for (const task of tasks) {
+       const existing = findMapping(mapping.mappings, task.description);
+-      const fields = buildRecordFields(task, projectId);
+-      
++      const fields = buildRecordFields(task);
+       if (existing?.feishuRecordId) {
+-        // 更新现有记录
+         console.log(`   更新: ${task.id}`);
+-        const success = await updateRecord(config, existing.feishuRecordId, fields);
+-        if (success) {
++        if (await updateRecord(config, existing.feishuRecordId, fields)) {
+           updated++;
+           existing.updatedAt = new Date().toISOString();
+-        } else {
+-          failed++;
+-        }
++        } else failed++;
+       } else {
+-        // 创建新记录
+         console.log(`   创建: ${task.id}`);
+         const recordId = await createRecord(config, fields);
+         if (recordId) {
+@@ -229,101 +137,38 @@ export async function syncTasksToBase(
+             createdAt: new Date().toISOString(),
+             updatedAt: new Date().toISOString(),
+           });
+-        } else {
+-          failed++;
+-        }
++        } else failed++;
+       }
+-      
+-      // 延迟 0.5 秒避免限流
+       await new Promise(resolve => setTimeout(resolve, 500));
+     }
+-    
+-    // 保存映射
+     saveMappings(mapping);
+-    
+-    console.log(`✅ 任务同步完成`);
+-    console.log(`   新建: ${created}`);
+-    console.log(`   更新: ${updated}`);
+-    console.log(`   失败: ${failed}`);
+-    console.log(`   映射文件: ${MAPPING_FILE}`);
+-    
+-    return {
+-      success: failed === 0,
+-      message: `同步完成: 新建${created}, 更新${updated}, 失败${failed}`,
+-    };
++    console.log(`✅ 任务同步完成: 新建${created}, 更新${updated}, 失败${failed}`);
++    return { success: failed === 0, message: `同步完成: 新建${created}, 更新${updated}, 失败${failed}` };
+   } catch (error) {
+     const errorMsg = error instanceof Error ? error.message : String(error);
+-    console.error('❌ 同步任务失败:', errorMsg);
+-    return {
+-      success: false,
+-      message: `同步失败: ${errorMsg}`,
+-    };
++    return { success: false, message: `同步失败: ${errorMsg}` };
+   }
+ }
+ 
+-/**
+- * 同步任务完成状态 - 真实 API 实现
+- */
+-export async function syncTaskComplete(
+-  taskDescription: string,
+-  commitHash: string | undefined,
+-  config: FeishuConfig
+-): Promise<{ success: boolean; message: string }> {
++export async function syncTaskComplete(taskDescription: string, commitHash: string | undefined, config: FeishuConfig): Promise<{ success: boolean; message: string }> {
+   try {
+-    // 加载映射
+     const mapping = loadMappings(config.project.id);
+     const existing = findMapping(mapping.mappings, taskDescription);
+-    
+     if (!existing?.feishuRecordId) {
+-      return {
+-        success: false,
+-        message: `❌ 未找到任务映射: ${taskDescription.substring(0, 50)}...`,
+-      };
++      return { success: false, message: `❌ 未找到任务映射: ${taskDescription.substring(0, 50)}...` };
+     }
+-    
+     console.log(`🔄 正在更新任务状态: ${existing.feishuTaskId}`);
+-    
+-    // 构建更新字段
+-    const updateFields: Record<string, any> = {
+-      'fldRJHcSxn': '已完成',
+-      'flddhwzCZW': formatDateTime(),
+-    };
+-    
+-    // 如果有 commit hash，添加到备注
+-    if (commitHash) {
+-      updateFields['fldXB7VBoE'] = `Git Commit: ${commitHash}`;
+-    }
+-    
+-    // 调用 API 更新
+-    const success = await updateRecord(config, existing.feishuRecordId, updateFields);
+-    
+-    if (success) {
+-      // 更新映射时间
++    const updateFields: Record<string, any> = { '状态': '已完成', '完成时间': formatDateTime() };
++    if (commitHash) updateFields['备注'] = `Git Commit: ${commitHash}`;
++    if (await updateRecord(config, existing.feishuRecordId, updateFields)) {
+       existing.updatedAt = new Date().toISOString();
+       saveMappings(mapping);
+-      
+-      console.log(`✅ 任务状态已更新: ${existing.feishuTaskId}`);
+-      return {
+-        success: true,
+-        message: `任务状态已更新: ${existing.feishuTaskId}`,
+-      };
+-    } else {
+-      return {
+-        success: false,
+-        message: '❌ 更新飞书记录失败',
+-      };
++      return { success: true, message: `任务状态已更新: ${existing.feishuTaskId}` };
+     }
++    return { success: false, message: '❌ 更新飞书记录失败' };
+   } catch (error) {
+-    const errorMsg = error instanceof Error ? error.message : String(error);
+-    console.error('❌ 更新任务状态失败:', errorMsg);
+-    return {
+-      success: false,
+-      message: `更新失败: ${errorMsg}`,
+-    };
++    return { success: false, message: `更新失败: ${error instanceof Error ? error.message : String(error)}` };
+   }
+ }
+ 
+-export default {
+-  syncTasksToBase,
+-  syncTaskComplete,
+-};
++export default { syncTasksToBase, syncTaskComplete };
+diff --git a/.trae/skills/ralph-feishu-sync/lib/im-notify.ts b/.trae/skills/ralph-feishu-sync/lib/im-notify.ts
+index 0edeb55..40c4164 100644
+--- a/.trae/skills/ralph-feishu-sync/lib/im-notify.ts
++++ b/.trae/skills/ralph-feishu-sync/lib/im-notify.ts
+@@ -25,26 +25,30 @@ interface NotifyData {
+  * 构建任务拆分通知消息
+  */
+ function buildSplitMessage(data: NotifyData): string {
+-  return `📋 **任务拆分完成**
++  return JSON.stringify({
++    text: `📋 任务拆分完成
+ ━━━━━━━━━━━━━━━━━━━━
+ 📁 项目：${data.project}
+ 📊 任务数：${data.taskCount} 个
+ 
+-✅ 已同步到飞书多维表格`;
++✅ 已同步到飞书多维表格`
++  });
+ }
+ 
+ /**
+  * 构建任务完成通知消息
+  */
+ function buildCompleteMessage(data: NotifyData): string {
+-  const commitInfo = data.commitHash ? `\n🔖 Commit: \`${data.commitHash}\`` : '';
++  const commitInfo = data.commitHash ? `\n🔖 Commit: ${data.commitHash}` : '';
+   
+-  return `✅ **任务完成**
++  return JSON.stringify({
++    text: `✅ 任务完成
+ ━━━━━━━━━━━━━━━━━━━━
+ 📁 项目：${data.project}
+ 📝 任务：${data.taskDescription?.substring(0, 50)}...${commitInfo}
+ 
+-📊 进度已更新`;
++📊 进度已更新`
++  });
+ }
+ 
+ /**
+@@ -54,27 +58,31 @@ function buildDailyMessage(data: NotifyData): string {
+   const { total, completed, percentage } = data.progress || { total: 0, completed: 0, percentage: 0 };
+   const remaining = total - completed;
+   
+-  return `📊 **Ralph 项目日报**
++  return JSON.stringify({
++    text: `📊 Ralph 项目日报
+ ━━━━━━━━━━━━━━━━━━━━
+ 📁 项目：${data.project}
+ 📅 日期：${new Date().toLocaleDateString()}
+ 
+ ✅ 已完成：${completed}/${total} (${percentage}%)
+-📋 剩余任务：${remaining} 个`;
++📋 剩余任务：${remaining} 个`
++  });
+ }
+ 
+ /**
+  * 构建里程碑通知消息
+  */
+ function buildMilestoneMessage(data: NotifyData): string {
+-  return `🎉 **里程碑达成**
++  return JSON.stringify({
++    text: `🎉 里程碑达成
+ ━━━━━━━━━━━━━━━━━━━━
+ 📁 项目：${data.project}
+ 🎯 模块：${data.module}
+ 
+ ✅ ${data.module} 模块全部完成！
+ 
+-🚀 进入下一阶段开发`;
++🚀 进入下一阶段开发`
++  });
+ }
+ 
+ /**
+@@ -111,16 +119,16 @@ export async function notifyProgress(
+         messageContent = buildMilestoneMessage(data);
+         break;
+       default:
+-        messageContent = JSON.stringify(data, null, 2);
++        messageContent = JSON.stringify({ text: JSON.stringify(data, null, 2) });
+     }
+     
+     console.log(`📤 发送${type}通知到飞书群聊...`);
+     console.log(`   Chat ID: ${config.im.chat_id}`);
+     
+     // 调用 lark-cli 发送消息
+-    // 使用 +messages-send shortcut
++    // 使用 +messages-send shortcut，--content 必须是 JSON 格式
+     const cmd = `lark-cli im +messages-send --chat-id ${config.im.chat_id} --msg-type text --content '${messageContent}'`;
+-    console.log('   执行命令:', cmd.substring(0, 100) + '...');
++    console.log('   执行命令:', cmd.substring(0, 120) + '...');
+     
+     const result = execSync(cmd, { encoding: 'utf-8', stdio: ['pipe', 'pipe', 'pipe'] });
+     const response = JSON.parse(result);
+@@ -165,7 +173,8 @@ export async function sendCustomMessage(
+     
+     console.log(`📤 发送自定义消息...`);
+     
+-    const cmd = `lark-cli im +messages-send --chat-id ${config.im.chat_id} --msg-type text --content '${message}'`;
++    const content = JSON.stringify({ text: message });
++    const cmd = `lark-cli im +messages-send --chat-id ${config.im.chat_id} --msg-type text --content '${content}'`;
+     const result = execSync(cmd, { encoding: 'utf-8', stdio: ['pipe', 'pipe', 'pipe'] });
+     const response = JSON.parse(result);
+     
+-- 
+2.37.1 (Apple Git-137.1)
+
