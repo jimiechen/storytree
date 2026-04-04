@@ -6,6 +6,7 @@ import { api } from '@/lib/api';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Alert } from '@/components/ui/Alert';
+import { ProjectCard } from '@/components/cards/ProjectCard';
 
 interface Project {
   id: string;
@@ -94,22 +95,11 @@ export default function ProjectsPage() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredProjects.map((project) => (
-              <div
+              <ProjectCard
                 key={project.id}
-                className="project-card bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow cursor-pointer p-6"
-                onClick={() => handleProjectClick(project.id)}
-              >
-                <h3 className="text-lg font-medium text-gray-900 mb-2">
-                  {project.title}
-                </h3>
-                <p className="text-sm text-gray-600 mb-4 line-clamp-2">
-                  {project.description}
-                </p>
-                <div className="flex items-center justify-between text-xs text-gray-500">
-                  <span>创建于: {new Date(project.createdAt).toLocaleDateString()}</span>
-                  <span>更新于: {new Date(project.updatedAt).toLocaleDateString()}</span>
-                </div>
-              </div>
+                project={project}
+                onClick={handleProjectClick}
+              />
             ))}
           </div>
         )}
