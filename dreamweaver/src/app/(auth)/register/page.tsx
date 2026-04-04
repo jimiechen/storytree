@@ -6,6 +6,7 @@ import { api } from '@/lib/api';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { Alert } from '@/components/ui/Alert';
+import { Form } from '@/components/ui/Form';
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -88,7 +89,7 @@ export default function RegisterPage() {
 
         {error && <Alert>{error}</Alert>}
 
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+        <Form onSubmit={handleSubmit} className="mt-8">
           <Input
             label="用户名"
             type="text"
@@ -126,7 +127,7 @@ export default function RegisterPage() {
           >
             注册
           </Button>
-        </form>
+        </Form>
 
         <div className="text-center">
           <a href="/login" className="text-sm text-indigo-600 hover:text-indigo-500">
