@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&amp;family=Noto+Serif+SC:wght@400;700&amp;family=Noto+Sans+SC:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "surface-variant": "#333348",
+              "inverse-on-surface": "#2f2e44",
+              "primary": "#75d1ff",
+              "on-tertiary-fixed-variant": "#005318",
+              "on-tertiary": "#00390e",
+              "on-surface-variant": "#c6c6ce",
+              "on-primary": "#003548",
+              "outline": "#909098",
+              "tertiary-fixed-dim": "#83da85",
+              "background": "#111125",
+              "on-secondary-fixed": "#291800",
+              "surface-container-high": "#28283d",
+              "on-secondary-container": "#3c2500",
+              "on-primary-fixed": "#001e2b",
+              "error-container": "#93000a",
+              "surface": "#111125",
+              "on-secondary": "#452b00",
+              "on-primary-container": "#0094c4",
+              "surface-container": "#1e1e32",
+              "on-surface": "#e2e0fc",
+              "primary-fixed": "#c2e8ff",
+              "on-error": "#690005",
+              "tertiary": "#83da85",
+              "on-tertiary-fixed": "#002105",
+              "on-error-container": "#ffdad6",
+              "inverse-surface": "#e2e0fc",
+              "surface-tint": "#75d1ff",
+              "on-primary-fixed-variant": "#004d67",
+              "error": "#ffb4ab",
+              "surface-container-highest": "#333348",
+              "secondary-fixed": "#ffddb4",
+              "secondary": "#ffb954",
+              "surface-dim": "#111125",
+              "on-secondary-fixed-variant": "#633f00",
+              "on-background": "#e2e0fc",
+              "tertiary-container": "#002908",
+              "primary-fixed-dim": "#75d1ff",
+              "surface-container-lowest": "#0c0c20",
+              "secondary-container": "#c3841b",
+              "on-tertiary-container": "#469a4e",
+              "surface-bright": "#37374d",
+              "primary-container": "#002535",
+              "inverse-primary": "#006688",
+              "surface-container-low": "#1a1a2e",
+              "tertiary-fixed": "#9ff79f",
+              "outline-variant": "#45464d",
+              "secondary-fixed-dim": "#ffb954"
+            },
+            fontFamily: {
+              "headline": ["Manrope"],
+              "body": ["Noto Serif SC"],
+              "label": ["Manrope", "Noto Sans SC"]
+            },
+            borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .canvas-grid {
+            background-image: radial-gradient(circle, #75d1ff15 1px, transparent 1px);
+            background-size: 40px 40px;
+        }
+        .node-connector {
+            stroke: #75d1ff40;
+            stroke-width: 2;
+            fill: none;
+        }
+        .glass-panel {
+            background: rgba(30, 30, 50, 0.6);
+            backdrop-filter: blur(12px);
+        }
+    </style>
+</head>
+<body class="bg-surface-container-lowest text-on-surface font-label selection:bg-primary/30 overflow-hidden h-screen">
+<!-- SideNavBar -->
+<aside class="h-screen w-64 fixed left-0 top-0 bg-[#1e1e32] transition-colors duration-300 flex flex-col py-6 px-4 z-50">
+<div class="mb-10 px-2">
+<h1 class="text-[#75d1ff] font-bold tracking-tight text-xl font-headline">The Nocturnal Manuscript</h1>
+<p class="text-[#e2e0fc]/40 text-[10px] uppercase tracking-[0.2em] mt-1">Drafting: Book One</p>
+</div>
+<nav class="flex-1 space-y-2">
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[#e2e0fc]/60 hover:text-[#e2e0fc] hover:bg-[#37374d]/50 transition-all font-['Manrope'] text-sm tracking-wide group" href="#">
+<span class="material-symbols-outlined group-hover:text-primary transition-colors">edit_note</span>
+<span>Manuscript</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[#75d1ff] font-semibold border-l-2 border-[#75d1ff] bg-[#75d1ff]/5 font-['Manrope'] text-sm tracking-wide" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">account_tree</span>
+<span>Branch Map</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[#e2e0fc]/60 hover:text-[#e2e0fc] hover:bg-[#37374d]/50 transition-all font-['Manrope'] text-sm tracking-wide group" href="#">
+<span class="material-symbols-outlined group-hover:text-primary transition-colors">auto_stories</span>
+<span>Timeline</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[#e2e0fc]/60 hover:text-[#e2e0fc] hover:bg-[#37374d]/50 transition-all font-['Manrope'] text-sm tracking-wide group" href="#">
+<span class="material-symbols-outlined group-hover:text-primary transition-colors">group</span>
+<span>Characters</span>
+</a>
+<div class="pt-6 mt-6 border-t border-white/5">
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[#e2e0fc]/60 hover:text-[#e2e0fc] hover:bg-[#37374d]/50 transition-all font-['Manrope'] text-sm tracking-wide group" href="#">
+<span class="material-symbols-outlined group-hover:text-primary transition-colors">settings</span>
+<span>Settings</span>
+</a>
+</div>
+</nav>
+<div class="mt-auto flex items-center gap-3 px-2">
+<div class="w-8 h-8 rounded-full bg-primary-container flex items-center justify-center overflow-hidden border border-primary/20">
+<img alt="Writer Profile" class="w-full h-full object-cover" data-alt="Minimalist avatar of a writer with glasses and messy hair in a modern artistic style" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDa34agukDARgdNw5ugZWnAil-ao8c9vBsBnFhkFX57YuER55AHrAYUNtptAQBuIyPmIyunWy5hvP_vVW3eJV7UUi4cyBsXVfJgITHjgg7NgGJjNvZygTw_mJMSQolG50UkOMdcyQ_CUazKavxE2KpFGBJNnB0ta2SMuSknETFlAC43wXAwn0MFYT2GnDbbT_3Fy_m1UAN689FygsY1PqCxNMgt88IqEfHxxXRKPamcMKtCZhZm46OTwfPTlB2vcFZwhfePNNyr_rI"/>
+</div>
+<div class="flex flex-col">
+<span class="text-xs font-bold">Dream Weaver</span>
+<span class="text-[10px] text-on-surface-variant">Active Now</span>
+</div>
+</div>
+</aside>
+<!-- Main Map Canvas Area -->
+<main class="fixed top-0 right-0 left-64 bottom-0 bg-surface-container-lowest flex flex-col">
+<!-- TopNavBar -->
+<header class="h-16 flex items-center justify-between px-8 w-full bg-[#111125]/80 backdrop-blur-md z-40">
+<div class="flex items-center gap-8">
+<span class="text-lg font-black text-[#75d1ff] font-headline uppercase tracking-tighter">Branch Map</span>
+<nav class="flex items-center gap-6">
+<a class="text-[#75d1ff] border-b-2 border-[#75d1ff] pb-1 font-['Manrope'] font-medium text-xs uppercase tracking-widest" href="#">Focus</a>
+<a class="text-[#e2e0fc]/70 hover:text-[#75d1ff] transition-colors font-['Manrope'] font-medium text-xs uppercase tracking-widest" href="#">Zoom</a>
+<a class="text-[#e2e0fc]/70 hover:text-[#75d1ff] transition-colors font-['Manrope'] font-medium text-xs uppercase tracking-widest" href="#">Filter</a>
+<a class="text-[#e2e0fc]/70 hover:text-[#75d1ff] transition-colors font-['Manrope'] font-medium text-xs uppercase tracking-widest" href="#">Export</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<div class="flex bg-surface-container-high rounded-full px-1 py-1">
+<button class="px-4 py-1.5 rounded-full bg-surface-bright text-primary text-xs font-bold transition-all">树状视图</button>
+<button class="px-4 py-1.5 rounded-full text-on-surface-variant text-xs font-bold hover:text-on-surface transition-all">时间线视图</button>
+</div>
+<div class="h-6 w-[1px] bg-outline-variant mx-2"></div>
+<div class="flex items-center gap-2">
+<button class="w-8 h-8 flex items-center justify-center rounded-full text-on-surface-variant hover:text-primary hover:bg-primary/10 transition-all">
+<span class="material-symbols-outlined text-xl">history</span>
+</button>
+<button class="w-8 h-8 flex items-center justify-center rounded-full text-on-surface-variant hover:text-primary hover:bg-primary/10 transition-all">
+<span class="material-symbols-outlined text-xl">auto_awesome</span>
+</button>
+<button class="w-8 h-8 flex items-center justify-center rounded-full text-on-surface-variant hover:text-primary hover:bg-primary/10 transition-all">
+<span class="material-symbols-outlined text-xl">more_vert</span>
+</button>
+</div>
+</div>
+</header>
+<!-- Secondary Toolbar -->
+<div class="px-8 py-3 bg-surface-container-low flex items-center justify-between z-30 shadow-xl shadow-black/20">
+<div class="flex items-center gap-3">
+<button class="bg-gradient-to-br from-primary to-on-primary-container text-on-primary px-4 py-1.5 rounded-lg flex items-center gap-2 text-xs font-bold hover:brightness-110 transition-all shadow-lg shadow-primary/10">
+<span class="material-symbols-outlined text-sm">add_circle</span>
+                    新建分支
+                </button>
+<button class="bg-surface-container-highest text-on-surface border border-outline-variant/30 px-4 py-1.5 rounded-lg flex items-center gap-2 text-xs font-medium hover:bg-surface-bright transition-all">
+<span class="material-symbols-outlined text-sm">call_merge</span>
+                    合并分支
+                </button>
+<button class="bg-surface-container-highest text-on-surface border border-outline-variant/30 px-4 py-1.5 rounded-lg flex items-center gap-2 text-xs font-medium hover:bg-surface-bright transition-all">
+<span class="material-symbols-outlined text-sm">download</span>
+                    导出分支
+                </button>
+</div>
+<div class="flex items-center gap-4">
+<button class="text-on-surface-variant flex items-center gap-1.5 text-xs font-medium hover:text-primary transition-all">
+<span class="material-symbols-outlined text-sm">fit_screen</span>
+                    缩放适配
+                </button>
+<div class="flex items-center bg-surface-container-highest rounded px-2 py-1 gap-4">
+<span class="material-symbols-outlined text-sm text-on-surface-variant cursor-pointer hover:text-primary">remove</span>
+<span class="text-[10px] font-mono text-primary font-bold">100%</span>
+<span class="material-symbols-outlined text-sm text-on-surface-variant cursor-pointer hover:text-primary">add</span>
+</div>
+</div>
+</div>
+<!-- Tree Diagram Canvas -->
+<div class="flex-1 relative overflow-auto canvas-grid p-20 flex items-center">
+<!-- SVG Connectors Layer -->
+<svg class="absolute inset-0 w-full h-full pointer-events-none" style="min-width: 1200px;">
+<!-- Root to A/B -->
+<path class="node-connector" d="M 320 400 C 450 400, 450 250, 550 250"></path>
+<path class="node-connector" d="M 320 400 C 450 400, 450 550, 550 550"></path>
+<!-- A to A1/A2 -->
+<path class="node-connector" d="M 780 250 C 850 250, 850 180, 920 180"></path>
+<path class="node-connector" d="M 780 250 C 850 250, 850 320, 920 320"></path>
+<!-- Subtle glow effects -->
+<defs>
+<filter id="glow">
+<fegaussianblur result="coloredBlur" stddeviation="2.5"></fegaussianblur>
+<femerge>
+<femergenode in="coloredBlur"></femergenode>
+<femergenode in="SourceGraphic"></femergenode>
+</femerge>
+</filter>
+</defs>
+</svg>
+<div class="relative flex items-center h-full min-w-[1200px]">
+<!-- Root Node -->
+<div class="absolute left-40 top-1/2 -translate-y-1/2 group">
+<div class="w-64 bg-surface-container border-2 border-primary/40 rounded-xl p-4 shadow-2xl shadow-primary/5 transition-transform group-hover:scale-105 cursor-pointer">
+<div class="flex items-center justify-between mb-2">
+<span class="bg-primary/10 text-primary text-[10px] px-2 py-0.5 rounded-full font-bold flex items-center gap-1">
+<span class="material-symbols-outlined text-[12px]" style="font-variation-settings: 'FILL' 1;">star</span>
+                                main
+                            </span>
+<span class="text-[10px] text-on-surface-variant font-mono">ROOT-01</span>
+</div>
+<h3 class="font-body text-lg text-on-surface mb-1">第一章：相遇</h3>
+<p class="text-xs text-on-surface-variant line-clamp-2 leading-relaxed">主角在迷雾森林边缘的一座废弃驿站里，遇到了那个改变他一生的人...</p>
+</div>
+</div>
+<!-- Column 2 -->
+<div class="absolute left-[550px] top-[150px] group">
+<div class="w-64 bg-surface-container-high border border-secondary/40 rounded-xl p-4 shadow-2xl transition-transform group-hover:scale-105 cursor-pointer ring-2 ring-secondary/20">
+<div class="flex items-center justify-between mb-2">
+<span class="bg-secondary/10 text-secondary text-[10px] px-2 py-0.5 rounded-full font-bold flex items-center gap-1">
+<span class="material-symbols-outlined text-[12px]" style="font-variation-settings: 'FILL' 1;">auto_fix_high</span>
+                                IF-line
+                            </span>
+<span class="text-[10px] text-on-surface-variant font-mono">BR-A</span>
+</div>
+<h3 class="font-body text-lg text-on-surface mb-1">分支A: 接受邀请</h3>
+<p class="text-xs text-on-surface-variant line-clamp-2 leading-relaxed">既然未来不可知，不如随他而去。城堡的阴影正从地平线升起。</p>
+</div>
+</div>
+<div class="absolute left-[550px] top-[450px] group opacity-60 hover:opacity-100 transition-opacity">
+<div class="w-64 bg-surface-container border border-outline-variant/30 rounded-xl p-4 shadow-lg transition-transform group-hover:scale-105 cursor-pointer">
+<div class="flex items-center justify-between mb-2">
+<span class="bg-outline-variant/20 text-on-surface-variant text-[10px] px-2 py-0.5 rounded-full font-bold flex items-center gap-1">
+<span class="material-symbols-outlined text-[12px]">archive</span>
+                                archived
+                            </span>
+<span class="text-[10px] text-on-surface-variant font-mono">BR-B</span>
+</div>
+<h3 class="font-body text-lg text-on-surface mb-1">分支B: 拒绝邀请</h3>
+<p class="text-xs text-on-surface-variant line-clamp-2 leading-relaxed">这种突如其来的好意背后定有阴谋。他转身离去，回到熟悉的小镇。</p>
+</div>
+</div>
+<!-- Column 3 -->
+<div class="absolute left-[920px] top-[80px] group">
+<div class="w-60 bg-surface-container border border-primary/20 rounded-xl p-4 shadow-lg transition-transform group-hover:scale-105 cursor-pointer">
+<div class="flex items-center justify-between mb-2">
+<span class="bg-primary/10 text-primary text-[10px] px-2 py-0.5 rounded-full font-bold">active</span>
+<span class="text-[10px] text-on-surface-variant font-mono">SUB-A1</span>
+</div>
+<h3 class="font-body text-md text-on-surface mb-1">A1: 前往城堡</h3>
+<p class="text-[10px] text-on-surface-variant line-clamp-2">古老的城门轰然打开，尘封百年的秘密即将揭晓。</p>
+</div>
+</div>
+<div class="absolute left-[920px] top-[220px] group">
+<div class="w-60 bg-surface-container border border-primary/20 rounded-xl p-4 shadow-lg transition-transform group-hover:scale-105 cursor-pointer">
+<div class="flex items-center justify-between mb-2">
+<span class="bg-primary/10 text-primary text-[10px] px-2 py-0.5 rounded-full font-bold">active</span>
+<span class="text-[10px] text-on-surface-variant font-mono">SUB-A2</span>
+</div>
+<h3 class="font-body text-md text-on-surface mb-1">A2: 留在镇上</h3>
+<p class="text-[10px] text-on-surface-variant line-clamp-2">也许平凡才是幸福。然而，不速之客当晚就敲开了房门。</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Right Detail Panel (Floating Appearance) -->
+<aside class="absolute right-6 top-32 bottom-24 w-80 glass-panel border border-outline-variant/20 rounded-2xl flex flex-col shadow-2xl z-20 pointer-events-auto">
+<div class="p-6 border-b border-outline-variant/10">
+<div class="flex items-center justify-between mb-4">
+<span class="text-[10px] uppercase tracking-widest text-primary font-bold">Branch Details</span>
+<button class="text-on-surface-variant hover:text-white transition-colors">
+<span class="material-symbols-outlined text-lg">close</span>
+</button>
+</div>
+<h2 class="font-body text-2xl text-on-surface leading-tight">分支A: 接受邀请</h2>
+<div class="mt-2 flex items-center gap-2">
+<span class="bg-secondary/10 text-secondary text-[10px] px-2 py-0.5 rounded font-bold uppercase">IF-line</span>
+<span class="text-[10px] text-on-surface-variant font-mono">Updated: 2h ago</span>
+</div>
+</div>
+<div class="flex-1 overflow-y-auto p-6 space-y-6">
+<div class="grid grid-cols-2 gap-4">
+<div class="bg-surface-container-highest/40 p-3 rounded-xl border border-white/5">
+<p class="text-[10px] text-on-surface-variant uppercase mb-1">Word Count</p>
+<p class="text-lg font-headline font-bold text-primary">12,450</p>
+</div>
+<div class="bg-surface-container-highest/40 p-3 rounded-xl border border-white/5">
+<p class="text-[10px] text-on-surface-variant uppercase mb-1">Chapters</p>
+<p class="text-lg font-headline font-bold text-primary">4</p>
+</div>
+</div>
+<div>
+<h4 class="text-xs font-bold text-on-surface mb-3 flex items-center gap-2">
+<span class="material-symbols-outlined text-sm text-secondary">description</span>
+                        Description
+                    </h4>
+<p class="text-sm text-on-surface-variant leading-relaxed">
+                        这是剧情的第一个重大转折点。选择接受神秘人的邀请意味着主角将告别现有的宁静生活，正式步入主线冲突的核心。城堡中设计了三个关键谜题和一场潜在的战斗。
+                    </p>
+</div>
+<div>
+<h4 class="text-xs font-bold text-on-surface mb-3 flex items-center gap-2">
+<span class="material-symbols-outlined text-sm text-primary">history</span>
+                        Metadata
+                    </h4>
+<ul class="space-y-3 text-xs">
+<li class="flex justify-between border-b border-white/5 pb-2">
+<span class="text-on-surface-variant">Created On</span>
+<span class="text-on-surface">Oct 12, 2023</span>
+</li>
+<li class="flex justify-between border-b border-white/5 pb-2">
+<span class="text-on-surface-variant">Created By</span>
+<span class="text-on-surface">Dream Weaver</span>
+</li>
+<li class="flex justify-between border-b border-white/5 pb-2">
+<span class="text-on-surface-variant">Last Merger</span>
+<span class="text-on-surface">None</span>
+</li>
+</ul>
+</div>
+<div class="pt-4">
+<button class="w-full bg-primary/10 hover:bg-primary/20 text-primary py-3 rounded-xl text-xs font-bold transition-all border border-primary/20 flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-sm">open_in_new</span>
+                        进入该分支写作
+                    </button>
+</div>
+</div>
+</aside>
+<!-- Bottom Stats Bar -->
+<footer class="h-12 bg-surface-container-low px-8 flex items-center justify-between border-t border-white/5 z-40">
+<div class="flex items-center gap-6 text-[10px] font-medium tracking-wide">
+<span class="flex items-center gap-1.5"><b class="text-primary">总分支数:</b> 5</span>
+<span class="w-1 h-1 bg-outline-variant rounded-full"></span>
+<span class="flex items-center gap-1.5"><b class="text-secondary">活跃分支:</b> 3</span>
+<span class="w-1 h-1 bg-outline-variant rounded-full"></span>
+<span class="flex items-center gap-1.5"><b class="text-primary">最大深度:</b> 3</span>
+<span class="w-1 h-1 bg-outline-variant rounded-full"></span>
+<span class="flex items-center gap-1.5"><b class="text-on-surface-variant">已归档:</b> 1</span>
+</div>
+<div class="flex items-center gap-4 text-[10px] text-on-surface-variant uppercase tracking-tighter">
+<span>System Status: Optimal</span>
+<span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-tertiary shadow-lg shadow-tertiary/20"></span> Cloud Synced</span>
+</div>
+</footer>
+</main>
+</body></html>

@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&amp;family=Noto+Serif+SC:wght@400;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "on-tertiary-fixed": "#002105",
+                        "primary-container": "#002535",
+                        "secondary-container": "#c3841b",
+                        "secondary": "#ffb954",
+                        "inverse-primary": "#006688",
+                        "tertiary": "#83da85",
+                        "on-primary-fixed-variant": "#004d67",
+                        "surface-container-highest": "#333348",
+                        "primary-fixed": "#c2e8ff",
+                        "on-tertiary-container": "#469a4e",
+                        "surface-variant": "#333348",
+                        "on-secondary-fixed": "#291800",
+                        "inverse-surface": "#e2e0fc",
+                        "surface-bright": "#37374d",
+                        "surface": "#111125",
+                        "on-primary-container": "#0094c4",
+                        "on-error": "#690005",
+                        "surface-container": "#1e1e32",
+                        "on-tertiary": "#00390e",
+                        "tertiary-fixed": "#9ff79f",
+                        "surface-container-lowest": "#0c0c20",
+                        "tertiary-fixed-dim": "#83da85",
+                        "on-tertiary-fixed-variant": "#005318",
+                        "secondary-fixed": "#ffddb4",
+                        "on-secondary-fixed-variant": "#633f00",
+                        "secondary-fixed-dim": "#ffb954",
+                        "on-error-container": "#ffdad6",
+                        "on-primary": "#003548",
+                        "outline-variant": "#45464d",
+                        "error-container": "#93000a",
+                        "on-secondary-container": "#3c2500",
+                        "tertiary-container": "#002908",
+                        "inverse-on-surface": "#2f2e44",
+                        "primary": "#75d1ff",
+                        "surface-dim": "#111125",
+                        "on-background": "#e2e0fc",
+                        "on-primary-fixed": "#001e2b",
+                        "surface-tint": "#75d1ff",
+                        "error": "#ffb4ab",
+                        "background": "#111125",
+                        "primary-fixed-dim": "#75d1ff",
+                        "on-surface": "#e2e0fc",
+                        "on-secondary": "#452b00",
+                        "outline": "#909098",
+                        "on-surface-variant": "#c6c6ce",
+                        "surface-container-high": "#28283d",
+                        "surface-container-low": "#1a1a2e"
+                    },
+                    fontFamily: {
+                        "headline": ["Manrope"],
+                        "body": ["Noto Serif SC"],
+                        "label": ["Manrope"]
+                    },
+                    borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        body { font-family: 'Manrope', sans-serif; }
+        .serif-text { font-family: 'Noto Serif SC', serif; }
+        .glass-panel {
+            background: rgba(55, 55, 77, 0.6);
+            backdrop-filter: blur(12px);
+        }
+    </style>
+</head>
+<body class="bg-surface-container-lowest text-on-surface overflow-hidden">
+<!-- Sidebar: SideNavBar -->
+<aside class="h-screen w-64 fixed left-0 top-0 bg-[#1e1e32] flex flex-col py-6 z-50">
+<div class="px-6 mb-8">
+<h1 class="text-lg font-bold tracking-tight text-[#75d1ff] font-headline">The Nocturnal Manuscript</h1>
+<p class="text-xs text-on-surface-variant/60 font-label">Novel Workspace</p>
+</div>
+<nav class="flex-1 space-y-1">
+<a class="flex items-center gap-3 px-4 py-3 text-[#e2e0fc]/60 hover:bg-[#37374d]/50 hover:text-[#75d1ff] transition-colors duration-300" href="#">
+<span class="material-symbols-outlined">edit_note</span>
+<span class="font-medium text-sm font-label">Draft</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-[#75d1ff] border-l-2 border-[#75d1ff] bg-[#37374d]/30 font-label" href="#">
+<span class="material-symbols-outlined">account_tree</span>
+<span class="font-medium text-sm">Outline</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-[#e2e0fc]/60 hover:bg-[#37374d]/50 hover:text-[#75d1ff] transition-colors duration-300 font-label" href="#">
+<span class="material-symbols-outlined">alt_route</span>
+<span class="font-medium text-sm">Branches</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-[#e2e0fc]/60 hover:bg-[#37374d]/50 hover:text-[#75d1ff] transition-colors duration-300 font-label" href="#">
+<span class="material-symbols-outlined">menu_book</span>
+<span class="font-medium text-sm">Knowledge Base</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-[#e2e0fc]/60 hover:bg-[#37374d]/50 hover:text-[#75d1ff] transition-colors duration-300 font-label" href="#">
+<span class="material-symbols-outlined">inventory_2</span>
+<span class="font-medium text-sm">Archives</span>
+</a>
+</nav>
+<div class="mt-auto px-4 space-y-4">
+<button class="w-full py-3 px-4 bg-gradient-to-br from-primary to-on-primary-container text-on-primary font-bold text-xs uppercase tracking-widest rounded-sm hover:opacity-90 transition-opacity">
+                New Chapter
+            </button>
+<div class="pt-4 border-t border-outline-variant/20">
+<a class="flex items-center gap-3 px-2 py-2 text-[#e2e0fc]/60 hover:text-[#75d1ff] font-label text-sm" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span>Settings</span>
+</a>
+<a class="flex items-center gap-3 px-2 py-2 text-[#e2e0fc]/60 hover:text-[#75d1ff] font-label text-sm" href="#">
+<span class="material-symbols-outlined">help_outline</span>
+<span>Support</span>
+</a>
+</div>
+</div>
+</aside>
+<!-- Top Navigation: TopNavBar -->
+<header class="fixed top-0 right-0 w-[calc(100%-16rem)] h-16 bg-[#111125]/80 backdrop-blur-md z-40 flex justify-between items-center px-8">
+<div class="flex items-center gap-6">
+<span class="text-xl font-black text-[#e2e0fc] font-headline">Outline Management</span>
+<div class="flex gap-4">
+<button class="text-xs uppercase tracking-widest font-label text-[#e2e0fc]/70 hover:text-[#e2e0fc] transition-opacity">Expand All</button>
+<button class="text-xs uppercase tracking-widest font-label text-[#e2e0fc]/70 hover:text-[#e2e0fc] transition-opacity">Collapse All</button>
+<button class="text-xs uppercase tracking-widest font-label text-[#e2e0fc]/70 hover:text-[#e2e0fc] transition-opacity">Focus Mode</button>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-sm">search</span>
+<input class="bg-surface-container-high border-none text-xs rounded-full pl-10 pr-4 py-2 w-48 focus:ring-1 focus:ring-primary/40 transition-all" placeholder="Search outlines..." type="text"/>
+</div>
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-[#75d1ff] cursor-pointer hover:opacity-80">auto_awesome</span>
+<button class="bg-primary text-on-primary text-xs font-bold px-4 py-2 rounded-sm hover:bg-on-primary-container transition-colors">Sync to Cloud</button>
+<span class="material-symbols-outlined text-[#e2e0fc]/70 cursor-pointer">more_vert</span>
+<img class="w-8 h-8 rounded-full border border-outline-variant/30" data-alt="close-up portrait of a creative writer with glasses in a moody blue studio lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAXoZt8wPLBWwqnJf79mOszlEkSssg47xbL8NiXYvfqSMP8ke_FQCYpZjSRDe4eNGbbihM6vnNJKqo1pElMXELIzKRd1k0YIq3qJK09grtibQT8cosNmsYNKNXyam48LulDEnkzt6HGk_4Xk7oou62Zt9bsF-L-hvWx7fjnmW_GRZuDtk3gmd_QhBhECrlTQT3fbBcVGtt1E59yigmscM27HcbkSbpyAv6uKCA5DnXxKEtF8AXVkfbWrSCvnaeOJYUqPCpgxBzmwq4"/>
+</div>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="ml-64 pt-16 h-screen flex">
+<!-- Left: Hierarchical Tree -->
+<section class="flex-1 overflow-y-auto p-8 border-r border-outline-variant/10">
+<div class="max-w-4xl mx-auto">
+<div class="flex justify-between items-end mb-10">
+<div>
+<h2 class="text-4xl font-headline font-black text-on-surface mb-2">织梦笔</h2>
+<p class="text-on-surface-variant serif-text italic text-lg opacity-80">DreamWeaver Outline</p>
+</div>
+<div class="flex items-center gap-2 p-1 bg-surface-container-high rounded-lg">
+<button class="px-4 py-2 text-xs font-bold font-label bg-surface-container text-on-surface-variant rounded shadow-sm">卡片视图</button>
+<button class="px-4 py-2 text-xs font-bold font-label bg-primary text-on-primary rounded shadow-sm">列表视图</button>
+</div>
+</div>
+<div class="flex gap-4 mb-8">
+<button class="flex items-center gap-2 px-4 py-2 bg-primary/10 border border-primary/20 text-primary hover:bg-primary/20 transition-all rounded-sm text-sm font-label">
+<span class="material-symbols-outlined text-sm">add_circle</span> 新建章节
+                    </button>
+<button class="flex items-center gap-2 px-4 py-2 bg-surface-container-high text-on-surface-variant hover:text-on-surface transition-all rounded-sm text-sm font-label">
+<span class="material-symbols-outlined text-sm">dynamic_feed</span> 批量状态更新
+                    </button>
+</div>
+<!-- Tree Structure -->
+<div class="space-y-4">
+<!-- Volume 1 -->
+<div class="group">
+<div class="flex items-center gap-3 py-3 px-4 bg-surface-container border-l-4 border-primary rounded-lg">
+<span class="material-symbols-outlined text-on-surface-variant/40">drag_indicator</span>
+<span class="material-symbols-outlined text-primary">book</span>
+<h3 class="serif-text text-xl font-bold">第一卷：初入江湖</h3>
+<span class="ml-auto text-xs font-label text-on-surface-variant uppercase tracking-widest">4 Chapters</span>
+</div>
+<div class="mt-2 ml-10 space-y-2">
+<!-- Chapter 1 -->
+<div class="flex items-center gap-3 py-3 px-4 hover:bg-surface-container-high transition-colors rounded-lg group/item cursor-pointer">
+<span class="material-symbols-outlined text-on-surface-variant/20 opacity-0 group-hover/item:opacity-100 transition-opacity">drag_indicator</span>
+<span class="serif-text text-lg">第一章：青城山下</span>
+<span class="px-2 py-0.5 bg-tertiary-container text-tertiary text-[10px] font-bold rounded uppercase">✅ 定稿</span>
+<span class="ml-auto text-xs font-label text-on-surface-variant/60">3,200 字</span>
+</div>
+<!-- Chapter 2 -->
+<div class="flex items-center gap-3 py-3 px-4 hover:bg-surface-container-high transition-colors rounded-lg group/item cursor-pointer">
+<span class="material-symbols-outlined text-on-surface-variant/20 opacity-0 group-hover/item:opacity-100 transition-opacity">drag_indicator</span>
+<span class="serif-text text-lg">第二章：酒肆奇遇</span>
+<span class="px-2 py-0.5 bg-tertiary-container text-tertiary text-[10px] font-bold rounded uppercase">✅ 定稿</span>
+<span class="ml-auto text-xs font-label text-on-surface-variant/60">4,100 字</span>
+</div>
+<!-- Chapter 3 - ACTIVE -->
+<div class="flex items-center gap-3 py-3 px-4 bg-primary/5 border border-primary/20 transition-colors rounded-lg group/item cursor-pointer">
+<span class="material-symbols-outlined text-on-surface-variant/20 opacity-100">drag_indicator</span>
+<span class="serif-text text-lg text-primary font-bold">第三章：命运的转折</span>
+<span class="px-2 py-0.5 bg-primary-container text-primary text-[10px] font-bold rounded uppercase">🔵 写作中</span>
+<span class="ml-auto text-xs font-label text-primary font-bold">2,150 字</span>
+</div>
+<!-- Chapter 4 -->
+<div class="flex items-center gap-3 py-3 px-4 hover:bg-surface-container-high transition-colors rounded-lg group/item cursor-pointer opacity-50">
+<span class="material-symbols-outlined text-on-surface-variant/20 opacity-0 group-hover/item:opacity-100 transition-opacity">drag_indicator</span>
+<span class="serif-text text-lg">第四章：夜幕杀机</span>
+<span class="px-2 py-0.5 bg-surface-variant text-on-surface-variant text-[10px] font-bold rounded uppercase">⚪ 待写</span>
+<span class="ml-auto text-xs font-label text-on-surface-variant/60">—</span>
+</div>
+</div>
+</div>
+<!-- Volume 2 -->
+<div class="group pt-4">
+<div class="flex items-center gap-3 py-3 px-4 bg-surface-container border-l-4 border-secondary/50 rounded-lg">
+<span class="material-symbols-outlined text-on-surface-variant/40">drag_indicator</span>
+<span class="material-symbols-outlined text-secondary">book</span>
+<h3 class="serif-text text-xl font-bold">第二卷：风云际会</h3>
+<span class="ml-auto text-xs font-label text-on-surface-variant uppercase tracking-widest">2 Chapters</span>
+</div>
+<div class="mt-2 ml-10 space-y-2">
+<!-- Chapter 5 -->
+<div class="flex items-center gap-3 py-3 px-4 hover:bg-surface-container-high transition-colors rounded-lg group/item cursor-pointer opacity-50">
+<span class="material-symbols-outlined text-on-surface-variant/20 opacity-0 group-hover/item:opacity-100 transition-opacity">drag_indicator</span>
+<span class="serif-text text-lg">第五章：金陵城破</span>
+<span class="px-2 py-0.5 bg-surface-variant text-on-surface-variant text-[10px] font-bold rounded uppercase">⚪ 待写</span>
+<span class="ml-auto text-xs font-label text-on-surface-variant/60">—</span>
+</div>
+<!-- Chapter 6 -->
+<div class="flex items-center gap-3 py-3 px-4 hover:bg-surface-container-high transition-colors rounded-lg group/item cursor-pointer opacity-50">
+<span class="material-symbols-outlined text-on-surface-variant/20 opacity-0 group-hover/item:opacity-100 transition-opacity">drag_indicator</span>
+<span class="serif-text text-lg">第六章：各怀鬼胎</span>
+<span class="px-2 py-0.5 bg-surface-variant text-on-surface-variant text-[10px] font-bold rounded uppercase">⚪ 待写</span>
+<span class="ml-auto text-xs font-label text-on-surface-variant/60">—</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Right Panel: Outline Details -->
+<section class="w-96 bg-surface-container overflow-y-auto p-6 flex flex-col gap-8 shadow-2xl z-10">
+<div class="flex flex-col gap-1">
+<span class="text-[10px] uppercase tracking-widest font-bold text-primary">Selected Chapter</span>
+<h2 class="serif-text text-2xl font-bold">第三章：命运的转折</h2>
+</div>
+<div class="space-y-6">
+<!-- Plot Summary -->
+<div class="space-y-3">
+<div class="flex items-center justify-between">
+<label class="text-xs font-bold text-on-surface-variant uppercase tracking-wider font-label flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">description</span> Plot Summary
+                        </label>
+<span class="material-symbols-outlined text-primary cursor-pointer text-base">edit</span>
+</div>
+<div class="p-4 bg-surface-container-lowest rounded-lg border border-outline-variant/10 text-sm serif-text leading-relaxed text-on-surface/80">
+                        主角在酒馆意外偷听到关于自己身世的秘密，随即遭遇了一群黑衣人的围攻。这是全书第一个重大转折点，主角必须在逃亡中觉醒体内的潜能。
+                    </div>
+</div>
+<!-- Key Characters -->
+<div class="space-y-3">
+<label class="text-xs font-bold text-on-surface-variant uppercase tracking-wider font-label flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">groups</span> Key Characters
+                    </label>
+<div class="flex flex-wrap gap-2">
+<div class="flex items-center gap-2 px-3 py-1.5 bg-secondary-container/20 border border-secondary/30 rounded-full">
+<div class="w-4 h-4 rounded-full bg-secondary"></div>
+<span class="text-xs font-label text-secondary font-bold">林青云 (主角)</span>
+</div>
+<div class="flex items-center gap-2 px-3 py-1.5 bg-surface-variant rounded-full border border-outline-variant/30">
+<div class="w-4 h-4 rounded-full bg-outline"></div>
+<span class="text-xs font-label text-on-surface-variant">黑衣首领</span>
+</div>
+<button class="w-8 h-8 flex items-center justify-center bg-surface-container-high rounded-full border border-dashed border-outline-variant hover:border-primary transition-colors">
+<span class="material-symbols-outlined text-sm">add</span>
+</button>
+</div>
+</div>
+<!-- Conflict Points -->
+<div class="space-y-3">
+<label class="text-xs font-bold text-on-surface-variant uppercase tracking-wider font-label flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">thunderstorm</span> Conflict Points
+                    </label>
+<div class="space-y-2">
+<div class="flex items-start gap-3 p-3 bg-error-container/10 border-l-2 border-error rounded-r-lg">
+<span class="text-error font-black text-xs font-headline mt-1">01</span>
+<p class="text-xs text-on-surface/90 font-label">黑衣人的围堵与主角尚未成熟的剑法冲突。</p>
+</div>
+<div class="flex items-start gap-3 p-3 bg-secondary-container/10 border-l-2 border-secondary rounded-r-lg">
+<span class="text-secondary font-black text-xs font-headline mt-1">02</span>
+<p class="text-xs text-on-surface/90 font-label">酒馆老板的真实身份揭露前的暗示。</p>
+</div>
+</div>
+</div>
+<!-- AI Helper: Glassmorphism -->
+<div class="glass-panel p-5 rounded-xl border border-primary/20 mt-4">
+<div class="flex items-center gap-2 mb-3">
+<span class="material-symbols-outlined text-primary text-xl" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
+<span class="text-xs font-bold text-[#75d1ff] tracking-widest font-label uppercase">AI Creative Suggestion</span>
+</div>
+<p class="text-[13px] text-[#e2e0fc] serif-text leading-relaxed mb-4">
+                        检测到本章节奏较快，建议在冲突爆发前增加一段环境描写，以加深夜幕降临时的压抑感。
+                    </p>
+<button class="w-full py-2 bg-primary/20 hover:bg-primary/30 text-primary text-[10px] font-bold uppercase tracking-widest rounded transition-all">
+                        Apply Suggestion
+                    </button>
+</div>
+</div>
+<div class="mt-auto pt-6 border-t border-outline-variant/10">
+<div class="flex justify-between items-center text-on-surface-variant/40 text-[10px] font-label uppercase tracking-widest">
+<span>Last Saved</span>
+<span>2 mins ago</span>
+</div>
+</div>
+</section>
+</main>
+<!-- Visual Backdrop Gradients -->
+<div class="fixed top-0 left-0 w-full h-full pointer-events-none -z-10">
+<div class="absolute top-[-10%] right-[-10%] w-[50%] h-[50%] bg-primary/5 blur-[120px] rounded-full"></div>
+<div class="absolute bottom-[-5%] left-[20%] w-[30%] h-[30%] bg-secondary/5 blur-[100px] rounded-full"></div>
+</div>
+</body></html>
