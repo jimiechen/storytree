@@ -1,6 +1,16 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { projectStore } from '@/stores/project-store';
 
+// Mock API
+vi.mock('@/lib/api', () => ({
+  api: {
+    get: vi.fn(),
+    post: vi.fn(),
+  },
+}));
+
+import { api } from '@/lib/api';
+
 interface Project {
   id: string;
   title: string;
@@ -21,6 +31,7 @@ describe('Project Store', () => {
       isLoading: false, 
       error: null 
     });
+    vi.clearAllMocks();
   });
 
   it('should initialize with default state', () => {
@@ -55,6 +66,8 @@ describe('Project Store', () => {
       }
     ];
 
+    (api.get as vi.Mock).mockResolvedValue(mockProjects);
+
     await projectStore.getState().fetchProjects();
 
     const state = projectStore.getState();
@@ -64,7 +77,8 @@ describe('Project Store', () => {
   });
 
   it('should handle fetch projects failure', async () => {
-    // 模拟 API 失败
+    (api.get as vi.Mock).mockRejectedValue(new Error('API error'));
+
     await projectStore.getState().fetchProjects();
 
     const state = projectStore.getState();
@@ -98,6 +112,17 @@ describe('Project Store', () => {
       status: 'active' as const
     };
 
+    const mockProject: Project = {
+      id: '1',
+      ...newProjectData,
+      chapterCount: 0,
+      wordCount: 0,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+
+    (api.post as vi.Mock).mockResolvedValue(mockProject);
+
     await projectStore.getState().createProject(newProjectData);
 
     const state = projectStore.getState();
@@ -113,6 +138,8 @@ describe('Project Store', () => {
       description: '这是新测试项目',
       status: 'active' as const
     };
+
+    (api.post as vi.Mock).mockRejectedValue(new Error('API error'));
 
     await projectStore.getState().createProject(newProjectData);
 

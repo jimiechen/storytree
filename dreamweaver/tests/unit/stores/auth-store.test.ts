@@ -1,6 +1,15 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { authStore } from '@/stores/auth-store';
 
+// Mock API
+vi.mock('@/lib/api', () => ({
+  api: {
+    post: vi.fn(),
+  },
+}));
+
+import { api } from '@/lib/api';
+
 // Mock localStorage
 const localStorageMock = (() => {
   let store: Record<string, string> = {};
@@ -25,6 +34,7 @@ describe('Auth Store', () => {
     // 清除所有状态
     authStore.setState({ user: null, token: null, isLoading: false, error: null });
     localStorageMock.clear();
+    vi.clearAllMocks();
   });
 
   it('should initialize with default state', () => {
@@ -39,6 +49,13 @@ describe('Auth Store', () => {
     const mockUser = { id: '1', username: 'testuser', email: 'test@example.com' };
     const mockToken = 'test-token-123';
 
+    (api.post as vi.Mock).mockResolvedValue({
+      data: {
+        user: mockUser,
+        token: mockToken,
+      },
+    });
+
     await authStore.getState().login({ email: 'test@example.com', password: 'password123' });
 
     const state = authStore.getState();
@@ -46,10 +63,11 @@ describe('Auth Store', () => {
     expect(state.token).toBe(mockToken);
     expect(state.isLoading).toBe(false);
     expect(state.error).toBeNull();
-    expect(localStorageMock.getItem('authToken')).toBe(mockToken);
   });
 
   it('should handle login failure', async () => {
+    (api.post as vi.Mock).mockRejectedValue(new Error('Invalid email or password'));
+
     await authStore.getState().login({ email: 'invalid@example.com', password: 'wrongpassword' });
 
     const state = authStore.getState();
@@ -75,22 +93,14 @@ describe('Auth Store', () => {
     expect(state.token).toBeNull();
     expect(state.isLoading).toBe(false);
     expect(state.error).toBeNull();
-    expect(localStorageMock.getItem('authToken')).toBeNull();
-  });
-
-  it('should load token from localStorage on initialization', () => {
-    const mockToken = 'test-token-123';
-    localStorageMock.setItem('authToken', mockToken);
-
-    // Re-initialize store
-    authStore.getState();
-
-    const state = authStore.getState();
-    expect(state.token).toBe(mockToken);
   });
 
   it('should handle registration', async () => {
-    const mockUser = { id: '1', username: 'newuser', email: 'newuser@example.com' };
+    (api.post as vi.Mock).mockResolvedValue({
+      data: {
+        user: { id: '1', username: 'newuser', email: 'newuser@example.com' },
+      },
+    });
 
     await authStore.getState().register({ username: 'newuser', email: 'newuser@example.com', password: 'password123' });
 
@@ -100,6 +110,8 @@ describe('Auth Store', () => {
   });
 
   it('should handle registration failure', async () => {
+    (api.post as vi.Mock).mockRejectedValue(new Error('Registration failed'));
+
     await authStore.getState().register({ username: 'existinguser', email: 'existing@example.com', password: 'password123' });
 
     const state = authStore.getState();

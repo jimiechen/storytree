@@ -1,9 +1,12 @@
 import { http, HttpResponse } from 'msw';
-import { generateMockUser, generateMockProject, generateMockChapter } from './data';
+import { generateMockUser, generateMockProject, generateMockChapter, generateMockCharacter, generateMockWorldSetting } from './data';
+import type { Character, WorldSetting } from '@/types/knowledge';
 
 // Mock data store
 const mockUsers: Map<string, { userId: string; email: string; username: string; password: string }> = new Map();
 const mockProjects: Map<string, ReturnType<typeof generateMockProject> & { userId: string; chapters: ReturnType<typeof generateMockChapter>[] }> = new Map();
+const mockCharacters: Map<string, Character> = new Map();
+const mockWorldSettings: Map<string, WorldSetting> = new Map();
 
 // Add test user
 const testUser = generateMockUser();
@@ -135,7 +138,7 @@ export const handlers = [
       ...generateMockProject(),
       title: body.title,
       description: body.description || '',
-      status: body.status || 'active',
+      status: (body.status as 'active' | 'draft' | 'completed') || 'active',
       userId: 'mock-user-id',
       chapters: [],
     };
@@ -444,6 +447,288 @@ export const handlers = [
         },
       }, { status: 404 });
     }
+
+    return HttpResponse.json({
+      result: {
+        code: 10200,
+        message: '删除成功',
+      },
+    });
+  }),
+
+  // ============================================
+  // Characters API (知识库 - 角色管理)
+  // ============================================
+
+  // Characters: List
+  http.get('/api/projects/:projectId/characters', ({ params }) => {
+    const project = mockProjects.get(params.projectId as string);
+    
+    if (!project) {
+      return HttpResponse.json({
+        result: {
+          code: 10404,
+          message: '项目不存在',
+        },
+      }, { status: 404 });
+    }
+
+    const characters = Array.from(mockCharacters.values())
+      .filter(c => c.projectId === params.projectId);
+
+    return HttpResponse.json({
+      result: {
+        code: 10200,
+        message: 'success',
+        data: characters,
+      },
+    });
+  }),
+
+  // Characters: Get
+  http.get('/api/projects/:projectId/characters/:characterId', ({ params }) => {
+    const character = mockCharacters.get(params.characterId as string);
+    
+    if (!character || character.projectId !== params.projectId) {
+      return HttpResponse.json({
+        result: {
+          code: 10404,
+          message: '角色不存在',
+        },
+      }, { status: 404 });
+    }
+
+    return HttpResponse.json({
+      result: {
+        code: 10200,
+        message: 'success',
+        data: character,
+      },
+    });
+  }),
+
+  // Characters: Create
+  http.post('/api/projects/:projectId/characters', async ({ request, params }) => {
+    const project = mockProjects.get(params.projectId as string);
+    
+    if (!project) {
+      return HttpResponse.json({
+        result: {
+          code: 10404,
+          message: '项目不存在',
+        },
+      }, { status: 404 });
+    }
+
+    const body = (await request.json()) as Omit<Character, 'id' | 'createdAt' | 'updatedAt'>;
+    const newCharacter: Character = {
+      ...body,
+      id: crypto.randomUUID(),
+      projectId: params.projectId as string,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+    
+    mockCharacters.set(newCharacter.id, newCharacter);
+
+    return HttpResponse.json({
+      result: {
+        code: 10200,
+        message: '创建成功',
+        data: newCharacter,
+      },
+    }, { status: 201 });
+  }),
+
+  // Characters: Update
+  http.put('/api/projects/:projectId/characters/:characterId', async ({ request, params }) => {
+    const character = mockCharacters.get(params.characterId as string);
+    
+    if (!character || character.projectId !== params.projectId) {
+      return HttpResponse.json({
+        result: {
+          code: 10404,
+          message: '角色不存在',
+        },
+      }, { status: 404 });
+    }
+
+    const body = (await request.json()) as Partial<Character>;
+    
+    const updatedCharacter: Character = {
+      ...character,
+      ...body,
+      id: character.id,
+      projectId: character.projectId,
+      updatedAt: new Date().toISOString(),
+    };
+    
+    mockCharacters.set(character.id, updatedCharacter);
+
+    return HttpResponse.json({
+      result: {
+        code: 10200,
+        message: '更新成功',
+        data: updatedCharacter,
+      },
+    });
+  }),
+
+  // Characters: Delete
+  http.delete('/api/projects/:projectId/characters/:characterId', ({ params }) => {
+    const character = mockCharacters.get(params.characterId as string);
+    
+    if (!character || character.projectId !== params.projectId) {
+      return HttpResponse.json({
+        result: {
+          code: 10404,
+          message: '角色不存在',
+        },
+      }, { status: 404 });
+    }
+
+    mockCharacters.delete(params.characterId as string);
+
+    return HttpResponse.json({
+      result: {
+        code: 10200,
+        message: '删除成功',
+      },
+    });
+  }),
+
+  // ============================================
+  // World Settings API (知识库 - 世界观设定)
+  // ============================================
+
+  // World Settings: List
+  http.get('/api/projects/:projectId/world-settings', ({ params }) => {
+    const project = mockProjects.get(params.projectId as string);
+    
+    if (!project) {
+      return HttpResponse.json({
+        result: {
+          code: 10404,
+          message: '项目不存在',
+        },
+      }, { status: 404 });
+    }
+
+    const settings = Array.from(mockWorldSettings.values())
+      .filter(s => s.projectId === params.projectId);
+
+    return HttpResponse.json({
+      result: {
+        code: 10200,
+        message: 'success',
+        data: settings,
+      },
+    });
+  }),
+
+  // World Settings: Get
+  http.get('/api/projects/:projectId/world-settings/:settingId', ({ params }) => {
+    const setting = mockWorldSettings.get(params.settingId as string);
+    
+    if (!setting || setting.projectId !== params.projectId) {
+      return HttpResponse.json({
+        result: {
+          code: 10404,
+          message: '设定不存在',
+        },
+      }, { status: 404 });
+    }
+
+    return HttpResponse.json({
+      result: {
+        code: 10200,
+        message: 'success',
+        data: setting,
+      },
+    });
+  }),
+
+  // World Settings: Create
+  http.post('/api/projects/:projectId/world-settings', async ({ request, params }) => {
+    const project = mockProjects.get(params.projectId as string);
+    
+    if (!project) {
+      return HttpResponse.json({
+        result: {
+          code: 10404,
+          message: '项目不存在',
+        },
+      }, { status: 404 });
+    }
+
+    const body = (await request.json()) as Omit<WorldSetting, 'id' | 'createdAt' | 'updatedAt'>;
+    const newSetting: WorldSetting = {
+      ...body,
+      id: crypto.randomUUID(),
+      projectId: params.projectId as string,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+    
+    mockWorldSettings.set(newSetting.id, newSetting);
+
+    return HttpResponse.json({
+      result: {
+        code: 10200,
+        message: '创建成功',
+        data: newSetting,
+      },
+    }, { status: 201 });
+  }),
+
+  // World Settings: Update
+  http.put('/api/projects/:projectId/world-settings/:settingId', async ({ request, params }) => {
+    const setting = mockWorldSettings.get(params.settingId as string);
+    
+    if (!setting || setting.projectId !== params.projectId) {
+      return HttpResponse.json({
+        result: {
+          code: 10404,
+          message: '设定不存在',
+        },
+      }, { status: 404 });
+    }
+
+    const body = (await request.json()) as Partial<WorldSetting>;
+    
+    const updatedSetting: WorldSetting = {
+      ...setting,
+      ...body,
+      id: setting.id,
+      projectId: setting.projectId,
+      updatedAt: new Date().toISOString(),
+    };
+    
+    mockWorldSettings.set(setting.id, updatedSetting);
+
+    return HttpResponse.json({
+      result: {
+        code: 10200,
+        message: '更新成功',
+        data: updatedSetting,
+      },
+    });
+  }),
+
+  // World Settings: Delete
+  http.delete('/api/projects/:projectId/world-settings/:settingId', ({ params }) => {
+    const setting = mockWorldSettings.get(params.settingId as string);
+    
+    if (!setting || setting.projectId !== params.projectId) {
+      return HttpResponse.json({
+        result: {
+          code: 10404,
+          message: '设定不存在',
+        },
+      }, { status: 404 });
+    }
+
+    mockWorldSettings.delete(params.settingId as string);
 
     return HttpResponse.json({
       result: {

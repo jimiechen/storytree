@@ -2,27 +2,41 @@
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams } from 'next/navigation';
-import { ChapterSidebar } from '@/components/layout/ChapterSidebar';
+import { ActivityBar } from '@/components/layout/ActivityBar';
+import { StoryExplorer } from '@/components/layout/StoryExplorer';
+import { EditorToolbar } from '@/components/editor/EditorToolbar';
+import { StatusBar } from '@/components/editor/StatusBar';
+import { AIPanel } from '@/components/ai/AIPanel';
 import { Editor } from '@/components/editor/Editor';
 import { api } from '@/lib/api';
+import { CreateChapterModal } from '@/components/chapters/CreateChapterModal';
 
 interface Chapter {
   id: string;
   title: string;
   content: string;
+  order: number;
+}
+
+interface Volume {
+  id: string;
+  name: string;
+  chapters: Chapter[];
 }
 
 export default function WorkbenchPage() {
   const params = useParams();
   const projectId = params.projectId as string;
-  
-  const [chapters, setChapters] = useState<Chapter[]>([]);
+
+  const [volumes, setVolumes] = useState<Volume[]>([]);
   const [activeChapterId, setActiveChapterId] = useState<string>('');
+  const [activeView, setActiveView] = useState('outline');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [saveStatus, setSaveStatus] = useState<'saved' | 'saving' | 'unsaved'>('saved');
   const [wordCount, setWordCount] = useState(0);
-  
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // 获取章节列表
@@ -30,9 +44,22 @@ export default function WorkbenchPage() {
     const fetchChapters = async () => {
       try {
         setLoading(true);
-        const response = await api.get<{chapters: Chapter[]}>(`/api/projects/${projectId}/chapters`);
-        const chaptersData = response?.chapters || [];
-        setChapters(chaptersData);
+        const response = await api.get<{ result: { data: { chapters: Chapter[] } } }>(
+          `/api/projects/${projectId}/chapters`
+        );
+        const chaptersData = response?.result?.data?.chapters || [];
+
+        // 组织成卷结构（简化处理，默认第一卷）
+        const defaultVolume: Volume = {
+          id: 'volume-1',
+          name: '第一卷',
+          chapters: chaptersData.map((c) => ({
+            ...c,
+            order: c.order || 1,
+          })),
+        };
+
+        setVolumes([defaultVolume]);
         if (chaptersData.length > 0 && !activeChapterId) {
           setActiveChapterId(chaptersData[0].id);
         }
@@ -50,7 +77,9 @@ export default function WorkbenchPage() {
   }, [projectId]);
 
   // 获取当前章节
-  const activeChapter = chapters.find(c => c.id === activeChapterId);
+  const activeChapter = volumes
+    .flatMap((v) => v.chapters)
+    .find((c) => c.id === activeChapterId);
 
   // 计算字数
   const calculateWordCount = useCallback((content: string = '') => {
@@ -78,14 +107,26 @@ export default function WorkbenchPage() {
   // 处理添加新章节
   const handleAddChapter = useCallback(async (title: string) => {
     try {
-      const newChapter = await api.post<Chapter>(`/api/projects/${projectId}/chapters`, {
+      const response = await api.post<{ result: { data: Chapter } }>(`/api/projects/${projectId}/chapters`, {
         title,
         content: '<p></p>',
       });
-      
-      setChapters(prev => [...prev, newChapter]);
+      const newChapter = response.result.data;
+
+      setVolumes((prev) => {
+        const newVolumes = [...prev];
+        if (newVolumes.length > 0) {
+          newVolumes[0].chapters.push({
+            ...newChapter,
+            order: newChapter.order || newVolumes[0].chapters.length + 1,
+          });
+        }
+        return newVolumes;
+      });
+
       setActiveChapterId(newChapter.id);
       setSaveStatus('saved');
+      setIsCreateModalOpen(false);
     } catch (err) {
       console.error('Failed to create chapter:', err);
       setError('创建章节失败');
@@ -96,7 +137,7 @@ export default function WorkbenchPage() {
   const autoSave = useCallback(async (chapterId: string, content: string) => {
     setSaveStatus('saving');
     try {
-      await api.put(`/api/projects/${projectId}/chapters/${chapterId}`, {
+      await api.put(`/api/chapters/${chapterId}`, {
         content,
       });
       setSaveStatus('saved');
@@ -107,34 +148,38 @@ export default function WorkbenchPage() {
   }, []);
 
   // 处理内容变更（自动保存 - 防抖2秒）
-  const handleContentChange = useCallback((content: string) => {
-    if (!activeChapterId) return;
-    
-    // 更新本地状态
-    setChapters(prev => 
-      prev.map(chapter => 
-        chapter.id === activeChapterId 
-          ? { ...chapter, content }
-          : chapter
-      )
-    );
-    
-    // 更新字数
-    setWordCount(calculateWordCount(content));
-    
-    // 设置保存状态为未保存
-    setSaveStatus('unsaved');
-    
-    // 清除之前的定时器
-    if (saveTimeoutRef.current) {
-      clearTimeout(saveTimeoutRef.current);
-    }
-    
-    // 设置新的定时器（2秒防抖）
-    saveTimeoutRef.current = setTimeout(() => {
-      autoSave(activeChapterId, content);
-    }, 2000);
-  }, [activeChapterId, autoSave, calculateWordCount]);
+  const handleContentChange = useCallback(
+    (content: string) => {
+      if (!activeChapterId) return;
+
+      // 更新本地状态
+      setVolumes((prev) =>
+        prev.map((volume) => ({
+          ...volume,
+          chapters: volume.chapters.map((chapter) =>
+            chapter.id === activeChapterId ? { ...chapter, content } : chapter
+          ),
+        }))
+      );
+
+      // 更新字数
+      setWordCount(calculateWordCount(content));
+
+      // 设置保存状态为未保存
+      setSaveStatus('unsaved');
+
+      // 清除之前的定时器
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current);
+      }
+
+      // 设置新的定时器（2秒防抖）
+      saveTimeoutRef.current = setTimeout(() => {
+        autoSave(activeChapterId, content);
+      }, 2000);
+    },
+    [activeChapterId, autoSave, calculateWordCount]
+  );
 
   // 清理定时器
   useEffect(() => {
@@ -147,86 +192,93 @@ export default function WorkbenchPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="text-lg text-gray-600">加载中...</div>
+      <div className="flex items-center justify-center h-screen bg-background">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-4 text-on-surface-variant">加载中...</p>
+        </div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="text-lg text-red-600">{error}</div>
+      <div className="flex items-center justify-center h-screen bg-background">
+        <div className="text-lg text-error">{error}</div>
       </div>
     );
   }
 
   return (
-    <div className="flex h-screen" data-testid="workbench-page">
-      {/* 左侧章节导航 */}
-      <div data-testid="chapter-sidebar">
-        <ChapterSidebar
-          chapters={chapters}
+    <div className="h-screen bg-background text-on-surface overflow-hidden flex" data-testid="workbench-page">
+      {/* Activity Bar (Fixed Left) */}
+      <ActivityBar activeView={activeView} onViewChange={setActiveView} />
+
+      {/* App Shell */}
+      <main className="flex flex-1 ml-[48px] h-full overflow-hidden">
+        {/* Primary Sidebar (Story Explorer) */}
+        <StoryExplorer
+          volumes={volumes}
           activeChapterId={activeChapterId}
           onChapterSelect={handleChapterSelect}
-          onAddChapter={handleAddChapter}
+          onAddChapter={() => setIsCreateModalOpen(true)}
         />
-      </div>
-      
-      {/* 中间编辑器区域 */}
-      <div className="flex-1 flex flex-col">
-        <div 
-          className="flex items-center justify-between px-6 py-4 border-b border-gray-200"
-          data-testid="workbench-header"
-        >
-          <h1 className="text-xl font-semibold text-gray-800">
-            {activeChapter?.title || '未选择章节'}
-          </h1>
-          <div className="flex items-center gap-4">
-            {/* 字数统计 */}
-            <div data-testid="word-count" className="text-sm text-gray-500">
-              字数: {wordCount}
-            </div>
-            {/* 保存状态 */}
-            <div data-testid="save-status" className="text-sm">
-              {saveStatus === 'saving' && (
-                <span className="text-blue-500">保存中...</span>
+
+        {/* Main Editor Area */}
+        <section className="flex-1 flex flex-col bg-surface-container-lowest relative">
+          {/* Editor Toolbar */}
+          <EditorToolbar saveStatus={saveStatus} />
+
+          {/* Editor Content */}
+          <div className="flex-1 overflow-y-auto scroll-smooth py-12 px-24 flex flex-col items-center">
+            <article className="max-w-[700px] w-full relative pl-8 border-l-2 border-primary/20">
+              {activeChapter ? (
+                <>
+                  <h1 className="font-headline text-4xl font-black mb-12 text-on-surface tracking-tight">
+                    {activeChapter.title}
+                  </h1>
+                  <div className="font-body text-[16px] leading-[1.8] text-on-surface/90">
+                    <Editor
+                      content={activeChapter.content}
+                      onContentChange={handleContentChange}
+                      projectId={projectId}
+                    />
+                  </div>
+                </>
+              ) : (
+                <div className="flex items-center justify-center h-full text-on-surface-variant">
+                  请选择一个章节或创建新章节
+                </div>
               )}
-              {saveStatus === 'saved' && (
-                <span className="text-green-500">已保存</span>
-              )}
-              {saveStatus === 'unsaved' && (
-                <span className="text-orange-500">未保存</span>
-              )}
-            </div>
+            </article>
           </div>
-        </div>
-        
-        <div className="flex-1 p-6 overflow-auto">
-          {activeChapter ? (
-            <Editor
-              content={activeChapter.content}
-              onContentChange={handleContentChange}
-              className="h-full"
-            />
-          ) : (
-            <div className="flex items-center justify-center h-full text-gray-500">
-              请选择一个章节或创建新章节
-            </div>
-          )}
-        </div>
-      </div>
-      
-      {/* 右侧 AI 面板占位 */}
-      <div 
-        className="w-80 border-l border-gray-200 bg-gray-50 p-4"
-        data-testid="ai-panel"
-      >
-        <h2 className="text-lg font-semibold text-gray-800 mb-4">AI 助手</h2>
-        <div className="text-sm text-gray-500">
-          AI 对话功能即将上线...
-        </div>
-      </div>
+
+          {/* Status Bar */}
+          <StatusBar
+            wordCount={wordCount}
+            todayWordCount={2150}
+            totalWordCount={128450}
+            modelName="CLAUDE 4 OPUS"
+            consistencyStatus="checked"
+          />
+        </section>
+
+        {/* Secondary Sidebar (AI Panel) */}
+        <AIPanel
+          projectId={projectId}
+          context={{
+            chapterContent: activeChapter?.content,
+            chapterTitle: activeChapter?.title,
+          }}
+        />
+      </main>
+
+      {/* Create Chapter Modal */}
+      <CreateChapterModal
+        isOpen={isCreateModalOpen}
+        onOpenChange={setIsCreateModalOpen}
+        onChapterCreated={handleAddChapter}
+      />
     </div>
   );
 }

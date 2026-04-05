@@ -3,15 +3,17 @@
 import { useState, useEffect } from 'react';
 import { EditorContent, useEditor, Extension } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
+import { AIBubbleMenu } from './AIBubbleMenu';
 
 interface EditorProps {
   content: string;
   onContentChange: (content: string) => void;
   placeholder?: string;
   className?: string;
+  projectId?: string;
 }
 
-export function Editor({ content, onContentChange, placeholder = '开始写作...', className = '' }: EditorProps) {
+export function Editor({ content, onContentChange, placeholder = '开始写作...', className = '', projectId }: EditorProps) {
   const [editorContent, setEditorContent] = useState(content);
 
   const editor = useEditor({
@@ -38,6 +40,11 @@ export function Editor({ content, onContentChange, placeholder = '开始写作..
     <div className="editor-container">
       {editor && (
         <>
+          {/* AI Bubble Menu */}
+          {projectId && (
+            <AIBubbleMenu editor={editor} projectId={projectId} />
+          )}
+          
           <div className="toolbar flex flex-wrap gap-2 p-2 border-b">
             <button
               onClick={() => editor.commands.toggleBold()}
@@ -52,6 +59,13 @@ export function Editor({ content, onContentChange, placeholder = '开始写作..
               title="Italic"
             >
               I
+            </button>
+            <button
+              onClick={() => editor.commands.toggleUnderline()}
+              className={`px-2 py-1 rounded ${editor.isActive('underline') ? 'bg-indigo-100 text-indigo-600' : 'hover:bg-gray-100'}`}
+              title="Underline"
+            >
+              U
             </button>
             <button
               onClick={() => editor.commands.toggleHeading({ level: 1 })}
