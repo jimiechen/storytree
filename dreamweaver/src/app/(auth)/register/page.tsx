@@ -6,59 +6,74 @@ import { api } from '@/lib/api';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { Alert } from '@/components/ui/Alert';
-import { Form } from '@/components/ui/Form';
+
+interface RegisterResponse {
+  userId: string;
+  email: string;
+  username: string;
+}
+
+interface FormErrors {
+  username?: string;
+  email?: string;
+  password?: string;
+  general?: string;
+}
+
+const validateEmail = (email: string): boolean => {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
+};
+
+const validateUsername = (username: string): boolean => {
+  return username.length >= 3 && username.length <= 50;
+};
 
 export default function RegisterPage() {
   const router = useRouter();
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [errors, setErrors] = useState<FormErrors>({});
   const [loading, setLoading] = useState(false);
 
-  const validateEmail = (email: string): boolean => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
-  };
+  const validateForm = (): boolean => {
+    const newErrors: FormErrors = {};
 
-  const validateUsername = (username: string): boolean => {
-    return username.length >= 3 && username.length <= 50;
+    if (!username) {
+      newErrors.username = '用户名不能为空';
+    } else if (!validateUsername(username)) {
+      newErrors.username = '用户名长度必须在 3-50 个字符之间';
+    }
+
+    if (!email) {
+      newErrors.email = '邮箱不能为空';
+    } else if (!validateEmail(email)) {
+      newErrors.email = '邮箱格式无效';
+    }
+
+    if (!password) {
+      newErrors.password = '密码不能为空';
+    } else if (password.length < 8) {
+      newErrors.password = '密码至少 8 位';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
+    setErrors({});
 
-    // 表单验证
-    if (!username) {
-      setError('用户名不能为空');
-      return;
-    }
-
-    if (!validateUsername(username)) {
-      setError('用户名长度必须在 3-50 个字符之间');
-      return;
-    }
-
-    if (!validateEmail(email)) {
-      setError('邮箱格式无效');
-      return;
-    }
-
-    if (!password) {
-      setError('密码不能为空');
-      return;
-    }
-
-    if (password.length < 8) {
-      setError('密码至少 8 位');
+    if (!validateForm()) {
       return;
     }
 
     setLoading(true);
 
     try {
-      const response = await api.post<{ userId: string; email: string; username: string }>(
+      const response = await api.post<RegisterResponse>(
         '/api/auth/register',
         { username, email, password }
       );
@@ -67,11 +82,11 @@ export default function RegisterPage() {
       router.push('/login');
     } catch (err: any) {
       if (err.message?.includes('邮箱已被注册')) {
-        setError('该邮箱已被注册');
+        setErrors({ general: '该邮箱已被注册' });
       } else if (err.message?.includes('用户名已被使用')) {
-        setError('该用户名已被使用');
+        setErrors({ general: '该用户名已被使用' });
       } else {
-        setError('注册失败，请稍后重试');
+        setErrors({ general: '注册失败，请稍后重试' });
       }
     } finally {
       setLoading(false);
@@ -87,9 +102,9 @@ export default function RegisterPage() {
           </h2>
         </div>
 
-        {error && <Alert>{error}</Alert>}
+        {errors.general && <Alert>{errors.general}</Alert>}
 
-        <Form onSubmit={handleSubmit} className="mt-8">
+        <form className="mt-8 space-y-6" onSubmit={handleSubmit} noValidate>
           <Input
             label="用户名"
             type="text"
@@ -97,7 +112,7 @@ export default function RegisterPage() {
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             placeholder="请输入用户名"
-            error={error && !username ? '用户名不能为空' : undefined}
+            error={errors.username}
           />
 
           <Input
@@ -107,7 +122,7 @@ export default function RegisterPage() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="请输入邮箱"
-            error={error && !validateEmail(email) ? '邮箱格式无效' : undefined}
+            error={errors.email}
           />
 
           <Input
@@ -117,7 +132,7 @@ export default function RegisterPage() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="请输入密码（至少8位）"
-            error={error && password.length < 8 ? '密码至少 8 位' : undefined}
+            error={errors.password}
           />
 
           <Button
@@ -127,7 +142,7 @@ export default function RegisterPage() {
           >
             注册
           </Button>
-        </Form>
+        </form>
 
         <div className="text-center">
           <a href="/login" className="text-sm text-indigo-600 hover:text-indigo-500">

@@ -1,3 +1,6 @@
+---
+alwaysApply: true
+---
 # Ralph 执行铁律 (Execution Iron Rules)
 
 > **⚠️ 注意**: 这是 Ralph 开发流程的最高指令。所有 Agent 必须无条件遵守。每次行动前请自我检查。

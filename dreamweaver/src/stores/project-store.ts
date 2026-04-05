@@ -1,44 +1,80 @@
 import { create } from 'zustand';
-import { Project } from '../types/api';
+import { api } from '@/lib/api';
 
-interface ProjectStore {
-  // 状态
+interface Project {
+  id: string;
+  title: string;
+  description: string;
+  status: 'active' | 'draft' | 'completed';
+  chapterCount: number;
+  wordCount: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface CreateProjectData {
+  title: string;
+  description: string;
+  status: 'active' | 'draft' | 'completed';
+}
+
+interface ProjectState {
   projects: Project[];
   currentProject: Project | null;
-  loading: boolean;
+  isLoading: boolean;
   error: string | null;
-
-  // 操作
-  setProjects: (projects: Project[]) => void;
-  addProject: (project: Project) => void;
-  setCurrentProject: (project: Project | null) => void;
-  clearCurrentProject: () => void;
-  setLoading: (loading: boolean) => void;
-  setError: (error: string | null) => void;
+  fetchProjects: () => Promise<void>;
+  createProject: (projectData: CreateProjectData) => Promise<void>;
+  setCurrentProject: (project: Project) => void;
   clearError: () => void;
 }
 
-export const useProjectStore = create<ProjectStore>((set) => ({
-  // 初始状态
+export const projectStore = create<ProjectState>()((set, get) => ({
   projects: [],
   currentProject: null,
-  loading: false,
+  isLoading: false,
   error: null,
 
-  // 操作实现
-  setProjects: (projects) => set({ projects }),
-  
-  addProject: (project) => set((state) => ({
-    projects: [...state.projects, project]
-  })),
-  
-  setCurrentProject: (currentProject) => set({ currentProject }),
-  
-  clearCurrentProject: () => set({ currentProject: null }),
-  
-  setLoading: (loading) => set({ loading }),
-  
-  setError: (error) => set({ error }),
-  
-  clearError: () => set({ error: null }),
+  fetchProjects: async () => {
+    try {
+      set({ isLoading: true, error: null });
+      const response = await api.get<Project[]>('/api/projects');
+      set({
+        projects: Array.isArray(response) ? response : [],
+        isLoading: false,
+        error: null,
+      });
+    } catch (error) {
+      set({
+        projects: [],
+        isLoading: false,
+        error: 'Failed to fetch projects',
+      });
+    }
+  },
+
+  createProject: async (projectData) => {
+    try {
+      set({ isLoading: true, error: null });
+      const response = await api.post<Project>('/api/projects', projectData);
+      set((state) => ({
+        projects: [...state.projects, response],
+        isLoading: false,
+        error: null,
+      }));
+    } catch (error) {
+      set({
+        isLoading: false,
+        error: 'Failed to create project',
+      });
+    }
+  },
+
+  setCurrentProject: (project) => {
+    set({ currentProject: project });
+  },
+
+  clearError: () => {
+    set({ error: null });
+  },
 }));

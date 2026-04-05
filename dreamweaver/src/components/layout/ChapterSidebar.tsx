@@ -83,7 +83,7 @@ export const ChapterSidebar: React.FC<ChapterSidebarProps> = ({
             key={chapter.id}
             data-testid="chapter-item"
             onClick={() => onChapterSelect(chapter.id)}
-            className={`p-2 rounded cursor-pointer transition-colors ${activeChapterId === chapter.id ? 'bg-blue-100 text-blue-600' : 'hover:bg-gray-100'}`}
+            className={`p-2 rounded cursor-pointer transition-colors ${activeChapterId === chapter.id ? 'active bg-blue-100 text-blue-600' : 'hover:bg-gray-100'}`}
           >
             <div data-testid="chapter-title" className="text-sm font-medium">
               {chapter.title}

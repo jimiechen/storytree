@@ -3,13 +3,14 @@
 ## 需求概述
 
 在 Ralph 项目规则中加入以下飞书集成功能：
+
 1. **任务拆分更新到飞书多维表格** - 当生成 `04-ralph-tasks.md` 时，同步到飞书 Base
 2. **任务完成更新飞书多维表格** - 当任务标记为 `[x]` 完成时，同步更新飞书 Base
 3. **任务进度情况通知飞书群聊** - 定期或在关键节点发送进度通知到飞书群
 4. **@消息监听与评审** - 监听飞书群聊 @ 消息，保存到开发文档并进行评审反馈
 5. **Git 集成** - 每个任务开始前拉取最新代码，完成后提交代码
 
----
+***
 
 ## 方案设计
 
@@ -57,7 +58,7 @@
 └─────────────────────────────────────────────────────────────────────────┘
 ```
 
----
+***
 
 ### 二、.env 配置设计
 
@@ -113,13 +114,13 @@ RALPH_GIT_COMMIT_AFTER_TASK=true
 RALPH_GIT_COMMIT_PREFIX="feat:"
 ```
 
----
+***
 
 ### 三、Ralph.md 规则扩展
 
 在 `.trae/rules/Ralph.md` 末尾新增章节：
 
-```markdown
+````markdown
 ## 5. 飞书集成规则 (Feishu Integration)
 
 ### 5.1 配置加载
@@ -142,19 +143,24 @@ RALPH_GIT_COMMIT_PREFIX="feat:"
    git add .
    git commit -m "${commit_message}"
    git push origin ${RALPH_GIT_BRANCH}
-   ```
-4. **记录提交**：将 commit hash 记录到任务完成日志
+````
+
+1. **记录提交**：将 commit hash 记录到任务完成日志
 
 **铁律**：
-- 拉取失败 → 禁止开始任务
-- 提交失败 → 任务视为未完成
-- 禁止在 dirty workspace 上开始新任务
+
+* 拉取失败 → 禁止开始任务
+
+* 提交失败 → 任务视为未完成
+
+* 禁止在 dirty workspace 上开始新任务
 
 ### 5.3 任务拆分同步 (Task Split Sync)
 
 **触发时机**：`ralph-web-task-planner` 生成/更新 `04-ralph-tasks.md` 后
 
 **执行动作**：
+
 1. 解析 `04-ralph-tasks.md` 提取所有任务
 2. 为每个任务生成唯一 `task_id` (格式: `RALPH-${PROJECT}-${MODULE}-${SEQ}`)
 3. 调用 `ralph-feishu-sync` Skill 批量写入飞书多维表格
@@ -162,25 +168,27 @@ RALPH_GIT_COMMIT_PREFIX="feat:"
 5. 发送群通知
 
 **同步字段**：
-| 飞书字段 | 来源 | 说明 |
-|---------|------|------|
-| 任务ID | 自动生成 | RALPH-storytree2-AUTH-001 |
-| 任务名称 | 任务描述 | 实现登录页面 UI |
-| 模块 | 模块名 | Auth Module |
-| 状态 | 单选 | 待开始/进行中/已完成/已阻塞 |
-| 优先级 | 推断 | P0/P1/P2 |
-| 预估工时 | 推断 | 0.5h-2h |
-| 创建时间 | 系统时间 | 2025-01-15 10:30 |
-| 完成时间 | 系统时间 | 2025-01-15 14:20 |
-| Git Commit | 提交记录 | abc1234 |
-| 关联测试 | 解析 | TC-AUTH-HP-001 |
-| 本地文件行号 | 解析 | 04-ralph-tasks.md#L45 |
+
+| 飞书字段       | 来源   | 说明                        |
+| ---------- | ---- | ------------------------- |
+| 任务ID       | 自动生成 | RALPH-storytree2-AUTH-001 |
+| 任务名称       | 任务描述 | 实现登录页面 UI                 |
+| 模块         | 模块名  | Auth Module               |
+| 状态         | 单选   | 待开始/进行中/已完成/已阻塞           |
+| 优先级        | 推断   | P0/P1/P2                  |
+| 预估工时       | 推断   | 0.5h-2h                   |
+| 创建时间       | 系统时间 | 2025-01-15 10:30          |
+| 完成时间       | 系统时间 | 2025-01-15 14:20          |
+| Git Commit | 提交记录 | abc1234                   |
+| 关联测试       | 解析   | TC-AUTH-HP-001            |
+| 本地文件行号     | 解析   | 04-ralph-tasks.md#L45     |
 
 ### 5.4 任务完成同步 (Task Complete Sync)
 
 **触发时机**：`ralph-state-manager` 执行 `finish-task` 后
 
 **执行动作**：
+
 1. 根据任务描述查找 `.ralph-task-mapping.json` 中的飞书记录 ID
 2. 更新飞书多维表格对应记录的状态为「已完成」
 3. 更新「完成时间」和「Git Commit」字段
@@ -188,33 +196,44 @@ RALPH_GIT_COMMIT_PREFIX="feat:"
 5. 发送完成通知到群聊
 
 **状态映射**：
-| 本地状态 | 飞书状态 |
-|---------|---------|
-| `[ ]` | 待开始 |
-| `[~]` | 进行中 |
-| `[x]` | 已完成 |
-| `[-]` | 已阻塞 |
+
+| 本地状态  | 飞书状态 |
+| ----- | ---- |
+| `[ ]` | 待开始  |
+| `[~]` | 进行中  |
+| `[x]` | 已完成  |
+| `[-]` | 已阻塞  |
 
 ### 5.5 @消息监听与评审 (@Mention Handler)
 
 **监听配置**：
-- 使用 `lark-event` skill 监听群聊消息
-- 过滤条件：消息中包含 @机器人 且包含关键词（评审/review/需求/requirement/问题/issue）
+
+* 使用 `lark-event` skill 监听群聊消息
+
+* 过滤条件：消息中包含 @机器人 且包含关键词（评审/review/需求/requirement/问题/issue）
 
 **处理流程**：
+
 1. **接收消息**：通过 WebSocket 接收群聊消息
 2. **内容解析**：提取消息内容、发送人、时间戳
 3. **保存文档**：
-   - 在 `docs/reviews/` 目录下创建评审文档
-   - 文件名格式：`review-{YYYYMMDD}-{sender}-{hash}.md`
+
+   * 在 `docs/reviews/` 目录下创建评审文档
+
+   * 文件名格式：`review-{YYYYMMDD}-{sender}-{hash}.md`
 4. **自动评审**：
-   - 调用 `ralph-web-requirement` skill 进行需求评审
-   - 或调用代码审查逻辑进行代码评审
+
+   * 调用 `ralph-web-requirement` skill 进行需求评审
+
+   * 或调用代码审查逻辑进行代码评审
 5. **反馈回复**：
-   - 将评审意见发送到飞书群聊 @ 原发送人
-   - 同时更新到评审文档的「评审意见」章节
+
+   * 将评审意见发送到飞书群聊 @ 原发送人
+
+   * 同时更新到评审文档的「评审意见」章节
 
 **评审文档模板**：
+
 ```markdown
 # 评审记录
 
@@ -245,22 +264,31 @@ RALPH_GIT_COMMIT_PREFIX="feat:"
 **通知场景**：
 
 1. **任务拆分完成通知**
-   - 触发：生成任务列表后
-   - 内容：本次共生成 X 个任务，分布在 Y 个模块
+
+   * 触发：生成任务列表后
+
+   * 内容：本次共生成 X 个任务，分布在 Y 个模块
 
 2. **任务完成即时通知**
-   - 触发：单个任务标记完成
-   - 内容：任务 X 已完成，当前进度 X/Y (X%)
+
+   * 触发：单个任务标记完成
+
+   * 内容：任务 X 已完成，当前进度 X/Y (X%)
 
 3. **每日进度摘要**
-   - 触发：每日固定时间（可配置）
-   - 内容：今日完成任务数、剩余任务数、预计完成时间
+
+   * 触发：每日固定时间（可配置）
+
+   * 内容：今日完成任务数、剩余任务数、预计完成时间
 
 4. **里程碑通知**
-   - 触发：模块完成/阶段切换
-   - 内容：🎉 Auth 模块全部完成！进入 User 模块开发
+
+   * 触发：模块完成/阶段切换
+
+   * 内容：🎉 Auth 模块全部完成！进入 User 模块开发
 
 **消息格式**：
+
 ```
 📊 Ralph 项目进度报告
 ━━━━━━━━━━━━━━━━━━━━
@@ -306,6 +334,7 @@ ralph-state-manager → finish-task → 更新 04-ralph-tasks.md → 更新 RALP
                                     ├─→ 更新飞书 Base 状态
                                     └─→ 发送进度通知
 ```
+
 ```
 
 ---
@@ -315,21 +344,23 @@ ralph-state-manager → finish-task → 更新 04-ralph-tasks.md → 更新 RALP
 #### 4.1 目录结构
 
 ```
+
 .trae/skills/ralph-feishu-sync/
 ├── SKILL.md                          # Skill 定义文档
 ├── assets/
 │   ├── base-schema.md                # 多维表格字段设计
 │   └── review-template.md            # 评审文档模板
 └── lib/
-    ├── index.ts                      # 主入口
-    ├── config.ts                     # 配置读取 (.env)
-    ├── parser.ts                     # 任务文件解析器
-    ├── base-sync.ts                  # 多维表格同步
-    ├── im-notify.ts                  # 群聊通知
-    ├── mention-handler.ts            # @消息监听处理
-    ├── review-sync.ts                # 评审意见同步
-    └── git-helper.ts                 # Git 操作辅助
-```
+├── index.ts                      # 主入口
+├── config.ts                     # 配置读取 (.env)
+├── parser.ts                     # 任务文件解析器
+├── base-sync.ts                  # 多维表格同步
+├── im-notify.ts                  # 群聊通知
+├── mention-handler.ts            # @消息监听处理
+├── review-sync.ts                # 评审意见同步
+└── git-helper.ts                 # Git 操作辅助
+
+````
 
 #### 4.2 SKILL.md 内容
 
@@ -435,7 +466,7 @@ description: Ralph 飞书集成专用：任务同步、进度通知、@消息评
 - `.env` (配置文件)
 - `.ralph-task-mapping.json` (ID 映射缓存)
 - `docs/reviews/` (评审文档目录)
-```
+````
 
 #### 4.3 多维表格字段设计 (assets/base-schema.md)
 
@@ -561,7 +592,7 @@ description: Ralph 飞书集成专用：任务同步、进度通知、@消息评
 *由 Ralph 飞书集成系统自动生成*
 ```
 
----
+***
 
 ### 五、修改现有 Skill
 
@@ -590,7 +621,7 @@ description: Ralph 飞书集成专用：任务同步、进度通知、@消息评
 
 在 **4. COMMIT** 步骤中新增 Git 提交：
 
-```markdown
+````markdown
 #### 4.1 GIT COMMIT (Git 提交)
 
 **如果启用了 Git 集成**：
@@ -608,16 +639,21 @@ description: Ralph 飞书集成专用：任务同步、进度通知、@消息评
    git add .
    git commit -m "${commit_message}"
    git push origin ${RALPH_GIT_BRANCH}
-   ```
-   
-4. **记录结果**：
-   - 保存 commit hash
-   - 用于后续飞书同步
-   
-5. **失败处理**：
-   - 提交失败 → 任务视为未完成
-   - 返回 **IMPLEMENT** 步骤修复
-```
+````
+
+1. **记录结果**：
+
+   * 保存 commit hash
+
+   * 用于后续飞书同步
+
+2. **失败处理**：
+
+   * 提交失败 → 任务视为未完成
+
+   * 返回 **IMPLEMENT** 步骤修复
+
+````
 
 #### 5.2 修改 ralph-web-task-planner/SKILL.md
 
@@ -635,7 +671,7 @@ description: Ralph 飞书集成专用：任务同步、进度通知、@消息评
    - 失败：输出 "⚠️ 飞书同步失败，请检查配置"
 
 **注意**：飞书同步失败不应阻塞任务生成流程。
-```
+````
 
 #### 5.3 修改 ralph-state-manager/SKILL.md
 
@@ -654,7 +690,7 @@ description: Ralph 飞书集成专用：任务同步、进度通知、@消息评
     - 触发进度通知
 ```
 
----
+***
 
 ### 六、消息监听流程
 
@@ -718,7 +754,7 @@ description: Ralph 飞书集成专用：任务同步、进度通知、@消息评
     └──────────────────┘
 ```
 
----
+***
 
 ### 七、实施步骤
 
@@ -732,60 +768,75 @@ description: Ralph 飞书集成专用：任务同步、进度通知、@消息评
 
 #### Phase 2: 核心功能 (4-5 小时)
 
-6. [ ] 实现配置读取模块 (`lib/config.ts`)
-7. [ ] 实现 Git 操作辅助 (`lib/git-helper.ts`)
-8. [ ] 实现任务文件解析器 (`lib/parser.ts`)
-9. [ ] 实现多维表格同步 (`lib/base-sync.ts`)
-10. [ ] 实现群聊通知 (`lib/im-notify.ts`)
-11. [ ] 实现 @消息处理 (`lib/mention-handler.ts`)
-12. [ ] 实现评审同步 (`lib/review-sync.ts`)
+1. [ ] 实现配置读取模块 (`lib/config.ts`)
+2. [ ] 实现 Git 操作辅助 (`lib/git-helper.ts`)
+3. [ ] 实现任务文件解析器 (`lib/parser.ts`)
+4. [ ] 实现多维表格同步 (`lib/base-sync.ts`)
+5. [ ] 实现群聊通知 (`lib/im-notify.ts`)
+6. [ ] 实现 @消息处理 (`lib/mention-handler.ts`)
+7. [ ] 实现评审同步 (`lib/review-sync.ts`)
 
 #### Phase 3: 集成改造 (2-3 小时)
 
-13. [ ] 修改 `Ralph.md` 添加飞书集成章节
-14. [ ] 修改 `ralph-task-executor/SKILL.md` 添加 Git 操作
-15. [ ] 修改 `ralph-web-task-planner/SKILL.md` 添加同步钩子
-16. [ ] 修改 `ralph-state-manager/SKILL.md` 添加同步钩子
+1. [ ] 修改 `Ralph.md` 添加飞书集成章节
+2. [ ] 修改 `ralph-task-executor/SKILL.md` 添加 Git 操作
+3. [ ] 修改 `ralph-web-task-planner/SKILL.md` 添加同步钩子
+4. [ ] 修改 `ralph-state-manager/SKILL.md` 添加同步钩子
 
 #### Phase 4: 测试验证 (2 小时)
 
-17. [ ] 配置测试环境 (创建 .env 文件)
-18. [ ] 验证 Git 拉取/提交功能
-19. [ ] 验证任务拆分同步
-20. [ ] 验证任务完成同步
-21. [ ] 验证 @消息监听与评审
-22. [ ] 验证进度通知
+1. [ ] 配置测试环境 (创建 .env 文件)
+2. [ ] 验证 Git 拉取/提交功能
+3. [ ] 验证任务拆分同步
+4. [ ] 验证任务完成同步
+5. [ ] 验证 @消息监听与评审
+6. [ ] 验证进度通知
 
----
+***
 
 ### 八、注意事项
 
 1. **配置安全**：
-   - `.env` 文件必须加入 `.gitignore`
-   - 严禁提交敏感 Token 到仓库
-   - 提供 `.env.example` 作为模板
+
+   * `.env` 文件必须加入 `.gitignore`
+
+   * 严禁提交敏感 Token 到仓库
+
+   * 提供 `.env.example` 作为模板
 
 2. **Git 操作**：
-   - 拉取失败必须停止任务
-   - 提交失败任务视为未完成
-   - 禁止在 dirty workspace 上工作
+
+   * 拉取失败必须停止任务
+
+   * 提交失败任务视为未完成
+
+   * 禁止在 dirty workspace 上工作
 
 3. **离线降级**：
-   - 飞书 API 失败不影响本地流程
-   - 记录失败日志供后续排查
-   - 支持手动重试同步
+
+   * 飞书 API 失败不影响本地流程
+
+   * 记录失败日志供后续排查
+
+   * 支持手动重试同步
 
 4. **性能考虑**：
-   - 大批量任务使用批量 API
-   - 消息监听使用 WebSocket 长连接
-   - 评审文档按日期分目录存储
+
+   * 大批量任务使用批量 API
+
+   * 消息监听使用 WebSocket 长连接
+
+   * 评审文档按日期分目录存储
 
 5. **冲突处理**：
-   - Git 冲突优先人工解决
-   - 飞书与本地状态不一致时以本地为准
-   - 评审意见以最新版本为准
 
----
+   * Git 冲突优先人工解决
+
+   * 飞书与本地状态不一致时以本地为准
+
+   * 评审意见以最新版本为准
+
+***
 
 ### 九、扩展建议
 
@@ -795,3 +846,4 @@ description: Ralph 飞书集成专用：任务同步、进度通知、@消息评
 4. **智能提醒**：根据进度预测延期风险并提前通知
 5. **PR 集成**：关联 GitHub/GitLab PR 到任务记录
 6. **代码评审**：集成代码 diff 到评审流程
+

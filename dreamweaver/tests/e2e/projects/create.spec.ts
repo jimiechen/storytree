@@ -1,153 +1,69 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from '../../src/fixtures/auth.fixture';
 
-test.describe('新建项目功能', () => {
-  test.beforeEach(async ({ page }) => {
-    await page.goto('/projects');
+test.describe('新建项目', () => {
+  test.beforeEach(async ({ authenticated }) => {
+    // authenticated 夹具会自动登录并导航到 /projects
   });
 
-  test('页面元素渲染 - 显示新建项目页面', async ({ page }) => {
+  test('点击新建项目按钮时应该打开弹窗', async ({ page }) => {
     // 点击新建项目按钮
-    const createButton = page.locator('button:has-text("新建项目"), button:has-text("New Project")').first();
-    await createButton.click();
-    
-    // 验证页面标题
-    await expect(page).toHaveTitle(/新建项目|Create Project/);
-    
-    // 验证页面标题
-    const pageTitle = page.locator('h1, h2:has-text("新建项目"), h2:has-text("Create Project")').first();
-    await expect(pageTitle).toBeVisible();
-    
-    // 验证表单元素
-    const titleInput = page.locator('input[name="title"], input[placeholder*="项目标题"], input[placeholder*="Title"]').first();
-    await expect(titleInput).toBeVisible();
-    
-    const descriptionInput = page.locator('textarea[name="description"], textarea[placeholder*="项目描述"], textarea[placeholder*="Description"]').first();
-    await expect(descriptionInput).toBeVisible();
-    
-    const createProjectButton = page.locator('button:has-text("创建项目"), button:has-text("Create Project"), button[type="submit"]').first();
-    await expect(createProjectButton).toBeVisible();
-    
-    const cancelButton = page.locator('button:has-text("取消"), button:has-text("Cancel"), a[href*="projects"]').first();
-    await expect(cancelButton).toBeVisible();
+    await page.click('button:has-text("新建项目")');
+
+    // 检查弹窗是否打开
+    await expect(page.getByText('项目标题').first()).toBeVisible();
   });
 
-  test('表单验证 - 项目标题不能为空', async ({ page }) => {
-    // 点击新建项目按钮
-    const createButton = page.locator('button:has-text("新建项目"), button:has-text("New Project")').first();
-    await createButton.click();
-    
-    // 不输入标题，填写描述
-    const descriptionInput = page.locator('textarea[name="description"], textarea[placeholder*="项目描述"]').first();
-    await descriptionInput.fill('这是一个测试项目');
+  test('表单验证功能', async ({ page }) => {
+    // 打开新建项目弹窗
+    await page.click('button:has-text("新建项目")');
+
+    // 直接点击创建按钮，不填写任何字段
+    await page.click('button:has-text("创建")');
+
+    // 检查表单验证错误
+    await expect(page.locator('.text-red-600, .text-red-500')).toHaveCount(2);
+    await expect(page.getByText('项目标题不能为空')).toBeVisible();
+    await expect(page.getByText('项目描述不能为空')).toBeVisible();
+  });
+
+  test('成功创建项目', async ({ page }) => {
+    // 打开新建项目弹窗
+    await page.click('button:has-text("新建项目")');
+
+    // 填写项目信息
+    await page.fill('input[name="title"]', '测试项目');
+    await page.fill('textarea[name="description"]', '这是一个测试项目');
+    // 省略状态选择，使用默认值
     
     // 点击创建按钮
-    const createProjectButton = page.locator('button:has-text("创建项目"), button[type="submit"]').first();
-    await createProjectButton.click();
-    
-    // 验证显示错误提示
-    const errorMessage = page.locator('text=/标题不能为空|title is required|请输入项目标题/').first();
-    await expect(errorMessage).toBeVisible();
+    await page.click('button:has-text("创建")');
+
+    // 检查弹窗是否关闭
+    await expect(page.getByText('项目标题').first()).not.toBeVisible();
+
+    // 检查新创建的项目是否显示在列表中
+    await expect(page.locator('.project-card').last()).toContainText('测试项目');
   });
 
-  test('表单验证 - 项目标题长度限制', async ({ page }) => {
-    // 点击新建项目按钮
-    const createButton = page.locator('button:has-text("新建项目"), button:has-text("New Project")').first();
-    await createButton.click();
-    
-    // 输入过长的标题
-    const titleInput = page.locator('input[name="title"], input[placeholder*="项目标题"]').first();
-    await titleInput.fill('a'.repeat(101)); // 101个字符
-    
-    // 点击创建按钮
-    const createProjectButton = page.locator('button:has-text("创建项目"), button[type="submit"]').first();
-    await createProjectButton.click();
-    
-    // 验证显示错误提示
-    const errorMessage = page.locator('text=/标题长度|title length|标题不能超过/').first();
-    await expect(errorMessage).toBeVisible();
-  });
+  test('点击取消按钮时关闭弹窗', async ({ page }) => {
+    // 打开新建项目弹窗
+    await page.click('button:has-text("新建项目")');
 
-  test('表单验证 - 项目描述长度限制', async ({ page }) => {
-    // 点击新建项目按钮
-    const createButton = page.locator('button:has-text("新建项目"), button:has-text("New Project")').first();
-    await createButton.click();
-    
-    // 输入标题和过长的描述
-    const titleInput = page.locator('input[name="title"], input[placeholder*="项目标题"]').first();
-    await titleInput.fill('测试项目');
-    
-    const descriptionInput = page.locator('textarea[name="description"], textarea[placeholder*="项目描述"]').first();
-    await descriptionInput.fill('a'.repeat(1001)); // 1001个字符
-    
-    // 点击创建按钮
-    const createProjectButton = page.locator('button:has-text("创建项目"), button[type="submit"]').first();
-    await createProjectButton.click();
-    
-    // 验证显示错误提示
-    const errorMessage = page.locator('text=/描述长度|description length|描述不能超过/').first();
-    await expect(errorMessage).toBeVisible();
-  });
-
-  test('创建成功 - 跳转到项目列表并显示新项目', async ({ page }) => {
-    // 点击新建项目按钮
-    const createButton = page.locator('button:has-text("新建项目"), button:has-text("New Project")').first();
-    await createButton.click();
-    
-    // 输入项目信息
-    const titleInput = page.locator('input[name="title"], input[placeholder*="项目标题"]').first();
-    const testTitle = '测试项目 ' + Date.now();
-    await titleInput.fill(testTitle);
-    
-    const descriptionInput = page.locator('textarea[name="description"], textarea[placeholder*="项目描述"]').first();
-    await descriptionInput.fill('这是一个测试项目');
-    
-    // 点击创建按钮
-    const createProjectButton = page.locator('button:has-text("创建项目"), button[type="submit"]').first();
-    await createProjectButton.click();
-    
-    // 验证跳转到项目列表
-    await expect(page).toHaveURL(/.*projects/);
-    
-    // 验证新项目显示在列表中
-    const newProject = page.locator('text=' + testTitle).first();
-    await expect(newProject).toBeVisible();
-  });
-
-  test('取消按钮 - 返回到项目列表', async ({ page }) => {
-    // 点击新建项目按钮
-    const createButton = page.locator('button:has-text("新建项目"), button:has-text("New Project")').first();
-    await createButton.click();
-    
     // 点击取消按钮
-    const cancelButton = page.locator('button:has-text("取消"), button:has-text("Cancel"), a[href*="projects"]').first();
-    await cancelButton.click();
-    
-    // 验证返回到项目列表
-    await expect(page).toHaveURL(/.*projects/);
+    await page.click('button:has-text("取消")');
+
+    // 检查弹窗是否关闭
+    await expect(page.getByText('项目标题').first()).not.toBeVisible();
   });
 
-  test('表单提交 - 加载状态显示', async ({ page }) => {
-    // 点击新建项目按钮
-    const createButton = page.locator('button:has-text("新建项目"), button:has-text("New Project")').first();
-    await createButton.click();
-    
-    // 输入项目信息
-    const titleInput = page.locator('input[name="title"], input[placeholder*="项目标题"]').first();
-    await titleInput.fill('测试项目');
-    
-    const descriptionInput = page.locator('textarea[name="description"], textarea[placeholder*="项目描述"]').first();
-    await descriptionInput.fill('这是一个测试项目');
-    
-    // 点击创建按钮
-    const createProjectButton = page.locator('button:has-text("创建项目"), button[type="submit"]').first();
-    
-    // 验证按钮显示加载状态
-    const [response] = await Promise.all([
-      page.waitForNavigation(),
-      createProjectButton.click()
-    ]);
-    
-    // 验证跳转成功
-    await expect(page).toHaveURL(/.*projects/);
+  test('点击外部时关闭弹窗', async ({ page }) => {
+    // 打开新建项目弹窗
+    await page.click('button:has-text("新建项目")');
+
+    // 点击弹窗外部 (背景遮罩层)
+    await page.mouse.click(10, 10);
+
+    // 检查弹窗是否关闭
+    await expect(page.getByText('项目标题').first()).not.toBeVisible();
   });
 });

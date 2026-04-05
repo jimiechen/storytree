@@ -30,13 +30,11 @@ export default function WorkbenchPage() {
     const fetchChapters = async () => {
       try {
         setLoading(true);
-        const response = await api.get(`/api/projects/${projectId}/chapters`);
-        if (response.data.result.code === 10200) {
-          const chaptersData = response.data.result.data.chapters || [];
-          setChapters(chaptersData);
-          if (chaptersData.length > 0 && !activeChapterId) {
-            setActiveChapterId(chaptersData[0].id);
-          }
+        const response = await api.get<{chapters: Chapter[]}>(`/api/projects/${projectId}/chapters`);
+        const chaptersData = response?.chapters || [];
+        setChapters(chaptersData);
+        if (chaptersData.length > 0 && !activeChapterId) {
+          setActiveChapterId(chaptersData[0].id);
         }
       } catch (err) {
         setError('获取章节列表失败');
@@ -55,7 +53,7 @@ export default function WorkbenchPage() {
   const activeChapter = chapters.find(c => c.id === activeChapterId);
 
   // 计算字数
-  const calculateWordCount = useCallback((content: string) => {
+  const calculateWordCount = useCallback((content: string = '') => {
     // 移除 HTML 标签
     const text = content.replace(/<[^>]*>/g, '');
     // 计算中文字符和英文单词
@@ -80,17 +78,14 @@ export default function WorkbenchPage() {
   // 处理添加新章节
   const handleAddChapter = useCallback(async (title: string) => {
     try {
-      const response = await api.post(`/api/projects/${projectId}/chapters`, {
+      const newChapter = await api.post<Chapter>(`/api/projects/${projectId}/chapters`, {
         title,
         content: '<p></p>',
       });
       
-      if (response.data.result.code === 10200) {
-        const newChapter = response.data.result.data.chapter;
-        setChapters(prev => [...prev, newChapter]);
-        setActiveChapterId(newChapter.id);
-        setSaveStatus('saved');
-      }
+      setChapters(prev => [...prev, newChapter]);
+      setActiveChapterId(newChapter.id);
+      setSaveStatus('saved');
     } catch (err) {
       console.error('Failed to create chapter:', err);
       setError('创建章节失败');
@@ -101,15 +96,10 @@ export default function WorkbenchPage() {
   const autoSave = useCallback(async (chapterId: string, content: string) => {
     setSaveStatus('saving');
     try {
-      const response = await api.put(`/api/chapters/${chapterId}`, {
+      await api.put(`/api/projects/${projectId}/chapters/${chapterId}`, {
         content,
       });
-      
-      if (response.data.result.code === 10200) {
-        setSaveStatus('saved');
-      } else {
-        setSaveStatus('unsaved');
-      }
+      setSaveStatus('saved');
     } catch (err) {
       console.error('Failed to auto-save:', err);
       setSaveStatus('unsaved');
@@ -215,7 +205,7 @@ export default function WorkbenchPage() {
         <div className="flex-1 p-6 overflow-auto">
           {activeChapter ? (
             <Editor
-              initialContent={activeChapter.content}
+              content={activeChapter.content}
               onContentChange={handleContentChange}
               className="h-full"
             />

@@ -7,49 +7,77 @@ import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { Alert } from '@/components/ui/Alert';
 
+interface LoginResponse {
+  userId: string;
+  email: string;
+  username: string;
+  token: string;
+}
+
+interface FormErrors {
+  email?: string;
+  password?: string;
+  general?: string;
+}
+
+const validateEmail = (email: string): boolean => {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
+};
+
+const saveAuthData = (userData: LoginResponse) => {
+  localStorage.setItem('token', userData.token);
+  localStorage.setItem('user', JSON.stringify(userData));
+};
+
 export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [errors, setErrors] = useState<FormErrors>({});
   const [loading, setLoading] = useState(false);
 
-  const validateEmail = (email: string): boolean => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
+  const validateForm = (): boolean => {
+    const newErrors: FormErrors = {};
+
+    if (!email) {
+      newErrors.email = '邮箱不能为空';
+    } else if (!validateEmail(email)) {
+      newErrors.email = '邮箱格式无效';
+    }
+
+    if (!password) {
+      newErrors.password = '密码不能为空';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
+    setErrors({});
 
-    // 表单验证
-    if (!validateEmail(email)) {
-      setError('邮箱格式无效');
-      return;
-    }
-
-    if (!password) {
-      setError('密码不能为空');
+    if (!validateForm()) {
       return;
     }
 
     setLoading(true);
 
     try {
-      const response = await api.post<{ userId: string; email: string; username: string; token: string }>(
+      console.log('Login attempt with:', { email, password });
+      const response = await api.post<LoginResponse>(
         '/api/auth/login',
         { email, password }
       );
+      console.log('Login response:', response);
 
-      // 保存 token
-      localStorage.setItem('token', response.token);
-      localStorage.setItem('user', JSON.stringify(response));
-
-      // 跳转到项目列表
+      saveAuthData(response);
+      console.log('Auth data saved, redirecting to /projects');
       router.push('/projects');
     } catch (err) {
-      setError('邮箱或密码错误');
+      console.error('Login error:', err);
+      setErrors({ general: '邮箱或密码错误' });
     } finally {
       setLoading(false);
     }
@@ -64,9 +92,9 @@ export default function LoginPage() {
           </h2>
         </div>
 
-        {error && <Alert>{error}</Alert>}
+        {errors.general && <Alert>{errors.general}</Alert>}
 
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+        <form className="mt-8 space-y-6" onSubmit={handleSubmit} noValidate>
           <Input
             label="邮箱"
             type="email"
@@ -74,7 +102,7 @@ export default function LoginPage() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="请输入邮箱"
-            error={error && !validateEmail(email) ? '邮箱格式无效' : undefined}
+            error={errors.email}
           />
 
           <Input
@@ -84,6 +112,7 @@ export default function LoginPage() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="请输入密码"
+            error={errors.password}
           />
 
           <Button

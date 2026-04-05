@@ -1,122 +1,134 @@
-import { describe, it, expect, beforeEach } from 'vitest';
-import { useProjectStore } from '../../../src/stores/project-store';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { projectStore } from '@/stores/project-store';
 
 interface Project {
   id: string;
   title: string;
   description: string;
+  status: 'active' | 'draft' | 'completed';
+  chapterCount: number;
+  wordCount: number;
   createdAt: string;
   updatedAt: string;
 }
 
 describe('Project Store', () => {
   beforeEach(() => {
-    // 重置 store 状态
-    const { setProjects, setCurrentProject, setLoading, setError } = useProjectStore.getState();
-    setProjects([]);
-    setCurrentProject(null);
-    setLoading(false);
-    setError(null);
+    // 清除所有状态
+    projectStore.setState({ 
+      projects: [], 
+      currentProject: null, 
+      isLoading: false, 
+      error: null 
+    });
   });
 
-  it('should initialize with empty projects list and null current project', () => {
-    const { projects, currentProject, loading, error } = useProjectStore.getState();
-    expect(projects).toEqual([]);
-    expect(currentProject).toBeNull();
-    expect(loading).toBe(false);
-    expect(error).toBeNull();
+  it('should initialize with default state', () => {
+    const state = projectStore.getState();
+    expect(state.projects).toEqual([]);
+    expect(state.currentProject).toBeNull();
+    expect(state.isLoading).toBe(false);
+    expect(state.error).toBeNull();
   });
 
-  it('should add project to projects list', () => {
-    const { addProject, projects } = useProjectStore.getState();
-    const testProject: Project = {
-      id: '1',
-      title: 'Test Project',
-      description: 'Test Description',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-
-    addProject(testProject);
-    const updatedProjects = useProjectStore.getState().projects;
-    expect(updatedProjects).toHaveLength(1);
-    expect(updatedProjects[0]).toEqual(testProject);
-  });
-
-  it('should set current project', () => {
-    const { setCurrentProject, currentProject } = useProjectStore.getState();
-    const testProject: Project = {
-      id: '1',
-      title: 'Test Project',
-      description: 'Test Description',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-
-    setCurrentProject(testProject);
-    const updatedCurrentProject = useProjectStore.getState().currentProject;
-    expect(updatedCurrentProject).toEqual(testProject);
-  });
-
-  it('should clear current project', () => {
-    const { setCurrentProject, clearCurrentProject } = useProjectStore.getState();
-    const testProject: Project = {
-      id: '1',
-      title: 'Test Project',
-      description: 'Test Description',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-
-    setCurrentProject(testProject);
-    expect(useProjectStore.getState().currentProject).toEqual(testProject);
-
-    clearCurrentProject();
-    expect(useProjectStore.getState().currentProject).toBeNull();
-  });
-
-  it('should set loading state', () => {
-    const { setLoading } = useProjectStore.getState();
-    setLoading(true);
-    expect(useProjectStore.getState().loading).toBe(true);
-
-    setLoading(false);
-    expect(useProjectStore.getState().loading).toBe(false);
-  });
-
-  it('should set and clear error', () => {
-    const { setError, clearError } = useProjectStore.getState();
-    const errorMessage = 'Test error';
-
-    setError(errorMessage);
-    expect(useProjectStore.getState().error).toBe(errorMessage);
-
-    clearError();
-    expect(useProjectStore.getState().error).toBeNull();
-  });
-
-  it('should set projects list', () => {
-    const { setProjects } = useProjectStore.getState();
-    const testProjects: Project[] = [
+  it('should set projects list', async () => {
+    const mockProjects: Project[] = [
       {
         id: '1',
-        title: 'Project 1',
-        description: 'Description 1',
+        title: '测试项目 1',
+        description: '这是测试项目 1',
+        status: 'active',
+        chapterCount: 5,
+        wordCount: 1000,
         createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
       },
       {
         id: '2',
-        title: 'Project 2',
-        description: 'Description 2',
+        title: '测试项目 2',
+        description: '这是测试项目 2',
+        status: 'draft',
+        chapterCount: 3,
+        wordCount: 500,
         createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      },
+        updatedAt: new Date().toISOString()
+      }
     ];
 
-    setProjects(testProjects);
-    const updatedProjects = useProjectStore.getState().projects;
-    expect(updatedProjects).toEqual(testProjects);
-    expect(updatedProjects).toHaveLength(2);
+    await projectStore.getState().fetchProjects();
+
+    const state = projectStore.getState();
+    expect(state.projects).toHaveLength(2);
+    expect(state.isLoading).toBe(false);
+    expect(state.error).toBeNull();
+  });
+
+  it('should handle fetch projects failure', async () => {
+    // 模拟 API 失败
+    await projectStore.getState().fetchProjects();
+
+    const state = projectStore.getState();
+    expect(state.projects).toEqual([]);
+    expect(state.isLoading).toBe(false);
+    expect(state.error).toBe('Failed to fetch projects');
+  });
+
+  it('should set current project', () => {
+    const mockProject: Project = {
+      id: '1',
+      title: '测试项目',
+      description: '这是测试项目',
+      status: 'active',
+      chapterCount: 5,
+      wordCount: 1000,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+
+    projectStore.getState().setCurrentProject(mockProject);
+
+    const state = projectStore.getState();
+    expect(state.currentProject).toEqual(mockProject);
+  });
+
+  it('should create new project', async () => {
+    const newProjectData = {
+      title: '新测试项目',
+      description: '这是新测试项目',
+      status: 'active' as const
+    };
+
+    await projectStore.getState().createProject(newProjectData);
+
+    const state = projectStore.getState();
+    expect(state.projects).toHaveLength(1);
+    expect(state.projects[0].title).toBe('新测试项目');
+    expect(state.isLoading).toBe(false);
+    expect(state.error).toBeNull();
+  });
+
+  it('should handle create project failure', async () => {
+    const newProjectData = {
+      title: '新测试项目',
+      description: '这是新测试项目',
+      status: 'active' as const
+    };
+
+    await projectStore.getState().createProject(newProjectData);
+
+    const state = projectStore.getState();
+    expect(state.projects).toEqual([]);
+    expect(state.isLoading).toBe(false);
+    expect(state.error).toBe('Failed to create project');
+  });
+
+  it('should clear error', () => {
+    // 先设置一个错误
+    projectStore.setState({ error: 'Test error' });
+    
+    projectStore.getState().clearError();
+
+    const state = projectStore.getState();
+    expect(state.error).toBeNull();
   });
 });

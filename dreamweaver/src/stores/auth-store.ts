@@ -1,10 +1,11 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { persist, createJSONStorage } from 'zustand/middleware';
+import { api } from '@/lib/api';
 
 interface User {
   id: string;
-  email: string;
   username: string;
+  email: string;
 }
 
 interface AuthState {
@@ -12,73 +13,73 @@ interface AuthState {
   token: string | null;
   isLoading: boolean;
   error: string | null;
-  
-  // Actions
-  setUser: (user: User | null) => void;
-  setToken: (token: string | null) => void;
-  setLoading: (loading: boolean) => void;
-  setError: (error: string | null) => void;
-  
-  // Methods
-  login: (token: string, user: User) => void;
+  login: (credentials: { email: string; password: string }) => Promise<void>;
+  register: (userData: { username: string; email: string; password: string }) => Promise<void>;
   logout: () => void;
-  updateUser: (user: Partial<User>) => void;
-  isAuthenticated: () => boolean;
+  clearError: () => void;
 }
 
-export const useAuthStore = create<AuthState>()(
+export const authStore = create<AuthState>()(
   persist(
     (set, get) => ({
       user: null,
       token: null,
       isLoading: false,
       error: null,
-      
-      setUser: (user) => set({ user }),
-      
-      setToken: (token) => set({ token }),
-      
-      setLoading: (loading) => set({ loading }),
-      
-      setError: (error) => set({ error }),
-      
-      login: (token, user) => {
-        set({
-          user,
-          token,
-          error: null,
-          isLoading: false
-        });
+
+      login: async (credentials) => {
+        set({ isLoading: true, error: null });
+        try {
+          const response = await api.post<{ user: User; token: string }>('/api/auth/login', credentials);
+          set({
+            user: response.data.user,
+            token: response.data.token,
+            isLoading: false,
+            error: null,
+          });
+        } catch (error: any) {
+          set({
+            user: null,
+            token: null,
+            isLoading: false,
+            error: error.message || 'Login failed',
+          });
+        }
       },
-      
+
+      register: async (userData) => {
+        set({ isLoading: true, error: null });
+        try {
+          await api.post<{ user: User }>('/api/auth/register', userData);
+          set({
+            isLoading: false,
+            error: null,
+          });
+        } catch (error: any) {
+          set({
+            isLoading: false,
+            error: error.message || 'Registration failed',
+          });
+        }
+      },
+
       logout: () => {
         set({
           user: null,
           token: null,
+          isLoading: false,
           error: null,
-          isLoading: false
         });
       },
-      
-      updateUser: (userUpdates) => {
-        const currentUser = get().user;
-        if (currentUser) {
-          set({
-            user: { ...currentUser, ...userUpdates }
-          });
-        }
+
+      clearError: () => {
+        set({ error: null });
       },
-      
-      isAuthenticated: () => {
-        return get().token !== null && get().user !== null;
-      }
     }),
     {
       name: 'auth-storage',
-      partialize: (state) => ({
-        token: state.token,
-        user: state.user
-      })
+      storage: createJSONStorage(() => localStorage),
+      partialize: (state) => ({ token: state.token, user: state.user }),
     }
   )
 );

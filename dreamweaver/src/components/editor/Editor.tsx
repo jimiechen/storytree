@@ -1,64 +1,92 @@
-import React from 'react';
-import { EditorContent, useEditor } from '@tiptap/react';
-import Document from '@tiptap/extension-document';
-import Paragraph from '@tiptap/extension-paragraph';
-import Text from '@tiptap/extension-text';
-import Bold from '@tiptap/extension-bold';
-import Italic from '@tiptap/extension-italic';
+'use client';
+
+import { useState, useEffect } from 'react';
+import { EditorContent, useEditor, Extension } from '@tiptap/react';
+import StarterKit from '@tiptap/starter-kit';
 
 interface EditorProps {
-  initialContent?: string;
-  onContentChange?: (content: string) => void;
+  content: string;
+  onContentChange: (content: string) => void;
+  placeholder?: string;
   className?: string;
 }
 
-export const Editor: React.FC<EditorProps> = ({
-  initialContent = '',
-  onContentChange,
-  className = '',
-}) => {
+export function Editor({ content, onContentChange, placeholder = '开始写作...', className = '' }: EditorProps) {
+  const [editorContent, setEditorContent] = useState(content);
+
   const editor = useEditor({
     extensions: [
-      Document,
-      Paragraph,
-      Text,
-      Bold,
-      Italic,
+      StarterKit,
     ],
-    content: initialContent || '<p></p>',
+    content: editorContent,
+    placeholder: placeholder,
+    immediatelyRender: false,
     onUpdate: ({ editor }) => {
-      if (onContentChange) {
-        onContentChange(editor.getHTML());
-      }
+      const newContent = editor.getHTML();
+      setEditorContent(newContent);
+      onContentChange(newContent);
     },
   });
 
+  useEffect(() => {
+    if (content !== editorContent && editor) {
+      editor.commands.setContent(content);
+    }
+  }, [content, editorContent, editor]);
+
   return (
-    <div className={`editor ${className}`}>
-      <div className="editor-toolbar mb-2 flex gap-2">
-        <button
-          data-testid="bold-button"
-          onClick={() => editor?.chain().focus().toggleBold().run()}
-          className={`px-3 py-1 rounded ${editor?.isActive('bold') ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-600'}`}
-        >
-          B
-        </button>
-        <button
-          data-testid="italic-button"
-          onClick={() => editor?.chain().focus().toggleItalic().run()}
-          className={`px-3 py-1 rounded ${editor?.isActive('italic') ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-600'}`}
-        >
-          I
-        </button>
-      </div>
-      <div 
-        data-testid="editor-content"
-        className="border border-gray-300 rounded p-4 min-h-[200px] focus:outline-none focus:ring-2 focus:ring-blue-500"
-      >
-        <EditorContent editor={editor} />
-      </div>
+    <div className="editor-container">
+      {editor && (
+        <>
+          <div className="toolbar flex flex-wrap gap-2 p-2 border-b">
+            <button
+              onClick={() => editor.commands.toggleBold()}
+              className={`px-2 py-1 rounded ${editor.isActive('bold') ? 'bg-indigo-100 text-indigo-600' : 'hover:bg-gray-100'}`}
+              title="Bold"
+            >
+              B
+            </button>
+            <button
+              onClick={() => editor.commands.toggleItalic()}
+              className={`px-2 py-1 rounded ${editor.isActive('italic') ? 'bg-indigo-100 text-indigo-600' : 'hover:bg-gray-100'}`}
+              title="Italic"
+            >
+              I
+            </button>
+            <button
+              onClick={() => editor.commands.toggleHeading({ level: 1 })}
+              className={`px-2 py-1 rounded ${editor.isActive('heading', { level: 1 }) ? 'bg-indigo-100 text-indigo-600' : 'hover:bg-gray-100'}`}
+              title="Heading 1"
+            >
+              H1
+            </button>
+            <button
+              onClick={() => editor.commands.toggleHeading({ level: 2 })}
+              className={`px-2 py-1 rounded ${editor.isActive('heading', { level: 2 }) ? 'bg-indigo-100 text-indigo-600' : 'hover:bg-gray-100'}`}
+              title="Heading 2"
+            >
+              H2
+            </button>
+            <button
+              onClick={() => editor.commands.toggleBulletList()}
+              className={`px-2 py-1 rounded ${editor.isActive('bulletList') ? 'bg-indigo-100 text-indigo-600' : 'hover:bg-gray-100'}`}
+              title="Bullet List"
+            >
+              •
+            </button>
+            <button
+              onClick={() => editor.commands.toggleOrderedList()}
+              className={`px-2 py-1 rounded ${editor.isActive('orderedList') ? 'bg-indigo-100 text-indigo-600' : 'hover:bg-gray-100'}`}
+              title="Ordered List"
+            >
+              1.
+            </button>
+          </div>
+          <div className={`editor-content border rounded-b min-h-[300px] p-4 ${className}`} data-testid="editor-content">
+            <EditorContent editor={editor} className="h-full outline-none prose max-w-none" />
+          </div>
+        </>
+      )}
     </div>
   );
-};
-
-export default Editor;
+}

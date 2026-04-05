@@ -16,7 +16,7 @@ export const Alert: React.FC<AlertProps> = ({ children, variant = 'error' }) => 
   };
 
   return (
-    <div className={`${variantStyles[variant]} border px-4 py-3 rounded`}>
+    <div role="alert" className={`${variantStyles[variant]} border px-4 py-3 rounded`}>
       {children}
     </div>
   );

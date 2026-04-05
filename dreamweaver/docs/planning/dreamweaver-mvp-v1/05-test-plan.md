@@ -1,11 +1,12 @@
 # 测试计划 (Test Plan)
 
 > **生成时间**: 2026-04-04
-> **基于文档**: 01-requirements.md, 02-architecture.md
+> **基于文档**: 01-requirements.md, 02-architecture.md, 织梦笔Playwright自动化测试验收方案.md
 > **测试框架**: Playwright (E2E) + Vitest (Unit) + React Testing Library (Component)
 > **迭代版本**: dreamweaver-mvp-v1
 
 > **⚠️ 执行铁律**: 必须严格按照列表顺序（从上到下）执行测试用例。严禁跳跃或乱序执行。
+> **执行策略**: 分阶段测试 - 核心功能优先，逐步扩展覆盖范围
 
 ---
 
@@ -14,6 +15,23 @@
 > **Test Case ID Format**: `[TC-<MODULE>-<TYPE>-<NUMBER>]`
 > - Modules: `AUTH`, `PROJ`, `WB`, `CHAPTER`
 > - Types: `HP` (Happy Path), `SP` (Sad Path), `EC` (Edge Case), `UI` (UI/UX)
+
+### 1.0 测试执行策略
+
+#### 阶段 1: 核心功能验证 (P0)
+- 认证模块: 登录、注册
+- 项目管理: 项目列表、新建项目
+- 写作工作台: 编辑器、章节导航、自动保存
+
+#### 阶段 2: 扩展功能测试 (P1)
+- 章节管理: 创建、编辑、删除章节
+- AI 面板: 模型选择、AI 交互
+- 错误处理: 各种异常场景
+
+#### 阶段 3: 边缘场景与性能 (P2)
+- 性能测试: 页面加载、编辑器响应
+- 兼容性测试: 不同浏览器
+- 边缘场景: 大文本、网络异常
 
 ---
 

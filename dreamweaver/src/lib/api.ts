@@ -57,17 +57,22 @@ apiClient.interceptors.response.use(
   },
   (error: AxiosError<ApiResponse>) => {
     if (error.response) {
-      const { result } = error.response.data;
-      
-      // 处理 401 未授权
-      if (error.response.status === 401 || result?.code === ApiErrorCode.UNAUTHORIZED) {
-        if (typeof window !== 'undefined') {
-          localStorage.removeItem('token');
-          window.location.href = '/login';
+      try {
+        const { result } = error.response.data;
+        
+        // 处理 401 未授权
+        if (error.response.status === 401 || result?.code === ApiErrorCode.UNAUTHORIZED) {
+          if (typeof window !== 'undefined') {
+            localStorage.removeItem('token');
+            window.location.href = '/login';
+          }
         }
+        
+        return Promise.reject(new Error(result?.message || '请求失败'));
+      } catch (err) {
+        // 处理响应格式错误
+        return Promise.reject(new Error('响应格式错误'));
       }
-      
-      return Promise.reject(new Error(result?.message || '请求失败'));
     }
     
     return Promise.reject(new Error('网络错误'));

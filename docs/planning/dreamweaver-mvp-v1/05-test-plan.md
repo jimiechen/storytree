@@ -158,21 +158,21 @@
 
 ### 3.1 UI 组件
 
-- [ ] `[TC-UNIT-UI-001]` Button 组件 - 正常渲染和点击事件
-- [ ] `[TC-UNIT-UI-002]` Input 组件 - 受控组件行为
-- [ ] `[TC-UNIT-UI-003]` Modal 组件 - 打开/关闭行为
+- [x] `[TC-UNIT-UI-001]` Button 组件 - 正常渲染和点击事件
+- [x] `[TC-UNIT-UI-002]` Input 组件 - 受控组件行为
+- [x] `[TC-UNIT-UI-003]` Modal 组件 - 打开/关闭行为
 
 ### 3.2 编辑器组件
 
-- [ ] `[TC-UNIT-EDITOR-001]` Editor 组件 - 初始化正常
-- [ ] `[TC-UNIT-EDITOR-002]` Editor 组件 - 富文本格式化
-- [ ] `[TC-UNIT-EDITOR-003]` Editor 组件 - 内容变更回调
+- [x] `[TC-UNIT-EDITOR-001]` Editor 组件 - 初始化正常
+- [x] `[TC-UNIT-EDITOR-002]` Editor 组件 - 富文本格式化
+- [x] `[TC-UNIT-EDITOR-003]` Editor 组件 - 内容变更回调
 
 ### 3.3 业务组件
 
-- [ ] `[TC-UNIT-CHAT-001]` ChatPanel 组件 - 消息列表渲染
-- [ ] `[TC-UNIT-CHAT-002]` ChatPanel 组件 - 发送消息
-- [ ] `[TC-UNIT-SIDEBAR-001]` ChapterSidebar 组件 - 章节列表渲染
+- [x] `[TC-UNIT-CHAT-001]` ChatPanel 组件 - 消息列表渲染
+- [x] `[TC-UNIT-CHAT-002]` ChatPanel 组件 - 发送消息
+- [x] `[TC-UNIT-SIDEBAR-001]` ChapterSidebar 组件 - 章节列表渲染
 
 ---
 
@@ -180,12 +180,12 @@
 
 ### 4.1 完整用户流程
 
-- [ ] `[TC-INTEGRATION-001]` 注册 -> 登录 -> 创建项目 -> 进入工作台 -> 创建章节 -> 编辑内容 -> 自动保存
+- [x] `[TC-INTEGRATION-001]` 注册 -> 登录 -> 创建项目 -> 进入工作台 -> 创建章节 -> 编辑内容 -> 自动保存
 
 ### 4.2 并发操作
 
-- [ ] `[TC-INTEGRATION-002]` 快速切换章节，无数据错乱
-- [ ] `[TC-INTEGRATION-003]` 连续创建多个章节，顺序正确
+- [x] `[TC-INTEGRATION-002]` 快速切换章节，无数据错乱
+- [x] `[TC-INTEGRATION-003]` 连续创建多个章节，顺序正确
 
 ---
 
@@ -202,9 +202,9 @@
 
 ## 6. 测试执行检查清单
 
-- [ ] 所有单元测试通过 (Vitest)
-- [ ] 所有 E2E 测试通过 (Playwright)
-- [ ] 代码覆盖率 > 70%
-- [ ] Lighthouse Performance > 85
-- [ ] 无 Console Error
-- [ ] 无 TypeScript Error
+- [x] 所有单元测试通过 (Vitest)
+- [x] 所有 E2E 测试通过 (Playwright)
+- [x] 代码覆盖率 > 70%
+- [x] Lighthouse Performance > 85
+- [x] 无 Console Error
+- [x] 无 TypeScript Error
