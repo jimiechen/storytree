@@ -5,7 +5,7 @@ import { test, expect } from '@playwright/test';
  * 验证角色管理页面的视觉还原和功能
  */
 test.describe('Characters Page - T-UI-004', () => {
-  const projectId = 'test-project-123';
+  const projectId = 'test-project-id';
 
   test.beforeEach(async ({ page }) => {
     // 访问角色管理页面

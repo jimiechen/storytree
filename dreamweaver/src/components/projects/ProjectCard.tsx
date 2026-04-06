@@ -73,7 +73,7 @@ export function ProjectCard({ project, onClick }: ProjectCardProps) {
   return (
     <div
       onClick={handleClick}
-      className="bg-surface-container border-l-4 border-primary rounded-lg p-5 flex items-start gap-5 hover:bg-surface-container-high transition-all group cursor-pointer"
+      className="project-card bg-surface-container border-l-4 border-primary rounded-lg p-5 flex items-start gap-5 hover:bg-surface-container-high transition-all group cursor-pointer"
     >
       {/* Cover */}
       <div className="w-20 h-28 flex-shrink-0 bg-surface-container-highest rounded overflow-hidden relative shadow-lg">
@@ -89,8 +89,8 @@ export function ProjectCard({ project, onClick }: ProjectCardProps) {
       <div className="flex-1 space-y-2">
         <div className="flex justify-between items-start">
           <h3 className="font-serif text-lg font-bold">{project.name}</h3>
-          <span className={`${status.color} text-[10px] px-2 py-0.5 rounded-full font-bold`}>
-            {status.label}
+          <span className={`${status?.color || ''} text-[10px] px-2 py-0.5 rounded-full font-bold`}>
+            {status?.label || ''}
           </span>
         </div>
 
@@ -101,7 +101,7 @@ export function ProjectCard({ project, onClick }: ProjectCardProps) {
           </span>
           <span className="flex items-center gap-1">
             <span className="material-symbols-outlined text-sm">description</span>
-            {project.currentWordCount.toLocaleString()} 字
+            {project.currentWordCount?.toLocaleString() || '0'} 字
           </span>
         </div>
 

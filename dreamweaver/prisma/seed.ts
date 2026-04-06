@@ -26,8 +26,8 @@ async function main() {
       },
       subscription: {
         create: {
-          plan: SubscriptionPlan.free,
-          status: SubscriptionStatus.active,
+          plan: "free",
+          status: "active",
         },
       },
     },
@@ -55,8 +55,8 @@ async function main() {
       },
       subscription: {
         create: {
-          plan: SubscriptionPlan.pro,
-          status: SubscriptionStatus.active,
+          plan: "pro",
+          status: "active",
           currentPeriodStart: new Date(),
           currentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
         },
@@ -65,6 +65,35 @@ async function main() {
   });
 
   console.log('Pro 用户创建完成:', proUser.id);
+
+  // 创建测试项目
+  const project = await prisma.project.create({
+    data: {
+      id: 'test-project-id',
+      name: '测试项目',
+      description: '这是一个测试项目',
+      status: 'active',
+      userId: testUser.id,
+      currentWordCount: 0,
+      targetWordCount: 100000,
+    }
+  });
+  console.log('测试项目创建完成:', project.id);
+
+  // 创建测试章节
+  const chapter = await prisma.chapter.create({
+    data: {
+      id: 'test-chapter-id',
+      projectId: project.id,
+      volumeNumber: 1,
+      chapterNumber: 1,
+      title: '第一章：测试',
+      content: '这是第一章的内容。',
+      status: 'draft',
+      wordCount: 9,
+    }
+  });
+  console.log('测试章节创建完成:', chapter.id);
 
   console.log('种子数据完成!');
 }

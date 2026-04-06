@@ -6,7 +6,8 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
+  url      = "file:./dev.db"
 }
 
 // ============================================
@@ -14,39 +15,39 @@ datasource db {
 // ============================================
 
 model User {
-  id                String    @id @default(uuid()) @db.Uuid
-  email             String    @unique @db.VarChar(255)
-  passwordHash      String    @map("password_hash") @db.VarChar(255)
-  nickname          String?   @db.VarChar(100)
-  avatarUrl         String?   @map("avatar_url") @db.VarChar(500)
-  subscriptionTier  SubscriptionTier @default(free) @map("subscription_tier")
-  createdAt         DateTime  @default(now()) @map("created_at") @db.Timestamp(6)
-  updatedAt         DateTime  @updatedAt @map("updated_at") @db.Timestamp(6)
+  id               String   @id @default(uuid())
+  email            String   @unique
+  passwordHash     String   @map("password_hash")
+  nickname         String?
+  avatarUrl        String?  @map("avatar_url")
+  subscriptionTier String   @default("free") @map("subscription_tier")
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
 
   // Relations
-  preferences       UserPreferences?
-  subscription      Subscription?
-  projects          Project[]
-  agentSessions     AgentSession[]
-  hooks             HookConfig[]
-  companionSprite   CompanionSprite?
-  usageRecords      UsageRecord[]
-  payments          Payment[]
-  permissionAudits  PermissionAuditLog[]
+  preferences      UserPreferences?
+  subscription     Subscription?
+  projects         Project[]
+  agentSessions    AgentSession[]
+  hooks            HookConfig[]
+  companionSprite  CompanionSprite?
+  usageRecords     UsageRecord[]
+  payments         Payment[]
+  permissionAudits PermissionAuditLog[]
 
   @@map("users")
 }
 
 model UserPreferences {
-  id              String    @id @default(uuid()) @db.Uuid
-  userId          String    @unique @map("user_id") @db.Uuid
-  uiLanguage      String    @default("zh") @map("ui_language") @db.VarChar(10)
-  writingLanguage String    @default("zh") @map("writing_language") @db.VarChar(10)
-  timezone        String    @default("Asia/Shanghai") @db.VarChar(50)
-  currency        String    @default("CNY") @db.VarChar(3)
-  region          String    @default("ap") @db.VarChar(10)
-  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamp(6)
-  updatedAt       DateTime  @updatedAt @map("updated_at") @db.Timestamp(6)
+  id              String   @id @default(uuid())
+  userId          String   @unique @map("user_id")
+  uiLanguage      String   @default("zh") @map("ui_language")
+  writingLanguage String   @default("zh") @map("writing_language")
+  timezone        String   @default("Asia/Shanghai")
+  currency        String   @default("CNY")
+  region          String   @default("ap")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
 
   // Relations
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -55,17 +56,17 @@ model UserPreferences {
 }
 
 model Subscription {
-  id                    String            @id @default(uuid()) @db.Uuid
-  userId                String            @unique @map("user_id") @db.Uuid
-  plan                  SubscriptionPlan  @default(free)
-  status                SubscriptionStatus @default(trialing)
-  stripeCustomerId      String?           @map("stripe_customer_id") @db.VarChar(255)
-  stripeSubscriptionId  String?           @map("stripe_subscription_id") @db.VarChar(255)
-  currentPeriodStart    DateTime?         @map("current_period_start") @db.Timestamp(6)
-  currentPeriodEnd      DateTime?         @map("current_period_end") @db.Timestamp(6)
-  cancelAtPeriodEnd     Boolean           @default(false) @map("cancel_at_period_end")
-  createdAt             DateTime          @default(now()) @map("created_at") @db.Timestamp(6)
-  updatedAt             DateTime          @updatedAt @map("updated_at") @db.Timestamp(6)
+  id                   String    @id @default(uuid())
+  userId               String    @unique @map("user_id")
+  plan                 String    @default("free")
+  status               String    @default("trialing")
+  stripeCustomerId     String?   @map("stripe_customer_id")
+  stripeSubscriptionId String?   @map("stripe_subscription_id")
+  currentPeriodStart   DateTime? @map("current_period_start")
+  currentPeriodEnd     DateTime? @map("current_period_end")
+  cancelAtPeriodEnd    Boolean   @default(false) @map("cancel_at_period_end")
+  createdAt            DateTime  @default(now()) @map("created_at")
+  updatedAt            DateTime  @updatedAt @map("updated_at")
 
   // Relations
   user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -79,29 +80,29 @@ model Subscription {
 // ============================================
 
 model Project {
-  id                String          @id @default(uuid()) @db.Uuid
-  userId            String          @map("user_id") @db.Uuid
-  name              String          @db.VarChar(200)
-  description       String?         @db.Text
-  genre             String?         @db.VarChar(50)
-  targetWordCount   Int?            @map("target_word_count")
-  currentWordCount  Int             @default(0) @map("current_word_count")
-  status            ProjectStatus   @default(draft)
-  settings          Json?           @db.JsonB
-  createdAt         DateTime        @default(now()) @map("created_at") @db.Timestamp(6)
-  updatedAt         DateTime        @updatedAt @map("updated_at") @db.Timestamp(6)
+  id               String   @id @default(uuid())
+  userId           String   @map("user_id")
+  name             String
+  description      String?
+  genre            String?
+  targetWordCount  Int?     @map("target_word_count")
+  currentWordCount Int      @default(0) @map("current_word_count")
+  status           String   @default("draft")
+  settings         String?
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
 
   // Relations
-  user          User              @relation(fields: [userId], references: [id], onDelete: Cascade)
-  chapters      Chapter[]
-  characters    Character[]
-  worldSettings WorldSetting[]
-  branches      Branch[]
-  foreshadowing Foreshadowing[]
-  agentSessions AgentSession[]
-  hooks         HookConfig[]
-  memoryEntries MemoryEntry[]
-  promptCaches  PromptCacheEntry[]
+  user              User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  chapters          Chapter[]
+  characters        Character[]
+  worldSettings     WorldSetting[]
+  branches          Branch[]
+  foreshadowing     Foreshadowing[]
+  agentSessions     AgentSession[]
+  hooks             HookConfig[]
+  memoryEntries     MemoryEntry[]
+  promptCaches      PromptCacheEntry[]
   compactionRecords CompactionRecord[]
   permissionAudits  PermissionAuditLog[]
 
@@ -109,19 +110,19 @@ model Project {
 }
 
 model Chapter {
-  id              String          @id @default(uuid()) @db.Uuid
-  projectId       String          @map("project_id") @db.Uuid
-  volumeNumber    Int             @map("volume_number")
-  chapterNumber   Int             @map("chapter_number")
-  title           String          @db.VarChar(200)
-  content         String?         @db.Text
-  wordCount       Int             @default(0) @map("word_count")
-  status          ChapterStatus   @default(outline)
-  branchId        String?         @map("branch_id") @db.Uuid
-  parentVersion   String?         @map("parent_version") @db.Uuid
-  metadata        Json?           @db.JsonB
-  createdAt       DateTime        @default(now()) @map("created_at") @db.Timestamp(6)
-  updatedAt       DateTime        @updatedAt @map("updated_at") @db.Timestamp(6)
+  id            String   @id @default(uuid())
+  projectId     String   @map("project_id")
+  volumeNumber  Int      @map("volume_number")
+  chapterNumber Int      @map("chapter_number")
+  title         String
+  content       String?
+  wordCount     Int      @default(0) @map("word_count")
+  status        String   @default("outline")
+  branchId      String?  @map("branch_id")
+  parentVersion String?  @map("parent_version")
+  metadata      String?
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
 
   // Relations
   project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
@@ -131,18 +132,18 @@ model Chapter {
 }
 
 model Character {
-  id                String    @id @default(uuid()) @db.Uuid
-  projectId         String    @map("project_id") @db.Uuid
-  name              String    @db.VarChar(100)
-  aliases           Json?     @db.JsonB
-  roleType          RoleType  @map("role_type")
-  profile           Json?     @db.JsonB
-  relationships     Json?     @db.JsonB
-  arc               Json?     @db.JsonB
-  firstAppearance   String?   @map("first_appearance") @db.Uuid
-  wordCount         Int       @default(0) @map("word_count")
-  createdAt         DateTime  @default(now()) @map("created_at") @db.Timestamp(6)
-  updatedAt         DateTime  @updatedAt @map("updated_at") @db.Timestamp(6)
+  id              String   @id @default(uuid())
+  projectId       String   @map("project_id")
+  name            String
+  aliases         String?
+  roleType        String   @map("role_type")
+  profile         String?
+  relationships   String?
+  arc             String?
+  firstAppearance String?  @map("first_appearance")
+  wordCount       Int      @default(0) @map("word_count")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
 
   // Relations
   project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
@@ -151,18 +152,18 @@ model Character {
 }
 
 model WorldSetting {
-  id              String    @id @default(uuid()) @db.Uuid
-  projectId       String    @map("project_id") @db.Uuid
-  name            String    @db.VarChar(200)
-  category        String    @db.VarChar(100)
-  type            String    @db.VarChar(50)
-  description     String?   @db.Text
-  properties      Json?     @db.JsonB
-  relations       Json?     @db.JsonB
-  sourceChapters  Json?     @map("source_chapters") @db.JsonB
-  version         Int       @default(1)
-  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamp(6)
-  updatedAt       DateTime  @updatedAt @map("updated_at") @db.Timestamp(6)
+  id             String   @id @default(uuid())
+  projectId      String   @map("project_id")
+  name           String
+  category       String
+  type           String
+  description    String?
+  properties     String?
+  relations      String?
+  sourceChapters String?  @map("source_chapters")
+  version        Int      @default(1)
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
 
   // Relations
   project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
@@ -171,17 +172,17 @@ model WorldSetting {
 }
 
 model Branch {
-  id              String        @id @default(uuid()) @db.Uuid
-  projectId       String        @map("project_id") @db.Uuid
-  name            String        @db.VarChar(200)
-  type            BranchType
-  parentBranchId  String?       @map("parent_branch_id") @db.Uuid
-  forkPoint       String?       @map("fork_point") @db.Uuid
-  description     String?       @db.Text
-  wordCount       Int           @default(0) @map("word_count")
-  status          BranchStatus  @default(active)
-  createdAt       DateTime      @default(now()) @map("created_at") @db.Timestamp(6)
-  updatedAt       DateTime      @updatedAt @map("updated_at") @db.Timestamp(6)
+  id             String   @id @default(uuid())
+  projectId      String   @map("project_id")
+  name           String
+  type           String
+  parentBranchId String?  @map("parent_branch_id")
+  forkPoint      String?  @map("fork_point")
+  description    String?
+  wordCount      Int      @default(0) @map("word_count")
+  status         String   @default("active")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
 
   // Relations
   project  Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
@@ -191,19 +192,19 @@ model Branch {
 }
 
 model Foreshadowing {
-  id                    String              @id @default(uuid()) @db.Uuid
-  projectId             String              @map("project_id") @db.Uuid
-  content               String              @db.Text
-  plantedChapterId      String?             @map("planted_chapter_id") @db.Uuid
-  plantedText           String?             @map("planted_text") @db.Text
-  expectedPayoffChapter Int?                @map("expected_payoff_chapter")
-  actualPayoffChapterId String?             @map("actual_payoff_chapter_id") @db.Uuid
-  status                ForeshadowingStatus @default(planted)
-  priority              Priority            @default(medium)
-  relatedCharacters     Json?               @map("related_characters") @db.JsonB
-  notes                 String?             @db.Text
-  createdAt             DateTime            @default(now()) @map("created_at") @db.Timestamp(6)
-  updatedAt             DateTime            @updatedAt @map("updated_at") @db.Timestamp(6)
+  id                    String   @id @default(uuid())
+  projectId             String   @map("project_id")
+  content               String
+  plantedChapterId      String?  @map("planted_chapter_id")
+  plantedText           String?  @map("planted_text")
+  expectedPayoffChapter Int?     @map("expected_payoff_chapter")
+  actualPayoffChapterId String?  @map("actual_payoff_chapter_id")
+  status                String   @default("planted")
+  priority              String   @default("medium")
+  relatedCharacters     String?  @map("related_characters")
+  notes                 String?
+  createdAt             DateTime @default(now()) @map("created_at")
+  updatedAt             DateTime @updatedAt @map("updated_at")
 
   // Relations
   project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
@@ -216,45 +217,45 @@ model Foreshadowing {
 // ============================================
 
 model AgentSession {
-  id                String          @id @default(uuid()) @db.Uuid
-  projectId         String          @map("project_id") @db.Uuid
-  userId            String          @map("user_id") @db.Uuid
-  agentType         AgentType       @map("agent_type")
-  parentAgentId     String?         @map("parent_agent_id") @db.Uuid
-  mode              AgentMode
-  status            AgentStatus     @default(active)
-  task              String?         @db.Text
-  turnCount         Int             @default(0) @map("turn_count")
-  maxTurns          Int             @default(10) @map("max_turns")
-  model             String?         @db.VarChar(50)
-  contextSnapshot   Json?           @map("context_snapshot") @db.JsonB
-  result            Json?           @db.JsonB
-  createdAt         DateTime        @default(now()) @map("created_at") @db.Timestamp(6)
-  updatedAt         DateTime        @updatedAt @map("updated_at") @db.Timestamp(6)
-  completedAt       DateTime?       @map("completed_at") @db.Timestamp(6)
+  id              String    @id @default(uuid())
+  projectId       String    @map("project_id")
+  userId          String    @map("user_id")
+  agentType       String    @map("agent_type")
+  parentAgentId   String?   @map("parent_agent_id")
+  mode            String
+  status          String    @default("active")
+  task            String?
+  turnCount       Int       @default(0) @map("turn_count")
+  maxTurns        Int       @default(10) @map("max_turns")
+  model           String?
+  contextSnapshot String?   @map("context_snapshot")
+  result          String?
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+  completedAt     DateTime? @map("completed_at")
 
   // Relations
-  project   Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("agent_sessions")
 }
 
 model HookConfig {
-  id            String      @id @default(uuid()) @db.Uuid
-  projectId     String?     @map("project_id") @db.Uuid
-  userId        String      @map("user_id") @db.Uuid
-  name          String      @db.VarChar(200)
-  event         String      @db.VarChar(100)
-  matchPattern  String?     @map("match_pattern") @db.VarChar(500)
-  actionType    HookActionType @map("action_type")
-  scriptType    ScriptType  @map("script_type")
-  scriptPath    String?     @map("script_path") @db.VarChar(500)
-  priority      Int         @default(0)
-  enabled       Boolean     @default(true)
-  config        Json?       @db.JsonB
-  createdAt     DateTime    @default(now()) @map("created_at") @db.Timestamp(6)
-  updatedAt     DateTime    @updatedAt @map("updated_at") @db.Timestamp(6)
+  id           String   @id @default(uuid())
+  projectId    String?  @map("project_id")
+  userId       String   @map("user_id")
+  name         String
+  event        String
+  matchPattern String?  @map("match_pattern")
+  actionType   String   @map("action_type")
+  scriptType   String   @map("script_type")
+  scriptPath   String?  @map("script_path")
+  priority     Int      @default(0)
+  enabled      Boolean  @default(true)
+  config       String?
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
 
   // Relations
   project Project? @relation(fields: [projectId], references: [id], onDelete: SetNull)
@@ -264,22 +265,22 @@ model HookConfig {
 }
 
 model MemoryEntry {
-  id                String          @id @default(uuid()) @db.Uuid
-  projectId         String          @map("project_id") @db.Uuid
-  sessionId         String?         @map("session_id") @db.Uuid
-  type              String          @db.VarChar(50)
-  content           String          @db.Text
-  summary           String?         @db.Text
-  sourceChapterId   String?         @map("source_chapter_id") @db.Uuid
-  sourceText        String?         @map("source_text") @db.Text
-  entities          Json?           @db.JsonB
-  importance        Importance      @default(medium)
-  compressionLevel  Int             @default(0) @map("compression_level")
-  accessCount       Int             @default(0) @map("access_count")
-  lastAccessed      DateTime?       @map("last_accessed") @db.Timestamp(6)
-  expiresAt         DateTime?       @map("expires_at") @db.Timestamp(6)
-  createdAt         DateTime        @default(now()) @map("created_at") @db.Timestamp(6)
-  updatedAt         DateTime        @updatedAt @map("updated_at") @db.Timestamp(6)
+  id               String    @id @default(uuid())
+  projectId        String    @map("project_id")
+  sessionId        String?   @map("session_id")
+  type             String
+  content          String
+  summary          String?
+  sourceChapterId  String?   @map("source_chapter_id")
+  sourceText       String?   @map("source_text")
+  entities         String?
+  importance       String    @default("medium")
+  compressionLevel Int       @default(0) @map("compression_level")
+  accessCount      Int       @default(0) @map("access_count")
+  lastAccessed     DateTime? @map("last_accessed")
+  expiresAt        DateTime? @map("expires_at")
+  createdAt        DateTime  @default(now()) @map("created_at")
+  updatedAt        DateTime  @updatedAt @map("updated_at")
 
   // Relations
   project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
@@ -288,19 +289,19 @@ model MemoryEntry {
 }
 
 model CompanionSprite {
-  id                  String      @id @default(uuid()) @db.Uuid
-  userId              String      @unique @map("user_id") @db.Uuid
-  species             String      @db.VarChar(50)
-  rarity              String      @db.VarChar(50)
-  name                String?     @db.VarChar(100)
-  level               Int         @default(1)
-  experience          Int         @default(0)
-  attributes          Json?       @db.JsonB
-  evolution           String?     @db.VarChar(50)
-  totalCompanionHours Decimal     @default(0) @map("total_companion_hours") @db.Decimal(10, 2)
+  id                  String   @id @default(uuid())
+  userId              String   @unique @map("user_id")
+  species             String
+  rarity              String
+  name                String?
+  level               Int      @default(1)
+  experience          Int      @default(0)
+  attributes          String?
+  evolution           String?
+  totalCompanionHours Float    @default(0) @map("total_companion_hours")
   seed                BigInt?
-  createdAt           DateTime    @default(now()) @map("created_at") @db.Timestamp(6)
-  updatedAt           DateTime    @updatedAt @map("updated_at") @db.Timestamp(6)
+  createdAt           DateTime @default(now()) @map("created_at")
+  updatedAt           DateTime @updatedAt @map("updated_at")
 
   // Relations
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -313,15 +314,15 @@ model CompanionSprite {
 // ============================================
 
 model PromptCacheEntry {
-  id            String          @id @default(uuid()) @db.Uuid
-  projectId     String          @map("project_id") @db.Uuid
-  cacheScope    CacheScope      @map("cache_scope")
-  blockType     BlockType       @map("block_type")
-  contentHash   String          @map("content_hash") @db.VarChar(64)
-  tokenCount    Int             @map("token_count")
-  hitCount      Int             @default(0) @map("hit_count")
-  lastHitAt     DateTime?       @map("last_hit_at") @db.Timestamp(6)
-  createdAt     DateTime        @default(now()) @map("created_at") @db.Timestamp(6)
+  id          String    @id @default(uuid())
+  projectId   String    @map("project_id")
+  cacheScope  String    @map("cache_scope")
+  blockType   String    @map("block_type")
+  contentHash String    @map("content_hash")
+  tokenCount  Int       @map("token_count")
+  hitCount    Int       @default(0) @map("hit_count")
+  lastHitAt   DateTime? @map("last_hit_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
 
   // Relations
   project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
@@ -330,18 +331,18 @@ model PromptCacheEntry {
 }
 
 model CompactionRecord {
-  id                  String            @id @default(uuid()) @db.Uuid
-  sessionId           String?           @map("session_id") @db.Uuid
-  projectId           String            @map("project_id") @db.Uuid
-  compactionLevel     CompactionLevel   @map("compaction_level")
-  tokensBefore        Int               @map("tokens_before")
-  tokensAfter         Int               @map("tokens_after")
-  summaryContent      String?           @map("summary_content") @db.Text
-  firstArchivedMsgId  String?           @map("first_archived_msg_id") @db.Uuid
-  lastArchivedMsgId   String?           @map("last_archived_msg_id") @db.Uuid
-  isReversible        Boolean           @default(true) @map("is_reversible")
-  consecutiveFailures Int               @default(0) @map("consecutive_failures")
-  createdAt           DateTime          @default(now()) @map("created_at") @db.Timestamp(6)
+  id                  String   @id @default(uuid())
+  sessionId           String?  @map("session_id")
+  projectId           String   @map("project_id")
+  compactionLevel     String   @map("compaction_level")
+  tokensBefore        Int      @map("tokens_before")
+  tokensAfter         Int      @map("tokens_after")
+  summaryContent      String?  @map("summary_content")
+  firstArchivedMsgId  String?  @map("first_archived_msg_id")
+  lastArchivedMsgId   String?  @map("last_archived_msg_id")
+  isReversible        Boolean  @default(true) @map("is_reversible")
+  consecutiveFailures Int      @default(0) @map("consecutive_failures")
+  createdAt           DateTime @default(now()) @map("created_at")
 
   // Relations
   project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
@@ -350,17 +351,17 @@ model CompactionRecord {
 }
 
 model PermissionAuditLog {
-  id                String            @id @default(uuid()) @db.Uuid
-  projectId         String?           @map("project_id") @db.Uuid
-  userId            String            @map("user_id") @db.Uuid
-  sessionId         String?           @map("session_id") @db.Uuid
-  operationType     String            @map("operation_type") @db.VarChar(100)
-  classifierStage   ClassifierStage   @map("classifier_stage")
-  decision          PermissionDecision
-  reason            String?           @db.Text
-  racerId           String?           @map("racer_id") @db.VarChar(50)
-  processingTimeMs  Int               @map("processing_time_ms")
-  createdAt         DateTime          @default(now()) @map("created_at") @db.Timestamp(6)
+  id               String   @id @default(uuid())
+  projectId        String?  @map("project_id")
+  userId           String   @map("user_id")
+  sessionId        String?  @map("session_id")
+  operationType    String   @map("operation_type")
+  classifierStage  String   @map("classifier_stage")
+  decision         String
+  reason           String?
+  racerId          String?  @map("racer_id")
+  processingTimeMs Int      @map("processing_time_ms")
+  createdAt        DateTime @default(now()) @map("created_at")
 
   // Relations
   project Project? @relation(fields: [projectId], references: [id], onDelete: SetNull)
@@ -370,14 +371,14 @@ model PermissionAuditLog {
 }
 
 model FeatureGate {
-  id                  String      @id @default(uuid()) @db.Uuid
-  featureName         String      @unique @map("feature_name") @db.VarChar(100)
-  gateLevel           GateLevel   @map("gate_level")
-  enabled             Boolean     @default(false)
-  rolloutPercentage   Int         @default(0) @map("rollout_percentage")
-  config              Json?       @db.JsonB
-  createdAt           DateTime    @default(now()) @map("created_at") @db.Timestamp(6)
-  updatedAt           DateTime    @updatedAt @map("updated_at") @db.Timestamp(6)
+  id                String   @id @default(uuid())
+  featureName       String   @unique @map("feature_name")
+  gateLevel         String   @map("gate_level")
+  enabled           Boolean  @default(false)
+  rolloutPercentage Int      @default(0) @map("rollout_percentage")
+  config            String?
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
 
   @@map("feature_gates")
 }
@@ -387,14 +388,14 @@ model FeatureGate {
 // ============================================
 
 model UsageRecord {
-  id            String    @id @default(uuid()) @db.Uuid
-  userId        String    @map("user_id") @db.Uuid
-  periodStart   DateTime  @map("period_start") @db.Timestamp(6)
-  periodEnd     DateTime  @map("period_end") @db.Timestamp(6)
-  wordsUsed     Int       @default(0) @map("words_used")
-  wordsLimit    Int       @default(0) @map("words_limit")
-  aiTokensUsed  BigInt    @default(0) @map("ai_tokens_used")
-  planId        String?   @map("plan_id") @db.VarChar(50)
+  id           String   @id @default(uuid())
+  userId       String   @map("user_id")
+  periodStart  DateTime @map("period_start")
+  periodEnd    DateTime @map("period_end")
+  wordsUsed    Int      @default(0) @map("words_used")
+  wordsLimit   Int      @default(0) @map("words_limit")
+  aiTokensUsed BigInt   @default(0) @map("ai_tokens_used")
+  planId       String?  @map("plan_id")
 
   // Relations
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -403,15 +404,15 @@ model UsageRecord {
 }
 
 model Payment {
-  id                      String        @id @default(uuid()) @db.Uuid
-  userId                  String        @map("user_id") @db.Uuid
-  subscriptionId          String?       @map("subscription_id") @db.Uuid
-  stripePaymentIntentId   String?       @map("stripe_payment_intent_id") @db.VarChar(255)
-  amount                  Decimal       @db.Decimal(10, 2)
-  currency                String        @db.VarChar(3)
-  status                  PaymentStatus @default(pending)
-  refundedAt              DateTime?     @map("refunded_at") @db.Timestamp(6)
-  createdAt               DateTime      @default(now()) @map("created_at") @db.Timestamp(6)
+  id                    String    @id @default(uuid())
+  userId                String    @map("user_id")
+  subscriptionId        String?   @map("subscription_id")
+  stripePaymentIntentId String?   @map("stripe_payment_intent_id")
+  amount                Float
+  currency              String
+  status                String    @default("pending")
+  refundedAt            DateTime? @map("refunded_at")
+  createdAt             DateTime  @default(now()) @map("created_at")
 
   // Relations
   user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -423,157 +424,3 @@ model Payment {
 // ============================================
 // Enums
 // ============================================
-
-enum SubscriptionTier {
-  free
-  pro
-  enterprise
-}
-
-enum SubscriptionPlan {
-  free
-  pro
-  studio
-  team
-}
-
-enum SubscriptionStatus {
-  active
-  past_due
-  canceled
-  trialing
-}
-
-enum ProjectStatus {
-  draft
-  writing
-  completed
-  published
-}
-
-enum ChapterStatus {
-  outline
-  draft
-  revised
-  final
-}
-
-enum RoleType {
-  protagonist
-  antagonist
-  supporting
-  minor
-}
-
-enum BranchType {
-  main
-  exploration
-  perspective
-  timeline
-  style
-}
-
-enum BranchStatus {
-  active
-  merged
-  archived
-}
-
-enum ForeshadowingStatus {
-  planted
-  developing
-  payoff
-  verified
-  forgotten
-}
-
-enum Priority {
-  high
-  medium
-  low
-}
-
-enum AgentType {
-  main
-  coordinator
-  sub
-}
-
-enum AgentMode {
-  interactive
-  proactive
-  coordinator
-}
-
-enum AgentStatus {
-  active
-  paused
-  completed
-  failed
-}
-
-enum HookActionType {
-  allow
-  deny
-  modify
-  inform
-}
-
-enum ScriptType {
-  builtin
-  custom
-  plugin
-}
-
-enum Importance {
-  critical
-  high
-  medium
-  low
-}
-
-enum CacheScope {
-  global
-  org
-  session
-}
-
-enum BlockType {
-  static
-  dynamic
-  attribution
-}
-
-enum CompactionLevel {
-  L1
-  L2
-  L3
-  L4
-}
-
-enum ClassifierStage {
-  stage1
-  stage2
-  hook
-  user
-}
-
-enum PermissionDecision {
-  allow
-  deny
-  modify
-}
-
-enum GateLevel {
-  compile
-  runtime
-  env
-  api
-}
-
-enum PaymentStatus {
-  succeeded
-  pending
-  failed
-  refunded
-}

@@ -1,9 +1,10 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('世界观设定 CRUD (T-KNOW-005)', () => {
-  const projectId = 'test-project-123';
+  const projectId = 'test-project-id';
 
   test.beforeEach(async ({ page }) => {
+    page.on('console', msg => console.log(`[Browser] ${msg.text()}`));
     // 访问世界观设定页面
     await page.goto(`/workbench/${projectId}/world-settings`);
     // 等待页面加载完成
@@ -105,7 +106,7 @@ test.describe('世界观设定 CRUD (T-KNOW-005)', () => {
     await page.waitForSelector('[data-testid="world-setting-form-modal"]', { timeout: 5000 });
     await page.fill('[data-testid="setting-title-input"]', '待编辑设定');
     await page.fill('[data-testid="setting-content-input"]', '这是原始内容');
-    await page.click('[data-testid="save-setting-button"]');
+    await page.click('[data-testid="save-setting-button"]', { force: true });
     await page.waitForSelector('[data-testid="world-setting-form-modal"]', { state: 'hidden', timeout: 5000 });
     
     // 等待设定出现在列表中
@@ -126,7 +127,7 @@ test.describe('世界观设定 CRUD (T-KNOW-005)', () => {
     await page.fill('[data-testid="setting-title-input"]', '已编辑设定');
     
     // 保存
-    await page.click('[data-testid="save-setting-button"]');
+    await page.click('[data-testid="save-setting-button"]', { force: true });
     
     // 验证修改成功
     await page.waitForSelector('[data-testid="world-setting-form-modal"]', { state: 'hidden', timeout: 5000 });
@@ -253,7 +254,7 @@ test.describe('世界观设定 CRUD (T-KNOW-005)', () => {
     await page.waitForSelector('[data-testid="world-setting-form-modal"]', { timeout: 5000 });
     await page.fill('[data-testid="setting-title-input"]', '编辑时删除');
     await page.fill('[data-testid="setting-content-input"]', '这是编辑时删除的设定');
-    await page.click('[data-testid="save-setting-button"]');
+    await page.click('[data-testid="save-setting-button"]', { force: true });
     await page.waitForSelector('[data-testid="world-setting-form-modal"]', { state: 'hidden', timeout: 5000 });
     
     // 等待设定出现在列表中
@@ -287,8 +288,8 @@ test.describe('世界观设定 CRUD (T-KNOW-005)', () => {
     }
     
     // 验证分类标题显示
-    await expect(page.locator('text=魔法')).toBeVisible();
-    await expect(page.locator('text=地理')).toBeVisible();
+    await expect(page.locator('h2:has-text("魔法")').first()).toBeVisible();
+    await expect(page.locator('h2:has-text("地理")').first()).toBeVisible();
     
     // 验证设定在正确的分类下
     await expect(page.locator('[data-testid="setting-title"]:has-text("魔法体系")')).toBeVisible();

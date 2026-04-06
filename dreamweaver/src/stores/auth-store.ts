@@ -32,8 +32,8 @@ export const authStore = create<AuthState>()(
         try {
           const response = await api.post<{ user: User; token: string }>('/api/auth/login', credentials);
           set({
-            user: response.data.user,
-            token: response.data.token,
+            user: response.user,
+            token: response.token,
             isLoading: false,
             error: null,
           });

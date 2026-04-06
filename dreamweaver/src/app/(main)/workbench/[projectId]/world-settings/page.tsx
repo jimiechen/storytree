@@ -51,8 +51,9 @@ export default function WorldSettingsPage() {
     const fetchSettings = async () => {
       try {
         setLoading(true);
-        const response = await api.get<{ data: WorldSetting[] }>(`/api/projects/${projectId}/world-settings`);
-        const settingsData = response?.data || [];
+        console.log('[DEBUG] Fetching world settings for projectId:', projectId);
+        const response = await api.get<any>(`/api/projects/${projectId}/world-settings`);
+        const settingsData = response?.data || response || [];
         setStoreWorldSettings(settingsData);
       } catch (err) {
         setError('获取世界观设定失败');
@@ -88,16 +89,23 @@ export default function WorldSettingsPage() {
   // 创建设定
   const handleCreateSetting = async (data: Omit<WorldSetting, 'id' | 'createdAt' | 'updatedAt'>) => {
     try {
-      const response = await api.post<{ data: WorldSetting }>(`/api/projects/${projectId}/world-settings`, {
+      console.log('[DEBUG] handleCreateSetting called with data:', data);
+      const response = await api.post<any>(`/api/projects/${projectId}/world-settings`, {
         ...data,
         projectId,
       });
       
-      if (response?.data) {
-        addStoreWorldSetting(response.data);
+      const newSetting = response?.data || response;
+      console.log('[DEBUG] handleCreateSetting received newSetting:', newSetting);
+      if (newSetting) {
+        addStoreWorldSetting(newSetting);
+        setIsFormOpen(false);
+        console.log('[DEBUG] setIsFormOpen(false) called!');
+      } else {
+        console.log('[DEBUG] newSetting is falsy!');
       }
     } catch (err) {
-      console.error('Failed to create world setting:', err);
+      console.error('[DEBUG] Failed to create world setting:', err);
       setError('创建设定失败');
     }
   };
@@ -107,10 +115,12 @@ export default function WorldSettingsPage() {
     if (!editingSetting) return;
     
     try {
-      const response = await api.put<{ data: WorldSetting }>(`/api/projects/${projectId}/world-settings/${editingSetting.id}`, data);
+      const response = await api.put<any>(`/api/projects/${projectId}/world-settings/${editingSetting.id}`, data);
       
-      if (response?.data) {
-        updateStoreWorldSetting(editingSetting.id, response.data);
+      const updatedSetting = response?.data || response;
+      if (updatedSetting) {
+        updateStoreWorldSetting(editingSetting.id, updatedSetting);
+        setIsFormOpen(false);
       }
     } catch (err) {
       console.error('Failed to update world setting:', err);

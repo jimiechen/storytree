@@ -22,10 +22,10 @@ interface Project {
 }
 
 const templates = [
-  { id: 'xianxia', name: '仙侠', nameEn: 'Cultivation & Immortals', icon: 'swords', color: 'primary' },
-  { id: 'urban', name: '都市', nameEn: 'Urban Legends', icon: 'apartment', color: 'secondary' },
-  { id: 'mystery', name: '悬疑', nameEn: 'Mystery & Noir', icon: 'search_check', color: 'error' },
-  { id: 'scifi', name: '科幻', nameEn: 'Futuristic Worlds', icon: 'rocket_launch', color: 'tertiary' },
+  { id: 'xianxia', name: '仙侠', nameEn: 'Cultivation & Immortals', icon: 'swords', color: 'primary' as const },
+  { id: 'urban', name: '都市', nameEn: 'Urban Legends', icon: 'apartment', color: 'secondary' as const },
+  { id: 'mystery', name: '悬疑', nameEn: 'Mystery & Noir', icon: 'search_check', color: 'error' as const },
+  { id: 'scifi', name: '科幻', nameEn: 'Futuristic Worlds', icon: 'rocket_launch', color: 'tertiary' as const },
 ];
 
 export default function ProjectsPage() {
@@ -44,8 +44,8 @@ export default function ProjectsPage() {
     if (searchTerm) {
       setFilteredProjects(
         projects.filter(project =>
-          project.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          project.description.toLowerCase().includes(searchTerm.toLowerCase())
+          (project.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+          (project.description || '').toLowerCase().includes(searchTerm.toLowerCase())
         )
       );
     } else {
@@ -56,8 +56,8 @@ export default function ProjectsPage() {
   const fetchProjects = async () => {
     try {
       setLoading(true);
-      const response = await api.get<{ result: { code: number; data: Project[] } }>('/api/projects');
-      const projectsList = response.result?.data || [];
+      const response = await api.get<Project[]>('/api/projects');
+      const projectsList = Array.isArray(response) ? response : [];
       setProjects(projectsList);
       setFilteredProjects(projectsList);
     } catch (error) {
@@ -81,7 +81,7 @@ export default function ProjectsPage() {
     fetchProjects();
   };
 
-  const totalWordCount = projects.reduce((sum, p) => sum + p.currentWordCount, 0);
+  const totalWordCount = projects.reduce((sum, p) => sum + (p.currentWordCount || 0), 0);
   const activeProjects = projects.filter(p => p.status === 'writing').length;
 
   if (loading) {

@@ -21,7 +21,6 @@ export function Editor({ content, onContentChange, placeholder = '开始写作..
       StarterKit,
     ],
     content: editorContent,
-    placeholder: placeholder,
     immediatelyRender: false,
     onUpdate: ({ editor }) => {
       const newContent = editor.getHTML();

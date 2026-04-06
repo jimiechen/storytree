@@ -45,10 +45,10 @@ export const useKnowledgeStore = create<KnowledgeState>()((set, get) => ({
    */
   addCharacter: (characterData) => {
     const newCharacter: Character = {
-      ...characterData,
       id: generateId(),
       createdAt: getCurrentTimestamp(),
       updatedAt: getCurrentTimestamp(),
+      ...characterData,
     };
 
     set((state) => ({
@@ -123,10 +123,10 @@ export const useKnowledgeStore = create<KnowledgeState>()((set, get) => ({
    */
   addWorldSetting: (settingData) => {
     const newSetting: WorldSetting = {
-      ...settingData,
       id: generateId(),
       createdAt: getCurrentTimestamp(),
       updatedAt: getCurrentTimestamp(),
+      ...settingData,
     };
 
     set((state) => ({

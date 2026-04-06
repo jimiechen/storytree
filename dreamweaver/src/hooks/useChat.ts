@@ -23,7 +23,7 @@ export interface UseChatOptions {
 export interface UseChatReturn {
   messages: Message[];
   input: string;
-  handleInputChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
+  handleInputChange: (e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => void;
   handleSubmit: (e: React.FormEvent) => void;
   isLoading: boolean;
   error: string | null;
@@ -31,6 +31,7 @@ export interface UseChatReturn {
   setModel: (model: string) => void;
   append: (message: Omit<Message, 'id'>) => void;
   clearMessages: () => void;
+  setMessages: React.Dispatch<React.SetStateAction<Message[]>>;
 }
 
 /**
@@ -70,7 +71,7 @@ export function useChat({ projectId, context }: UseChatOptions): UseChatReturn {
   const [model, setModel] = useState('gpt-4o-mini');
   const abortControllerRef = useRef<AbortController | null>(null);
 
-  const handleInputChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
+  const handleInputChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
     setInput(e.target.value);
   }, []);
 
@@ -224,5 +225,6 @@ export function useChat({ projectId, context }: UseChatOptions): UseChatReturn {
     setModel,
     append,
     clearMessages,
+    setMessages,
   };
 }

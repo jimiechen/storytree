@@ -16,6 +16,8 @@ interface Chapter {
   title: string;
   content: string;
   order: number;
+  status: 'draft' | 'writing' | 'completed' | 'published';
+  wordCount?: number;
 }
 
 interface Volume {
@@ -44,18 +46,20 @@ export default function WorkbenchPage() {
     const fetchChapters = async () => {
       try {
         setLoading(true);
-        const response = await api.get<{ result: { data: { chapters: Chapter[] } } }>(
+        const response = await api.get<any>(
           `/api/projects/${projectId}/chapters`
         );
-        const chaptersData = response?.result?.data?.chapters || [];
+        const chaptersData = response?.result?.data?.chapters || response?.result?.data || response?.chapters || response || [];
 
         // 组织成卷结构（简化处理，默认第一卷）
         const defaultVolume: Volume = {
           id: 'volume-1',
           name: '第一卷',
-          chapters: chaptersData.map((c) => ({
+          chapters: (Array.isArray(chaptersData) ? chaptersData : []).map((c: any) => ({
             ...c,
             order: c.order || 1,
+            status: c.status || 'draft',
+            wordCount: c.wordCount || 0,
           })),
         };
 
@@ -215,7 +219,7 @@ export default function WorkbenchPage() {
       <ActivityBar activeView={activeView} onViewChange={setActiveView} />
 
       {/* App Shell */}
-      <main className="flex flex-1 ml-[48px] h-full overflow-hidden">
+      <main className="flex flex-1 h-full overflow-hidden">
         {/* Primary Sidebar (Story Explorer) */}
         <StoryExplorer
           volumes={volumes}

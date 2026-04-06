@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('模型中心页面 (T-UI-007)', () => {
-  const projectId = 'test-project-123';
+  const projectId = 'test-project-id';
 
   test.beforeEach(async ({ page }) => {
     // 访问模型中心页面

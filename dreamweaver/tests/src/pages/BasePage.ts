@@ -22,7 +22,7 @@ export class BasePage {
     return this.page.locator(`[data-testid="${testId}"]`);
   }
 
-  async getByRole(role: string, options?: { name?: string }): Promise<Locator> {
+  async getByRole(role: any, options?: { name?: string }): Promise<Locator> {
     return this.page.getByRole(role, options);
   }
 

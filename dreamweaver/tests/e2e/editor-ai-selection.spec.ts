@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('编辑器划词 AI 辅助 (T-AI-004)', () => {
-  const projectId = 'test-project-123';
+  const projectId = 'test-project-id';
 
   test.beforeEach(async ({ page }) => {
     // 访问工作台页面
@@ -33,20 +33,14 @@ test.describe('编辑器划词 AI 辅助 (T-AI-004)', () => {
 
   test('点击润色按钮应该替换选中的文本', async ({ page }) => {
     // 拦截 AI API 请求
-    await page.route('/api/chat', async (route) => {
-      const stream = new ReadableStream({
-        start(controller) {
-          controller.enqueue(new TextEncoder().encode('这是润色后的文本内容。'));
-          controller.close();
-        },
-      });
+    await page.route('**/api/chat', async (route) => {
 
       await route.fulfill({
         status: 200,
         headers: {
           'Content-Type': 'text/plain; charset=utf-8',
         },
-        body: stream,
+        body: "这是润色后的文本内容。",
       });
     });
 
@@ -73,20 +67,14 @@ test.describe('编辑器划词 AI 辅助 (T-AI-004)', () => {
 
   test('点击续写按钮应该替换选中的文本', async ({ page }) => {
     // 拦截 AI API 请求
-    await page.route('/api/chat', async (route) => {
-      const stream = new ReadableStream({
-        start(controller) {
-          controller.enqueue(new TextEncoder().encode('这是续写后的文本内容。'));
-          controller.close();
-        },
-      });
+    await page.route('**/api/chat', async (route) => {
 
       await route.fulfill({
         status: 200,
         headers: {
           'Content-Type': 'text/plain; charset=utf-8',
         },
-        body: stream,
+        body: "这是续写后的文本内容。",
       });
     });
 
@@ -113,20 +101,14 @@ test.describe('编辑器划词 AI 辅助 (T-AI-004)', () => {
 
   test('点击扩写按钮应该替换选中的文本', async ({ page }) => {
     // 拦截 AI API 请求
-    await page.route('/api/chat', async (route) => {
-      const stream = new ReadableStream({
-        start(controller) {
-          controller.enqueue(new TextEncoder().encode('这是扩写后的文本内容，增加了更多细节和描写。'));
-          controller.close();
-        },
-      });
+    await page.route('**/api/chat', async (route) => {
 
       await route.fulfill({
         status: 200,
         headers: {
           'Content-Type': 'text/plain; charset=utf-8',
         },
-        body: stream,
+        body: "这是扩写后的文本内容",
       });
     });
 
@@ -153,22 +135,16 @@ test.describe('编辑器划词 AI 辅助 (T-AI-004)', () => {
 
   test('AI 处理时应该显示加载状态', async ({ page }) => {
     // 拦截 AI API 请求并延迟响应
-    await page.route('/api/chat', async (route) => {
+    await page.route('**/api/chat', async (route) => {
       await new Promise(resolve => setTimeout(resolve, 1500));
       
-      const stream = new ReadableStream({
-        start(controller) {
-          controller.enqueue(new TextEncoder().encode('处理后的文本'));
-          controller.close();
-        },
-      });
 
       await route.fulfill({
         status: 200,
         headers: {
           'Content-Type': 'text/plain; charset=utf-8',
         },
-        body: stream,
+        body: "处理完成",
       });
     });
 
@@ -212,23 +188,16 @@ test.describe('编辑器划词 AI 辅助 (T-AI-004)', () => {
     let requestBody: any = null;
 
     // 拦截 AI API 请求并记录请求体
-    await page.route('/api/chat', async (route) => {
+    await page.route('**/api/chat', async (route) => {
       const request = route.request();
       requestBody = JSON.parse(request.postData() || '{}');
-
-      const stream = new ReadableStream({
-        start(controller) {
-          controller.enqueue(new TextEncoder().encode('润色后的文本'));
-          controller.close();
-        },
-      });
 
       await route.fulfill({
         status: 200,
         headers: {
           'Content-Type': 'text/plain; charset=utf-8',
         },
-        body: stream,
+        body: '润色后的文本',
       });
     });
 
@@ -262,20 +231,14 @@ test.describe('编辑器划词 AI 辅助 (T-AI-004)', () => {
 
   test('应该支持部分文本选择', async ({ page }) => {
     // 拦截 AI API 请求
-    await page.route('/api/chat', async (route) => {
-      const stream = new ReadableStream({
-        start(controller) {
-          controller.enqueue(new TextEncoder().encode('润色后的部分'));
-          controller.close();
-        },
-      });
+    await page.route('**/api/chat', async (route) => {
 
       await route.fulfill({
         status: 200,
         headers: {
           'Content-Type': 'text/plain; charset=utf-8',
         },
-        body: stream,
+        body: '润色后的部分',
       });
     });
 
