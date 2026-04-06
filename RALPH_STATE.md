@@ -8,9 +8,9 @@ AI 指令:
 4. **状态维护**: 每次 Skill 执行结束，必须更新此文件中的进度条 (Progress) 和状态 (Status)。
 -->
 
-> **当前上下文 (Current Context)**: dreamweaver-mvp-v1 已完成，准备进入 dreamweaver-v2-knowledge-ai
-> **迭代名称 (Iteration)**: dreamweaver-v2-knowledge-ai
-> **开发模式**: UI优先 + Mock接口 + TDD模式 + 真实AI引擎集成
+> **当前上下文 (Current Context)**: dreamweaver-v2-knowledge-ai 已完成，正式进入 dreamweaver-v3-advanced-narrative 迭代。
+> **迭代名称 (Iteration)**: dreamweaver-v3-advanced-narrative
+> **开发模式**: Harness Engineering + TDD + 多分支与 RAG 真实架构演进
 
 ## 1. 规划阶段 (Planning Phase)
 > **目标**: 在编码前通过 3 轮迭代完善需求与架构。
@@ -19,43 +19,45 @@ AI 指令:
 | :--- | :---: | :---: | :---: | :---: | :---: |
 | **Round 1** (MVP v1) | ✅ 完成 | ✅ 完成 | ✅ 完成 | ✅ 完成 | ✅ 完成 |
 | **Round 1** (V2) | ✅ 完成 | ✅ 完成 | ✅ 完成 | ✅ 完成 | ✅ 完成 |
-| **Round 2** (V2) | ⏳ 待定 | ⏳ 待定 | ⏳ 待定 | ⏳ 待定 | ⏳ 待定 |
-| **Round 3** (V2) | ⏳ 待定 | ⏳ 待定 | ⏳ 待定 | ⏳ 待定 | ⏳ 待定 |
+| **Round 1** (V3) | ✅ 完成 | ⏳ 待定 | ⏳ 待定 | ⏳ 待定 | ⏳ 待定 |
+| **Round 2** (V3) | ⏳ 待定 | ⏳ 待定 | ⏳ 待定 | ⏳ 待定 | ⏳ 待定 |
+| **Round 3** (V3) | ⏳ 待定 | ⏳ 待定 | ⏳ 待定 | ⏳ 待定 | ⏳ 待定 |
 
-### Round 1 (V2) 完成内容
-- ✅ 创建 `01-progress-comparison.md` - 进度对比与差距分析
-- ✅ 创建 `02-architecture-v2.md` - V2 架构演进方案
-- ✅ 创建 `03-execution-plan.md` - V2 执行计划
-- ✅ 创建 `04-ralph-tasks.md` - V2 开发任务清单
-- ✅ 创建 `05-test-plan.md` - V2 验收测试计划
+### Round 1 (V3) 完成内容
+- ✅ 创建 `01-progress-comparison.md` - V3 进度对比与差距分析
+- ✅ 创建 `02-architecture-v3.md` - V3 架构演进方案 (Harness & RAG)
+- ✅ 创建 `03-execution-plan.md` - V3 执行计划 (多分支叙事)
+- ✅ 创建 `04-ralph-tasks.md` - V3 开发任务清单
+- ✅ 创建 `05-test-plan.md` - V3 验收测试计划
+- ✅ 创建 `06-learnings.md` - V3 迭代学习与经验总结
 
 ## 2. 开发阶段 (Implementation Phase)
 > **目标**: 严格按顺序执行开发任务。
 > **⚠️ 执行铁律**: 必须严格按照 `04-ralph-tasks.md` 中的列表顺序执行任务。**严禁跳跃**或乱序执行。
 > **TDD 铁律**: 先写测试(Red) -> 再写实现(Green) -> 运行测试 -> 重构(Refactor)
 
-- **状态**: ✅ 开发阶段已完成
-- **进度**: **15 / 15 任务完成 (100%)**
-- **引用**: `docs/planning/dreamweaver-v2-knowledge-ai/04-ralph-tasks.md`
+- **状态**: ⏸ 待开始 (Waiting for Planning to finish)
+- **进度**: **0 / 12 任务完成 (0%)**
+- **引用**: `docs/planning/dreamweaver-v3-advanced-narrative/04-ralph-tasks.md`
 
-### Sprint 1: 知识资产系统 ✅ 已完成
-- [x] **T-KNOW-001**: 结构化资产状态管理
-- [x] **T-KNOW-002**: 知识库 Mock API 编写
-- [x] **T-KNOW-003**: 知识库页面骨架与侧边栏入口
-- [x] **T-KNOW-004**: 角色管理列表与表单组件
-- [x] **T-KNOW-005**: 世界观设定列表与表单组件
+### Sprint 1: Harness 工程基础设施 (Harness Foundation) ⏳ 待定
+- [ ] **T-HAR-001**: 建立 Context Manager 与 Compaction 雏形
+- [ ] **T-HAR-002**: 实现 Prompt Cache Harness (基于 AI SDK)
 
-### Sprint 2: AI 引擎破冰集成 ✅ 已完成
-- [x] **T-AI-001**: 服务端 AI 路由搭建
-- [x] **T-AI-002**: AI 面板流式会话交互
-- [x] **T-AI-003**: 上下文自动注入逻辑
-- [x] **T-AI-004**: 编辑器划词 AI 辅助
+### Sprint 2: 知识库 RAG 检索 (Knowledge Retrieval) ⏳ 待定
+- [ ] **T-RAG-001**: 向量存储架构选型与 Prisma 扩展
+- [ ] **T-RAG-002**: 实体数据 Ingestion (写入向量库)
+- [ ] **T-RAG-003**: 智能检索与上下文注入 (Retrieval & Injection)
 
-### Sprint 3: 真实后端迁移准备 ✅ 已完成
-- [x] **T-DB-001**: 数据库 Schema 设计与 Prisma 初始化
-- [x] **T-DB-002**: 项目与章节 API Route 实现
-- [x] **T-DB-003**: 认证网关与双轨控制环境变量
-- [x] **T-DB-004**: V2 阶段全量集成测试与代码审查
+### Sprint 3: 多分支叙事系统 (Branching Narrative) ⏳ 待定
+- [ ] **T-BRN-001**: Prisma 分支模型设计与迁移
+- [ ] **T-BRN-002**: 工作台分支 UI 组件与状态
+- [ ] **T-BRN-003**: 分支切换与编辑器联动
+- [ ] **T-BRN-004**: 基于 AI 的“假设推演”交互 (What-if Execution)
+
+### Sprint 4: 质量门禁与性能调优 (QA & Tuning) ⏳ 待定
+- [ ] **T-QA-001**: 全链路回归测试与缺陷修复
+- [ ] **T-QA-002**: 性能基准与首字延迟优化
 
 ## 3. 质量基准与规范 (Quality Standards & Baselines)
 
@@ -84,25 +86,24 @@ AI 指令:
 > **目标**: 确保所有功能满足验收标准，通过所有用例。
 > **⚠️ 执行铁律**: 必须严格按照 `05-test-plan.md` 中的列表顺序执行测试。**严禁跳跃**或乱序执行。
 
-- **状态**: ✅ 测试阶段已完成
-- **进度**: 16 / 16 测试通过 (100%)
-- **引用**: `docs/planning/dreamweaver-v2-knowledge-ai/05-test-plan.md`
-- **备注**: 所有 E2E 测试和 Prisma 数据库集成验证完成。
+- **状态**: ⏸ 待开始
+- **进度**: 0 / 10 测试通过 (0%)
+- **引用**: `docs/planning/dreamweaver-v3-advanced-narrative/05-test-plan.md`
 
 ### 测试用例清单
 | 类别 | 通过 | 失败 | 跳过 | 通过率 |
 |------|------|------|------|--------|
-| 知识库模块 (TC-KNOW) | 5 | 0 | 0 | 100% |
-| AI 引擎交互 (TC-AI) | 4 | 0 | 0 | 100% |
-| 真实后端迁移 (TC-DB) | 3 | 0 | 0 | 100% |
+| Harness与RAG (TC-RAG) | 0 | 0 | 3 | 0% |
+| 多分支系统 (TC-BRN) | 0 | 0 | 4 | 0% |
+| 性能与回归门禁 (TC-QA) | 0 | 0 | 3 | 0% |
 
 ## 5. 质量门禁标准 (Quality Gates)
-在完成 V2 迭代前，必须通过以下强制门禁：
-1. **缺陷清零**: 无 P0/P1 级别的功能性崩溃、渲染白屏或安全性 Bug。 ✅
-2. **测试全通过**: E2E 和 Unit 测试 **100% Pass**。 ✅
-3. **覆盖率达标**: 满足 3.1 定义的 80% / 95% 覆盖率红线。 ✅
-4. **类型安全**: TypeScript `strict` 模式全量检查 **0 Error**。 ✅
-5. **性能达标**: 核心交互页面满足 3.2 定义的性能基准。 ✅
+在完成 V3 迭代前，必须通过以下强制门禁：
+1. **缺陷清零**: 无 P0/P1 级别的功能性崩溃、渲染白屏或安全性 Bug。 ⏳
+2. **测试全通过**: E2E 和 Unit 测试 **100% Pass**。 ⏳
+3. **覆盖率达标**: 满足 3.1 定义的 80% / 95% 覆盖率红线。 ⏳
+4. **类型安全**: TypeScript `strict` 模式全量检查 **0 Error**。 ⏳
+5. **性能达标**: Prompt Cache 启用后，同章节多次对话首字延迟明显优化。 ⏳
 
 ## 6. 关键风险与注意事项
 
@@ -122,12 +123,18 @@ AI 指令:
 - **方案**: 在 T-AI-003 中增加上下文截断或摘要策略
 
 ## 7. 项目交付 (Project Delivery)
-- **最终审查**: ✅ 已完成
-- **用户验收**: ✅ 已完成
+- **最终审查**: ⏳ 待开始
+- **用户验收**: ⏳ 待开始
 
 ---
 
 ## 关键变更记录
+
+### 2026-04-06: 进入 V3 迭代 (dreamweaver-v3-advanced-narrative)
+- ✅ V2 全部 15 个任务完成，测试 100% 覆盖通过
+- ✅ V3 规划文档评审通过 (多分支叙事 + RAG)
+- 🔄 准备进入 V3 Sprint 1: Harness 工程基础设施
+- 📋 当前任务: T-HAR-001 建立 Context Manager 与 Compaction 雏形
 
 ### 2026-04-05: 进入 V2 迭代 (dreamweaver-v2-knowledge-ai)
 - ✅ MVP v1 全部 37 个任务完成
