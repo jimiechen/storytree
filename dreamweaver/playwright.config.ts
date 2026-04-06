@@ -10,9 +10,15 @@ export default defineConfig({
     ['html'],
     ['json', { outputFile: 'test-results/results.json' }]
   ],
-  timeout: 60000, // 60秒超时
+  timeout: 30000, // 每个测试用例 30 秒超时
+  globalTimeout: 200000, // 全局执行 2 分钟超时
+  expect: {
+    timeout: 5000, // 每个 expect 断言 5 秒超时
+  },
   use: {
     baseURL: 'http://localhost:3000',
+    actionTimeout: 5000, // 每个操作（click, fill等） 5 秒超时
+    navigationTimeout: 30000, // 页面导航 30 秒超时
     trace: 'on-first-retry',
     screenshot: 'on', // 自动截图
     video: 'on', // 自动录制视频

@@ -35,7 +35,7 @@ export function AIPanel({ projectId, context }: AIPanelProps) {
   const [activeTab, setActiveTab] = useState<'chat' | 'log' | 'report' | 'versions'>('chat');
 
   return (
-    <section className="w-[320px] bg-surface-container border-l border-outline-variant/10 flex flex-col h-full overflow-hidden">
+    <section className="w-[320px] bg-surface-container border-l border-outline-variant/10 flex flex-col h-full overflow-hidden" data-testid="ai-panel">
       {/* Model Selection & Quick Actions */}
       <div className="p-6 flex flex-col gap-4">
         {/* Model Selector */}
@@ -60,6 +60,7 @@ export function AIPanel({ projectId, context }: AIPanelProps) {
             <button
               key={action.id}
               className={`flex flex-col items-center justify-center gap-1 p-3 rounded-xl bg-surface-container-highest hover:bg-surface-bright transition-colors group`}
+              data-testid={`quick-action-${action.id}`}
             >
               <span className={`material-symbols-outlined text-[18px] text-${action.color}`}>
                 {action.icon}

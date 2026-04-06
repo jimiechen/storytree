@@ -31,6 +31,12 @@ export interface Character {
   projectId: string;
   name: string;
   aliases?: string[];
+  roleType?: 'protagonist' | 'supporting' | 'antagonist' | 'other';
+  profile?: {
+    age?: number;
+    gender?: 'male' | 'female' | 'other' | 'unknown';
+    appearance?: string;
+  };
   age?: number;
   gender?: 'male' | 'female' | 'other' | 'unknown';
   occupation?: string;
@@ -38,10 +44,11 @@ export interface Character {
   personality?: string;
   backstory?: string;
   goals?: string;
-  relationships: CharacterRelationship[];
+  relationships?: CharacterRelationship[];
   notes?: string;
-  status: CharacterStatus;
-  tags: string[];
+  status?: CharacterStatus;
+  tags?: string[];
+  wordCount?: number;
   createdAt: string;
   updatedAt: string;
 }

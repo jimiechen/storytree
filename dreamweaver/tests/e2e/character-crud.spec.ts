@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('角色管理 CRUD (T-KNOW-004)', () => {
-  const projectId = 'test-project-123';
+  const projectId = 'test-project-id';
 
   test.beforeEach(async ({ page }) => {
     // 访问角色管理页面
@@ -12,22 +12,22 @@ test.describe('角色管理 CRUD (T-KNOW-004)', () => {
 
   test('应该显示角色管理页面', async ({ page }) => {
     // 验证页面标题
-    await expect(page.locator('h1:has-text("角色管理")')).toBeVisible();
+    await expect(page.locator('h1:has-text("知识库：角色")')).toBeVisible();
     
     // 验证新建按钮
     await expect(page.locator('[data-testid="create-character-button"]')).toBeVisible();
     
     // 验证搜索框
-    await expect(page.locator('[data-testid="character-search-input"]')).toBeVisible();
+    await expect(page.locator('input[placeholder="搜索角色..."]')).toBeVisible();
   });
 
   test('点击新建角色按钮应该打开表单弹窗', async ({ page }) => {
     // 点击新建按钮
     await page.click('[data-testid="create-character-button"]');
     
-    // 验证弹窗出现
+    // 验证弹窗出现 
     await expect(page.locator('[data-testid="character-form-modal"]')).toBeVisible();
-    await expect(page.locator('text=新建角色')).toBeVisible();
+    await expect(page.locator('h2:has-text("新建角色")')).toBeVisible();
     
     // 验证表单字段
     await expect(page.locator('[data-testid="character-name-input"]')).toBeVisible();
@@ -97,16 +97,16 @@ test.describe('角色管理 CRUD (T-KNOW-004)', () => {
     // 等待角色出现在列表中
     await page.waitForSelector('[data-testid="character-name"]:has-text("待编辑角色")', { timeout: 5000 });
     
-    // 点击菜单按钮
+    // 点击角色卡片
     const characterCard = page.locator('[data-testid="character-card"]:has-text("待编辑角色")');
-    await characterCard.locator('[data-testid="character-menu-button"]').click();
+    await characterCard.click();
     
-    // 点击编辑
-    await page.click('[data-testid="edit-character-menu-item"]');
+    // 点击详情面板中的编辑按钮
+    await page.click('button:has-text("编辑角色")');
     
     // 验证弹窗打开并显示编辑标题
     await expect(page.locator('[data-testid="character-form-modal"]')).toBeVisible();
-    await expect(page.locator('text=编辑角色')).toBeVisible();
+    await expect(page.getByText('编辑角色', { exact: true })).toBeVisible();
     
     // 修改名称
     await page.fill('[data-testid="character-name-input"]', '已编辑角色');
@@ -130,13 +130,16 @@ test.describe('角色管理 CRUD (T-KNOW-004)', () => {
     // 等待角色出现在列表中
     await page.waitForSelector('[data-testid="character-name"]:has-text("待删除角色")', { timeout: 5000 });
     
-    // 点击菜单按钮
+    // 点击角色卡片
     const characterCard = page.locator('[data-testid="character-card"]:has-text("待删除角色")');
-    await characterCard.locator('[data-testid="character-menu-button"]').click();
+    await characterCard.click();
     
-    // 点击删除
+    // 点击详情面板中的编辑按钮
+    await page.click('button:has-text("编辑角色")');
+    
+    // 在编辑弹窗中点击删除
     page.on('dialog', dialog => dialog.accept());
-    await page.click('[data-testid="delete-character-menu-item"]');
+    await page.click('[data-testid="delete-character-button"]');
     
     // 验证角色被删除
     await page.waitForSelector('[data-testid="character-name"]:has-text("待删除角色")', { state: 'hidden', timeout: 5000 });
@@ -154,7 +157,7 @@ test.describe('角色管理 CRUD (T-KNOW-004)', () => {
     }
     
     // 搜索"张三"
-    await page.fill('[data-testid="character-search-input"]', '张三');
+    await page.fill('input[placeholder="搜索角色..."]', '张三');
     
     // 验证只显示"张三"
     await expect(page.locator('[data-testid="character-name"]:has-text("张三")')).toBeVisible();
@@ -172,7 +175,7 @@ test.describe('角色管理 CRUD (T-KNOW-004)', () => {
     await page.waitForSelector('[data-testid="character-form-modal"]', { state: 'hidden', timeout: 5000 });
     
     // 搜索别名
-    await page.fill('[data-testid="character-search-input"]', '小明');
+    await page.fill('input[placeholder="搜索角色..."]', '小明');
     
     // 验证能找到角色
     await expect(page.locator('[data-testid="character-name"]:has-text("主角")')).toBeVisible();
@@ -240,8 +243,8 @@ test.describe('角色管理 CRUD (T-KNOW-004)', () => {
     
     // 打开编辑
     const characterCard = page.locator('[data-testid="character-card"]:has-text("完整角色")');
-    await characterCard.locator('[data-testid="character-menu-button"]').click();
-    await page.click('[data-testid="edit-character-menu-item"]');
+    await characterCard.click();
+    await page.click('button:has-text("编辑角色")');
     
     // 验证表单中显示现有数据
     await expect(page.locator('[data-testid="character-name-input"]')).toHaveValue('完整角色');
@@ -263,8 +266,8 @@ test.describe('角色管理 CRUD (T-KNOW-004)', () => {
     
     // 打开编辑
     const characterCard = page.locator('[data-testid="character-card"]:has-text("编辑时删除")');
-    await characterCard.locator('[data-testid="character-menu-button"]').click();
-    await page.click('[data-testid="edit-character-menu-item"]');
+    await characterCard.click();
+    await page.click('button:has-text("编辑角色")');
     
     // 在编辑表单中点击删除
     page.on('dialog', dialog => dialog.accept());

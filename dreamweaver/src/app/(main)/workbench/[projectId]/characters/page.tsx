@@ -5,7 +5,7 @@ import { useParams } from 'next/navigation';
 import { api } from '@/lib/api';
 import { useKnowledgeStore } from '@/stores/knowledge-store';
 import { CharacterForm } from '@/components/knowledge/CharacterForm';
-import type { Character } from '@/types/knowledge';
+import { Character } from '@/types/knowledge';
 
 const tabs = [
   { id: 'characters', name: '角色', active: true },
@@ -13,58 +13,6 @@ const tabs = [
   { id: 'items', name: '物品', active: false },
   { id: 'lore', name: '传说', active: false },
   { id: 'concepts', name: '概念', active: false },
-];
-
-// Mock data for demo
-const mockCharacters: Character[] = [
-  {
-    id: '1',
-    projectId: 'demo',
-    name: '李云',
-    aliases: ['云儿'],
-    roleType: 'protagonist',
-    profile: {
-      age: 19,
-      gender: 'male',
-      appearance: '剑眉星目，白衣胜雪',
-    },
-    tags: ['主角', '青云宗', '高冷'],
-    wordCount: 15000,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-  {
-    id: '2',
-    projectId: 'demo',
-    name: '苏婉儿',
-    aliases: ['婉儿'],
-    roleType: 'supporting',
-    profile: {
-      age: 17,
-      gender: 'female',
-      appearance: '明眸皓齿，绿衣飘飘',
-    },
-    tags: ['重要配角', '灵药谷', '温柔'],
-    wordCount: 8900,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-  {
-    id: '3',
-    projectId: 'demo',
-    name: '莫离',
-    aliases: ['暗影'],
-    roleType: 'antagonist',
-    profile: {
-      age: 25,
-      gender: 'male',
-      appearance: '黑衣蒙面，眼神阴冷',
-    },
-    tags: ['反派', '暗影殿'],
-    wordCount: 2400,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
 ];
 
 export default function CharactersPage() {
@@ -91,10 +39,12 @@ export default function CharactersPage() {
     const fetchCharacters = async () => {
       try {
         setLoading(true);
-        // 使用 mock 数据
-        setStoreCharacters(mockCharacters);
-        if (mockCharacters.length > 0) {
-          setSelectedCharacter(mockCharacters[0]);
+        // 使用 mock API
+        const response = await api.get<{ result: { code: number; data: Character[] } }>(`/api/projects/${projectId}/characters`);
+        const chars = (response as any)?.data || [];
+        setStoreCharacters(chars);
+        if (chars.length > 0) {
+          setSelectedCharacter(chars[0]);
         }
       } catch (err) {
         setError('获取角色列表失败');
@@ -119,14 +69,12 @@ export default function CharactersPage() {
   // 创建角色
   const handleCreateCharacter = async (data: Omit<Character, 'id' | 'createdAt' | 'updatedAt'>) => {
     try {
-      const newCharacter: Character = {
-        ...data,
-        id: Date.now().toString(),
-        projectId,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      };
-      addStoreCharacter(newCharacter);
+      const response = await api.post<any>(`/api/projects/${projectId}/characters`, data);
+      const newChar = response?.data || response;
+      if (newChar) {
+        addStoreCharacter(newChar);
+        setIsFormOpen(false);
+      }
     } catch (err) {
       console.error('Failed to create character:', err);
       setError('创建角色失败');
@@ -138,16 +86,14 @@ export default function CharactersPage() {
     if (!editingCharacter) return;
 
     try {
-      const updatedCharacter: Character = {
-        ...data,
-        id: editingCharacter.id,
-        projectId,
-        createdAt: editingCharacter.createdAt,
-        updatedAt: new Date().toISOString(),
-      };
-      updateStoreCharacter(editingCharacter.id, updatedCharacter);
-      if (selectedCharacter?.id === editingCharacter.id) {
-        setSelectedCharacter(updatedCharacter);
+      const response = await api.put<any>(`/api/projects/${projectId}/characters/${editingCharacter.id}`, data);
+      const updatedCharacter = response?.data || response;
+      if (updatedCharacter) {
+        updateStoreCharacter(editingCharacter.id, updatedCharacter);
+        if (selectedCharacter?.id === editingCharacter.id) {
+          setSelectedCharacter(updatedCharacter);
+        }
+        setIsFormOpen(false);
       }
     } catch (err) {
       console.error('Failed to update character:', err);
@@ -158,6 +104,7 @@ export default function CharactersPage() {
   // 删除角色
   const handleDeleteCharacter = async (id: string) => {
     try {
+      await api.delete(`/api/projects/${projectId}/characters/${id}`);
       deleteStoreCharacter(id);
       if (selectedCharacter?.id === id) {
         setSelectedCharacter(characters.find((c) => c.id !== id) || null);
@@ -280,6 +227,7 @@ export default function CharactersPage() {
               <button
                 onClick={openCreateForm}
                 className="px-5 py-2 rounded-full border border-outline-variant text-on-surface text-sm font-medium hover:bg-surface-container-high transition-colors flex items-center gap-2"
+                data-testid="create-character-button"
               >
                 <span className="material-symbols-outlined text-lg">add</span>
                 手动添加
@@ -319,9 +267,9 @@ export default function CharactersPage() {
                     {index === 2 ? '设定冲突' : '无矛盾'}
                   </span>
                 </div>
-                <h3 className="font-serif text-2xl font-bold mb-1 text-on-surface">{character.name}</h3>
+                <h3 className="font-serif text-2xl font-bold mb-1 text-on-surface" data-testid="character-name">{character.name}</h3>
                 <p className="text-sm text-on-surface-variant mb-4">
-                  {getRoleTypeLabel(character.roleType)}
+                  {getRoleTypeLabel(character.roleType || '')}
                 </p>
                 <div className="space-y-2 mb-6">
                   <div className="flex justify-between text-xs">
@@ -389,7 +337,7 @@ export default function CharactersPage() {
                   <div className="grid grid-cols-2 gap-y-4 gap-x-6 text-sm">
                     <div>
                       <p className="text-on-surface-variant text-[11px] mb-1">角色类型</p>
-                      <p className="text-on-surface">{getRoleTypeLabel(selectedCharacter.roleType)}</p>
+                      <p className="text-on-surface">{getRoleTypeLabel(selectedCharacter.roleType || '')}</p>
                     </div>
                     <div>
                       <p className="text-on-surface-variant text-[11px] mb-1">年龄</p>

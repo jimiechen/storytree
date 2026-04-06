@@ -1,12 +1,17 @@
 import { openai } from '@ai-sdk/openai';
-import { streamText, type CoreMessage } from 'ai';
+import { streamText } from 'ai';
+
+interface Message {
+  role: 'system' | 'user' | 'assistant';
+  content: string;
+}
 
 // Allow streaming responses up to 30 seconds
 export const maxDuration = 30;
 
 export async function POST(req: Request) {
   try {
-    const { messages, model = 'gpt-4o-mini', temperature = 0.7, maxTokens = 2000 } = await req.json();
+    const { messages, model = 'gpt-4o-mini', temperature = 0.7, maxTokens = 2000 }: { messages: Message[], model?: string, temperature?: number, maxTokens?: number } = await req.json();
 
     // Validate messages
     if (!messages || !Array.isArray(messages) || messages.length === 0) {
@@ -18,7 +23,7 @@ export async function POST(req: Request) {
 
     // Validate each message has required fields
     const validMessages = messages.every(
-      (msg: CoreMessage) => 
+      (msg: Message) => 
         msg && 
         typeof msg === 'object' && 
         'role' in msg && 
@@ -38,11 +43,10 @@ export async function POST(req: Request) {
       model: openai(model),
       messages,
       temperature,
-      maxTokens,
     });
 
     // Return streaming response
-    return result.toDataStreamResponse();
+    return result.toTextStreamResponse();
   } catch (error) {
     console.error('Chat API Error:', error);
     

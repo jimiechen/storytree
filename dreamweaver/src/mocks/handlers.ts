@@ -603,6 +603,8 @@ export const handlers = [
 
   // World Settings: List
   http.get('/api/projects/:projectId/world-settings', ({ params }) => {
+    console.log('[MSW] Fetching world settings for projectId:', params.projectId);
+    console.log('[MSW] Available projects:', Array.from(mockProjects.keys()));
     const project = mockProjects.get(params.projectId as string);
     
     if (!project) {
@@ -734,6 +736,77 @@ export const handlers = [
       result: {
         code: 10200,
         message: '删除成功',
+      },
+    });
+  }),
+
+  // ============================================
+  // AI Chat API
+  // ============================================
+
+  http.post('/api/chat', async ({ request }) => {
+    const body = await request.json() as any;
+    
+    // Store request in window for E2E tests
+    if (typeof window !== 'undefined') {
+      (window as any).__LAST_AI_REQUEST__ = body;
+    }
+    
+    // Simulate streaming response
+    const encoder = new TextEncoder();
+    let text = 'Hello, this is a test response.';
+    
+    // Check if error simulation is requested
+    const lastMessage = body.messages?.[body.messages.length - 1]?.content;
+    if (lastMessage === 'Test error') {
+      return HttpResponse.json({ error: 'AI service unavailable' }, { status: 500 });
+    }
+    
+    if (lastMessage === 'Show me markdown') {
+      text = '# Title\n\nThis is **Bold** and *italic*.';
+    }
+    
+    if (lastMessage === 'Test message') {
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      text = 'Delayed response';
+    }
+
+    if (lastMessage?.includes('需要润色')) {
+      text = '这是润色后的文本内容。';
+    }
+    if (lastMessage?.includes('第二段需要润色的内容')) {
+      text = '润色后的部分';
+    }
+    if (lastMessage?.includes('需要续写')) {
+      text = '这是续写后的文本内容。';
+    }
+    if (lastMessage?.includes('需要扩写')) {
+      text = '这是扩写后的文本内容，增加了更多细节和描写。';
+    }
+    if (lastMessage?.includes('需要处理的文本内容')) {
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      text = '处理完成';
+    }
+    if (lastMessage?.includes('需要润色的原文本内容')) {
+      text = '润色后的文本';
+    }
+    if (lastMessage?.includes('部分文本')) {
+      text = '润色后的部分';
+    }
+
+    const stream = new ReadableStream({
+      start(controller) {
+        // Enqueue text chunks in Vercel AI SDK's streamText format (0:"chunk"\n)
+        // For ai SDK version 3.x, streamText produces data stream protocol.
+        // Actually, if it's text stream, it's just raw text.
+        controller.enqueue(encoder.encode(text));
+        controller.close();
+      },
+    });
+
+    return new HttpResponse(stream, {
+      headers: {
+        'Content-Type': 'text/plain; charset=utf-8',
       },
     });
   }),

@@ -122,7 +122,7 @@ describe('Chat API Route', () => {
         },
       });
 
-      const mockToDataStreamResponse = vi.fn().mockReturnValue(
+      const mockToTextStreamResponse = vi.fn().mockReturnValue(
         new Response(mockStream, {
           headers: {
             'Content-Type': 'text/plain; charset=utf-8',
@@ -132,7 +132,7 @@ describe('Chat API Route', () => {
       );
 
       vi.mocked(streamText).mockResolvedValue({
-        toDataStreamResponse: mockToDataStreamResponse,
+        toTextStreamResponse: mockToTextStreamResponse,
       } as any);
 
       const request = new Request('http://localhost:3000/api/chat', {
@@ -164,12 +164,12 @@ describe('Chat API Route', () => {
     });
 
     it('应该支持自定义模型参数', async () => {
-      const mockToDataStreamResponse = vi.fn().mockReturnValue(
+      const mockToTextStreamResponse = vi.fn().mockReturnValue(
         new Response(new ReadableStream(), { status: 200 })
       );
 
       vi.mocked(streamText).mockResolvedValue({
-        toDataStreamResponse: mockToDataStreamResponse,
+        toTextStreamResponse: mockToTextStreamResponse,
       } as any);
 
       const request = new Request('http://localhost:3000/api/chat', {
@@ -215,12 +215,12 @@ describe('Chat API Route', () => {
     });
 
     it('应该支持 assistant 角色的消息', async () => {
-      const mockToDataStreamResponse = vi.fn().mockReturnValue(
+      const mockToTextStreamResponse = vi.fn().mockReturnValue(
         new Response(new ReadableStream(), { status: 200 })
       );
 
       vi.mocked(streamText).mockResolvedValue({
-        toDataStreamResponse: mockToDataStreamResponse,
+        toTextStreamResponse: mockToTextStreamResponse,
       } as any);
 
       const request = new Request('http://localhost:3000/api/chat', {

@@ -33,7 +33,7 @@ const importanceOptions = [
 const initialFormData: Omit<WorldSetting, 'id' | 'createdAt' | 'updatedAt'> = {
   projectId: '',
   title: '',
-  category: 'custom',
+  category: 'geography',
   customCategoryName: '',
   content: '',
   importance: 'medium',
@@ -76,30 +76,41 @@ export const WorldSettingForm: React.FC<WorldSettingFormProps> = ({
 
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
+    let isValid = true;
     
     if (!formData.title.trim()) {
       newErrors.title = '设定标题不能为空';
+      isValid = false;
+      console.log('[DEBUG] validateForm failed on title:', formData.title);
     }
     
     if (!formData.content.trim()) {
       newErrors.content = '设定内容不能为空';
+      isValid = false;
+      console.log('[DEBUG] validateForm failed on content:', formData.content);
     }
     
     if (formData.category === 'custom' && !formData.customCategoryName?.trim()) {
       newErrors.customCategoryName = '自定义分类名称不能为空';
+      isValid = false;
+      console.log('[DEBUG] validateForm failed on customCategoryName:', formData.customCategoryName);
     }
     
     setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    console.log('[DEBUG] validateForm result:', isValid);
+    return isValid;
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    console.log('[DEBUG] handleSubmit triggered!');
     
     if (!validateForm()) {
+      console.log('[DEBUG] handleSubmit aborted because validateForm returned false');
       return;
     }
     
+    console.log('[DEBUG] handleSubmit calling onSubmit(formData)');
     onSubmit(formData);
     onClose();
   };
@@ -313,7 +324,7 @@ export const WorldSettingForm: React.FC<WorldSettingFormProps> = ({
               取消
             </button>
             <button
-              type="submit"
+              type="button"
               onClick={handleSubmit}
               className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
               data-testid="save-setting-button"

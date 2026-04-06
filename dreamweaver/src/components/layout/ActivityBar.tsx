@@ -17,7 +17,7 @@ const activities = [
 
 export function ActivityBar({ activeView, onViewChange }: ActivityBarProps) {
   return (
-    <aside className="fixed left-0 top-0 h-full z-50 flex flex-col bg-[#111125] w-[48px] items-center py-4">
+    <aside className="w-[48px] bg-surface-container-lowest border-r border-outline-variant/10 flex flex-col items-center py-4 z-40 flex-shrink-0">
       {/* Logo */}
       <div className="text-xl font-bold text-[#75d1ff] mb-8 font-headline cursor-pointer hover:scale-110 transition-transform">
         织

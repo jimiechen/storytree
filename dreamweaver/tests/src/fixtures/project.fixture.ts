@@ -1,8 +1,8 @@
-import { test as base } from '@playwright/test';
+import { test as base } from './auth.fixture';
 import { ProjectsPage } from '../pages/ProjectsPage';
 import { WorkbenchPage } from '../pages/WorkbenchPage';
 
-export const test = base.extend({
+export const test = base.extend<{ projectsPage: ProjectsPage; workbenchPage: WorkbenchPage; testProject: any; testProjectData: any }>({
   projectsPage: async ({ page }, use) => {
     const projectsPage = new ProjectsPage(page);
     await use(projectsPage);

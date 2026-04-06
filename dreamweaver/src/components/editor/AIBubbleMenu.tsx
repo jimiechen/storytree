@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useState } from 'react';
-import { BubbleMenu, type Editor } from '@tiptap/react';
+import { type Editor } from '@tiptap/react';
+import { BubbleMenu } from '@tiptap/react/menus';
 import { Sparkles, Wand2, PenTool, Maximize2, X, Loader2 } from 'lucide-react';
 import { api } from '@/lib/api';
 
@@ -53,7 +54,6 @@ export const AIBubbleMenu: React.FC<AIBubbleMenuProps> = ({ editor, projectId })
           ],
           model: 'gpt-4o-mini',
           temperature: 0.7,
-          maxTokens: 2000,
         }),
       });
 
@@ -101,7 +101,6 @@ export const AIBubbleMenu: React.FC<AIBubbleMenuProps> = ({ editor, projectId })
   return (
     <BubbleMenu
       editor={editor}
-      tippyOptions={{ duration: 100 }}
       shouldShow={({ editor }) => {
         // Only show when text is selected
         return !editor.state.selection.empty;

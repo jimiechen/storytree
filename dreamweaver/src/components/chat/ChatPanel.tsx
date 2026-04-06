@@ -49,7 +49,7 @@ export const ChatPanel: React.FC<ChatPanelProps> = ({
     const action = quickActions.find((a) => a.id === actionId);
     if (action) {
       setActiveAction(actionId);
-      handleInputChange({ target: { value: action.prompt } } as React.ChangeEvent<HTMLInputElement>);
+      handleInputChange({ target: { value: action.prompt } } as unknown as React.ChangeEvent<HTMLTextAreaElement>);
     }
   };
 
