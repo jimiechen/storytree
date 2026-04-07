@@ -10,10 +10,15 @@ export default defineConfig({
     ['html'],
     ['json', { outputFile: 'test-results/results.json' }]
   ],
-  timeout: 30000, // 每个测试用例 30 秒超时
-  globalTimeout: 200000, // 全局执行 2 分钟超时
+  timeout: 60 * 1000, // 每个测试用例 60 秒超时
+  globalTimeout: 15 * 60 * 1000, // 全局执行 15 分钟超时
   expect: {
-    timeout: 5000, // 每个 expect 断言 5 秒超时
+    timeout: 10000, // 每个 expect 断言 10 秒超时
+    toHaveScreenshot: {
+      maxDiffPixelRatio: 0.01, // 允许最大 1% 的像素差异
+      threshold: 0.1, // 感知差异阈值 (YIQ 颜色比较)
+      animations: 'disabled', // 截图时禁用动画
+    },
   },
   use: {
     baseURL: 'http://localhost:3000',

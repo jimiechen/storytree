@@ -36,9 +36,16 @@ AI 指令:
 > **⚠️ 执行铁律**: 必须严格按照 `04-ralph-tasks.md` 中的列表顺序执行任务。**严禁跳跃**或乱序执行。
 > **TDD 铁律**: 先写测试(Red) -> 再写实现(Green) -> 运行测试 -> 重构(Refactor)
 
-- **状态**: ⏸ 待开始 (Waiting for Planning to finish)
-- **进度**: **0 / 12 任务完成 (0%)**
+- **状态**: 🔄 进行中 (Sprint 0: UI Polish)
+- **进度**: **0 / 17 任务完成 (0%)**
 - **引用**: `docs/planning/dreamweaver-v3-advanced-narrative/04-ralph-tasks.md`
+
+### Sprint 0: UI 视觉与布局差异修复 (UI Polish) ✅ 已完成
+- [x] **T-UI-FIX-001**: 修复 P1/P2 轻微样式与视觉偏差
+- [x] **T-UI-FIX-002**: 修复 P0 项目主页全局布局缺失
+- [x] **T-UI-FIX-003**: 修复 P0 大纲管理视图降级
+- [x] **T-UI-FIX-004**: 修复 P0 分支树形图静态化
+- [x] **T-UI-FIX-005**: 核心业务链路串联验证 (E2E)
 
 ### Sprint 1: Harness 工程基础设施 (Harness Foundation) ⏳ 待定
 - [ ] **T-HAR-001**: 建立 Context Manager 与 Compaction 雏形

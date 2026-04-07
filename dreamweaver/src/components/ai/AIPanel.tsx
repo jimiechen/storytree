@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { ChatPanel } from '@/components/chat/ChatPanel';
+import { useTranslations } from 'next-intl';
 
 interface AIPanelProps {
   projectId: string;
@@ -11,28 +12,29 @@ interface AIPanelProps {
   };
 }
 
-const quickActions = [
-  { id: 'continue', icon: 'edit_note', label: '续写', color: 'primary' },
-  { id: 'expand', icon: 'unfold_more', label: '扩写', color: 'primary' },
-  { id: 'rewrite', icon: 'auto_fix', label: '改写', color: 'primary' },
-  { id: 'chat', icon: 'chat_bubble', label: '对话', color: 'secondary' },
-  { id: 'describe', icon: 'palette', label: '描写', color: 'secondary' },
-  { id: 'deduce', icon: 'account_tree', label: '推演', color: 'secondary' },
-];
-
 const characters = [
-  { name: '李云', role: '主角' },
-  { name: '苏婉', role: '女主' },
+  { name: 'Elena Vance', role: 'Protagonist' },
+  { name: 'Marcus Thorne', role: 'Antagonist' },
 ];
 
 const foreshadowing = [
-  { name: '玉佩秘密', status: 'active', desc: '关键线索' },
-  { name: '已5章未回收', status: 'warning', desc: '' },
+  { name: 'Data Drive', status: 'active', desc: 'Critical Evidence' },
+  { name: 'Unresolved', status: 'warning', desc: 'From chapter 1' },
 ];
 
 export function AIPanel({ projectId, context }: AIPanelProps) {
   const [selectedModel, setSelectedModel] = useState('Claude 4 Opus');
   const [activeTab, setActiveTab] = useState<'chat' | 'log' | 'report' | 'versions'>('chat');
+  const t = useTranslations('AIChat');
+
+  const quickActions = [
+    { id: 'continue', icon: 'edit_note', label: t('continue'), color: 'primary' },
+    { id: 'expand', icon: 'unfold_more', label: t('expand'), color: 'primary' },
+    { id: 'rewrite', icon: 'auto_fix', label: t('rewrite'), color: 'primary' },
+    { id: 'chat', icon: 'chat_bubble', label: t('chat'), color: 'secondary' },
+    { id: 'describe', icon: 'palette', label: t('describe'), color: 'secondary' },
+    { id: 'deduce', icon: 'account_tree', label: t('deduce'), color: 'secondary' },
+  ];
 
   return (
     <section className="w-[320px] bg-surface-container border-l border-outline-variant/10 flex flex-col h-full overflow-hidden" data-testid="ai-panel">
@@ -42,7 +44,7 @@ export function AIPanel({ projectId, context }: AIPanelProps) {
         <div className="flex items-center justify-between">
           <div className="flex flex-col">
             <span className="text-[10px] text-outline font-bold uppercase tracking-widest">
-              Selected Model
+              {t('model')}
             </span>
             <div className="flex items-center gap-2 text-on-surface">
               <span className="font-bold text-sm">{selectedModel}</span>
@@ -61,8 +63,9 @@ export function AIPanel({ projectId, context }: AIPanelProps) {
               key={action.id}
               className={`flex flex-col items-center justify-center gap-1 p-3 rounded-xl bg-surface-container-highest hover:bg-surface-bright transition-colors group`}
               data-testid={`quick-action-${action.id}`}
+              aria-label={`Quick action: ${action.label}`}
             >
-              <span className={`material-symbols-outlined text-[18px] text-${action.color}`}>
+              <span className={`material-symbols-outlined text-[18px] text-${action.color}`} aria-hidden="true">
                 {action.icon}
               </span>
               <span className="text-[10px]">{action.label}</span>
@@ -124,15 +127,15 @@ export function AIPanel({ projectId, context }: AIPanelProps) {
         {/* Consistency Check */}
         <div className="space-y-3 pb-8">
           <h3 className="text-[11px] font-black uppercase tracking-widest text-outline">
-            Consistency Check
+            {t('consistencyCheck')}
           </h3>
           <div className="space-y-2">
             <div className="flex items-center justify-between p-2 rounded bg-tertiary/5 border-l-2 border-tertiary">
-              <span className="text-[11px]">角色一致性</span>
+              <span className="text-[11px]">{t('charConsistency')}</span>
               <span className="material-symbols-outlined text-[16px] text-tertiary">check</span>
             </div>
             <div className="flex items-center justify-between p-2 rounded bg-tertiary/5 border-l-2 border-tertiary">
-              <span className="text-[11px]">时间线校对</span>
+              <span className="text-[11px]">{t('timelineConsistency')}</span>
               <span className="material-symbols-outlined text-[16px] text-tertiary">check</span>
             </div>
             <div className="flex items-center justify-between p-2 rounded bg-secondary/5 border-l-2 border-secondary">
@@ -190,12 +193,12 @@ export function AIPanel({ projectId, context }: AIPanelProps) {
           )}
           {activeTab === 'report' && (
             <div className="p-4 text-center text-on-surface-variant text-sm">
-              报告功能开发中...
+              {t('reportDev')}
             </div>
           )}
           {activeTab === 'versions' && (
             <div className="p-4 text-center text-on-surface-variant text-sm">
-              版本历史开发中...
+              {t('versionsDev')}
             </div>
           )}
         </div>

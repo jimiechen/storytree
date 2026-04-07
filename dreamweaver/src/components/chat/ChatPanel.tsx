@@ -4,6 +4,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useChat } from '@/hooks/useChat';
 import ReactMarkdown from 'react-markdown';
 import { Send, Loader2, Sparkles, User, Bot, X, CheckCircle, History } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 interface ChatContext {
   chapterContent?: string;
@@ -18,24 +19,25 @@ interface ChatPanelProps {
   compact?: boolean;
 }
 
-const quickActions = [
-  { id: 'continue', label: '/续写', prompt: '请续写以下内容：' },
-  { id: 'expand', label: '/扩写', prompt: '请扩写以下内容：' },
-  { id: 'rewrite', label: '/改写', prompt: '请改写以下内容：' },
-  { id: 'dialogue', label: '/对话', prompt: '请为以下场景编写对话：' },
-  { id: 'describe', label: '/描写', prompt: '请描写以下场景：' },
-  { id: 'deduce', label: '/推演', prompt: '请推演以下情节发展：' },
-];
-
 export const ChatPanel: React.FC<ChatPanelProps> = ({
   projectId,
   context,
   compact = false,
 }) => {
+  const t = useTranslations('AIChat');
   const { messages, input, handleInputChange, handleSubmit, isLoading, error, setMessages } = useChat({
     projectId,
     context,
   });
+
+  const quickActions = [
+    { id: 'continue', label: `/${t('continue')}`, prompt: '请续写以下内容：' },
+    { id: 'expand', label: `/${t('expand')}`, prompt: '请扩写以下内容：' },
+    { id: 'rewrite', label: `/${t('rewrite')}`, prompt: '请改写以下内容：' },
+    { id: 'dialogue', label: `/${t('chat')}`, prompt: '请为以下场景编写对话：' },
+    { id: 'describe', label: `/${t('describe')}`, prompt: '请描写以下场景：' },
+    { id: 'deduce', label: `/${t('deduce')}`, prompt: '请推演以下情节发展：' },
+  ];
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [activeAction, setActiveAction] = useState<string | null>(null);
@@ -79,7 +81,7 @@ export const ChatPanel: React.FC<ChatPanelProps> = ({
           {messages.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full text-on-surface-variant space-y-2">
               <Sparkles size={24} className="text-primary/50" />
-              <p className="text-xs">开始与 AI 对话</p>
+              <p className="text-xs">{t('startChat')}</p>
             </div>
           ) : (
             <>
@@ -122,7 +124,7 @@ export const ChatPanel: React.FC<ChatPanelProps> = ({
                   </div>
                   <div className="bg-surface-container-highest rounded-xl px-3 py-2 flex items-center gap-2">
                     <Loader2 size={12} className="animate-spin text-outline" />
-                    <span className="text-xs text-outline">思考中...</span>
+                    <span className="text-xs text-outline">{t('thinking')}</span>
                   </div>
                 </div>
               )}
@@ -172,7 +174,7 @@ export const ChatPanel: React.FC<ChatPanelProps> = ({
       {/* Context Bar */}
       <div className="px-4 py-3 bg-surface-container-high flex items-center gap-2 text-xs text-on-surface/70 font-label">
         <span className="material-symbols-outlined text-sm">book_2</span>
-        <span>{context?.chapterTitle || '当前章节'}</span>
+        <span>{context?.chapterTitle || t('currentChapter')}</span>
         <span className="mx-1 text-outline-variant">|</span>
         <span className="material-symbols-outlined text-sm">group</span>
         <span>李云, 苏婉</span>
@@ -189,8 +191,8 @@ export const ChatPanel: React.FC<ChatPanelProps> = ({
               <Sparkles size={32} className="text-primary/50" />
             </div>
             <div className="text-center">
-              <p className="text-sm font-medium mb-1">开始与 AI 对话</p>
-              <p className="text-xs text-on-surface-variant/60">输入指令或选择快捷操作</p>
+              <p className="text-sm font-medium mb-1">{t('startChat')}</p>
+              <p className="text-xs text-on-surface-variant/60">{t('inputPlaceholder')}</p>
             </div>
           </div>
         ) : (
@@ -226,10 +228,10 @@ export const ChatPanel: React.FC<ChatPanelProps> = ({
                     <div className="mt-4 flex flex-wrap gap-2">
                       <button className="px-3 py-1.5 rounded bg-primary text-on-primary-fixed text-[11px] font-bold hover:opacity-90 transition-opacity flex items-center gap-1">
                         <CheckCircle size={12} />
-                        采纳
+                        {t('accept')}
                       </button>
                       <button className="px-3 py-1.5 rounded bg-surface-container-highest text-on-surface text-[11px] hover:bg-surface-bright transition-colors">
-                        重新生成
+                        {t('regenerate')}
                       </button>
                       <button className="px-3 py-1.5 rounded bg-surface-container-highest text-on-surface text-[11px] hover:bg-surface-bright transition-colors">
                         扩写
@@ -254,7 +256,7 @@ export const ChatPanel: React.FC<ChatPanelProps> = ({
                 <div className="max-w-[95%] px-4 py-4 rounded-2xl rounded-tl-none border-l-4 border-primary bg-surface-container-high/50 glass-panel shadow-xl">
                   <div className="flex items-center gap-2">
                     <Loader2 size={16} className="animate-spin text-primary" />
-                    <span className="text-sm text-on-surface/70">思考中...</span>
+                    <span className="text-sm text-on-surface/70">{t('thinking')}</span>
                   </div>
                 </div>
               </div>
@@ -272,9 +274,9 @@ export const ChatPanel: React.FC<ChatPanelProps> = ({
       </div>
 
       {/* Input Area */}
-      <div className="p-4 bg-surface-container-high border-t border-outline-variant/10">
+      <div className="p-4 pb-6 bg-surface-container-high border-t border-outline-variant/10">
         {/* Action Chips */}
-        <div className="flex gap-2 overflow-x-auto custom-scrollbar pb-3 mb-3 no-scrollbar">
+        <div className="flex gap-2 overflow-x-auto custom-scrollbar pb-3 mb-3 no-scrollbar" aria-label="Quick Actions">
           {quickActions.map((action) => (
             <button
               key={action.id}
@@ -284,6 +286,9 @@ export const ChatPanel: React.FC<ChatPanelProps> = ({
                   ? 'bg-primary-container text-primary border-primary/20'
                   : 'bg-surface-container-highest text-on-surface/70 border-outline-variant/30 hover:border-primary/50'
               }`}
+              data-testid={`quick-action-${action.id}`}
+              aria-label={`Use ${action.label}`}
+              aria-pressed={activeAction === action.id}
             >
               {action.label}
             </button>
@@ -291,35 +296,40 @@ export const ChatPanel: React.FC<ChatPanelProps> = ({
         </div>
         
         <form onSubmit={onSubmit} className="relative group" data-testid="chat-input-form">
+          <label htmlFor="chat-input" className="sr-only">{t('inputPlaceholder')}</label>
           <textarea
+            id="chat-input"
             value={input}
             onChange={handleInputChange}
             onKeyDown={handleKeyDown}
-            placeholder="输入指令或与 AI 对话..."
+            placeholder={t('inputPlaceholder')}
             className="w-full bg-surface-container-highest rounded-xl border-none focus:ring-1 focus:ring-primary/40 text-sm p-4 pr-12 min-h-[100px] placeholder:text-on-surface/30 resize-none transition-all"
             data-testid="chat-input"
             disabled={isLoading}
+            tabIndex={0}
+            aria-invalid={!!error}
           />
           <button
             type="submit"
             disabled={isLoading || !input.trim()}
             className="absolute bottom-3 right-3 w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-on-primary shadow-lg shadow-primary/20 hover:scale-105 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             data-testid="send-button"
+            aria-label="Send message"
           >
-            <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'wght' 700" }}>arrow_upward</span>
+            <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'wght' 700" }} aria-hidden="true">arrow_upward</span>
           </button>
         </form>
         
         <div className="mt-2 flex justify-between items-center px-1">
           <div className="flex gap-3">
-            <button className="text-on-surface/40 hover:text-primary transition-colors">
-              <span className="material-symbols-outlined text-lg">attach_file</span>
+            <button className="text-on-surface/40 hover:text-primary transition-colors" aria-label="Attach file">
+              <span className="material-symbols-outlined text-lg" aria-hidden="true">attach_file</span>
             </button>
-            <button className="text-on-surface/40 hover:text-primary transition-colors">
-              <span className="material-symbols-outlined text-lg">mood</span>
+            <button className="text-on-surface/40 hover:text-primary transition-colors" aria-label="Insert emoji">
+              <span className="material-symbols-outlined text-lg" aria-hidden="true">mood</span>
             </button>
           </div>
-          <span className="text-[10px] text-on-surface/30 font-medium">Shift + Enter 换行</span>
+          <span className="text-[10px] text-on-surface/30 font-medium">{t('shiftEnter')}</span>
         </div>
       </div>
     </aside>

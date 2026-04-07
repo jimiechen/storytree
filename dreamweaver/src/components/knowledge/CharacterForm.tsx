@@ -154,12 +154,13 @@ export const CharacterForm: React.FC<CharacterFormProps> = ({
             {/* 基本信息 */}
             <section>
               <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">基本信息</h3>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-6">
                 <div className="col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label htmlFor="character-name" className="block text-sm font-medium text-gray-700 mb-1">
                     角色名称 <span className="text-red-500">*</span>
                   </label>
                   <input
+                    id="character-name"
                     type="text"
                     value={formData.name}
                     onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
@@ -168,14 +169,17 @@ export const CharacterForm: React.FC<CharacterFormProps> = ({
                     }`}
                     placeholder="输入角色名称"
                     data-testid="character-name-input"
+                    aria-invalid={!!errors.name}
+                    aria-describedby={errors.name ? "name-error" : undefined}
                   />
-                  {errors.name && <p className="mt-1 text-sm text-red-500">{errors.name}</p>}
+                  {errors.name && <p id="name-error" className="mt-1 text-sm text-red-500">{errors.name}</p>}
                 </div>
 
                 <div className="col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">别名</label>
+                  <label htmlFor="character-alias" className="block text-sm font-medium text-gray-700 mb-1">别名</label>
                   <div className="flex gap-2 mb-2">
                     <input
+                      id="character-alias"
                       type="text"
                       value={newAlias}
                       onChange={(e) => setNewAlias(e.target.value)}
@@ -189,8 +193,9 @@ export const CharacterForm: React.FC<CharacterFormProps> = ({
                       onClick={handleAddAlias}
                       className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
                       data-testid="add-alias-button"
+                      aria-label="添加别名"
                     >
-                      <Plus size={18} />
+                      <Plus size={18} aria-hidden="true" />
                     </button>
                   </div>
                   <div className="flex flex-wrap gap-2">
@@ -206,8 +211,9 @@ export const CharacterForm: React.FC<CharacterFormProps> = ({
                           onClick={() => handleRemoveAlias(alias)}
                           className="hover:text-blue-900"
                           data-testid="remove-alias-button"
+                          aria-label={`移除别名: ${alias}`}
                         >
-                          <X size={14} />
+                          <X size={14} aria-hidden="true" />
                         </button>
                       </span>
                     ))}
@@ -215,8 +221,9 @@ export const CharacterForm: React.FC<CharacterFormProps> = ({
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">年龄</label>
+                  <label htmlFor="character-age" className="block text-sm font-medium text-gray-700 mb-1">年龄</label>
                   <input
+                    id="character-age"
                     type="number"
                     value={formData.age || ''}
                     onChange={(e) => setFormData(prev => ({ ...prev, age: e.target.value ? parseInt(e.target.value) : undefined }))}
@@ -227,8 +234,9 @@ export const CharacterForm: React.FC<CharacterFormProps> = ({
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">性别</label>
+                  <label htmlFor="character-gender" className="block text-sm font-medium text-gray-700 mb-1">性别</label>
                   <select
+                    id="character-gender"
                     value={formData.gender}
                     onChange={(e) => setFormData(prev => ({ ...prev, gender: e.target.value as Character['gender'] }))}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -242,8 +250,9 @@ export const CharacterForm: React.FC<CharacterFormProps> = ({
                 </div>
 
                 <div className="col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">职业</label>
+                  <label htmlFor="character-occupation" className="block text-sm font-medium text-gray-700 mb-1">职业</label>
                   <input
+                    id="character-occupation"
                     type="text"
                     value={formData.occupation}
                     onChange={(e) => setFormData(prev => ({ ...prev, occupation: e.target.value }))}
@@ -260,8 +269,9 @@ export const CharacterForm: React.FC<CharacterFormProps> = ({
               <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">详细设定</h3>
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">外貌描述</label>
+                  <label htmlFor="character-appearance" className="block text-sm font-medium text-gray-700 mb-1">外貌描述</label>
                   <textarea
+                    id="character-appearance"
                     value={formData.appearance}
                     onChange={(e) => setFormData(prev => ({ ...prev, appearance: e.target.value }))}
                     rows={3}
@@ -272,8 +282,9 @@ export const CharacterForm: React.FC<CharacterFormProps> = ({
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">性格特点</label>
+                  <label htmlFor="character-personality" className="block text-sm font-medium text-gray-700 mb-1">性格特点</label>
                   <textarea
+                    id="character-personality"
                     value={formData.personality}
                     onChange={(e) => setFormData(prev => ({ ...prev, personality: e.target.value }))}
                     rows={3}
@@ -284,8 +295,9 @@ export const CharacterForm: React.FC<CharacterFormProps> = ({
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">背景故事</label>
+                  <label htmlFor="character-backstory" className="block text-sm font-medium text-gray-700 mb-1">背景故事</label>
                   <textarea
+                    id="character-backstory"
                     value={formData.backstory}
                     onChange={(e) => setFormData(prev => ({ ...prev, backstory: e.target.value }))}
                     rows={4}
@@ -296,8 +308,9 @@ export const CharacterForm: React.FC<CharacterFormProps> = ({
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">目标/动机</label>
+                  <label htmlFor="character-goals" className="block text-sm font-medium text-gray-700 mb-1">目标/动机</label>
                   <textarea
+                    id="character-goals"
                     value={formData.goals}
                     onChange={(e) => setFormData(prev => ({ ...prev, goals: e.target.value }))}
                     rows={2}
@@ -313,7 +326,9 @@ export const CharacterForm: React.FC<CharacterFormProps> = ({
             <section>
               <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">标签</h3>
               <div className="flex gap-2 mb-2">
+                <label htmlFor="character-tag" className="sr-only">添加标签</label>
                 <input
+                  id="character-tag"
                   type="text"
                   value={newTag}
                   onChange={(e) => setNewTag(e.target.value)}
@@ -327,8 +342,9 @@ export const CharacterForm: React.FC<CharacterFormProps> = ({
                   onClick={handleAddTag}
                   className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
                   data-testid="add-tag-button"
+                  aria-label="添加标签"
                 >
-                  <Plus size={18} />
+                  <Plus size={18} aria-hidden="true" />
                 </button>
               </div>
               <div className="flex flex-wrap gap-2">
@@ -344,8 +360,9 @@ export const CharacterForm: React.FC<CharacterFormProps> = ({
                       onClick={() => handleRemoveTag(tag)}
                       className="hover:text-green-900"
                       data-testid="remove-tag-button"
+                      aria-label={`移除标签: ${tag}`}
                     >
-                      <X size={14} />
+                      <X size={14} aria-hidden="true" />
                     </button>
                   </span>
                 ))}
