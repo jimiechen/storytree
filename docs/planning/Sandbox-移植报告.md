@@ -1,206 +1,259 @@
-# Claude Code 沙箱系统移植报告
+# Claude Code 沙箱系统移植分析报告
 
-## 1. 沙箱系统概述
+## 1. 重要声明
 
-Claude Code 的沙箱系统是一个安全执行环境，用于隔离和限制智能体的操作，确保系统安全性。该系统提供了文件系统隔离、网络隔离和权限控制等功能，是 Claude Code 安全运行的重要保障。
+**⚠️ 关键发现**：Claude Code 的沙箱系统依赖于私有包 `@anthropic-ai/sandbox-runtime`，该包没有开源，无法获取其源代码。因此，**无法完整移植沙箱系统**。
 
-## 2. 沙箱系统结构
+本报告将实事求是地分析哪些部分可以移植，哪些部分无法移植，并提供替代方案建议。
 
-### 2.1 核心文件
+## 2. 沙箱系统分析
 
-| 文件名 | 功能 | 位置 |
-|--------|------|------|
-| sandboxTypes.ts | 沙箱配置类型定义 | [entrypoints/sandboxTypes.ts](file:///workspace/caiode/claude-code-src/entrypoints/sandboxTypes.ts) |
-| sandbox-adapter.ts | 沙箱适配器，包装外部沙箱运行时 | [utils/sandbox/sandbox-adapter.ts](file:///workspace/caiode/claude-code-src/utils/sandbox/sandbox-adapter.ts) |
-| sandbox-ui-utils.ts | 沙箱UI工具函数 | [utils/sandbox/sandbox-ui-utils.ts](file:///workspace/caiode/claude-code-src/utils/sandbox/sandbox-ui-utils.ts) |
+### 2.1 系统架构
 
-### 2.2 依赖分析
+Claude Code 的沙箱系统分为两层：
 
-| 依赖 | 类型 | 用途 | 备注 |
-|------|------|------|------|
-| @anthropic-ai/sandbox-runtime | 外部依赖 | 沙箱核心运行时 | 私有依赖，非开源 |
-| zod | 外部依赖 | 配置验证 | 开源依赖 |
-| lodash-es | 外部依赖 | 工具函数 | 开源依赖 |
-| fs | 内置模块 | 文件系统操作 | 内置依赖 |
-| path | 内置模块 | 路径处理 | 内置依赖 |
+1. **开源层**（可移植）：
+   - 类型定义和接口
+   - 配置管理
+   - 权限规则解析
+   - 适配器接口
 
-### 2.3 功能模块
+2. **私有关闭层**（不可移植）：
+   - `@anthropic-ai/sandbox-runtime` 包
+   - 核心沙箱运行时
+   - 系统调用拦截
+   - 真正的隔离实现
 
-1. **配置管理**：处理沙箱配置，包括网络配置和文件系统配置
-2. **权限控制**：管理智能体的文件系统和网络访问权限
-3. **依赖检查**：检查沙箱运行所需的依赖是否可用
-4. **平台支持**：检查当前平台是否支持沙箱
-5. **沙箱初始化**：初始化沙箱环境
-6. **命令包装**：将命令包装在沙箱中执行
-7. **违规处理**：处理沙箱违规事件
-8. **配置更新**：根据设置变化动态更新沙箱配置
+### 2.2 核心文件分析
 
-## 3. 沙箱系统功能分析
+| 文件名 | 功能 | 可移植性 | 位置 |
+|--------|------|---------|------|
+| sandboxTypes.ts | 沙箱配置类型定义 | ✅ 可移植 | [entrypoints/sandboxTypes.ts](file:///workspace/caiode/claude-code-src/entrypoints/sandboxTypes.ts) |
+| sandbox-adapter.ts | 沙箱适配器，包装外部运行时 | ⚠️ 部分可移植 | [utils/sandbox/sandbox-adapter.ts](file:///workspace/caiode/claude-code-src/utils/sandbox/sandbox-adapter.ts) |
+| sandbox-ui-utils.ts | 沙箱UI工具函数 | ✅ 可移植 | [utils/sandbox/sandbox-ui-utils.ts](file:///workspace/caiode/claude-code-src/utils/sandbox/sandbox-ui-utils.ts) |
 
-### 3.1 核心功能
+### 2.3 依赖分析
 
-1. **文件系统隔离**：
-   - 控制文件系统读写权限
-   - 支持路径模式匹配
-   - 保护敏感文件和目录
+| 依赖 | 类型 | 用途 | 可获取性 | 备注 |
+|------|------|------|---------|------|
+| @anthropic-ai/sandbox-runtime | 外部依赖 | 沙箱核心运行时 | ❌ 不可获取 | 私有 NPM 包，无源代码 |
+| zod | 外部依赖 | 配置验证 | ✅ 可获取 | 开源依赖 |
+| lodash-es | 外部依赖 | 工具函数 | ✅ 可获取 | 开源依赖 |
+| fs | 内置模块 | 文件系统操作 | ✅ 可获取 | Node.js 内置 |
+| path | 内置模块 | 路径处理 | ✅ 可获取 | Node.js 内置 |
 
-2. **网络隔离**：
-   - 控制网络访问权限
-   - 支持域名白名单和黑名单
-   - 支持代理配置
+## 3. 可移植部分分析
 
-3. **权限控制**：
-   - 基于规则的权限管理
-   - 支持不同级别的权限设置
-   - 权限继承和覆盖机制
+### 3.1 配置系统（完全可移植）
 
-4. **安全增强**：
-   - 防止沙箱逃逸
-   - 保护设置文件
-   - 清理潜在的安全威胁
+从 [sandboxTypes.ts](file:///workspace/caiode/claude-code-src/entrypoints/sandboxTypes.ts) 可以看到完整的配置类型定义，包括：
 
-5. **平台兼容性**：
-   - 支持 macOS、Linux 和 WSL2
-   - 平台特定的优化和限制
+- **网络配置**：域名白名单、代理设置、Unix Socket 控制
+- **文件系统配置**：读写权限、路径模式匹配
+- **沙箱设置**：启用/禁用、平台限制、依赖检查
 
-### 3.2 关键特性
+### 3.2 权限规则系统（完全可移植）
 
-- **动态配置**：根据设置变化自动更新沙箱配置
-- **依赖检测**：检测并报告沙箱依赖问题
-- **违规监控**：监控和处理沙箱违规事件
-- **工作树支持**：支持 git 工作树环境
-- **代理支持**：支持 HTTP 和 SOCKS 代理
+从 [sandbox-adapter.ts](file:///workspace/caiode/claude-code-src/utils/sandbox/sandbox-adapter.ts) 可以看到：
 
-## 4. 依赖情况分析
+- 权限规则解析逻辑
+- 路径模式处理
+- 设置源管理
+- 配置转换逻辑
 
-### 4.1 外部依赖
+### 3.3 接口定义（完全可移植）
 
-Claude Code 的沙箱系统依赖于 `@anthropic-ai/sandbox-runtime` 这个外部包，这是一个私有依赖，不是开源的。该包提供了沙箱的核心功能，包括：
+完整的 `ISandboxManager` 接口定义，包括：
 
-- 沙箱运行时管理
-- 系统调用拦截
-- 网络隔离实现
-- 文件系统隔离实现
+```typescript
+export interface ISandboxManager {
+  initialize(sandboxAskCallback?: SandboxAskCallback): Promise<void>
+  isSupportedPlatform(): boolean
+  isSandboxingEnabled(): boolean
+  wrapWithSandbox(command: string, binShell?: string): Promise<string>
+  // ... 更多方法
+}
+```
 
-### 4.2 内部依赖
+## 4. 不可移植部分
 
-沙箱系统还依赖于 Claude Code 内部的其他模块：
+### 4.1 核心沙箱运行时
 
-- **设置系统**：读取和管理沙箱配置
-- **权限系统**：处理权限规则
-- **路径处理**：解析和处理路径模式
-- **平台检测**：检测当前平台类型
+`@anthropic-ai/sandbox-runtime` 提供的以下功能无法获取：
 
-## 5. 移植建议
+- **系统调用拦截**：seccomp/bubblewrap 集成
+- **文件系统隔离**：真正的 mount namespace
+- **网络隔离**：network namespace 管理
+- **进程隔离**：PID namespace
+- **资源限制**：cgroups 配置
 
-### 5.1 移植策略
+### 4.2 关键代码示例
 
-由于沙箱系统依赖于私有包 `@anthropic-ai/sandbox-runtime`，直接移植完整功能会面临挑战。建议采用以下策略：
+从 [sandbox-adapter.ts](file:///workspace/caiode/claude-code-src/utils/sandbox/sandbox-adapter.ts) 第 7-22 行可以看到：
 
-1. **创建替代实现**：
-   - 基于开源技术创建沙箱替代方案
-   - 例如使用 Docker 或 bubblewrap 等工具
+```typescript
+import type {
+  FsReadRestrictionConfig,
+  FsWriteRestrictionConfig,
+  // ... 更多类型
+} from '@anthropic-ai/sandbox-runtime'
+import {
+  SandboxManager as BaseSandboxManager,
+  SandboxRuntimeConfigSchema,
+  SandboxViolationStore,
+} from '@anthropic-ai/sandbox-runtime'
+```
 
-2. **功能模拟**：
-   - 实现沙箱的核心接口
-   - 模拟沙箱的基本功能
+所有这些都是从私有包导入的，没有源代码。
 
-3. **逐步移植**：
-   - 先移植配置和接口层
-   - 再实现核心功能
+## 5. 替代方案建议
 
-### 5.2 移植步骤
+### 5.1 方案一：使用开源沙箱工具（推荐）
 
-1. **创建沙箱目录结构**：
-   - `caiode/ext/claude/sandbox/`
-   - 复制类型定义和接口
-
-2. **实现沙箱接口**：
-   - 创建 `SandboxManager` 接口
-   - 实现基本的配置管理功能
-
-3. **实现文件系统隔离**：
-   - 基于文件系统权限实现隔离
-   - 支持路径模式匹配
-
-4. **实现网络隔离**：
-   - 基于网络代理实现隔离
-   - 支持域名白名单和黑名单
-
-5. **集成到 Caiode**：
-   - 与 Caiode 的设置系统集成
-   - 与 Caiode 的权限系统集成
-
-### 5.3 技术选型
-
-| 技术 | 用途 | 优势 |
+| 工具 | 平台 | 特性 |
 |------|------|------|
-| bubblewrap | Linux 沙箱 | 轻量级，安全 |
-| Docker | 容器化沙箱 | 功能完整，跨平台 |
-| Node.js 内置模块 | 文件系统操作 | 无需额外依赖 |
-| http-proxy | 网络代理 | 灵活，可配置 |
+| bubblewrap | Linux | 轻量级，安全，用于 Flatpak |
+| firejail | Linux | 功能完整，配置灵活 |
+| Docker | 全平台 | 跨平台，功能强大 |
+| nsjail | Linux | Google 开发，安全 |
 
-## 6. 移植风险评估
+**推荐方案**：使用 bubblewrap（Linux）+ Docker（跨平台）组合
+
+### 5.2 方案二：实现轻量级权限控制
+
+不做真正的系统级隔离，而是在应用层实现权限控制：
+
+- 路径白名单/黑名单
+- 命令白名单
+- 文件访问拦截（通过 Node.js fs 钩子）
+- 网络访问控制（通过代理）
+
+### 5.3 方案三：混合方案
+
+- **开发环境**：使用轻量级权限控制
+- **生产环境**：使用 Docker 或 bubblewrap
+
+## 6. 实际移植策略
+
+### 6.1 阶段一：移植可移植部分（优先）
+
+1. **移植配置系统**：
+   - 复制 [sandboxTypes.ts](file:///workspace/caiode/claude-code-src/entrypoints/sandboxTypes.ts)
+   - 移植配置验证逻辑
+
+2. **移植权限规则系统**：
+   - 复制权限解析逻辑
+   - 移植路径模式匹配
+
+3. **实现适配器接口**：
+   - 创建 `SandboxManager` 类
+   - 实现所有接口方法（先返回默认值或抛出 NotImplemented）
+
+### 6.2 阶段二：实现替代沙箱
+
+1. **选择技术栈**：
+   - Linux：bubblewrap
+   - macOS：Docker Desktop
+   - Windows：WSL2 + Docker
+
+2. **实现核心功能**：
+   - 文件系统隔离
+   - 网络隔离
+   - 权限控制
+
+3. **集成到适配器**：
+   - 替换 `BaseSandboxManager` 调用
+   - 保持接口兼容性
+
+### 6.3 阶段三：优化和完善
+
+1. **性能优化**：
+   - 减少沙箱启动开销
+   - 优化命令执行速度
+
+2. **安全增强**：
+   - 添加安全审计
+   - 实现违规检测
+
+3. **平台适配**：
+   - 针对不同平台优化
+   - 处理平台差异
+
+## 7. 风险评估
 
 | 风险 | 可能性 | 影响 | 缓解措施 |
 |------|--------|------|----------|
-| 依赖私有包 | 高 | 高 | 创建替代实现 |
-| 平台兼容性 | 中 | 中 | 针对不同平台实现适配 |
-| 性能影响 | 低 | 中 | 优化沙箱启动和执行速度 |
-| 安全性 | 中 | 高 | 加强安全测试和审计 |
+| 无法获取核心运行时 | 100% | 极高 | 使用开源替代方案 |
+| 替代方案功能不足 | 中 | 高 | 分阶段实现，逐步完善 |
+| 安全漏洞 | 中 | 极高 | 加强安全测试，使用成熟工具 |
+| 平台兼容性 | 中 | 中 | 针对主要平台实现适配 |
+| 性能影响 | 低 | 中 | 优化启动和执行流程 |
 
-## 7. 结论
+## 8. 结论
 
-Claude Code 的沙箱系统是一个功能完整的安全执行环境，但它依赖于私有包 `@anthropic-ai/sandbox-runtime`，这给移植带来了挑战。通过创建替代实现和功能模拟，可以在 Caiode 中实现类似的沙箱功能，确保智能体的安全执行。
+**重要结论**：
 
-移植沙箱系统需要考虑平台兼容性、性能影响和安全性等因素，建议采用逐步移植的策略，先实现核心接口和配置管理，再逐步完善功能。
+1. **无法完整移植**：由于 `@anthropic-ai/sandbox-runtime` 是私有包，没有源代码，无法完整移植沙箱系统。
 
-## 8. 附录
+2. **可以移植的部分**：
+   - 配置系统
+   - 权限规则系统
+   - 接口定义
+   - 配置转换逻辑
 
-### 8.1 沙箱配置示例
+3. **推荐的做法**：
+   - 移植可移植的部分
+   - 使用开源沙箱工具（bubblewrap、Docker 等）实现替代方案
+   - 保持接口兼容性，便于未来替换
 
-```json
-{
-  "sandbox": {
-    "enabled": true,
-    "network": {
-      "allowedDomains": ["github.com", "npmjs.com"],
-      "allowLocalBinding": true
-    },
-    "filesystem": {
-      "allowWrite": ["./src", "./dist"],
-      "denyWrite": ["~/.ssh", "/etc"]
-    }
-  }
-}
-```
+4. **为 Caiode 中间版本**：
+   - 可以先实现轻量级权限控制
+   - 后续再引入完整的沙箱隔离
 
-### 8.2 沙箱使用示例
+## 9. 附录
+
+### 9.1 可移植代码清单
+
+**完全可移植**：
+- [entrypoints/sandboxTypes.ts](file:///workspace/caiode/claude-code-src/entrypoints/sandboxTypes.ts) - 类型定义
+- [utils/sandbox/sandbox-ui-utils.ts](file:///workspace/caiode/claude-code-src/utils/sandbox/sandbox-ui-utils.ts) - UI 工具
+- sandbox-adapter.ts 中的配置转换逻辑
+- sandbox-adapter.ts 中的权限规则解析逻辑
+
+**需要重写**：
+- sandbox-adapter.ts 中所有对 `BaseSandboxManager` 的调用
+
+### 9.2 开源沙箱工具推荐
+
+| 工具 | GitHub | 文档 |
+|------|--------|------|
+| bubblewrap | https://github.com/containers/bubblewrap | https://github.com/containers/bubblewrap |
+| firejail | https://github.com/netblue30/firejail | https://firejail.wordpress.com/ |
+| nsjail | https://github.com/google/nsjail | https://nsjail.dev/ |
+
+### 9.3 Docker 沙箱示例
 
 ```typescript
-import { SandboxManager } from './sandbox/SandboxManager';
+// 简单的 Docker 沙箱包装器示例
+import { exec } from 'child_process';
 
-// 初始化沙箱
-await SandboxManager.initialize();
-
-// 检查沙箱是否启用
-if (SandboxManager.isSandboxingEnabled()) {
-  console.log('沙箱已启用');
-} else {
-  console.log('沙箱未启用');
+export async function wrapWithDockerSandbox(
+  command: string,
+  workDir: string,
+  allowedPaths: string[]
+): Promise<string> {
+  const volumeArgs = allowedPaths.map(p => `-v ${p}:${p}`).join(' ');
+  
+  const dockerCommand = `docker run --rm ${volumeArgs} -w ${workDir} alpine ${command}`;
+  
+  return new Promise((resolve, reject) => {
+    exec(dockerCommand, (error, stdout, stderr) => {
+      if (error) {
+        reject(error);
+      } else {
+        resolve(stdout);
+      }
+    });
+  });
 }
-
-// 包装命令在沙箱中执行
-const sandboxedCommand = await SandboxManager.wrapWithSandbox('ls -la');
-console.log(sandboxedCommand);
 ```
-
-### 8.3 移植注意事项
-
-1. **权限管理**：确保权限规则的正确解析和应用
-2. **路径处理**：注意不同平台的路径格式差异
-3. **网络隔离**：确保网络请求的正确拦截和控制
-4. **性能优化**：减少沙箱启动和执行的开销
-5. **安全测试**：进行全面的安全测试，确保沙箱的有效性
-
-通过以上移植策略和步骤，可以在 Caiode 中实现一个功能完整、安全可靠的沙箱系统，为智能体的执行提供安全保障。
