@@ -1,0 +1,76 @@
+{
+  "KnowledgeBase": {
+    "title": "知识库",
+    "characters": "角色",
+    "locations": "地点",
+    "items": "物品",
+    "lore": "传说",
+    "concepts": "概念",
+    "searchPlaceholder": "搜索...",
+    "manualAdd": "手动添加",
+    "aiExtract": "AI 自动提取",
+    "noConflict": "无矛盾",
+    "conflict": "设定冲突",
+    "age": "年龄",
+    "wordCount": "出场字数",
+    "appearance": "外貌描述",
+    "gender": "性别",
+    "unknown": "未知",
+    "male": "男",
+    "female": "女",
+    "roles": {
+      "protagonist": "主角",
+      "supporting": "配角",
+      "antagonist": "反派",
+      "other": "龙套"
+    }
+  },
+  "AIChat": {
+    "model": "Selected Model",
+    "continue": "续写",
+    "expand": "扩写",
+    "rewrite": "改写",
+    "chat": "对话",
+    "describe": "描写",
+    "deduce": "推演",
+    "foreshadowing": "伏笔状态",
+    "consistencyCheck": "一致性检查",
+    "charConsistency": "角色一致性",
+    "timelineConsistency": "时间线校对",
+    "reportDev": "报告功能开发中...",
+    "versionsDev": "版本历史开发中...",
+    "tabs": {
+      "chat": "CHAT",
+      "log": "LOG",
+      "report": "REPORT",
+      "versions": "VERSIONS"
+    },
+    "inputPlaceholder": "输入指令或与 AI 对话...",
+    "accept": "采纳",
+    "regenerate": "重新生成",
+    "startChat": "开始与 AI 对话",
+    "thinking": "思考中...",
+    "shiftEnter": "Shift + Enter 换行",
+    "currentChapter": "当前章节"
+  },
+  "Sidebar": {
+    "library": "LIBRARY",
+    "manuscript": "MANUSCRIPT",
+    "characters": "CHARACTERS",
+    "worldBuilding": "WORLD BUILDING",
+    "analytics": "ANALYTICS",
+    "newManuscript": "NEW MANUSCRIPT",
+    "settings": "SETTINGS",
+    "support": "SUPPORT",
+    "theme": "THEME",
+    "language": "LANGUAGE"
+  },
+  "Workbench": {
+    "draft": "写作",
+    "outline": "大纲",
+    "branches": "分支",
+    "knowledge": "知识库",
+    "models": "AI模型",
+    "stats": "统计"
+  }
+}

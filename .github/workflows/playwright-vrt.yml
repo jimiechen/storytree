@@ -1,0 +1,54 @@
+name: Playwright VRT
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  test:
+    timeout-minutes: 60
+    runs-on: ubuntu-latest
+    
+    # Run only VRT tasks when a PR is updated
+    steps:
+    - uses: actions/checkout@v4
+    
+    - uses: actions/setup-node@v4
+      with:
+        node-version: lts/*
+        cache: 'npm'
+        cache-dependency-path: './dreamweaver/package-lock.json'
+        
+    - name: Install dependencies
+      run: |
+        cd dreamweaver
+        npm ci
+        
+    - name: Setup Prisma
+      run: |
+        cd dreamweaver
+        npx prisma generate
+        
+    - name: Build Next.js app
+      run: |
+        cd dreamweaver
+        npm run build
+        
+    - name: Install Playwright Browsers
+      run: |
+        cd dreamweaver
+        npx playwright install --with-deps
+        
+    - name: Run Visual Regression Tests
+      run: |
+        cd dreamweaver
+        npx playwright test tests/e2e/vrt.spec.ts --reporter=github
+        
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: playwright-report
+        path: dreamweaver/playwright-report/
+        retention-days: 14

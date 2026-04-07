@@ -1,0 +1,76 @@
+{
+  "KnowledgeBase": {
+    "title": "Knowledge Base",
+    "characters": "Characters",
+    "locations": "Locations",
+    "items": "Items",
+    "lore": "Lore",
+    "concepts": "Concepts",
+    "searchPlaceholder": "Search...",
+    "manualAdd": "Manual Add",
+    "aiExtract": "AI Auto Extract",
+    "noConflict": "No Conflict",
+    "conflict": "Conflict",
+    "age": "Age",
+    "wordCount": "Word Count",
+    "appearance": "Appearance",
+    "gender": "Gender",
+    "unknown": "Unknown",
+    "male": "Male",
+    "female": "Female",
+    "roles": {
+      "protagonist": "Protagonist",
+      "supporting": "Supporting",
+      "antagonist": "Antagonist",
+      "other": "Other"
+    }
+  },
+  "AIChat": {
+    "model": "Selected Model",
+    "continue": "Continue",
+    "expand": "Expand",
+    "rewrite": "Rewrite",
+    "chat": "Chat",
+    "describe": "Describe",
+    "deduce": "Deduce",
+    "foreshadowing": "Foreshadowing",
+    "consistencyCheck": "Consistency Check",
+    "charConsistency": "Character Consistency",
+    "timelineConsistency": "Timeline Proofing",
+    "reportDev": "Report feature in development...",
+    "versionsDev": "Version history in development...",
+    "tabs": {
+      "chat": "CHAT",
+      "log": "LOG",
+      "report": "REPORT",
+      "versions": "VERSIONS"
+    },
+    "inputPlaceholder": "Enter prompt or chat with AI...",
+    "accept": "Accept",
+    "regenerate": "Regenerate",
+    "startChat": "Start AI Chat",
+    "thinking": "Thinking...",
+    "shiftEnter": "Shift + Enter to new line",
+    "currentChapter": "Current Chapter"
+  },
+  "Sidebar": {
+    "library": "LIBRARY",
+    "manuscript": "MANUSCRIPT",
+    "characters": "CHARACTERS",
+    "worldBuilding": "WORLD BUILDING",
+    "analytics": "ANALYTICS",
+    "newManuscript": "NEW MANUSCRIPT",
+    "settings": "SETTINGS",
+    "support": "SUPPORT",
+    "theme": "THEME",
+    "language": "LANGUAGE"
+  },
+  "Workbench": {
+    "draft": "Draft",
+    "outline": "Outline",
+    "branches": "Branches",
+    "knowledge": "Knowledge Base",
+    "models": "AI Models",
+    "stats": "Stats"
+  }
+}

@@ -8,63 +8,69 @@ AI 指令:
 4. **状态维护**: 每次 Skill 执行结束，必须更新此文件中的进度条 (Progress) 和状态 (Status)。
 -->
 
-> **当前上下文 (Current Context)**: dreamweaver-v2-knowledge-ai 已完成，正式进入 dreamweaver-v3-advanced-narrative 迭代。
-> **迭代名称 (Iteration)**: dreamweaver-v3-advanced-narrative
-> **开发模式**: Harness Engineering + TDD + 多分支与 RAG 真实架构演进
+> **当前上下文 (Current Context)**: dreamweaver-v3-advanced-narrative 已冻结，正式转向 vscode-oss-integration-hybrid 混合渐进式迁移迭代。
+> **迭代名称 (Iteration)**: vscode-oss-integration-hybrid
+> **开发模式**: TDD + 纯静态 Webview UI + SQLite 持久化 + OpenAPI 直连
 
 ## 1. 规划阶段 (Planning Phase)
-> **目标**: 在编码前通过 3 轮迭代完善需求与架构。
+> **目标**: 在编码前通过多轮架构评审确定最稳妥的迁移方案。
 
 | 轮次 (Round) | 步骤 1: 草稿 (Draft) | 步骤 2: 自查 (Critique) | 步骤 3: 调研 (Research) | 步骤 4: 推演 (Simulation) | 步骤 5: 锁定 (Lock) |
 | :--- | :---: | :---: | :---: | :---: | :---: |
-| **Round 1** (MVP v1) | ✅ 完成 | ✅ 完成 | ✅ 完成 | ✅ 完成 | ✅ 完成 |
-| **Round 1** (V2) | ✅ 完成 | ✅ 完成 | ✅ 完成 | ✅ 完成 | ✅ 完成 |
-| **Round 1** (V3) | ✅ 完成 | ⏳ 待定 | ⏳ 待定 | ⏳ 待定 | ⏳ 待定 |
-| **Round 2** (V3) | ⏳ 待定 | ⏳ 待定 | ⏳ 待定 | ⏳ 待定 | ⏳ 待定 |
-| **Round 3** (V3) | ⏳ 待定 | ⏳ 待定 | ⏳ 待定 | ⏳ 待定 | ⏳ 待定 |
+| **Round 1** (V3) | ✅ 完成 | ⏳ 冻结 | ⏳ 冻结 | ⏳ 冻结 | ⏳ 冻结 |
+| **Round 1** (Hybrid) | ✅ 完成 | ✅ 完成 | ✅ 完成 | ✅ 完成 | ✅ 完成 |
 
-### Round 1 (V3) 完成内容
-- ✅ 创建 `01-progress-comparison.md` - V3 进度对比与差距分析
-- ✅ 创建 `02-architecture-v3.md` - V3 架构演进方案 (Harness & RAG)
-- ✅ 创建 `03-execution-plan.md` - V3 执行计划 (多分支叙事)
-- ✅ 创建 `04-ralph-tasks.md` - V3 开发任务清单
-- ✅ 创建 `05-test-plan.md` - V3 验收测试计划
-- ✅ 创建 `06-learnings.md` - V3 迭代学习与经验总结
+### Round 1 (Hybrid) 完成内容
+- ✅ 产出 `Dreamweaver-Caiode-VSCode-Offline-Feasibility.md` (离线可行性报告)
+- ✅ 产出 `StoryTree-VSCode-OSS-Integration-Plan.md` (三阶段实施计划)
+- ✅ 产出 `ADR-001-Architecture-Finalization.md` (纯静态+SQLite+OpenAPI架构)
+- ✅ 产出 `ADR-002-Security-Gateway-and-Mock-Strategy.md` (网关与Mock下沉)
+- ✅ 创建 `04-ralph-tasks.md` - 混合渐进式迁移任务清单
 
 ## 2. 开发阶段 (Implementation Phase)
 > **目标**: 严格按顺序执行开发任务。
 > **⚠️ 执行铁律**: 必须严格按照 `04-ralph-tasks.md` 中的列表顺序执行任务。**严禁跳跃**或乱序执行。
 > **TDD 铁律**: 先写测试(Red) -> 再写实现(Green) -> 运行测试 -> 重构(Refactor)
 
-- **状态**: 🔄 进行中 (Sprint 0: UI Polish)
-- **进度**: **0 / 17 任务完成 (0%)**
-- **引用**: `docs/planning/dreamweaver-v3-advanced-narrative/04-ralph-tasks.md`
+- **状态**: 🔄 进行中 (Phase 1: PoC)
+- **进度**: **1 / 23 任务完成 (4.3%)**
+- **引用**: `docs/planning/vscode-oss-integration/04-ralph-tasks.md`
 
-### Sprint 0: UI 视觉与布局差异修复 (UI Polish) ✅ 已完成
-- [x] **T-UI-FIX-001**: 修复 P1/P2 轻微样式与视觉偏差
-- [x] **T-UI-FIX-002**: 修复 P0 项目主页全局布局缺失
-- [x] **T-UI-FIX-003**: 修复 P0 大纲管理视图降级
-- [x] **T-UI-FIX-004**: 修复 P0 分支树形图静态化
-- [x] **T-UI-FIX-005**: 核心业务链路串联验证 (E2E)
+### Phase 1.1: 制定前后端通信协议 (IPC Protocol Design) ✅ 已完成
+- [x] **T-POC-001**: 定义标准的 JSON-RPC 格式的通信协议
+- [ ] **T-POC-002**: 在 `dreamweaver` 中实现基于该协议的 RPC 适配器
+- [ ] **T-POC-003**: 在 `caiode` 扩展中实现对应的消息路由处理器
 
-### Sprint 1: Harness 工程基础设施 (Harness Foundation) ⏳ 待定
-- [ ] **T-HAR-001**: 建立 Context Manager 与 Compaction 雏形
-- [ ] **T-HAR-002**: 实现 Prompt Cache Harness (基于 AI SDK)
+### Phase 1.2: 前端静态导出验证 (Next.js Static Export PoC) ⏳ 待定
+- [ ] **T-POC-004**: 配置 `output: 'export'` 并移除阻碍依赖
+- [ ] **T-POC-005**: 成功构建出纯静态产物 (`out/` 目录)
 
-### Sprint 2: 知识库 RAG 检索 (Knowledge Retrieval) ⏳ 待定
-- [ ] **T-RAG-001**: 向量存储架构选型与 Prisma 扩展
-- [ ] **T-RAG-002**: 实体数据 Ingestion (写入向量库)
-- [ ] **T-RAG-003**: 智能检索与上下文注入 (Retrieval & Injection)
+### Phase 1.3: 插件骨架与 Mock 层下沉 (Extension Skeleton) ⏳ 待定
+- [ ] **T-POC-006**: 初始化 VS Code Extension 骨架与 Webview
+- [ ] **T-POC-007**: 迁移 Mock 逻辑至 Node.js 层
+- [ ] **T-POC-008**: 跑通双端 IPC 数据通信渲染
 
-### Sprint 3: 多分支叙事系统 (Branching Narrative) ⏳ 待定
-- [ ] **T-BRN-001**: Prisma 分支模型设计与迁移
-- [ ] **T-BRN-002**: 工作台分支 UI 组件与状态
-- [ ] **T-BRN-003**: 分支切换与编辑器联动
-- [ ] **T-BRN-004**: 基于 AI 的“假设推演”交互 (What-if Execution)
+### Phase 1.4: 持续推进 DW 页面开发与测试 ⏳ 待定
+- [ ] **T-FE-001**: 恢复剩余的 Stitch 原页面开发
+- [ ] **T-FE-002**: 完善 Playwright 自动化 UI 测试和 VRT
+- [ ] **T-FE-003**: 接入新增页面的 IPC 请求
 
-### Sprint 4: 质量门禁与性能调优 (QA & Tuning) ⏳ 待定
-- [ ] **T-QA-001**: 全链路回归测试与缺陷修复
-- [ ] **T-QA-002**: 性能基准与首字延迟优化
+### Phase 1.5: 安全机制架构设计与验证 ⏳ 待定
+- [ ] **T-SEC-001**: 数据安全 (SecretStorage API Keys)
+- [ ] **T-SEC-002**: 文件隔离 (沙箱机制)
+- [ ] **T-SEC-003**: 反编译防护 (esbuild / PyArmor)
+- [ ] **T-SEC-004**: 本地库加密 (sqlcipher)
+
+### Phase 1.6: SQLite 本地化替换 ⏳ 待定
+- [ ] **T-DB-001**: 引入真实 SQLite 替换 Mock
+- [ ] **T-DB-002**: 实现 Prisma/SQL CRUD
+- [ ] **T-DB-003**: 联调前端业务与本地数据库
+
+### Phase 1.7: 云端网关集成 ⏳ 待定
+- [ ] **T-GW-001**: 接入用户登录与授权验证
+- [ ] **T-GW-002**: 接入续费支付、全局配置拉取
+- [ ] **T-GW-003**: 集成版本检查与日志上报
+- [ ] **T-GW-004**: 提供用户反馈入口
 
 ## 3. 质量基准与规范 (Quality Standards & Baselines)
 
@@ -93,16 +99,27 @@ AI 指令:
 > **目标**: 确保所有功能满足验收标准，通过所有用例。
 > **⚠️ 执行铁律**: 必须严格按照 `05-test-plan.md` 中的列表顺序执行测试。**严禁跳跃**或乱序执行。
 
-- **状态**: ⏸ 待开始
-- **进度**: 0 / 10 测试通过 (0%)
-- **引用**: `docs/planning/dreamweaver-v3-advanced-narrative/05-test-plan.md`
+- **状态**: 🔄 就绪 (测试计划已生成)
+- **进度**: **0 / ~91 测试通过 (0%)**
+- **引用**: `docs/planning/vscode-oss-integration/05-test-plan.md`
 
 ### 测试用例清单
-| 类别 | 通过 | 失败 | 跳过 | 通过率 |
-|------|------|------|------|--------|
-| Harness与RAG (TC-RAG) | 0 | 0 | 3 | 0% |
-| 多分支系统 (TC-BRN) | 0 | 0 | 4 | 0% |
-| 性能与回归门禁 (TC-QA) | 0 | 0 | 3 | 0% |
+| 类别 | 总数 | 通过 | 失败 | 跳过 | 通过率 |
+|------|------|------|------|------|--------|
+| IPC Protocol (TC-IPC) | 16 | 0 | 0 | 16 | 0% |
+| Static Export (TC-EXPORT) | 11 | 0 | 0 | 11 | 0% |
+| Extension Skeleton (TC-EXT) | 12 | 0 | 0 | 12 | 0% |
+| Frontend UI (TC-FE) | 9 | 0 | 0 | 9 | 0% |
+| Security (TC-SEC) | 11 | 0 | 0 | 11 | 0% |
+| SQLite Database (TC-DB) | 14 | 0 | 0 | 14 | 0% |
+| Cloud Gateway (TC-GW) | 7 | 0 | 0 | 7 | 0% |
+| Performance Benchmark (TC-PERF) | 6 | 0 | 0 | 6 | 0% |
+| Security Audit (TC-SEC-AUDIT) | 5 | 0 | 0 | 5 | 0% |
+| **总计** | **~91** | **0** | **0** | **91** | **0%** |
+
+### Round 1 (Hybrid) 补充完成内容
+- ✅ 创建 `05-test-plan.md` - VS Code OSS 集成测试计划 (~91 个测试用例)
+- ✅ 包含单元测试/集成测试/E2E测试/安全扫描/性能基准全覆盖
 
 ## 5. 质量门禁标准 (Quality Gates)
 在完成 V3 迭代前，必须通过以下强制门禁：
@@ -136,6 +153,14 @@ AI 指令:
 ---
 
 ## 关键变更记录
+
+### 2026-04-07: 正式启动 VS Code OSS 集成 (vscode-oss-integration-hybrid)
+- ✅ 完成项目状态评估与技术决策报告
+- ✅ 生成增强版任务拆分计划 (v1.1 - 含方案对比 + 5 大功能模块)
+- ✅ 完成 Ralph 就绪性评估 (95% Ready)
+- ✅ 创建 `05-test-plan.md` - VS Code OSS 集成测试计划 (~91 个测试用例)
+- 🔄 **准备启动 ralph-task-executor 执行 T-POC-001**
+- 📋 当前任务: T-POC-001 定义 JSON-RPC 通信协议
 
 ### 2026-04-06: 进入 V3 迭代 (dreamweaver-v3-advanced-narrative)
 - ✅ V2 全部 15 个任务完成，测试 100% 覆盖通过
