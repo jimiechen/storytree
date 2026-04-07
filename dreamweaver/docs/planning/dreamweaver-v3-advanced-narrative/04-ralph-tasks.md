@@ -10,6 +10,65 @@
 
 ---
 
+## Sprint 0: UI 视觉与布局差异修复 (UI Polish)
+> **目标**: 在进入 V3 服务端架构前，彻底修复 V2 遗留的 UI 布局坍塌与视觉偏差，确保核心业务串联。
+
+### T-UI-FIX-001: 修复 P1/P2 轻微样式与视觉偏差
+- [x] 在 `src/app/layout.tsx` 中引入 Material Symbols 字体库，恢复全局图标渲染。
+- [x] 强制全局启用暗黑主题 (Dark Mode)，恢复深空蓝高级质感。
+- [x] 修复 AI 面板 (`ChatPanel.tsx`) 输入框底部间距，恢复悬浮感。
+- [x] 修复编辑器 Toolbar 吸顶高度的轻微偏差。
+- [x] 调整知识库角色表单 (`CharacterForm.tsx`) 的控件间距 (`gap-4` 改为 `gap-6`)。
+
+### T-UI-FIX-002: 修复 P0 项目主页全局布局缺失
+- [x] 创建/重构 `src/app/(main)/projects/layout.tsx`，将 `ActivityBar` 和 `TopNav` (顶部居中导航) 引入项目主页。
+- [x] 为项目主页内容区添加正确的 Sidebar 宽度挤压 (margin-left)，确保网格布局对齐。
+
+### T-UI-FIX-003: 修复 P0 大纲管理视图降级
+- [x] 与产品/设计确认，创建独立路由 `src/app/(main)/workbench/[projectId]/outline/page.tsx`。
+- [x] 实现原型的全屏三栏布局（侧边栏、大纲列表树、右侧详情）。
+
+### T-UI-FIX-004: 修复 P0 分支树形图静态化
+- [x] 在 `src/app/(main)/workbench/[projectId]/branches/page.tsx` 引入图形学库 (如 `React Flow`)。
+- [x] 重写现有静态 Flex/Grid 卡片，渲染为带连线和绝对定位层级的树状结构。
+
+### T-UI-FIX-005: 核心业务链路串联验证 (E2E)
+- [x] 运行现有 E2E 测试，修复由于 UI DOM 结构调整带来的测试定位器 (Locator) 失效。
+- [x] 验证数据流串联：登录 -> 项目列表 -> 工作台大纲 -> 编辑器/AI面板 -> 分支视图 -> 知识库。
+- [x] 确保端到端测试 100% 通过后，再进入 Sprint 1 开发。
+
+---
+
+## Sprint 0.5: 主题/国际化与无障碍基建 (Theme & i18n & A11y)
+> **目标**: 彻底解决知识库和 AI 面板由于数据报错和硬编码造成的视觉塌方，建立完整的设计令牌、中英双语、无障碍与视觉回归矩阵。
+
+### T-SYS-001: 知识库真实后端数据接入 (修复 404 空白)
+- [x] 创建 `src/app/api/projects/[id]/characters/route.ts` 与 `world-settings/route.ts` 的真实数据库增删改查。
+- [x] 确保测试环境生成包含角色的种子数据 (`seed.ts`)，恢复 `knowledge_base_characters` 丰富界面。
+- [x] 修复 AI 面板的 "Consistency Check" 与 "Context Reference" 的静态组件结构占位。
+
+### T-SYS-002: 设计令牌与 Light/Dark 一键切换
+- [x] 在 `globals.css` 中重构 CSS 变量，分为 `:root` (Light) 和 `.dark` 两套完整的语义化色板。
+- [x] 引入 `next-themes`，在全局 `layout.tsx` 中包裹 `ThemeProvider`。
+- [x] 在 `Settings` 菜单中添加主题切换开关，测试深/浅色模式切换的无缝过渡。
+
+### T-SYS-003: 国际化双语支持 (zh-CN / en-US)
+- [x] 引入 `next-intl`，建立 `messages/zh-CN.json` 和 `en-US.json` 语言包字典。
+- [x] 重构知识库 (`knowledge_base_characters`) 和 AI 面板 (`ai_chat_panel`) 中所有硬编码的中/英文字符串。
+- [x] 配置 `[locale]` 动态路由与 `middleware.ts` 拦截，支持随浏览器语言或手动切换。
+
+### T-SYS-004: 无障碍访问 (A11y) 改造
+- [x] 为所有 Icon 按钮 (如侧边栏、快捷指令) 添加 `aria-label` 属性。
+- [x] 设置全局 `<html>` 的 `lang` 属性随 i18n 动态变化。
+- [x] 为表单元素配置正确的 `htmlFor` 与焦点顺序 (`tabIndex`)。
+
+### T-SYS-005: 视觉回归测试 (VRT) 矩阵搭建
+- [x] 引入 Playwright 视觉对比库 (Visual Comparisons) 或 Percy。
+- [x] 编写测试脚本，覆盖 `Light/Dark` × `zh-CN/en-US` 四种组合下的核心页面快照比对。
+- [x] 配置 GitHub Actions 脚本，使得任何超过 1% 像素差异的改动触发 CI 失败。
+
+---
+
 ## Sprint 1: Harness 工程基础设施 (Harness Foundation)
 
 ### T-HAR-001: 建立 Context Manager 与 Compaction 雏形

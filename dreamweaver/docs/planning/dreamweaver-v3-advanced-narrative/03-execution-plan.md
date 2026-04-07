@@ -10,7 +10,17 @@
 
 ## 2. 分阶段执行步骤
 
-### 2.1 第一阶段 (Sprint 1): Harness 工程基础设施搭建 (Harness Foundation)
+### 2.1 第零阶段 (Sprint 0): UI 视觉与布局差异修复 (UI Polish)
+> **目标**: 在进入 V3 服务端架构前，彻底修复 V2 遗留的 UI 布局坍塌与视觉偏差，确保核心业务串联。
+
+1. **基础体验打磨**: 引入缺失的 Material Symbols 图标库，全局强制开启暗黑模式 (Dark Mode)，微调 AI 面板输入框与编辑器 Toolbar。
+2. **全局路由重构**: 修复 `/projects` 路由全局布局缺失问题，补充 `ActivityBar` 和 `TopNav`。
+3. **视图级重构**: 
+   - 确认大纲管理需求，必要时创建独立的三栏大纲视图 `/workbench/[id]/outline`。
+   - 引入 `React Flow` 图形学库，重写多分支树形视图。
+4. **端到端测试覆盖**: 修复因 DOM 变更带来的用例失效，跑通完整业务链路，建立每日进度同步。
+
+### 2.2 第一阶段 (Sprint 1): Harness 工程基础设施 (Harness Foundation)
 > **目标**: 构建符合 PRD v5 理念的工程化基础设施，优化 AI 上下文成本。
 
 1. **Context Manager (上下文组装与压缩)**:

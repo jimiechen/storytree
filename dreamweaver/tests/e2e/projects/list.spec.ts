@@ -10,13 +10,13 @@ test.describe('项目列表页面', () => {
     await expect(page).toHaveTitle(/DreamWeaver/);
 
     // 检查页面头部
-    await expect(page.locator('h1')).toContainText('织梦笔');
+    await expect(page.locator('h1:has-text("织梦笔")')).toBeVisible();
 
     // 检查新建项目按钮
     await expect(page.locator('text=新建作品').first()).toBeVisible();
 
     // 检查搜索框
-    await expect(page.locator('input[placeholder="搜索项目..."]')).toBeVisible();
+    await expect(page.locator('input[placeholder="Search manuscripts..."]')).toBeVisible();
 
     // 检查项目列表容器 (至少包含一个项目)
     await expect(page.locator('text=最近作品').first()).toBeVisible();
@@ -44,8 +44,8 @@ test.describe('项目列表页面', () => {
 
   test('搜索功能 - 可通过标题搜索项目', async ({ page }) => {
     // 输入搜索关键词
-    await page.fill('input[placeholder="搜索项目..."]', '测试');
-    await page.press('input[placeholder="搜索项目..."]', 'Enter');
+    await page.fill('input[placeholder="Search manuscripts..."]', '测试');
+    await page.press('input[placeholder="Search manuscripts..."]', 'Enter');
 
     // 检查搜索结果
     const projectCards = page.locator('.project-card');
@@ -66,7 +66,7 @@ test.describe('项目列表页面', () => {
     // 点击新建项目按钮
     await page.locator('text=新建作品').first().click();
 
-    // 检查弹窗是否打开
-    await expect(page.getByText('作品名称').first()).toBeVisible();
+    // 检查弹窗是否存在
+    await expect(page.locator('text=作品名称').first()).toBeVisible();
   });
 });

@@ -166,7 +166,7 @@ test.describe('Workbench Page - T-UI-002', () => {
 
   test('should close modal when clicking cancel', async ({ page }) => {
     // 打开弹窗
-    await page.locator('text=新建章节').click();
+    await page.locator('text=新建章节').first().click();
     await expect(page.locator('.fixed.inset-0')).toBeVisible();
 
     // 点击取消按钮
@@ -178,10 +178,10 @@ test.describe('Workbench Page - T-UI-002', () => {
 
   test('should validate chapter title is required', async ({ page }) => {
     // 打开弹窗
-    await page.locator('text=新建章节').click();
+    await page.locator('text=新建章节').first().click();
 
     // 直接点击创建按钮
-    await page.locator('button:has-text("创建章节")').click();
+    await page.locator('button:has-text("创建")').first().click();
 
     // 验证错误提示
     await expect(page.locator('text=章节标题不能为空')).toBeVisible();
