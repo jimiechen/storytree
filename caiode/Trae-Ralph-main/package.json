@@ -1,0 +1,71 @@
+{
+  "name": "trae-ralph",
+  "version": "1.1.2",
+  "description": "通过 Chrome DevTools Protocol 为 Trae IDE 实现自动化持续工作（Ralph Loop）",
+  "main": "src/launcher.js",
+  "bin": {
+    "trae-ralph": "./bin/cli.js"
+  },
+  "scripts": {
+    "config": "node src/config.js",
+    "config:cn": "node src/config.js --cn",
+    "scenarios": "node src/scenario-manager.js",
+    "setup-trae": "node src/setup-trae.js",
+    "start": "node src/launcher.js",
+    "start:nostop": "node src/launcher.js --nostop",
+    "start:cn": "node src/launcher.js --version china",
+    "inject": "node src/injector.js",
+    "inject:cn": "node src/injector.js --version china",
+    "rules:inject": "node scripts/inject-rules.js",
+    "skills:inject": "node scripts/inject-skills.js",
+    "templates:inject": "node scripts/inject-templates.js",
+    "rules:clean": "node scripts/clean-rules.js",
+    "plan": "node scripts/init-planning.js",
+    "build": "pkg bin/cli.js -t node16-win-x64,node16-macos-x64,node16-linux-x64 -o dist/trae-ralph",
+    "prepublishOnly": "echo 'Ready to publish to npm'"
+  },
+  "keywords": [
+    "trae",
+    "trae-ide",
+    "ralph-loop",
+    "cdp",
+    "chrome-devtools-protocol",
+    "automation",
+    "ai",
+    "ai-assistant",
+    "continuous",
+    "cli",
+    "developer-tools"
+  ],
+  "author": "ylubi <yhuiche@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "chrome-remote-interface": "^0.32.2"
+  },
+  "devDependencies": {
+    "pkg": "^5.8.1"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-username/trae-ralph.git"
+  },
+  "bugs": {
+    "url": "https://github.com/your-username/trae-ralph/issues"
+  },
+  "homepage": "https://github.com/your-username/trae-ralph#readme",
+  "files": [
+    "bin/",
+    "src/",
+    "config/",
+    ".trae-templates/",
+    "scripts/",
+    "templates/",
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md"
+  ],
+  "preferGlobal": true
+}
