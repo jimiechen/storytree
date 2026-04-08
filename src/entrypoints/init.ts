@@ -70,7 +70,7 @@ export const init = memoize(async (): Promise<void> => {
   logForDiagnosticsNoPII('info', 'init_started')
   profileCheckpoint('init_function_start')
 
-  // Validate configs are valid and enable configuration system
+  // 验证配置有效性并启用配置系统
   try {
     const configsStart = Date.now()
     enableConfigs()
@@ -79,13 +79,13 @@ export const init = memoize(async (): Promise<void> => {
     })
     profileCheckpoint('init_configs_enabled')
 
-    // Apply only safe environment variables before trust dialog
-    // Full environment variables are applied after trust is established
+    // 在信任对话框之前仅应用安全的环境变量
+    // 完全的环境变量在信任建立后应用
     const envVarsStart = Date.now()
     applySafeConfigEnvironmentVariables()
 
-    // Apply NODE_EXTRA_CA_CERTS from settings.json to process.env early,
-    // before any TLS connections.
+    // 提前从 settings.json 应用 NODE_EXTRA_CA_CERTS 到 process.env，
+    // 在任何 TLS 连接之前。
     applyExtraCACertsFromConfig()
 
     logForDiagnosticsNoPII('info', 'init_safe_env_vars_applied', {
@@ -93,37 +93,36 @@ export const init = memoize(async (): Promise<void> => {
     })
     profileCheckpoint('init_safe_env_vars_applied')
 
-    // Make sure things get flushed on exit
+    // 确保在退出时刷新所有内容
     setupGracefulShutdown()
     profileCheckpoint('init_after_graceful_shutdown')
 
-    // Initialize 1P event logging
+    // 初始化第一方事件日志记录
     void Promise.all([
       import('../services/analytics/firstPartyEventLogger.js'),
       import('../services/analytics/growthbook.js'),
     ]).then(([fp, gb]) => {
       fp.initialize1PEventLogging()
-      // Rebuild the logger provider if tengu_1p_event_batch_config changes
-      // mid-session. Change detection (isEqual) is inside the handler so
-      // unchanged refreshes are no-ops.
+      // 如果 tengu_1p_event_batch_config 在会话中途更改，重建日志记录提供程序
+      // 变更检测 (isEqual) 在处理程序内部，因此未更改的刷新是无操作的。
       gb.onGrowthBookRefresh(() => {
         void fp.reinitialize1PEventLoggingIfConfigChanged()
       })
     })
     profileCheckpoint('init_after_1p_event_logging')
 
-    // Populate OAuth account info if it is not already cached in config
+    // 如果 OAuth 账户信息尚未缓存在配置中，则填充它
     void populateOAuthAccountInfoIfNeeded()
     profileCheckpoint('init_after_oauth_populate')
 
-    // Initialize JetBrains IDE detection asynchronously
+    // 异步初始化 JetBrains IDE 检测
     void initJetBrainsDetection()
     profileCheckpoint('init_after_jetbrains_detection')
 
-    // Detect GitHub repository asynchronously
+    // 异步检测 GitHub 仓库
     void detectCurrentRepository()
 
-    // Initialize the loading promise early so that other systems can await remote settings loading
+    // 提前初始化加载 promise，以便其他系统可以等待远程设置加载
     if (isEligibleForRemoteManagedSettings()) {
       initializeRemoteManagedSettingsLoadingPromise()
     }
@@ -132,32 +131,32 @@ export const init = memoize(async (): Promise<void> => {
     }
     profileCheckpoint('init_after_remote_settings_check')
 
-    // Record the first start time
+    // 记录首次启动时间
     recordFirstStartTime()
 
-    // Configure global mTLS settings
+    // 配置全局 mTLS 设置
     const mtlsStart = Date.now()
-    logForDebugging('[init] configureGlobalMTLS starting')
+    logForDebugging('[init] configureGlobalMTLS 开始')
     configureGlobalMTLS()
     logForDiagnosticsNoPII('info', 'init_mtls_configured', {
       duration_ms: Date.now() - mtlsStart,
     })
-    logForDebugging('[init] configureGlobalMTLS complete')
+    logForDebugging('[init] configureGlobalMTLS 完成')
 
-    // Configure global HTTP agents (proxy and/or mTLS)
+    // 配置全局 HTTP 代理（代理和/或 mTLS）
     const proxyStart = Date.now()
-    logForDebugging('[init] configureGlobalAgents starting')
+    logForDebugging('[init] configureGlobalAgents 开始')
     configureGlobalAgents()
     logForDiagnosticsNoPII('info', 'init_proxy_configured', {
       duration_ms: Date.now() - proxyStart,
     })
-    logForDebugging('[init] configureGlobalAgents complete')
+    logForDebugging('[init] configureGlobalAgents 完成')
     profileCheckpoint('init_network_configured')
 
-    // Preconnect to the Anthropic API
+    // 预连接到 Anthropic API
     preconnectAnthropicApi()
 
-    // CCR upstreamproxy: start the local CONNECT relay
+    // CCR 上游代理：启动本地 CONNECT 中继
     if (isEnvTruthy(process.env.CLAUDE_CODE_REMOTE)) {
       try {
         const { initUpstreamProxy, getUpstreamProxyEnv } = await import(
@@ -170,19 +169,19 @@ export const init = memoize(async (): Promise<void> => {
         await initUpstreamProxy()
       } catch (err) {
         logForDebugging(
-          `[init] upstreamproxy init failed: ${err instanceof Error ? err.message : String(err)}; continuing without proxy`,
+          `[init] 上游代理初始化失败: ${err instanceof Error ? err.message : String(err)}; 继续无代理运行`,
           { level: 'warn' },
         )
       }
     }
 
-    // Set up git-bash if relevant
+    // 如果相关，设置 git-bash
     setShellIfWindows()
 
-    // Register LSP manager cleanup
+    // 注册 LSP 管理器清理
     registerCleanup(shutdownLspServerManager)
 
-    // Register cleanup for all teams created this session
+    // 注册清理此会话创建的所有团队
     registerCleanup(async () => {
       const { cleanupSessionTeams } = await import(
         '../utils/swarm/teamHelpers.js'
@@ -190,7 +189,7 @@ export const init = memoize(async (): Promise<void> => {
       await cleanupSessionTeams()
     })
 
-    // Initialize scratchpad directory if enabled
+    // 如果启用，初始化临时目录
     if (isScratchpadEnabled()) {
       const scratchpadStart = Date.now()
       await ensureScratchpadDir()
@@ -205,21 +204,21 @@ export const init = memoize(async (): Promise<void> => {
     profileCheckpoint('init_function_end')
   } catch (error) {
     if (error instanceof ConfigParseError) {
-      // Skip the interactive Ink dialog when we can't safely render it
+      // 当无法安全渲染时，跳过交互式 Ink 对话框
       if (getIsNonInteractiveSession()) {
         process.stderr.write(
-          `Configuration error in ${error.filePath}: ${error.message}\n`,
+          `配置错误在 ${error.filePath}: ${error.message}\n`,
         )
         gracefulShutdownSync(1)
         return
       }
 
-      // Show the invalid config dialog with the error object and wait for it to complete
+      // 显示无效配置对话框并等待其完成
       return import('../components/InvalidConfigDialog.js').then(m =>
         m.showInvalidConfigDialog({ error }),
       )
     } else {
-      // For non-config errors, rethrow them
+      // 对于非配置错误，重新抛出它们
       throw error
     }
   }
