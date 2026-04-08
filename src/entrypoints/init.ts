@@ -200,11 +200,50 @@ export const init = memoize(async (): Promise<void> => {
     }
 
     // 初始化目标管理
-    const initialGoal = process.env.INITIAL_GOAL || '复刻 Claude 初始化函数并集成目标管理功能'
+    const initialGoal = process.env.INITIAL_GOAL || 'Phase1-Implementation-Plan: 预检检查 → 设置加载 → 权限初始化 → 获取 Trae 任务列表 ID → 用户确认绑定任务 → 初始化沙箱 → 验证隔离性 → 创建 Trae 自定义智能体 → 测试验证'
     initializeGoalManagement(initialGoal)
     logForDiagnosticsNoPII('info', 'init_goal_management_initialized', {
       goal: initialGoal
     })
+
+    // Phase 1 计划初始化流程
+    if (initialGoal.includes('Phase1') || initialGoal.includes('Trae 任务')) {
+      logForDiagnosticsNoPII('info', 'init_phase1_start')
+      
+      // 1. 预检检查
+      try {
+        const { PreflightChecker } = await import('../services/preflight/checker.js')
+        const checker = new PreflightChecker()
+        const preflightResult = await checker.runAllChecks()
+        logForDiagnosticsNoPII('info', 'init_preflight_completed', {
+          result: preflightResult
+        })
+      } catch (error) {
+        logForDebugging(`[init] 预检检查失败: ${error instanceof Error ? error.message : String(error)}`, { level: 'warn' })
+      }
+      
+      // 2. 设置加载
+      try {
+        const { SettingsManager } = await import('../services/settings/manager.js')
+        const settingsManager = new SettingsManager()
+        await settingsManager.load()
+        logForDiagnosticsNoPII('info', 'init_settings_loaded')
+      } catch (error) {
+        logForDebugging(`[init] 设置加载失败: ${error instanceof Error ? error.message : String(error)}`, { level: 'warn' })
+      }
+      
+      // 3. 权限初始化
+      try {
+        const { PermissionManager } = await import('../services/permissions/manager.js')
+        const permissionManager = new PermissionManager()
+        await permissionManager.initialize()
+        logForDiagnosticsNoPII('info', 'init_permissions_initialized')
+      } catch (error) {
+        logForDebugging(`[init] 权限初始化失败: ${error instanceof Error ? error.message : String(error)}`, { level: 'warn' })
+      }
+      
+      logForDiagnosticsNoPII('info', 'init_phase1_initialization_completed')
+    }
 
     logForDiagnosticsNoPII('info', 'init_completed', {
       duration_ms: Date.now() - initStartTime,

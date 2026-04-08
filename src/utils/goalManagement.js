@@ -54,6 +54,26 @@ export function breakdownGoal(goal) {
       `任务 4.1: 验证所有功能正常工作`,
       `任务 4.2: 准备方案评审文档`
     ]
+  } else if (goal.includes('Phase1') || goal.includes('预检检查') || goal.includes('沙箱') || goal.includes('Trae 任务')) {
+    // Phase 1 计划的任务拆解
+    tasks = [
+      `Phase 0: 初始化基础设施`,
+      `  Task 0.1: 预检检查模块`,
+      `  Task 0.2: 设置加载模块`,
+      `  Task 0.3: 权限系统初始化`,
+      `Phase 1.1: CDP 连接与任务列表获取`,
+      `  Task 1.1.1: CDP 连接模块封装`,
+      `  Task 1.1.2: Trae 任务列表获取`,
+      `  Task 1.1.3: VS Code 配置页面 - 连接与任务显示`,
+      `Phase 1.2: Git Worktree 沙箱初始化`,
+      `  Task 1.2.1: Worktree 管理器封装`,
+      `  Task 1.2.2: 沙箱隔离验证器`,
+      `  Task 1.2.3: VS Code 配置页面 - 沙箱初始化`,
+      `Phase 1.3: Trae 智能体创建与验证`,
+      `  Task 1.3.1: Trae 智能体配置注入`,
+      `  Task 1.3.2: 智能体沙箱工作验证`,
+      `  Task 1.3.3: VS Code 配置页面 - 完整流程集成`
+    ]
   } else {
     // 通用的任务拆解
     tasks = [
