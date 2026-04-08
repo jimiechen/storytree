@@ -44,6 +44,7 @@ import { configureGlobalAgents } from '../utils/proxy.js'
 import { isBetaTracingEnabled } from '../utils/telemetry/betaSessionTracing.js'
 import { getTelemetryAttributes } from '../utils/telemetryAttributes.js'
 import { setShellIfWindows } from '../utils/windowsPaths.js'
+import { initializeGoalManagement } from '../utils/goalManagement.js'
 
 // Track if telemetry has been initialized to prevent double initialization
 let telemetryInitialized = false
@@ -197,6 +198,13 @@ export const init = memoize(async (): Promise<void> => {
         duration_ms: Date.now() - scratchpadStart,
       })
     }
+
+    // 初始化目标管理
+    const initialGoal = process.env.INITIAL_GOAL || '实现 Claude 初始化函数的复刻'
+    initializeGoalManagement(initialGoal)
+    logForDiagnosticsNoPII('info', 'init_goal_management_initialized', {
+      goal: initialGoal
+    })
 
     logForDiagnosticsNoPII('info', 'init_completed', {
       duration_ms: Date.now() - initStartTime,
