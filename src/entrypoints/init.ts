@@ -200,7 +200,7 @@ export const init = memoize(async (): Promise<void> => {
     }
 
     // 初始化目标管理
-    const initialGoal = process.env.INITIAL_GOAL || '实现 Claude 初始化函数的复刻'
+    const initialGoal = process.env.INITIAL_GOAL || '复刻 Claude 初始化函数并集成目标管理功能'
     initializeGoalManagement(initialGoal)
     logForDiagnosticsNoPII('info', 'init_goal_management_initialized', {
       goal: initialGoal
