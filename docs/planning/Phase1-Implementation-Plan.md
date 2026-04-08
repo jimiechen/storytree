@@ -1,8 +1,9 @@
 # 首阶段实施计划：Trae 任务绑定与沙箱隔离
 
-**版本**: v1.0
+**版本**: v2.0
 **日期**: 2026-04-08
 **状态**: 待评审
+**更新**: 新增 Phase 0 初始化基础设施
 
 ---
 
@@ -10,17 +11,273 @@
 
 实现 VS Code 配置页面驱动的自动化流程：
 ```
-获取 Trae 任务列表 ID → 用户确认绑定任务 → 初始化沙箱 → 验证隔离性 → 创建 Trae 自定义智能体 → 测试验证
+预检检查 → 设置加载 → 权限初始化 → 获取 Trae 任务列表 ID → 用户确认绑定任务 → 初始化沙箱 → 验证隔离性 → 创建 Trae 自定义智能体 → 测试验证
 ```
 
 ---
 
 ## 2. 任务分解
 
+### Phase 0: 初始化基础设施 (新增，预计 2 天)
+
+#### Task 0.1: 预检检查模块
+**描述**: 在启动流程中检查 Trae 连接性和环境可用性
+
+**输入**:
+- Trae 调试端口配置
+- 超时配置
+
+**输出**:
+- `PreflightChecker` 类
+- 检查结果报告
+
+**验证方式**:
+```bash
+# 单元测试
+npm run test -- --grep "PreflightChecker"
+
+# 集成测试
+npm run test:e2e -- --grep "preflight"
+```
+
+**自动化验证脚本**:
+```javascript
+// tests/integration/preflight.test.js
+describe('Preflight Checker', () => {
+  it('should check Trae debug port availability', async () => {
+    const checker = new PreflightChecker({ port: 9222 });
+    const result = await checker.checkTraeConnection();
+    assert(result.success === true || result.error !== undefined);
+  });
+
+  it('should check Git availability', async () => {
+    const checker = new PreflightChecker();
+    const result = await checker.checkGitAvailable();
+    assert(result.success === true);
+  });
+
+  it('should check Worktree support', async () => {
+    const checker = new PreflightChecker();
+    const result = await checker.checkWorktreeSupport();
+    assert(result.success === true);
+  });
+
+  it('should generate preflight report', async () => {
+    const checker = new PreflightChecker({ port: 9222 });
+    const report = await checker.runAllChecks();
+    assert(report.traeConnection !== undefined);
+    assert(report.gitAvailable !== undefined);
+    assert(report.worktreeSupport !== undefined);
+  });
+
+  it('should handle SSL certificate issues', async () => {
+    const checker = new PreflightChecker({ ignoreSSL: true });
+    const result = await checker.checkTraeConnection();
+    // 应该优雅处理 SSL 问题
+    assert(result !== undefined);
+  });
+});
+```
+
+---
+
+#### Task 0.2: 设置加载模块
+**描述**: 加载和管理沙箱配置
+
+**输入**:
+- 配置文件路径
+- 默认配置
+
+**输出**:
+- `SettingsManager` 类
+- 配置验证和合并
+
+**配置结构**:
+```typescript
+interface CaiodeSettings {
+  trae: {
+    port: number;
+    host: string;
+    autoReconnect: boolean;
+    reconnectInterval: number;
+  };
+  sandbox: {
+    enabled: boolean;
+    basePath: string;
+    maxWorktrees: number;
+    autoCleanup: boolean;
+    cleanupAge: number;  // 天
+  };
+  permissions: {
+    allowedPaths: string[];
+    deniedPaths: string[];
+    allowedCommands: string[];
+    deniedCommands: string[];
+  };
+  agent: {
+    defaultPrompt: string;
+    systemPromptPath: string;
+  };
+}
+```
+
+**验证方式**:
+```bash
+# 单元测试
+npm run test -- --grep "SettingsManager"
+
+# 集成测试
+npm run test:e2e -- --grep "settings-load"
+```
+
+**自动化验证脚本**:
+```javascript
+// tests/integration/settings-load.test.js
+describe('Settings Manager', () => {
+  it('should load settings from file', async () => {
+    const manager = new SettingsManager('/path/to/config.json');
+    const settings = await manager.load();
+    assert(settings.trae !== undefined);
+    assert(settings.sandbox !== undefined);
+  });
+
+  it('should merge with defaults', async () => {
+    const manager = new SettingsManager('/nonexistent.json');
+    const settings = await manager.load();
+    assert(settings.trae.port === 9222);  // 默认值
+  });
+
+  it('should validate settings schema', async () => {
+    const manager = new SettingsManager('/invalid.json');
+    await assert.rejects(() => manager.load(), /validation/i);
+  });
+
+  it('should watch for settings changes', async () => {
+    const manager = new SettingsManager('/path/to/config.json');
+    await manager.load();
+    await manager.watch();
+    // 修改文件
+    await fs.writeFile('/path/to/config.json', '{"trae": {"port": 9223}}');
+    await sleep(100);
+    assert(manager.getSettings().trae.port === 9223);
+  });
+
+  it('should support multiple config sources', async () => {
+    const manager = new SettingsManager();
+    // 模拟多层配置
+    manager.addSource('user', { trae: { port: 9222 } });
+    manager.addSource('project', { trae: { port: 9223 } });
+    const settings = manager.getMergedSettings();
+    // 项目配置应覆盖用户配置
+    assert(settings.trae.port === 9223);
+  });
+});
+```
+
+---
+
+#### Task 0.3: 权限系统初始化
+**描述**: 初始化沙箱权限控制系统
+
+**输入**:
+- 权限配置
+- 沙箱路径
+
+**输出**:
+- `PermissionManager` 类
+- 权限检查接口
+
+**权限检查逻辑**:
+```typescript
+interface PermissionManager {
+  // 检查文件访问权限
+  checkFileAccess(path: string, mode: 'read' | 'write'): PermissionResult;
+  
+  // 检查命令执行权限
+  checkCommandExecution(command: string): PermissionResult;
+  
+  // 添加临时权限
+  addTemporaryPermission(permission: PermissionRule): void;
+  
+  // 清除临时权限
+  clearTemporaryPermissions(): void;
+}
+```
+
+**验证方式**:
+```bash
+# 单元测试
+npm run test -- --grep "PermissionManager"
+
+# 集成测试
+npm run test:e2e -- --grep "permission-init"
+```
+
+**自动化验证脚本**:
+```javascript
+// tests/integration/permission-init.test.js
+describe('Permission Manager', () => {
+  it('should initialize with default rules', async () => {
+    const manager = new PermissionManager(sandboxPath);
+    await manager.initialize();
+    assert(manager.getRules().length > 0);
+  });
+
+  it('should allow access to sandbox paths', async () => {
+    const manager = new PermissionManager(sandboxPath);
+    await manager.initialize();
+    const result = manager.checkFileAccess(`${sandboxPath}/test.txt`, 'write');
+    assert(result.allowed === true);
+  });
+
+  it('should deny access outside sandbox', async () => {
+    const manager = new PermissionManager(sandboxPath);
+    await manager.initialize();
+    const result = manager.checkFileAccess('/etc/passwd', 'read');
+    assert(result.allowed === false);
+  });
+
+  it('should support temporary permissions', async () => {
+    const manager = new PermissionManager(sandboxPath);
+    await manager.initialize();
+    manager.addTemporaryPermission({
+      type: 'file',
+      pattern: '/tmp/**',
+      behavior: 'allow'
+    });
+    const result = manager.checkFileAccess('/tmp/test.txt', 'write');
+    assert(result.allowed === true);
+  });
+
+  it('should support command whitelist', async () => {
+    const manager = new PermissionManager(sandboxPath, {
+      allowedCommands: ['git', 'npm', 'node']
+    });
+    await manager.initialize();
+    
+    assert(manager.checkCommandExecution('git status').allowed === true);
+    assert(manager.checkCommandExecution('rm -rf /').allowed === false);
+  });
+
+  it('should support path pattern matching', async () => {
+    const manager = new PermissionManager(sandboxPath);
+    await manager.initialize();
+    
+    // 支持 glob 模式
+    const result = manager.checkFileAccess(`${sandboxPath}/node_modules/test/index.js`, 'read');
+    assert(result.allowed === true);
+  });
+});
+```
+
+---
+
 ### Phase 1.1: CDP 连接与任务列表获取 (预计 2 天)
 
 #### Task 1.1.1: CDP 连接模块封装
 **描述**: 封装 CDP 连接逻辑，提供统一的连接管理接口
+
+**依赖**: Task 0.1 (预检检查)
 
 **输入**:
 - Trae 调试端口配置
@@ -64,6 +321,18 @@ describe('CDP Connection', () => {
     await sleep(2000);
     assert(client.isConnected() === true);
   });
+
+  it('should emit connection state changes', async () => {
+    const client = new CdpClient({ port: 9222 });
+    const states = [];
+    client.on('stateChange', (state) => states.push(state));
+    
+    await client.connect();
+    await client.disconnect();
+    
+    assert(states.includes('connected'));
+    assert(states.includes('disconnected'));
+  });
 });
 ```
 
@@ -71,6 +340,8 @@ describe('CDP Connection', () => {
 
 #### Task 1.1.2: Trae 任务列表获取
 **描述**: 通过 CDP 获取 Trae 中的任务列表 ID
+
+**依赖**: Task 1.1.1 (CDP 连接)
 
 **输入**:
 - CDP 连接实例
@@ -117,6 +388,16 @@ describe('Task List Fetcher', () => {
     // 应该优雅降级，不抛出异常
     assert(Array.isArray(tasks));
   });
+
+  it('should cache task list for performance', async () => {
+    const fetcher = new TaskListFetcher(cdpClient);
+    await fetcher.fetchTasks();
+    const start = Date.now();
+    await fetcher.fetchTasks();
+    const duration = Date.now() - start;
+    // 缓存命中应该很快
+    assert(duration < 100);
+  });
 });
 ```
 
@@ -124,6 +405,8 @@ describe('Task List Fetcher', () => {
 
 #### Task 1.1.3: VS Code 配置页面 - 连接与任务显示
 **描述**: 创建 VS Code Webview 页面，显示连接状态和任务列表
+
+**依赖**: Task 1.1.2 (任务列表获取)
 
 **输入**:
 - VS Code Extension API
@@ -164,6 +447,18 @@ describe('VS Code Config Page', () => {
     const bindButtons = await screen.findAllByRole('button', { name: /绑定/i });
     assert(bindButtons.length === mockTasks.length);
   });
+
+  it('should show preflight check results', async () => {
+    const preflightResult = {
+      traeConnection: { success: true },
+      gitAvailable: { success: true },
+      worktreeSupport: { success: true }
+    };
+    render(<ConfigPage preflightResult={preflightResult} />);
+    
+    const preflightSection = await screen.findByTestId('preflight-result');
+    assert(preflightSection.textContent.includes('全部通过'));
+  });
 });
 ```
 
@@ -173,6 +468,8 @@ describe('VS Code Config Page', () => {
 
 #### Task 1.2.1: Worktree 管理器封装
 **描述**: 封装 Git Worktree 操作，提供创建、切换、清理接口
+
+**依赖**: Task 0.2 (设置加载), Task 0.3 (权限系统)
 
 **输入**:
 - Git 仓库路径
@@ -243,6 +540,24 @@ describe('Worktree Manager', () => {
     const list = await manager.listWorktrees();
     assert(!list.some(w => w.name === 'stale'));
   });
+
+  it('should respect permission rules', async () => {
+    const permissionManager = new PermissionManager(testRepo, {
+      deniedPaths: ['/tmp/test-repo-worktree/protected/**']
+    });
+    await permissionManager.initialize();
+    
+    const manager = new WorktreeManager(testRepo, { permissionManager });
+    const result = await manager.createWorktree({ name: 'test' });
+    
+    // 尝试在保护路径创建文件应该失败
+    const writeResult = await manager.writeFileInWorktree(
+      result.name,
+      'protected/test.txt',
+      'content'
+    );
+    assert(writeResult.success === false);
+  });
 });
 ```
 
@@ -250,6 +565,8 @@ describe('Worktree Manager', () => {
 
 #### Task 1.2.2: 沙箱隔离验证器
 **描述**: 验证 Worktree 沙箱的文件隔离性
+
+**依赖**: Task 1.2.1 (Worktree 管理), Task 0.3 (权限系统)
 
 **输入**:
 - Worktree 路径
@@ -310,6 +627,14 @@ describe('Sandbox Validator', () => {
     assert(report.details.length > 0);
     assert(report.passed === true || report.passed === false);
   });
+
+  it('should verify permission enforcement', async () => {
+    const validator = new SandboxValidator(worktreePath, { permissionManager });
+    const result = await validator.verifyPermissionEnforcement();
+    
+    assert(result.tests.deniedPathAccess === true);
+    assert(result.tests.deniedCommandExecution === true);
+  });
 });
 ```
 
@@ -317,6 +642,8 @@ describe('Sandbox Validator', () => {
 
 #### Task 1.2.3: VS Code 配置页面 - 沙箱初始化
 **描述**: 在配置页面添加沙箱初始化功能
+
+**依赖**: Task 1.2.2 (隔离验证器)
 
 **输入**:
 - 用户绑定的任务 ID
@@ -362,6 +689,16 @@ describe('Sandbox Init Panel', () => {
     const resultElement = await screen.findByTestId('validation-result');
     assert(resultElement.textContent.includes('通过'));
   });
+
+  it('should show settings summary before init', async () => {
+    const settings = {
+      sandbox: { basePath: '/tmp/sandbox', maxWorktrees: 5 }
+    };
+    render(<SandboxInitPanel settings={settings} />);
+    
+    const settingsSummary = await screen.findByTestId('settings-summary');
+    assert(settingsSummary.textContent.includes('/tmp/sandbox'));
+  });
 });
 ```
 
@@ -371,6 +708,8 @@ describe('Sandbox Init Panel', () => {
 
 #### Task 1.3.1: Trae 智能体配置注入
 **描述**: 通过 CDP 向 Trae 注入智能体配置
+
+**依赖**: Task 0.2 (设置加载)
 
 **输入**:
 - 沙箱路径
@@ -425,6 +764,17 @@ describe('Agent Config Injector', () => {
     assert(result.success === false);
     assert(result.error !== undefined);
   });
+
+  it('should load system prompt from file', async () => {
+    const injector = new AgentConfigInjector(cdpClient);
+    const result = await injector.inject({
+      name: 'File Prompt Agent',
+      sandboxPath: '/tmp/sandbox',
+      systemPromptPath: '/path/to/prompt.md'
+    });
+    
+    assert(result.success === true);
+  });
 });
 ```
 
@@ -432,6 +782,8 @@ describe('Agent Config Injector', () => {
 
 #### Task 1.3.2: 智能体沙箱工作验证
 **描述**: 验证智能体是否在独立沙箱中工作
+
+**依赖**: Task 1.3.1 (智能体配置注入), Task 0.3 (权限系统)
 
 **输入**:
 - 智能体 ID
@@ -516,6 +868,8 @@ describe('Agent Sandbox Verification', () => {
 #### Task 1.3.3: VS Code 配置页面 - 完整流程集成
 **描述**: 集成所有功能，实现完整的一键流程
 
+**依赖**: Task 1.3.2 (智能体验证)
+
 **输入**:
 - 用户配置参数
 - Trae 连接信息
@@ -535,9 +889,13 @@ npm run test:e2e -- --grep "full-workflow"
 ```javascript
 // tests/e2e/full-workflow.test.js
 describe('Full Workflow Integration', () => {
-  it('should complete full workflow from connection to verification', async () => {
-    // 1. 打开配置页面
+  it('should complete full workflow from preflight to verification', async () => {
+    // 0. 打开配置页面
     await vscode.commands.executeCommand('caiode.openConfigPage');
+    
+    // 1. 预检检查
+    await page.click('[data-testid="run-preflight-button"]');
+    await page.waitForSelector('[data-testid="preflight-status"][data-status="passed"]');
     
     // 2. 连接 Trae
     await page.click('[data-testid="connect-button"]');
@@ -588,6 +946,20 @@ describe('Full Workflow Integration', () => {
     const retryButton = await page.$('[data-testid="retry-button"]');
     assert(retryButton !== null);
   });
+
+  it('should show preflight failures before proceeding', async () => {
+    // 模拟预检失败
+    await mockPreflightFailure('git');
+    
+    await page.click('[data-testid="run-preflight-button"]');
+    
+    const preflightError = await page.$eval('[data-testid="preflight-error"]', el => el.textContent);
+    assert(preflightError.includes('Git'));
+    
+    // 连接按钮应该被禁用
+    const connectButton = await page.$('[data-testid="connect-button"]');
+    assert(connectButton.disabled === true);
+  });
 });
 ```
 
@@ -599,6 +971,9 @@ describe('Full Workflow Integration', () => {
 
 | 功能 | 验收标准 | 自动化测试 |
 |------|----------|------------|
+| 预检检查 | 能检查 Trae/Git/Worktree 可用性 | `test:e2e --grep "preflight"` |
+| 设置加载 | 能加载和合并配置 | `test:e2e --grep "settings-load"` |
+| 权限初始化 | 能初始化权限规则 | `test:e2e --grep "permission-init"` |
 | CDP 连接 | 能稳定连接 Trae 并自动重连 | `test:e2e --grep "cdp-connection"` |
 | 任务列表获取 | 能正确获取并显示任务列表 | `test:e2e --grep "task-list-fetch"` |
 | 任务绑定 | 用户可选择并绑定任务 | `test:e2e --grep "task-bind"` |
@@ -611,6 +986,9 @@ describe('Full Workflow Integration', () => {
 
 | 指标 | 标准 | 验证方式 |
 |------|------|----------|
+| 预检检查 | < 3s | 自动化测试计时 |
+| 设置加载 | < 1s | 自动化测试计时 |
+| 权限初始化 | < 1s | 自动化测试计时 |
 | CDP 连接时间 | < 2s | 自动化测试计时 |
 | 任务列表获取 | < 1s | 自动化测试计时 |
 | Worktree 创建 | < 5s | 自动化测试计时 |
@@ -621,6 +999,7 @@ describe('Full Workflow Integration', () => {
 
 | 指标 | 标准 | 验证方式 |
 |------|------|----------|
+| 预检失败处理 | 显示明确错误和解决建议 | 错误注入测试 |
 | CDP 断线重连 | 自动重连成功 | 模拟断线测试 |
 | Worktree 清理 | 无残留文件 | 清理后检查 |
 | 错误恢复 | 优雅降级不崩溃 | 错误注入测试 |
@@ -630,23 +1009,40 @@ describe('Full Workflow Integration', () => {
 ## 4. 依赖关系
 
 ```
-Task 1.1.1 (CDP 连接)
+Phase 0 (初始化基础设施)
     │
-    ├── Task 1.1.2 (任务列表获取)
+    ├── Task 0.1 (预检检查)
+    │
+    ├── Task 0.2 (设置加载)
     │       │
-    │       └── Task 1.1.3 (配置页面 - 连接)
+    │       └── Task 0.3 (权限系统)
     │
-Task 1.2.1 (Worktree 管理)
+    └───────────────────────┐
+                            │
+                            ▼
+Phase 1.1 (CDP 连接)
     │
-    ├── Task 1.2.2 (隔离验证器)
+    ├── Task 1.1.1 (CDP 连接模块) ──→ 依赖 Task 0.1 (预检检查)
     │       │
-    │       └── Task 1.2.3 (配置页面 - 沙箱)
+    │       └── Task 1.1.2 (任务列表获取)
+    │               │
+    │               └── Task 1.1.3 (配置页面 - 连接)
     │
-Task 1.3.1 (智能体配置注入)
+Phase 1.2 (沙箱初始化)
     │
-    ├── Task 1.3.2 (智能体验证)
+    ├── Task 1.2.1 (Worktree 管理) ──→ 依赖 Task 0.2 (设置加载), Task 0.3 (权限系统)
     │       │
-    │       └── Task 1.3.3 (完整流程集成)
+    │       └── Task 1.2.2 (隔离验证器)
+    │               │
+    │               └── Task 1.2.3 (配置页面 - 沙箱)
+    │
+Phase 1.3 (智能体创建)
+    │
+    ├── Task 1.3.1 (智能体配置注入) ──→ 依赖 Task 0.2 (设置加载)
+    │       │
+    │       └── Task 1.3.2 (智能体验证) ──→ 依赖 Task 0.3 (权限系统)
+    │               │
+    │               └── Task 1.3.3 (完整流程集成)
 ```
 
 ---
@@ -659,6 +1055,8 @@ Task 1.3.1 (智能体配置注入)
 | CDP 连接不稳定 | 中 | 中 | 自动重连机制 |
 | Worktree 权限问题 | 低 | 中 | 权限预检查 |
 | 测试环境依赖 | 低 | 中 | Docker 容器化测试环境 |
+| 配置文件格式变化 | 低 | 中 | Schema 验证和迁移 |
+| 权限规则冲突 | 低 | 中 | 规则优先级和冲突检测 |
 
 ---
 
@@ -669,6 +1067,19 @@ Task 1.3.1 (智能体配置注入)
 - [ ] 依赖关系是否清晰？
 - [ ] 时间估算是否合理？
 - [ ] 风险评估是否完整？
+- [ ] Phase 0 任务是否必要？
+
+---
+
+## 7. 时间估算
+
+| Phase | 预计时间 |
+|-------|----------|
+| Phase 0: 初始化基础设施 | 2 天 |
+| Phase 1.1: CDP 连接与任务列表 | 2 天 |
+| Phase 1.2: 沙箱初始化 | 3 天 |
+| Phase 1.3: 智能体创建与验证 | 3 天 |
+| **总计** | **10 天** |
 
 ---
 
