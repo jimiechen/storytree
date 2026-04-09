@@ -25,7 +25,7 @@ export interface FileMutexEvents {
 }
 
 export class FileMutex extends EventEmitter {
-  private locks: Map<string, LockHandle> = new Map();
+  protected locks: Map<string, LockHandle> = new Map();
   private defaultOptions: Required<LockOptions>;
 
   constructor(options: LockOptions = {}) {

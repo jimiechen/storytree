@@ -17,8 +17,6 @@ vi.mock('child_process', () => ({
 
 // 创建内存中的 mock FileMutex
 class MockFileMutex extends FileMutex {
-  private locks = new Set<string>();
-
   constructor() {
     super({ lockfilePath: '/tmp/test' });
   }
@@ -27,12 +25,13 @@ class MockFileMutex extends FileMutex {
     if (this.locks.has(lockId)) {
       throw new Error(`Lock ${lockId} already acquired`);
     }
-    this.locks.add(lockId);
-    return {
+    const handle: LockHandle = {
       lockId,
       lockfilePath: `/tmp/test/${lockId}.lock`,
       released: false,
     };
+    this.locks.set(lockId, handle);
+    return handle;
   }
 
   async release(handle: LockHandle): Promise<void> {

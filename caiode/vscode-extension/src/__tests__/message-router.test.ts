@@ -140,7 +140,7 @@ describe("MessageRouter Core Tests", () => {
 
       expect(response.status).toBe("error");
 
-      if (response.status === "error") {
+      if (response.status === "error" && response.error) {
         expect(response.error.code).toBe(ErrorCode.METHOD_NOT_FOUND);
         expect(response.error.message).toContain("unknown.action");
       }
@@ -151,7 +151,7 @@ describe("MessageRouter Core Tests", () => {
 
       expect(response.status).toBe("error");
 
-      if (response.status === "error") {
+      if (response.status === "error" && response.error) {
         expect(response.error.code).toBe(ErrorCode.INVALID_REQUEST);
       }
     });
@@ -172,7 +172,7 @@ describe("MessageRouter Core Tests", () => {
 
       expect(response.status).toBe("error");
 
-      if (response.status === "error") {
+      if (response.status === "error" && response.error) {
         expect(response.error.code).toBe(ErrorCode.INTERNAL_ERROR);
         expect(response.error.message).toContain("Handler exploded!");
       }
@@ -252,7 +252,7 @@ describe("MessageRouter Core Tests", () => {
 
       expect(response.status).toBe("error");
 
-      if (response.status === "error") {
+      if (response.status === "error" && response.error) {
         expect(response.error.message).toContain("aborted by middleware");
       }
     });

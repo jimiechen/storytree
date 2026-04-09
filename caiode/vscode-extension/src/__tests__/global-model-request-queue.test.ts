@@ -15,7 +15,6 @@ import { FileMutex, LockHandle } from '../core/file-mutex';
 
 // 创建内存中的 mock FileMutex - 使用队列确保串行
 class MockFileMutex extends FileMutex {
-  private locks = new Set<string>();
   private queue: { lockId: string; resolve: (handle: LockHandle) => void }[] = [];
 
   constructor() {
@@ -29,29 +28,31 @@ class MockFileMutex extends FileMutex {
         this.queue.push({ lockId, resolve });
       });
     }
-    
-    this.locks.add(lockId);
-    return {
+
+    const handle: LockHandle = {
       lockId,
       lockfilePath: `/tmp/test/${lockId}.lock`,
       released: false,
     };
+    this.locks.set(lockId, handle);
+    return handle;
   }
 
   async release(handle: LockHandle): Promise<void> {
     this.locks.delete(handle.lockId);
     handle.released = true;
-    
+
     // 检查是否有等待相同锁的请求
     const waitingIndex = this.queue.findIndex(item => item.lockId === handle.lockId);
     if (waitingIndex >= 0) {
       const waiting = this.queue.splice(waitingIndex, 1)[0];
-      this.locks.add(waiting.lockId);
-      waiting.resolve({
+      const newHandle: LockHandle = {
         lockId: waiting.lockId,
         lockfilePath: `/tmp/test/${waiting.lockId}.lock`,
         released: false,
-      });
+      };
+      this.locks.set(waiting.lockId, newHandle);
+      waiting.resolve(newHandle);
     }
   }
 
@@ -60,7 +61,7 @@ class MockFileMutex extends FileMutex {
   }
 
   getActiveLocks(): string[] {
-    return Array.from(this.locks);
+    return Array.from(this.locks.keys());
   }
 
   async cleanup(): Promise<void> {
@@ -71,7 +72,7 @@ class MockFileMutex extends FileMutex {
 
 describe('GlobalModelRequestQueue', () => {
   let queue: GlobalModelRequestQueue;
-  let mockProvider: ReturnType<typeof vi.fn>;
+  let mockProvider: any;
   let mockMutex: MockFileMutex;
 
   beforeEach(() => {

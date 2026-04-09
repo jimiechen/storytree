@@ -1,5 +1,5 @@
 ---
-alwaysApply: true
+alwaysApply: false
 ---
 # Ralph 执行铁律 (Execution Iron Rules)
 

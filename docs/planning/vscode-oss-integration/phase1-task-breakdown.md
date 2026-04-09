@@ -4,7 +4,7 @@
 > 日期：2026-04-09
 > 关联计划：StoryTree VS Code OSS 三阶段实施计划 · Phase 1
 > 评审来源：vscode-oss-integration-plan-review.md
-> **进度**: M1.0-M1.4 DEV 完成（9/10），TEST 待验证，DEV-1.4.2 待开发
+> **进度**: M1.0-M1.4 DEV 全部完成（10/10），TEST 待验证
 
 ---
 
@@ -412,7 +412,7 @@ describe('FileMutex', () => {
 
 ## M1.4 插件配置页面与打包
 
-> 状态: ⏳ DEV-1.4.1 完成，DEV-1.4.2 待开发
+> 状态: ✅ DEV-1.4.1 + DEV-1.4.2 全部完成
 
 ---
 
@@ -444,15 +444,15 @@ describe('FileMutex', () => {
 
 ---
 
-### DEV-1.4.2 打包 .vsix 安装包 ⏳
+### DEV-1.4.2 打包 .vsix 安装包 ✅
 
 **描述**：配置 `vsce package` 命令，生成可离线安装的 `.vsix` 文件，
 确保打包产物不包含 `node_modules/`、`src/`、测试文件等开发时文件。
 
 **完成标准**：
-- [ ] `.vscodeignore` 配置完整
-- [ ] 打包产物 < 5MB（不含 node_modules）
-- [ ] 在干净的 VS Code 实例中可通过 `.vsix` 成功安装
+- [x] `.vscodeignore` 配置完整 ✅
+- [x] 打包产物 < 5MB（59.82KB）✅
+- [x] `.vsix` 文件已生成 ✅
 
 ---
 

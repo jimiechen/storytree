@@ -1,5 +1,5 @@
 import { EventEmitter } from "events";
-import { FileMutex, createFileMutex } from "./file-mutex";
+import { FileMutex, createFileMutex, LockHandle } from "./file-mutex";
 
 export interface LLMRequest {
   id: string;

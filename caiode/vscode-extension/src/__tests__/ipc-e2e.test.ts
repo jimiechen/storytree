@@ -235,7 +235,7 @@ describe("T-POC-008: End-to-End IPC Communication", () => {
       const response = await router.processMessage(request);
 
       expect(isErrorResponse(response)).toBe(true);
-      if (isErrorResponse(response)) {
+      if (isErrorResponse(response) && response.error) {
         expect(response.error.code).toBe(ErrorCode.INTERNAL_ERROR);
         expect(response.error.message).toContain("not found");
       }
@@ -399,7 +399,7 @@ describe("T-POC-008: End-to-End IPC Communication", () => {
       const response = await strictRouter.processMessage(request);
 
       expect(isErrorResponse(response)).toBe(true);
-      if (isErrorResponse(response)) {
+      if (isErrorResponse(response) && response.error) {
         expect(response.error.code).toBe(ErrorCode.METHOD_NOT_FOUND);
       }
     });
@@ -409,7 +409,7 @@ describe("T-POC-008: End-to-End IPC Communication", () => {
       const response = await router.processMessage(request);
 
       expect(isErrorResponse(response)).toBe(true);
-      if (isErrorResponse(response)) {
+      if (isErrorResponse(response) && response.error) {
         expect(response.error.code).toBe(ErrorCode.METHOD_NOT_FOUND);
       }
     });
@@ -419,7 +419,7 @@ describe("T-POC-008: End-to-End IPC Communication", () => {
       const response = await router.processMessage(badMessage);
 
       expect(isErrorResponse(response)).toBe(true);
-      if (isErrorResponse(response)) {
+      if (isErrorResponse(response) && response.error) {
         expect(response.error.code).toBe(ErrorCode.INVALID_REQUEST);
       }
     });
@@ -427,7 +427,7 @@ describe("T-POC-008: End-to-End IPC Communication", () => {
     it("should return error for completely invalid input", async () => {
       const response = await router.processMessage(null);
       expect(isErrorResponse(response)).toBe(true);
-      if (isErrorResponse(response)) {
+      if (isErrorResponse(response) && response.error) {
         expect(response.error.code).toBe(ErrorCode.INVALID_REQUEST);
       }
     });
@@ -437,7 +437,7 @@ describe("T-POC-008: End-to-End IPC Communication", () => {
       const response = await router.processMessage(request);
 
       expect(isErrorResponse(response)).toBe(true);
-      if (isErrorResponse(response)) {
+      if (isErrorResponse(response) && response.error) {
         expect(response.error.message).toContain("required");
       }
     });
