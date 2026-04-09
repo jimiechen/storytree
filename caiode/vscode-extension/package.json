@@ -81,7 +81,7 @@
       },
       {
         "command": "storytree.showSettings",
-        "key": "cmd+shift+,",
+        "key": "cmd+shift+, ",
         "mac": "cmd+shift+,"
       }
     ],
