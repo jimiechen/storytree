@@ -78,9 +78,9 @@ export class GlobalModelRequestQueue extends EventEmitter {
     super();
     this.provider = provider;
     this.mutex = options.mutex || createFileMutex();
-    this.maxConcurrent = options.maxConcurrent || 1;
-    this.defaultTimeout = options.defaultTimeout || 60000;
-    this.maxRetries = options.maxRetries || 3;
+    this.maxConcurrent = options.maxConcurrent ?? 1;
+    this.defaultTimeout = options.defaultTimeout ?? 60000;
+    this.maxRetries = options.maxRetries ?? 3;
   }
 
   private generateRequestId(): string {
@@ -115,7 +115,8 @@ export class GlobalModelRequestQueue extends EventEmitter {
     this.emit("queue:enqueue", entry.request);
     this.emit("queue:status", this.getQueueStatus());
 
-    return this.processQueue();
+    // 统一使用executeEntry处理，它会自动处理串行逻辑
+    return this.executeEntry(entry);
   }
 
   async enqueuePriority(request: LLMRequest, priority: number): Promise<LLMResponse> {
@@ -129,37 +130,80 @@ export class GlobalModelRequestQueue extends EventEmitter {
 
     const entry = this.queue.find((e) => e.status === "pending");
     if (!entry) {
+      if (this.queue.length === 0 && this.running.size === 0) {
+        return Promise.reject(new Error("Queue is empty"));
+      }
       return this.waitForCompletion();
     }
 
     return this.executeEntry(entry);
   }
 
+  private globalLockQueue: (() => void)[] = [];
+  private isLocked = false;
+
+  private async acquireGlobalLock(): Promise<void> {
+    if (!this.isLocked) {
+      this.isLocked = true;
+      return;
+    }
+    
+    return new Promise((resolve) => {
+      this.globalLockQueue.push(resolve);
+    });
+  }
+
+  private releaseGlobalLock(): void {
+    if (this.globalLockQueue.length > 0) {
+      const next = this.globalLockQueue.shift();
+      next?.();
+    } else {
+      this.isLocked = false;
+    }
+  }
+
   private async executeEntry(entry: QueueRequestEntry): Promise<LLMResponse> {
-    const lockId = `${this.lockIdPrefix}${entry.request.id}`;
+    // 获取全局锁确保串行执行
+    await this.acquireGlobalLock();
+
+    // 从队列中选择优先级最高的pending请求
+    const pendingEntries = this.queue.filter(e => e.status === "pending");
+    if (pendingEntries.length === 0) {
+      this.releaseGlobalLock();
+      return Promise.reject(new Error("No pending requests"));
+    }
+    
+    // 按优先级排序（高优先级在前）
+    pendingEntries.sort((a, b) => b.priority - a.priority);
+    const selectedEntry = pendingEntries[0];
+
+    const lockId = `${this.lockIdPrefix}${selectedEntry.request.id}`;
     const handle = await this.mutex.acquire(lockId);
 
     try {
-      entry.status = "running";
-      this.running.add(entry.request.id);
-      this.emit("queue:start", entry.request);
+      selectedEntry.status = "running";
+      this.running.add(selectedEntry.request.id);
+      this.emit("queue:start", selectedEntry.request);
       this.emit("queue:status", this.getQueueStatus());
 
-      const timeout = entry.request.timeout || this.defaultTimeout;
-      const response = await this.executeWithTimeout(entry.request, timeout);
+      const timeout = selectedEntry.request.timeout || this.defaultTimeout;
+      const response = await this.executeWithTimeout(selectedEntry.request, timeout);
 
-      entry.status = "completed";
-      this.completed.set(entry.request.id, response);
-      this.running.delete(entry.request.id);
-      this.emit("queue:complete", entry.request, response);
+      selectedEntry.status = "completed";
+      this.completed.set(selectedEntry.request.id, response);
+      this.running.delete(selectedEntry.request.id);
+      this.emit("queue:complete", selectedEntry.request, response);
       this.emit("queue:status", this.getQueueStatus());
 
       return response;
     } catch (error) {
-      return this.handleExecutionError(entry, error as Error);
+      return this.handleExecutionError(selectedEntry, error as Error, handle);
     } finally {
-      await this.mutex.release(handle);
-      this.processNext();
+      // 只有在成功时才释放锁（错误情况在handleExecutionError中处理）
+      if (selectedEntry.status === "completed") {
+        await this.mutex.release(handle);
+      }
+      this.releaseGlobalLock();
     }
   }
 
@@ -181,13 +225,20 @@ export class GlobalModelRequestQueue extends EventEmitter {
     });
   }
 
-  private async handleExecutionError(entry: QueueRequestEntry, error: Error): Promise<LLMResponse> {
+  private async handleExecutionError(entry: QueueRequestEntry, error: Error, lockHandle?: LockHandle): Promise<LLMResponse> {
     entry.retries++;
 
-    if (entry.retries < this.maxRetries) {
+    if (entry.retries <= this.maxRetries) {
       entry.status = "pending";
       this.running.delete(entry.request.id);
-      return this.processQueue();
+      // 释放锁后再重试
+      if (lockHandle) {
+        await this.mutex.release(lockHandle);
+      }
+      // 释放全局锁，让其他请求可以执行
+      this.releaseGlobalLock();
+      // 重新排队这个entry
+      return this.executeEntry(entry);
     }
 
     entry.status = "failed";
@@ -196,20 +247,47 @@ export class GlobalModelRequestQueue extends EventEmitter {
     this.emit("queue:fail", entry.request, error);
     this.emit("queue:status", this.getQueueStatus());
 
+    // 释放锁
+    if (lockHandle) {
+      await this.mutex.release(lockHandle);
+    }
+
     throw error;
   }
 
+  private isProcessing = false;
+
   private async processNext(): Promise<void> {
-    if (this.running.size < this.maxConcurrent) {
-      this.processQueue();
+    // 防止重复处理
+    if (this.isProcessing) {
+      return;
+    }
+    
+    // 只有当队列不为空且并发数未达到上限时才继续处理
+    if (this.running.size < this.maxConcurrent && this.queue.length > 0) {
+      this.isProcessing = true;
+      try {
+        await this.processQueue();
+      } finally {
+        this.isProcessing = false;
+      }
     }
   }
 
   private async waitForSlot(): Promise<LLMResponse> {
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
       const check = () => {
-        if (this.running.size < this.maxConcurrent) {
-          resolve(this.processQueue());
+        if (this.running.size < this.maxConcurrent && !this.isProcessing) {
+          this.isProcessing = true;
+          this.processQueue()
+            .then((result) => {
+              this.isProcessing = false;
+              resolve(result);
+            })
+            .catch((error) => {
+              this.isProcessing = false;
+              reject(error);
+            });
         } else {
           setTimeout(check, 100);
         }
@@ -222,11 +300,19 @@ export class GlobalModelRequestQueue extends EventEmitter {
     return new Promise((resolve, reject) => {
       const check = () => {
         if (this.queue.length === 0 && this.running.size === 0) {
-          reject(new Error("Queue is empty"));
+          // 队列为空且没有运行中的请求，返回一个特殊的响应表示完成
+          resolve({
+            requestId: "queue-complete",
+            content: "",
+            model: "",
+            durationMs: 0,
+            timestamp: new Date().toISOString(),
+          });
         } else if (this.running.size === 0) {
           const pending = this.queue.filter((e) => e.status === "pending");
           if (pending.length === 0) {
-            reject(new Error("No pending requests"));
+            // 没有pending请求但有队列项，等待它们完成
+            setTimeout(check, 100);
           } else {
             resolve(this.processQueue());
           }

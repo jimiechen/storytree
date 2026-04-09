@@ -245,8 +245,66 @@ workspaces/
 - 如果用户未明确要求，则删除该文件
 - 确保最终目录中只有一个合规的 hello{model_name}.md 文件
 
+## 独立扣分记录要求
+
+**防止得分被覆盖**: 每个Agent必须在自己的工作空间目录中维护独立的扣分记录文件。
+
+### 扣分记录文件规范
+
+**文件路径**: `/Users/mac/StudioProjects/storytree2/workspaces/{model_name}/agent-score-record-{model_name}.md`
+
+**示例**:
+- Kimi-K2.5: `workspaces/Kimi-K2.5/agent-score-record-kimi.md`
+- MiniMax-M2: `workspaces/MiniMax-M2/agent-score-record-minimax.md`
+
+### 扣分记录内容要求
+
+每个Agent的独立扣分记录必须包含:
+1. **当前积分状态** - Agent名称、当前积分、状态、最后更新
+2. **扣分历史记录** - 详细的每次扣分记录
+3. **历史扣分汇总** - 按日期汇总的扣分历史
+4. **积分状态说明** - 各分数段的状态说明
+5. **改进记录** - 改进措施和计划
+6. **签名确认** - Agent签名和确认日期
+
+### 会话开始流程更新
+
+每次会话开始时，**前三个操作**必须是:
+
+1. **读取独立扣分档案** (第一优先级)
+   ```
+   Read /Users/mac/StudioProjects/storytree2/workspaces/{model_name}/agent-score-record-{model_name}.md
+   ```
+
+2. **读取全局扣分档案** (第二优先级)
+   ```
+   Read /Users/mac/StudioProjects/storytree2/.trae/rules/agent-score-record.md
+   ```
+   - 对比确认积分一致性
+   - 如不一致，以独立扣分档案为准
+
+3. **读取任务来源记录** (第三优先级)
+   ```
+   Read /Users/mac/StudioProjects/storytree2/.trae/rules/task-source-record.md
+   ```
+
+### 扣分记录更新流程
+
+每次扣分后必须:
+1. 更新独立扣分档案 `workspaces/{model_name}/agent-score-record-{model_name}.md`
+2. 同时更新全局扣分档案 `.trae/rules/agent-score-record.md`
+3. 确保两个文件内容一致
+4. 如全局档案被其他Agent覆盖，使用独立档案恢复
+
+### 防止覆盖措施
+
+1. **独立文件命名**: 使用 `agent-score-record-{model_name}.md` 格式
+2. **独立目录存储**: 存储在各自的工作空间目录中
+3. **定期备份**: 重要更新后立即备份
+4. **版本对比**: 会话开始时对比独立档案和全局档案
+
 ---
-*规则版本: v3.3*
+*规则版本: v3.4*
 *更新日期: 2026-04-09*
-*更新内容: 增加测试强制步骤、Exit Criteria 自评表模板、[READY_FOR_REVIEW] 标记规范*
-*署名: m27*
+*更新内容: 增加独立扣分记录要求，防止得分被其他Agent覆盖*
+*署名: Kimi*
