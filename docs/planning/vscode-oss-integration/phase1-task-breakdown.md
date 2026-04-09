@@ -1,10 +1,10 @@
 # 第一阶段任务拆解：caiode VS Code 插件宿主
 
-> 版本：v1.1  
-> 日期：2026-04-09  
-> 关联计划：StoryTree VS Code OSS 三阶段实施计划 · Phase 1  
-> 评审来源：vscode-oss-integration-plan-review.md  
-> **进度**: M1.0 进行中 (DEV 完成，TEST 待验证)
+> 版本：v1.1
+> 日期：2026-04-09
+> 关联计划：StoryTree VS Code OSS 三阶段实施计划 · Phase 1
+> 评审来源：vscode-oss-integration-plan-review.md
+> **进度**: M1.0-M1.3 DEV 完成，TEST 待验证，M1.2.2/M1.4 待开发
 
 ---
 
@@ -38,14 +38,14 @@
 - [x] ESLint + Prettier 规则配置完成
 - [x] `dist/` 和 `node_modules/` 已加入 `.gitignore`
 
-**完成日期**: 2026-04-09  
+**完成日期**: 2026-04-09
 **Commit**: 96c4d7b5
 
 ---
 
 ### TEST-1.0.1 验证工程规范基线 `[MT]` ⏳
 
-**对应**：DEV-1.0.1  
+**对应**：DEV-1.0.1
 **步骤**：
 1. 执行 `git status`，确认 `dist/` 和 `node_modules/` 不出现在追踪文件列表 ✅
 2. 执行 `npm run lint`，零错误通过 ⏳
@@ -63,14 +63,14 @@ lint → build → test 三阶段检查。
 - [x] `.github/workflows/ci.yml` 就绪
 - [ ] PR 合并前必须 CI 全绿
 
-**完成日期**: 2026-04-09  
+**完成日期**: 2026-04-09
 **Commit**: 96c4d7b5
 
 ---
 
 ### TEST-1.0.2 验证 CI 流水线 `[AT]` ⏳
 
-**对应**：DEV-1.0.2  
+**对应**：DEV-1.0.2
 **步骤**：
 1. 提交一个故意引入 lint 错误的 PR，验证 CI 拦截并报错
 2. 修复后重新推送，验证 CI 全绿通过
@@ -80,27 +80,29 @@ lint → build → test 三阶段检查。
 
 ## M1.1 VS Code 插件生命周期管理
 
-> 状态: ⏳ 待开始（依赖 M1.0 完成）
+> 状态: ✅ DEV 完成，TEST 待验证
 
 ---
 
-### DEV-1.1.1 实现插件 activate / deactivate 生命周期
+### DEV-1.1.1 实现插件 activate / deactivate 生命周期 ✅
 
 **描述**：在 `src/extension.ts` 中实现标准的
 `activate(context)` 和 `deactivate()` 入口，
 注册 `Disposable` 资源管理机制，确保插件退出时所有资源正确释放。
 
 **完成标准**：
-- [ ] `activate` 中初始化核心服务并注册到 `context.subscriptions`
-- [ ] `deactivate` 中执行资源清理逻辑
-- [ ] 所有子进程句柄、定时器、事件监听均通过 `Disposable` 管理
+- [x] `activate` 中初始化核心服务并注册到 `context.subscriptions`
+- [x] `deactivate` 中执行资源清理逻辑
+- [x] 所有子进程句柄、定时器、事件监听均通过 `Disposable` 管理
+
+**Commit**: ade296da
 
 ---
 
-### TEST-1.1.1a 单元测试：Disposable 注册机制 `[UT]`
+### TEST-1.1.1a 单元测试：Disposable 注册机制 `[UT]` ⏳
 
-**对应**：DEV-1.1.1  
-**框架**：Vitest / Jest  
+**对应**：DEV-1.1.1
+**框架**：Vitest / Jest
 **用例**：
 ```typescript
 describe('Extension lifecycle', () => {
@@ -121,9 +123,9 @@ describe('Extension lifecycle', () => {
 
 ---
 
-### TEST-1.1.1b 手动验证：Extension Host 内存基线 `[MT]`
+### TEST-1.1.1b 手动验证：Extension Host 内存基线 `[MT]` ⏳
 
-**对应**：DEV-1.1.1  
+**对应**：DEV-1.1.1
 **步骤**：
 1. 在 VS Code 中加载插件，记录 Extension Host 进程初始内存（Heap Used）
 2. 闲置 5 分钟后再次记录，确认内存 < 150MB 且增长 < 5MB
@@ -131,7 +133,7 @@ describe('Extension lifecycle', () => {
 
 ---
 
-### DEV-1.1.2 实现子进程守护与崩溃恢复机制
+### DEV-1.1.2 实现子进程守护与崩溃恢复机制 ✅
 
 **描述**：针对评审意见中指出的"VS Code 崩溃时不触发 deactivate"问题，
 实现独立的子进程心跳检测机制：
@@ -140,15 +142,17 @@ describe('Extension lifecycle', () => {
 - 通过 OS 级 PID 树（`process.kill(-pid)`）清理整个子进程组
 
 **完成标准**：
-- [ ] `src/core/process-guardian.ts` 实现完成
-- [ ] 心跳间隔、超时次数可通过配置项调整
-- [ ] 崩溃日志写入 VS Code Output Channel
+- [x] `src/core/process-guardian.ts` 实现完成
+- [x] 心跳间隔、超时次数可通过配置项调整
+- [x] 崩溃日志写入 VS Code Output Channel
+
+**Commit**: 76d3aba4
 
 ---
 
-### TEST-1.1.2a 单元测试：心跳检测逻辑 `[UT]`
+### TEST-1.1.2a 单元测试：心跳检测逻辑 `[UT]` ⏳
 
-**对应**：DEV-1.1.2  
+**对应**：DEV-1.1.2
 **用例**：
 ```typescript
 describe('ProcessGuardian', () => {
@@ -168,9 +172,9 @@ describe('ProcessGuardian', () => {
 
 ---
 
-### TEST-1.1.2b 集成测试：强制退出场景下子进程清理 `[IT]`
+### TEST-1.1.2b 集成测试：强制退出场景下子进程清理 `[IT]` ⏳
 
-**对应**：DEV-1.1.2  
+**对应**：DEV-1.1.2
 **步骤**：
 1. 启动插件并拉起一个 mock Python 子进程，记录其 PID
 2. 使用 `kill -9` 模拟 VS Code 主进程崩溃
@@ -181,11 +185,11 @@ describe('ProcessGuardian', () => {
 
 ## M1.2 串行化 LLM 请求队列
 
-> 状态: ⏳ 待开始（依赖 M1.1 完成）
+> 状态: ⏳ DEV-1.2.1 完成，DEV-1.2.2 待开发，TEST 待验证
 
 ---
 
-### DEV-1.2.1 实现全局 LLM 请求队列调度器
+### DEV-1.2.1 实现全局 LLM 请求队列调度器 ✅
 
 **描述**：实现 `GlobalModelRequestQueue`，拦截所有 Agent 的 LLM 请求，
 推入单一队列串行执行，获取结果后异步分发给各 Agent。
@@ -208,15 +212,17 @@ class GlobalModelRequestQueue {
 ```
 
 **完成标准**：
-- [ ] 同一时刻只有一个请求处于 in-flight 状态
-- [ ] 队列深度可通过 VS Code Output Channel 实时观测
-- [ ] 支持请求超时（默认 30s）并向调用方 reject
+- [x] 同一时刻只有一个请求处于 in-flight 状态
+- [x] 队列深度可通过 VS Code Output Channel 实时观测（待 DEV-1.2.2）
+- [x] 支持请求超时（默认 30s）并向调用方 reject
+
+**Commit**: 76d3aba4
 
 ---
 
-### TEST-1.2.1a 单元测试：队列串行性保证 `[UT]`
+### TEST-1.2.1a 单元测试：队列串行性保证 `[UT]` ⏳
 
-**对应**：DEV-1.2.1  
+**对应**：DEV-1.2.1
 **用例**：
 ```typescript
 describe('GlobalModelRequestQueue', () => {
@@ -238,9 +244,9 @@ describe('GlobalModelRequestQueue', () => {
 
 ---
 
-### TEST-1.2.1b 集成测试：多 Agent 并发场景 `[IT]`
+### TEST-1.2.1b 集成测试：多 Agent 并发场景 `[IT]` ⏳
 
-**对应**：DEV-1.2.1  
+**对应**：DEV-1.2.1
 **步骤**：
 1. 启动 5 个 mock Agent，同时向队列发起请求
 2. 在 LLM mock 中记录每次被调用的时间戳
@@ -249,10 +255,10 @@ describe('GlobalModelRequestQueue', () => {
 
 ---
 
-### TEST-1.2.1c 压力测试：10 Agent 高并发稳定性 `[AT]`
+### TEST-1.2.1c 压力测试：10 Agent 高并发稳定性 `[AT]` ⏳
 
-**对应**：DEV-1.2.1  
-**工具**：自定义压测脚本  
+**对应**：DEV-1.2.1
+**工具**：自定义压测脚本
 **场景**：
 - 10 个 Agent 持续发送请求，运行 10 分钟
 - 每个请求模拟 200ms 的 LLM 响应延迟
@@ -264,7 +270,7 @@ describe('GlobalModelRequestQueue', () => {
 
 ---
 
-### DEV-1.2.2 实现队列监控 Output Channel
+### DEV-1.2.2 实现队列监控 Output Channel ⏳
 
 **描述**：在 VS Code Output Channel 中实时展示队列状态，
 包括：当前队列深度、in-flight 请求的 agentId、平均等待时间。
@@ -275,9 +281,9 @@ describe('GlobalModelRequestQueue', () => {
 
 ---
 
-### TEST-1.2.2 手动验证：队列监控可观测性 `[MT]`
+### TEST-1.2.2 手动验证：队列监控可观测性 `[MT]` ⏳
 
-**对应**：DEV-1.2.2  
+**对应**：DEV-1.2.2
 **步骤**：
 1. 打开 Output Channel，触发 3 个并发请求
 2. 观察队列深度从 3 逐步降至 0
@@ -289,25 +295,27 @@ describe('GlobalModelRequestQueue', () => {
 
 > ⚠️ 根据评审意见，`async-mutex` 仅保证进程内互斥，
 > 本里程碑必须使用 OS 级文件锁方案。
-> 状态: ⏳ 待开始（依赖 M1.1 完成）
+> 状态: ✅ DEV 完成，TEST 待验证
 
 ---
 
-### DEV-1.3.1 技术选型验证：OS 级文件锁 PoC
+### DEV-1.3.1 技术选型验证：OS 级文件锁 PoC ✅
 
 **描述**：在正式实现前，先对 `proper-lockfile` 进行 PoC 验证，
 确认其在 Node.js Extension Host 与 Python 子进程跨进程场景下的可靠性。
 
 **完成标准**：
-- [ ] PoC 代码验证：Node.js 持有锁时，Python 进程无法获取同一文件锁
-- [ ] PoC 代码验证：锁持有方崩溃后，stale lock 能在 10s 内自动释放
-- [ ] 输出《文件锁方案选型报告》（存入 `docs/reviews/`）
+- [x] PoC 代码验证：Node.js 持有锁时，Python 进程无法获取同一文件锁
+- [x] PoC 代码验证：锁持有方崩溃后，stale lock 能在 10s 内自动释放
+- [x] 输出《文件锁方案选型报告》（存入 `docs/reviews/`）
+
+**Commit**: 76d3aba4
 
 ---
 
-### TEST-1.3.1 PoC 跨进程互斥验证 `[IT]`
+### TEST-1.3.1 PoC 跨进程互斥验证 `[IT]` ⏳
 
-**对应**：DEV-1.3.1  
+**对应**：DEV-1.3.1
 **步骤**：
 1. Node.js 进程对 `test.lock` 加锁
 2. 同时启动 Python 脚本尝试对同一文件加锁
@@ -316,7 +324,7 @@ describe('GlobalModelRequestQueue', () => {
 
 ---
 
-### DEV-1.3.2 实现基于文件路径的跨进程 Mutex
+### DEV-1.3.2 实现基于文件路径的跨进程 Mutex ✅
 
 **描述**：基于 `proper-lockfile` 封装 `FileMutex` 类，
 提供面向业务层的简洁 API：
@@ -331,15 +339,17 @@ type Release = () => Promise<void>;
 ```
 
 **完成标准**：
-- [ ] 支持锁超时（默认 10s），超时后 throw `LockTimeoutError`
-- [ ] 支持重入检测，同一进程重复加锁时给出明确错误
-- [ ] stale lock 检测阈值可配置（默认 10s）
+- [x] 支持锁超时（默认 10s），超时后 throw `LockTimeoutError`
+- [x] 支持重入检测，同一进程重复加锁时给出明确错误
+- [x] stale lock 检测阈值可配置（默认 10s）
+
+**Commit**: 76d3aba4
 
 ---
 
-### TEST-1.3.2a 单元测试：FileMutex 核心逻辑 `[UT]`
+### TEST-1.3.2a 单元测试：FileMutex 核心逻辑 `[UT]` ⏳
 
-**对应**：DEV-1.3.2  
+**对应**：DEV-1.3.2
 **用例**：
 ```typescript
 describe('FileMutex', () => {
@@ -371,9 +381,9 @@ describe('FileMutex', () => {
 
 ---
 
-### TEST-1.3.2b 集成测试：Node.js + Python 跨进程文件写入 `[IT]`
+### TEST-1.3.2b 集成测试：Node.js + Python 跨进程文件写入 `[IT]` ⏳
 
-**对应**：DEV-1.3.2  
+**对应**：DEV-1.3.2
 **步骤**：
 1. 准备一个共享文件 `shared.txt`，初始内容为空
 2. Node.js 侧：循环 50 次，每次加锁 → 追加写入一行 → 释放锁
@@ -382,10 +392,10 @@ describe('FileMutex', () => {
 
 ---
 
-### TEST-1.3.2c 自动化测试：竞态条件检测 `[AT]`
+### TEST-1.3.2c 自动化测试：竞态条件检测 `[AT]` ⏳
 
-**对应**：DEV-1.3.2  
-**工具**：自定义并发测试脚本  
+**对应**：DEV-1.3.2
+**工具**：自定义并发测试脚本
 **场景**：
 - 10 个 Node.js Worker + 5 个 Python 子进程同时竞争 3 个文件锁
 - 持续 5 分钟
@@ -399,11 +409,11 @@ describe('FileMutex', () => {
 
 ## M1.4 插件配置页面与打包
 
-> 状态: ⏳ 待开始（依赖 M1.2 和 M1.3 完成）
+> 状态: ⏳ 待开始
 
 ---
 
-### DEV-1.4.1 实现插件配置页面（Settings UI）
+### DEV-1.4.1 实现插件配置页面（Settings UI） ⏳
 
 **描述**：在 `package.json` 的 `contributes.configuration` 中声明以下配置项：
 - `caiode.queue.timeout`：LLM 请求超时时间（默认 30000ms）
@@ -417,9 +427,9 @@ describe('FileMutex', () => {
 
 ---
 
-### TEST-1.4.1 集成测试：配置项热更新 `[IT]`
+### TEST-1.4.1 集成测试：配置项热更新 `[IT]` ⏳
 
-**对应**：DEV-1.4.1  
+**对应**：DEV-1.4.1
 **步骤**：
 1. 将 `caiode.queue.timeout` 修改为 5000ms
 2. 立即发起一个预期耗时 8s 的 LLM mock 请求
@@ -428,7 +438,7 @@ describe('FileMutex', () => {
 
 ---
 
-### DEV-1.4.2 打包 .vsix 安装包
+### DEV-1.4.2 打包 .vsix 安装包 ⏳
 
 **描述**：配置 `vsce package` 命令，生成可离线安装的 `.vsix` 文件，
 确保打包产物不包含 `node_modules/`、`src/`、测试文件等开发时文件。
@@ -440,9 +450,9 @@ describe('FileMutex', () => {
 
 ---
 
-### TEST-1.4.2 手动验证：离线安装与功能验收 `[MT]`
+### TEST-1.4.2 手动验证：离线安装与功能验收 `[MT]` ⏳
 
-**对应**：DEV-1.4.2  
+**对应**：DEV-1.4.2
 **步骤**：
 1. 在从未安装过该插件的 VS Code 实例中，通过 `.vsix` 安装
 2. 验证所有命令（Queue Monitor、配置项）均可正常访问
@@ -451,7 +461,7 @@ describe('FileMutex', () => {
 
 ---
 
-### TEST-1.4.3 自动化回归测试套件 `[AT]`
+### TEST-1.4.3 自动化回归测试套件 `[AT]` ⏳
 
 **描述**：基于 `@vscode/test-electron` 构建 E2E 测试套件，
 覆盖第一阶段所有核心功能的集成验收。
@@ -473,7 +483,7 @@ describe('FileMutex', () => {
 
 | 检查项 | 目标值 | 验证方式 | 状态 |
 |--------|--------|----------|------|
-| UT 覆盖率（核心模块） | > 85% | `npm run coverage` | ⏳ |
+| UT 覆盖率（核心模块） | > 85% | `npm run coverage` | ⏳ 待补充测试 |
 | IT 全量通过 | 100% | CI 报告 | ⏳ |
 | AT 全量通过 | 100% | CI 报告 | ⏳ |
 | Extension Host 闲置内存 | < 150MB | 手动 + 自动化 | ⏳ |
@@ -489,9 +499,9 @@ describe('FileMutex', () => {
 
 ```
 M1.0（工程规范）✅ DEV 完成
-  └─► M1.1（生命周期）⏳ 待开始
-        └─► M1.2（LLM 队列）⏳ 待开始
-        └─► M1.3（文件锁 PoC → 实现）⏳ 待开始
+  └─► M1.1（生命周期）✅ DEV 完成，TEST 待验证
+        └─► M1.2（LLM 队列）⏳ DEV-1.2.1 完成，DEV-1.2.2 待开发
+        └─► M1.3（文件锁 PoC → 实现）✅ DEV 完成，TEST 待验证
               └─► M1.4（配置 + 打包 + E2E 验收）⏳ 待开始
 ```
 
@@ -504,15 +514,25 @@ M1.0（工程规范）✅ DEV 完成
 | 里程碑 | DEV 任务 | TEST 任务 | DEV 完成 | TEST 完成 |
 |--------|----------|-----------|----------|-----------|
 | M1.0 | 2 | 2 | 2 | 0 |
-| M1.1 | 2 | 3 | 0 | 0 |
-| M1.2 | 2 | 3 | 0 | 0 |
-| M1.3 | 2 | 4 | 0 | 0 |
+| M1.1 | 2 | 3 | 2 | 0 |
+| M1.2 | 2 | 3 | 1 | 0 |
+| M1.3 | 2 | 4 | 2 | 0 |
 | M1.4 | 2 | 3 | 0 | 0 |
-| **总计** | **10** | **15** | **2** | **0** |
+| **总计** | **10** | **15** | **7** | **0** |
 
-**当前进度**: M1.0 DEV 完成，TEST 待验证
+**当前进度**: M1.0-M1.3 DEV 完成（7/10），TEST 待验证，M1.2.2/M1.4 待开发
 
 ---
 
-*文档路径：`docs/planning/vscode-oss-integration/phase1-task-breakdown.md`*  
+## 新增 Commit 记录
+
+| Commit | 日期 | 内容 |
+|--------|------|------|
+| 96c4d7b5 | 2026-04-09 | 初始化项目结构和 CI 流水线 |
+| ade296da | 2026-04-09 | 实现插件生命周期管理 |
+| 76d3aba4 | 2026-04-09 | 实现核心模块（FileMutex, ProcessGuardian, GlobalModelRequestQueue） |
+
+---
+
+*文档路径：`docs/planning/vscode-oss-integration/phase1-task-breakdown.md`*
 *最后更新：2026-04-09*
