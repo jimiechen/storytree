@@ -5,33 +5,38 @@
 **状态**: 待评审
 **更新**: 新增 Phase 0 初始化基础设施
 
----
+***
 
 ## 1. 目标概述
 
 实现 VS Code 配置页面驱动的自动化流程：
+
 ```
 预检检查 → 设置加载 → 权限初始化 → 获取 Trae 任务列表 ID → 用户确认绑定任务 → 初始化沙箱 → 验证隔离性 → 创建 Trae 自定义智能体 → 测试验证
 ```
 
----
+***
 
 ## 2. 任务分解
 
 ### Phase 0: 初始化基础设施 (新增，预计 2 天)
 
 #### Task 0.1: 预检检查模块
+
 **描述**: 在启动流程中检查 Trae 连接性和环境可用性
 
 **输入**:
+
 - Trae 调试端口配置
 - 超时配置
 
 **输出**:
+
 - `PreflightChecker` 类
 - 检查结果报告
 
 **验证方式**:
+
 ```bash
 # 单元测试
 npm run test -- --grep "PreflightChecker"
@@ -41,6 +46,7 @@ npm run test:e2e -- --grep "preflight"
 ```
 
 **自动化验证脚本**:
+
 ```javascript
 // tests/integration/preflight.test.js
 describe('Preflight Checker', () => {
@@ -79,20 +85,24 @@ describe('Preflight Checker', () => {
 });
 ```
 
----
+***
 
 #### Task 0.2: 设置加载模块
+
 **描述**: 加载和管理沙箱配置
 
 **输入**:
+
 - 配置文件路径
 - 默认配置
 
 **输出**:
+
 - `SettingsManager` 类
 - 配置验证和合并
 
 **配置结构**:
+
 ```typescript
 interface CaiodeSettings {
   trae: {
@@ -122,6 +132,7 @@ interface CaiodeSettings {
 ```
 
 **验证方式**:
+
 ```bash
 # 单元测试
 npm run test -- --grep "SettingsManager"
@@ -131,6 +142,7 @@ npm run test:e2e -- --grep "settings-load"
 ```
 
 **自动化验证脚本**:
+
 ```javascript
 // tests/integration/settings-load.test.js
 describe('Settings Manager', () => {
@@ -174,20 +186,24 @@ describe('Settings Manager', () => {
 });
 ```
 
----
+***
 
 #### Task 0.3: 权限系统初始化
+
 **描述**: 初始化沙箱权限控制系统
 
 **输入**:
+
 - 权限配置
 - 沙箱路径
 
 **输出**:
+
 - `PermissionManager` 类
 - 权限检查接口
 
 **权限检查逻辑**:
+
 ```typescript
 interface PermissionManager {
   // 检查文件访问权限
@@ -205,6 +221,7 @@ interface PermissionManager {
 ```
 
 **验证方式**:
+
 ```bash
 # 单元测试
 npm run test -- --grep "PermissionManager"
@@ -214,6 +231,7 @@ npm run test:e2e -- --grep "permission-init"
 ```
 
 **自动化验证脚本**:
+
 ```javascript
 // tests/integration/permission-init.test.js
 describe('Permission Manager', () => {
@@ -270,24 +288,28 @@ describe('Permission Manager', () => {
 });
 ```
 
----
+***
 
 ### Phase 1.1: CDP 连接与任务列表获取 (预计 2 天)
 
 #### Task 1.1.1: CDP 连接模块封装
+
 **描述**: 封装 CDP 连接逻辑，提供统一的连接管理接口
 
 **依赖**: Task 0.1 (预检检查)
 
 **输入**:
+
 - Trae 调试端口配置
 - 连接超时配置
 
 **输出**:
+
 - `CdpClient` 类，支持连接、断开、重连
 - 连接状态管理
 
 **验证方式**:
+
 ```bash
 # 单元测试
 npm run test -- --grep "CdpClient"
@@ -297,6 +319,7 @@ npm run test:e2e -- --grep "cdp-connection"
 ```
 
 **自动化验证脚本**:
+
 ```javascript
 // tests/integration/cdp-connection.test.js
 describe('CDP Connection', () => {
@@ -336,22 +359,26 @@ describe('CDP Connection', () => {
 });
 ```
 
----
+***
 
 #### Task 1.1.2: Trae 任务列表获取
+
 **描述**: 通过 CDP 获取 Trae 中的任务列表 ID
 
 **依赖**: Task 1.1.1 (CDP 连接)
 
 **输入**:
+
 - CDP 连接实例
 - DOM 选择器配置
 
 **输出**:
+
 - `TaskListFetcher` 类
 - 任务列表数据结构: `{ id, title, status, element }[]`
 
 **验证方式**:
+
 ```bash
 # 单元测试
 npm run test -- --grep "TaskListFetcher"
@@ -361,6 +388,7 @@ npm run test:e2e -- --grep "task-list-fetch"
 ```
 
 **自动化验证脚本**:
+
 ```javascript
 // tests/integration/task-list-fetch.test.js
 describe('Task List Fetcher', () => {
@@ -401,23 +429,27 @@ describe('Task List Fetcher', () => {
 });
 ```
 
----
+***
 
 #### Task 1.1.3: VS Code 配置页面 - 连接与任务显示
+
 **描述**: 创建 VS Code Webview 页面，显示连接状态和任务列表
 
 **依赖**: Task 1.1.2 (任务列表获取)
 
 **输入**:
+
 - VS Code Extension API
 - React 组件
 
 **输出**:
+
 - 配置页面 UI
 - 任务列表展示组件
 - 连接状态指示器
 
 **验证方式**:
+
 ```bash
 # UI 组件测试
 npm run test -- --grep "ConfigPage"
@@ -427,6 +459,7 @@ npm run test:e2e -- --grep "vscode-config-page"
 ```
 
 **自动化验证脚本**:
+
 ```javascript
 // tests/ui/config-page.test.js
 describe('VS Code Config Page', () => {
@@ -462,24 +495,28 @@ describe('VS Code Config Page', () => {
 });
 ```
 
----
+***
 
 ### Phase 1.2: Git Worktree 沙箱初始化 (预计 3 天)
 
 #### Task 1.2.1: Worktree 管理器封装
+
 **描述**: 封装 Git Worktree 操作，提供创建、切换、清理接口
 
 **依赖**: Task 0.2 (设置加载), Task 0.3 (权限系统)
 
 **输入**:
+
 - Git 仓库路径
 - Worktree 配置
 
 **输出**:
+
 - `WorktreeManager` 类
 - Worktree 生命周期管理
 
 **验证方式**:
+
 ```bash
 # 单元测试
 npm run test -- --grep "WorktreeManager"
@@ -489,6 +526,7 @@ npm run test:e2e -- --grep "worktree-lifecycle"
 ```
 
 **自动化验证脚本**:
+
 ```javascript
 // tests/integration/worktree-manager.test.js
 describe('Worktree Manager', () => {
@@ -561,22 +599,26 @@ describe('Worktree Manager', () => {
 });
 ```
 
----
+***
 
 #### Task 1.2.2: 沙箱隔离验证器
+
 **描述**: 验证 Worktree 沙箱的文件隔离性
 
 **依赖**: Task 1.2.1 (Worktree 管理), Task 0.3 (权限系统)
 
 **输入**:
+
 - Worktree 路径
 - 隔离规则配置
 
 **输出**:
+
 - `SandboxValidator` 类
 - 隔离性测试报告
 
 **验证方式**:
+
 ```bash
 # 单元测试
 npm run test -- --grep "SandboxValidator"
@@ -586,6 +628,7 @@ npm run test:e2e -- --grep "sandbox-isolation"
 ```
 
 **自动化验证脚本**:
+
 ```javascript
 // tests/integration/sandbox-validator.test.js
 describe('Sandbox Validator', () => {
@@ -638,23 +681,27 @@ describe('Sandbox Validator', () => {
 });
 ```
 
----
+***
 
 #### Task 1.2.3: VS Code 配置页面 - 沙箱初始化
+
 **描述**: 在配置页面添加沙箱初始化功能
 
 **依赖**: Task 1.2.2 (隔离验证器)
 
 **输入**:
+
 - 用户绑定的任务 ID
 - Worktree 配置
 
 **输出**:
+
 - 沙箱初始化按钮
 - 初始化进度显示
 - 隔离性验证结果展示
 
 **验证方式**:
+
 ```bash
 # UI 组件测试
 npm run test -- --grep "SandboxInitPanel"
@@ -664,6 +711,7 @@ npm run test:e2e -- --grep "sandbox-init-flow"
 ```
 
 **自动化验证脚本**:
+
 ```javascript
 // tests/ui/sandbox-init-panel.test.js
 describe('Sandbox Init Panel', () => {
@@ -702,24 +750,28 @@ describe('Sandbox Init Panel', () => {
 });
 ```
 
----
+***
 
 ### Phase 1.3: Trae 智能体创建与验证 (预计 3 天)
 
 #### Task 1.3.1: Trae 智能体配置注入
+
 **描述**: 通过 CDP 向 Trae 注入智能体配置
 
 **依赖**: Task 0.2 (设置加载)
 
 **输入**:
+
 - 沙箱路径
 - 智能体提示词配置
 
 **输出**:
+
 - `AgentConfigInjector` 类
 - 配置注入状态
 
 **验证方式**:
+
 ```bash
 # 单元测试
 npm run test -- --grep "AgentConfigInjector"
@@ -729,6 +781,7 @@ npm run test:e2e -- --grep "agent-config-inject"
 ```
 
 **自动化验证脚本**:
+
 ```javascript
 // tests/integration/agent-config-inject.test.js
 describe('Agent Config Injector', () => {
@@ -778,28 +831,33 @@ describe('Agent Config Injector', () => {
 });
 ```
 
----
+***
 
 #### Task 1.3.2: 智能体沙箱工作验证
+
 **描述**: 验证智能体是否在独立沙箱中工作
 
 **依赖**: Task 1.3.1 (智能体配置注入), Task 0.3 (权限系统)
 
 **输入**:
+
 - 智能体 ID
 - 沙箱路径
 
 **输出**:
+
 - 验证测试报告
 - 文件操作日志
 
 **验证方式**:
+
 ```bash
 # E2E 测试
 npm run test:e2e -- --grep "agent-sandbox-verify"
 ```
 
 **自动化验证脚本**:
+
 ```javascript
 // tests/e2e/agent-sandbox-verify.test.js
 describe('Agent Sandbox Verification', () => {
@@ -863,29 +921,34 @@ describe('Agent Sandbox Verification', () => {
 });
 ```
 
----
+***
 
 #### Task 1.3.3: VS Code 配置页面 - 完整流程集成
+
 **描述**: 集成所有功能，实现完整的一键流程
 
 **依赖**: Task 1.3.2 (智能体验证)
 
 **输入**:
+
 - 用户配置参数
 - Trae 连接信息
 
 **输出**:
+
 - 完整的配置页面
 - 一键启动按钮
 - 全流程状态追踪
 
 **验证方式**:
+
 ```bash
 # E2E 完整流程测试
 npm run test:e2e -- --grep "full-workflow"
 ```
 
 **自动化验证脚本**:
+
 ```javascript
 // tests/e2e/full-workflow.test.js
 describe('Full Workflow Integration', () => {
@@ -963,48 +1026,48 @@ describe('Full Workflow Integration', () => {
 });
 ```
 
----
+***
 
 ## 3. 验收标准
 
 ### 3.1 功能验收
 
-| 功能 | 验收标准 | 自动化测试 |
-|------|----------|------------|
-| 预检检查 | 能检查 Trae/Git/Worktree 可用性 | `test:e2e --grep "preflight"` |
-| 设置加载 | 能加载和合并配置 | `test:e2e --grep "settings-load"` |
-| 权限初始化 | 能初始化权限规则 | `test:e2e --grep "permission-init"` |
-| CDP 连接 | 能稳定连接 Trae 并自动重连 | `test:e2e --grep "cdp-connection"` |
-| 任务列表获取 | 能正确获取并显示任务列表 | `test:e2e --grep "task-list-fetch"` |
-| 任务绑定 | 用户可选择并绑定任务 | `test:e2e --grep "task-bind"` |
-| 沙箱初始化 | 能创建独立 Worktree | `test:e2e --grep "worktree-lifecycle"` |
-| 隔离性验证 | 文件/分支隔离验证通过 | `test:e2e --grep "sandbox-isolation"` |
-| 智能体创建 | 能注入配置并创建智能体 | `test:e2e --grep "agent-config-inject"` |
-| 智能体验证 | 智能体在独立沙箱工作 | `test:e2e --grep "agent-sandbox-verify"` |
+| 功能     | 验收标准                      | 自动化测试                                    |
+| ------ | ------------------------- | ---------------------------------------- |
+| 预检检查   | 能检查 Trae/Git/Worktree 可用性 | `test:e2e --grep "preflight"`            |
+| 设置加载   | 能加载和合并配置                  | `test:e2e --grep "settings-load"`        |
+| 权限初始化  | 能初始化权限规则                  | `test:e2e --grep "permission-init"`      |
+| CDP 连接 | 能稳定连接 Trae 并自动重连          | `test:e2e --grep "cdp-connection"`       |
+| 任务列表获取 | 能正确获取并显示任务列表              | `test:e2e --grep "task-list-fetch"`      |
+| 任务绑定   | 用户可选择并绑定任务                | `test:e2e --grep "task-bind"`            |
+| 沙箱初始化  | 能创建独立 Worktree            | `test:e2e --grep "worktree-lifecycle"`   |
+| 隔离性验证  | 文件/分支隔离验证通过               | `test:e2e --grep "sandbox-isolation"`    |
+| 智能体创建  | 能注入配置并创建智能体               | `test:e2e --grep "agent-config-inject"`  |
+| 智能体验证  | 智能体在独立沙箱工作                | `test:e2e --grep "agent-sandbox-verify"` |
 
 ### 3.2 性能验收
 
-| 指标 | 标准 | 验证方式 |
-|------|------|----------|
-| 预检检查 | < 3s | 自动化测试计时 |
-| 设置加载 | < 1s | 自动化测试计时 |
-| 权限初始化 | < 1s | 自动化测试计时 |
-| CDP 连接时间 | < 2s | 自动化测试计时 |
-| 任务列表获取 | < 1s | 自动化测试计时 |
-| Worktree 创建 | < 5s | 自动化测试计时 |
-| 隔离性验证 | < 10s | 自动化测试计时 |
-| 完整流程 | < 60s | E2E 测试计时 |
+| 指标          | 标准    | 验证方式     |
+| ----------- | ----- | -------- |
+| 预检检查        | < 3s  | 自动化测试计时  |
+| 设置加载        | < 1s  | 自动化测试计时  |
+| 权限初始化       | < 1s  | 自动化测试计时  |
+| CDP 连接时间    | < 2s  | 自动化测试计时  |
+| 任务列表获取      | < 1s  | 自动化测试计时  |
+| Worktree 创建 | < 5s  | 自动化测试计时  |
+| 隔离性验证       | < 10s | 自动化测试计时  |
+| 完整流程        | < 60s | E2E 测试计时 |
 
 ### 3.3 可靠性验收
 
-| 指标 | 标准 | 验证方式 |
-|------|------|----------|
-| 预检失败处理 | 显示明确错误和解决建议 | 错误注入测试 |
-| CDP 断线重连 | 自动重连成功 | 模拟断线测试 |
-| Worktree 清理 | 无残留文件 | 清理后检查 |
-| 错误恢复 | 优雅降级不崩溃 | 错误注入测试 |
+| 指标          | 标准          | 验证方式   |
+| ----------- | ----------- | ------ |
+| 预检失败处理      | 显示明确错误和解决建议 | 错误注入测试 |
+| CDP 断线重连    | 自动重连成功      | 模拟断线测试 |
+| Worktree 清理 | 无残留文件       | 清理后检查  |
+| 错误恢复        | 优雅降级不崩溃     | 错误注入测试 |
 
----
+***
 
 ## 4. 依赖关系
 
@@ -1045,20 +1108,20 @@ Phase 1.3 (智能体创建)
     │               └── Task 1.3.3 (完整流程集成)
 ```
 
----
+***
 
 ## 5. 风险评估
 
-| 风险 | 可能性 | 影响 | 缓解措施 |
-|------|--------|------|----------|
-| Trae DOM 选择器变化 | 中 | 高 | 选择器配置化，版本适配 |
-| CDP 连接不稳定 | 中 | 中 | 自动重连机制 |
-| Worktree 权限问题 | 低 | 中 | 权限预检查 |
-| 测试环境依赖 | 低 | 中 | Docker 容器化测试环境 |
-| 配置文件格式变化 | 低 | 中 | Schema 验证和迁移 |
-| 权限规则冲突 | 低 | 中 | 规则优先级和冲突检测 |
+| 风险             | 可能性 | 影响 | 缓解措施           |
+| -------------- | --- | -- | -------------- |
+| Trae DOM 选择器变化 | 中   | 高  | 选择器配置化，版本适配    |
+| CDP 连接不稳定      | 中   | 中  | 自动重连机制         |
+| Worktree 权限问题  | 低   | 中  | 权限预检查          |
+| 测试环境依赖         | 低   | 中  | Docker 容器化测试环境 |
+| 配置文件格式变化       | 低   | 中  | Schema 验证和迁移   |
+| 权限规则冲突         | 低   | 中  | 规则优先级和冲突检测     |
 
----
+***
 
 ## 6. 评审清单
 
@@ -1069,18 +1132,18 @@ Phase 1.3 (智能体创建)
 - [ ] 风险评估是否完整？
 - [ ] Phase 0 任务是否必要？
 
----
+***
 
 ## 7. 时间估算
 
-| Phase | 预计时间 |
-|-------|----------|
-| Phase 0: 初始化基础设施 | 2 天 |
-| Phase 1.1: CDP 连接与任务列表 | 2 天 |
-| Phase 1.2: 沙箱初始化 | 3 天 |
-| Phase 1.3: 智能体创建与验证 | 3 天 |
-| **总计** | **10 天** |
+| Phase                  | 预计时间     |
+| ---------------------- | -------- |
+| Phase 0: 初始化基础设施       | 2 天      |
+| Phase 1.1: CDP 连接与任务列表 | 2 天      |
+| Phase 1.2: 沙箱初始化       | 3 天      |
+| Phase 1.3: 智能体创建与验证    | 3 天      |
+| **总计**                 | **10 天** |
 
----
+***
 
 **下一步**: 请评审此计划，确认后开始实施。
