@@ -56,6 +56,11 @@
         "command": "storytree.wordCount",
         "title": "Show Word Count Statistics",
         "category": "StoryTree"
+      },
+      {
+        "command": "storytree.showQueueMonitor",
+        "title": "Show Caiode Queue Monitor",
+        "category": "Caiode"
       }
     ],
     "keybindings": [
@@ -152,6 +157,26 @@
           "type": "number",
           "default": 5000,
           "description": "Auto-save interval in milliseconds"
+        },
+        "caiode.queue.timeout": {
+          "type": "number",
+          "default": 30000,
+          "description": "LLM request timeout in milliseconds"
+        },
+        "caiode.lock.staleLockTimeout": {
+          "type": "number",
+          "default": 10000,
+          "description": "Stale lock timeout in milliseconds"
+        },
+        "caiode.heartbeat.interval": {
+          "type": "number",
+          "default": 5000,
+          "description": "Heartbeat check interval in milliseconds"
+        },
+        "caiode.heartbeat.maxMisses": {
+          "type": "number",
+          "default": 3,
+          "description": "Maximum missed heartbeat count before process termination"
         }
       }
     }
@@ -175,9 +200,11 @@
     "@types/better-sqlite3": "^7.6.13",
     "@types/glob": "^8.1.0",
     "@types/node": "^20.10.0",
+    "@types/proper-lockfile": "^4.1.4",
     "@types/vscode": "^1.85.0",
     "@typescript-eslint/eslint-plugin": "^7.0.0",
     "@typescript-eslint/parser": "^7.0.0",
+    "@vitest/coverage-v8": "^1.6.1",
     "esbuild": "^0.19.0",
     "eslint": "^8.56.0",
     "glob": "^13.0.6",
@@ -185,5 +212,7 @@
     "typescript": "^5.3.0",
     "vitest": "^1.2.0"
   },
-  "dependencies": {}
+  "dependencies": {
+    "proper-lockfile": "^4.1.2"
+  }
 }

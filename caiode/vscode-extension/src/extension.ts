@@ -26,6 +26,10 @@ import {
   createQueueMonitor,
   getQueueMonitor,
 } from "./core/queue-monitor";
+import {
+  getConfigService,
+  disposeConfigService,
+} from "./core/config-service";
 
 let webviewManager: WebviewPanelManager | undefined;
 let messageRouter: MessageRouter | undefined;
@@ -42,6 +46,7 @@ export function activate(context: vscode.ExtensionContext): void {
   initializeMessageRouter();
   initializeWebviewManager();
   initializeGlobalModelQueue();
+  initializeConfigService();
   registerCommands();
 
   console.log("[StoryTree] Extension activated successfully!");
@@ -59,6 +64,8 @@ export function deactivate(): void {
     globalModelQueue.clear();
     globalModelQueue = undefined;
   }
+
+  disposeConfigService();
 
   if (webviewManager) {
     webviewManager.dispose();
@@ -237,6 +244,14 @@ function initializeGlobalModelQueue(): void {
   });
 
   console.log("[StoryTree] Global model queue initialized");
+}
+
+function initializeConfigService(): void {
+  const configService = getConfigService();
+  configService.on("configChanged", (newConfig, oldConfig) => {
+    console.log("[StoryTree] Configuration changed:", JSON.stringify(newConfig));
+  });
+  console.log("[StoryTree] Config service initialized");
 }
 
 function registerCommands(): void {
