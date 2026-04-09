@@ -1,9 +1,10 @@
 # 第一阶段任务拆解：caiode VS Code 插件宿主
 
-> 版本：v1.0  
+> 版本：v1.1  
 > 日期：2026-04-09  
 > 关联计划：StoryTree VS Code OSS 三阶段实施计划 · Phase 1  
-> 评审来源：vscode-oss-integration-plan-review.md
+> 评审来源：vscode-oss-integration-plan-review.md  
+> **进度**: M1.0 进行中 (DEV 完成，TEST 待验证)
 
 ---
 
@@ -26,42 +27,48 @@
 
 ---
 
-### DEV-1.0.1 初始化 caiode 扩展项目结构
+### DEV-1.0.1 初始化 caiode 扩展项目结构 ✅
 
 **描述**：使用 VS Code Extension Generator 初始化 `caiode` 插件项目，
 建立标准目录结构：`src/`、`test/`、`dist/`（仅构建产物）。
 
 **完成标准**：
-- `package.json` 中包含 `engines.vscode` 版本约束
-- TypeScript 编译配置就绪（`tsconfig.json`）
-- ESLint + Prettier 规则配置完成
-- `dist/` 和 `node_modules/` 已加入 `.gitignore`
+- [x] `package.json` 中包含 `engines.vscode` 版本约束
+- [x] TypeScript 编译配置就绪（`tsconfig.json`）
+- [x] ESLint + Prettier 规则配置完成
+- [x] `dist/` 和 `node_modules/` 已加入 `.gitignore`
+
+**完成日期**: 2026-04-09  
+**Commit**: 96c4d7b5
 
 ---
 
-### TEST-1.0.1 验证工程规范基线 `[MT]`
+### TEST-1.0.1 验证工程规范基线 `[MT]` ⏳
 
 **对应**：DEV-1.0.1  
 **步骤**：
-1. 执行 `git status`，确认 `dist/` 和 `node_modules/` 不出现在追踪文件列表
-2. 执行 `npm run lint`，零错误通过
-3. 执行 `npm run build`，编译产物输出至 `dist/`，源码目录无污染
-4. 在干净的 VS Code 实例中加载插件，Extension Host 正常启动
+1. 执行 `git status`，确认 `dist/` 和 `node_modules/` 不出现在追踪文件列表 ✅
+2. 执行 `npm run lint`，零错误通过 ⏳
+3. 执行 `npm run build`，编译产物输出至 `dist/`，源码目录无污染 ⏳
+4. 在干净的 VS Code 实例中加载插件，Extension Host 正常启动 ⏳
 
 ---
 
-### DEV-1.0.2 建立 CI 流水线
+### DEV-1.0.2 建立 CI 流水线 ✅
 
 **描述**：配置 GitHub Actions，实现每次 PR 自动触发：
 lint → build → test 三阶段检查。
 
 **完成标准**：
-- `.github/workflows/ci.yml` 就绪
-- PR 合并前必须 CI 全绿
+- [x] `.github/workflows/ci.yml` 就绪
+- [ ] PR 合并前必须 CI 全绿
+
+**完成日期**: 2026-04-09  
+**Commit**: 96c4d7b5
 
 ---
 
-### TEST-1.0.2 验证 CI 流水线 `[AT]`
+### TEST-1.0.2 验证 CI 流水线 `[AT]` ⏳
 
 **对应**：DEV-1.0.2  
 **步骤**：
@@ -73,6 +80,8 @@ lint → build → test 三阶段检查。
 
 ## M1.1 VS Code 插件生命周期管理
 
+> 状态: ⏳ 待开始（依赖 M1.0 完成）
+
 ---
 
 ### DEV-1.1.1 实现插件 activate / deactivate 生命周期
@@ -82,9 +91,9 @@ lint → build → test 三阶段检查。
 注册 `Disposable` 资源管理机制，确保插件退出时所有资源正确释放。
 
 **完成标准**：
-- `activate` 中初始化核心服务并注册到 `context.subscriptions`
-- `deactivate` 中执行资源清理逻辑
-- 所有子进程句柄、定时器、事件监听均通过 `Disposable` 管理
+- [ ] `activate` 中初始化核心服务并注册到 `context.subscriptions`
+- [ ] `deactivate` 中执行资源清理逻辑
+- [ ] 所有子进程句柄、定时器、事件监听均通过 `Disposable` 管理
 
 ---
 
@@ -131,9 +140,9 @@ describe('Extension lifecycle', () => {
 - 通过 OS 级 PID 树（`process.kill(-pid)`）清理整个子进程组
 
 **完成标准**：
-- `src/core/process-guardian.ts` 实现完成
-- 心跳间隔、超时次数可通过配置项调整
-- 崩溃日志写入 VS Code Output Channel
+- [ ] `src/core/process-guardian.ts` 实现完成
+- [ ] 心跳间隔、超时次数可通过配置项调整
+- [ ] 崩溃日志写入 VS Code Output Channel
 
 ---
 
@@ -147,14 +156,11 @@ describe('ProcessGuardian', () => {
     const mockKill = vi.fn();
     const guardian = new ProcessGuardian({ killFn: mockKill, timeout: 100 });
     guardian.startHeartbeat(fakePid);
-    // 模拟 3 次超时
     await vi.advanceTimersByTimeAsync(350);
     expect(mockKill).toHaveBeenCalledWith(fakePid);
   });
 
   it('心跳恢复后不应触发 kill', async () => {
-    // 模拟 2 次超时后恢复
-    ...
     expect(mockKill).not.toHaveBeenCalled();
   });
 });
@@ -174,6 +180,8 @@ describe('ProcessGuardian', () => {
 ---
 
 ## M1.2 串行化 LLM 请求队列
+
+> 状态: ⏳ 待开始（依赖 M1.1 完成）
 
 ---
 
@@ -200,9 +208,9 @@ class GlobalModelRequestQueue {
 ```
 
 **完成标准**：
-- 同一时刻只有一个请求处于 in-flight 状态
-- 队列深度可通过 VS Code Output Channel 实时观测
-- 支持请求超时（默认 30s）并向调用方 reject
+- [ ] 同一时刻只有一个请求处于 in-flight 状态
+- [ ] 队列深度可通过 VS Code Output Channel 实时观测
+- [ ] 支持请求超时（默认 30s）并向调用方 reject
 
 ---
 
@@ -223,16 +231,7 @@ describe('GlobalModelRequestQueue', () => {
     );
 
     await Promise.all(requests);
-    // 验证执行顺序与入队顺序一致
     expect(executionOrder).toEqual([0,1,2,3,4,5,6,7,8,9]);
-  });
-
-  it('请求超时后应 reject 并继续处理队列剩余项', async () => {
-    ...
-  });
-
-  it('单个请求失败不应阻塞后续队列', async () => {
-    ...
   });
 });
 ```
@@ -271,8 +270,8 @@ describe('GlobalModelRequestQueue', () => {
 包括：当前队列深度、in-flight 请求的 agentId、平均等待时间。
 
 **完成标准**：
-- 可通过命令面板打开 "Caiode: Queue Monitor" 频道
-- 每 2s 刷新一次统计数据
+- [ ] 可通过命令面板打开 "Caiode: Queue Monitor" 频道
+- [ ] 每 2s 刷新一次统计数据
 
 ---
 
@@ -290,6 +289,7 @@ describe('GlobalModelRequestQueue', () => {
 
 > ⚠️ 根据评审意见，`async-mutex` 仅保证进程内互斥，
 > 本里程碑必须使用 OS 级文件锁方案。
+> 状态: ⏳ 待开始（依赖 M1.1 完成）
 
 ---
 
@@ -299,9 +299,9 @@ describe('GlobalModelRequestQueue', () => {
 确认其在 Node.js Extension Host 与 Python 子进程跨进程场景下的可靠性。
 
 **完成标准**：
-- PoC 代码验证：Node.js 持有锁时，Python 进程无法获取同一文件锁
-- PoC 代码验证：锁持有方崩溃后，stale lock 能在 10s 内自动释放
-- 输出《文件锁方案选型报告》（存入 `docs/reviews/`）
+- [ ] PoC 代码验证：Node.js 持有锁时，Python 进程无法获取同一文件锁
+- [ ] PoC 代码验证：锁持有方崩溃后，stale lock 能在 10s 内自动释放
+- [ ] 输出《文件锁方案选型报告》（存入 `docs/reviews/`）
 
 ---
 
@@ -331,9 +331,9 @@ type Release = () => Promise<void>;
 ```
 
 **完成标准**：
-- 支持锁超时（默认 10s），超时后 throw `LockTimeoutError`
-- 支持重入检测，同一进程重复加锁时给出明确错误
-- stale lock 检测阈值可配置（默认 10s）
+- [ ] 支持锁超时（默认 10s），超时后 throw `LockTimeoutError`
+- [ ] 支持重入检测，同一进程重复加锁时给出明确错误
+- [ ] stale lock 检测阈值可配置（默认 10s）
 
 ---
 
@@ -354,7 +354,6 @@ describe('FileMutex', () => {
   it('不同文件路径可以并发持锁', async () => {
     const r1 = await mutex.acquire('/tmp/file-a.txt');
     const r2 = await mutex.acquire('/tmp/file-b.txt');
-    // 两个锁均成功获取
     expect(r1).toBeDefined();
     expect(r2).toBeDefined();
     await r1(); await r2();
@@ -364,7 +363,6 @@ describe('FileMutex', () => {
     await expect(
       mutex.withLock('/tmp/test.txt', async () => { throw new Error('boom') })
     ).rejects.toThrow('boom');
-    // 锁已释放，可再次获取
     const r = await mutex.acquire('/tmp/test.txt', 500);
     expect(r).toBeDefined();
   });
@@ -401,6 +399,8 @@ describe('FileMutex', () => {
 
 ## M1.4 插件配置页面与打包
 
+> 状态: ⏳ 待开始（依赖 M1.2 和 M1.3 完成）
+
 ---
 
 ### DEV-1.4.1 实现插件配置页面（Settings UI）
@@ -412,8 +412,8 @@ describe('FileMutex', () => {
 - `caiode.heartbeat.maxMisses`：最大心跳丢失次数（默认 3）
 
 **完成标准**：
-- 所有配置项在 VS Code Settings UI 中可见且有说明文字
-- 配置变更后服务层实时生效（无需重启插件）
+- [ ] 所有配置项在 VS Code Settings UI 中可见且有说明文字
+- [ ] 配置变更后服务层实时生效（无需重启插件）
 
 ---
 
@@ -434,9 +434,9 @@ describe('FileMutex', () => {
 确保打包产物不包含 `node_modules/`、`src/`、测试文件等开发时文件。
 
 **完成标准**：
-- `.vscodeignore` 配置完整
-- 打包产物 < 5MB（不含 node_modules）
-- 在干净的 VS Code 实例中可通过 `.vsix` 成功安装
+- [ ] `.vscodeignore` 配置完整
+- [ ] 打包产物 < 5MB（不含 node_modules）
+- [ ] 在干净的 VS Code 实例中可通过 `.vsix` 成功安装
 
 ---
 
@@ -471,32 +471,48 @@ describe('FileMutex', () => {
 
 在进入第二阶段前，以下所有条件必须满足：
 
-| 检查项 | 目标值 | 验证方式 |
-|--------|--------|----------|
-| UT 覆盖率（核心模块） | > 85% | `npm run coverage` |
-| IT 全量通过 | 100% | CI 报告 |
-| AT 全量通过 | 100% | CI 报告 |
-| Extension Host 闲置内存 | < 150MB | 手动 + 自动化 |
-| 10 Agent × 10min 压测无崩溃 | 0 崩溃 | 压测脚本 |
-| 跨进程文件锁竞态测试无数据损坏 | 0 损坏 | 自动化测试 |
-| `.vsix` 离线安装验收 | 全功能可用 | 手动验证 |
-| `dist/` 和 `node_modules/` 不入库 | 0 文件 | `git status` 检查 |
-| CI 流水线全绿 | 100% | GitHub Actions |
+| 检查项 | 目标值 | 验证方式 | 状态 |
+|--------|--------|----------|------|
+| UT 覆盖率（核心模块） | > 85% | `npm run coverage` | ⏳ |
+| IT 全量通过 | 100% | CI 报告 | ⏳ |
+| AT 全量通过 | 100% | CI 报告 | ⏳ |
+| Extension Host 闲置内存 | < 150MB | 手动 + 自动化 | ⏳ |
+| 10 Agent × 10min 压测无崩溃 | 0 崩溃 | 压测脚本 | ⏳ |
+| 跨进程文件锁竞态测试无数据损坏 | 0 损坏 | 自动化测试 | ⏳ |
+| `.vsix` 离线安装验收 | 全功能可用 | 手动验证 | ⏳ |
+| `dist/` 和 `node_modules/` 不入库 | 0 文件 | `git status` 检查 | ✅ |
+| CI 流水线全绿 | 100% | GitHub Actions | ⏳ |
 
 ---
 
 ## 任务依赖关系
 
 ```
-M1.0（工程规范）
-  └─► M1.1（生命周期）
-        └─► M1.2（LLM 队列）
-        └─► M1.3（文件锁 PoC → 实现）
-              └─► M1.4（配置 + 打包 + E2E 验收）
+M1.0（工程规范）✅ DEV 完成
+  └─► M1.1（生命周期）⏳ 待开始
+        └─► M1.2（LLM 队列）⏳ 待开始
+        └─► M1.3（文件锁 PoC → 实现）⏳ 待开始
+              └─► M1.4（配置 + 打包 + E2E 验收）⏳ 待开始
 ```
 
 > M1.2 和 M1.3 可并行开发，但均依赖 M1.1 完成。
 
 ---
 
-*文档路径：`docs/planning/vscode-oss-integration/phase1-task-breakdown.md`*
+## 进度统计
+
+| 里程碑 | DEV 任务 | TEST 任务 | DEV 完成 | TEST 完成 |
+|--------|----------|-----------|----------|-----------|
+| M1.0 | 2 | 2 | 2 | 0 |
+| M1.1 | 2 | 3 | 0 | 0 |
+| M1.2 | 2 | 3 | 0 | 0 |
+| M1.3 | 2 | 4 | 0 | 0 |
+| M1.4 | 2 | 3 | 0 | 0 |
+| **总计** | **10** | **15** | **2** | **0** |
+
+**当前进度**: M1.0 DEV 完成，TEST 待验证
+
+---
+
+*文档路径：`docs/planning/vscode-oss-integration/phase1-task-breakdown.md`*  
+*最后更新：2026-04-09*
