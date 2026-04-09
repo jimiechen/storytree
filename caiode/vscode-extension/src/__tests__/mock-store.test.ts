@@ -182,7 +182,8 @@ describe("StoryTree Mock Store - Integration", () => {
     });
 
     expect(results.length).toBeGreaterThan(0);
-    expect(results[0].name).toContain("林");
+    const firstResult = results[0] as { name?: string; title?: string };
+    expect(firstResult.name || firstResult.title).toContain("林");
   });
 
   it("should return empty array for no matches in search", () => {

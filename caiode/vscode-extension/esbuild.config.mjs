@@ -1,15 +1,12 @@
 import * as esbuild from "esbuild";
 import * as path from "path";
+import { fileURLToPath } from "url";
 
-interface BuildOptions {
-  mode: "development" | "production";
-  watch?: boolean;
-  sourceMap?: boolean;
-  minify?: boolean;
-}
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
-const isProduction = (process.argv.includes("--prod") ||
-  process.argv.includes("-p")) as const;
+const isProduction = process.argv.includes("--prod") ||
+  process.argv.includes("-p");
 
 const ROOT = path.resolve(__dirname);
 const DIST = path.join(ROOT, "dist");
@@ -19,14 +16,14 @@ const EXTERNAL_MODULES = [
   "better-sqlite3",
 ];
 
-const SHARED_CONFIG: Pick<esbuild.BuildOptions, "platform" | "target" | "charset" | "legalComments"> = {
+const SHARED_CONFIG = {
   platform: "node",
   target: ["node18"],
   charset: "utf8",
   legalComments: "none",
 };
 
-function createExtensionConfig(): esbuild.BuildOptions {
+function createExtensionConfig() {
   return {
     ...SHARED_CONFIG,
     entryPoints: [path.join(ROOT, "src", "extension.ts")],
@@ -41,7 +38,7 @@ function createExtensionConfig(): esbuild.BuildOptions {
   };
 }
 
-function createWebviewConfig(): esbuild.BuildOptions {
+function createWebviewConfig() {
   return {
     ...SHARED_CONFIG,
     entryPoints: {
@@ -58,7 +55,7 @@ function createWebviewConfig(): esbuild.BuildOptions {
   };
 }
 
-const devBaseConfig = (base: esbuild.BuildOptions): esbuild.BuildOptions => ({
+const devBaseConfig = (base) => ({
   ...base,
   sourcemap: true,
   minify: false,
@@ -69,25 +66,21 @@ const devBaseConfig = (base: esbuild.BuildOptions): esbuild.BuildOptions => ({
   metafile: false,
 });
 
-const prodBaseConfig = (base: esbuild.BuildOptions): esbuild.BuildOptions => ({
+const prodBaseConfig = (base) => ({
   ...base,
   sourcemap: false,
-  minify: {
-    syntax: true,
-    whitespace: true,
-    identifiers: false,
-  },
+  minify: true,
   define: {
     "process.env.NODE_ENV": '"production"',
     __DEV__: "false",
   },
   metafile: true,
   treeShaking: true,
-  drop: ["console", "debugger"],
+  drop: ["debugger"],
   keepNames: false,
 });
 
-async function buildAll(config: BuildOptions): Promise<void> {
+async function buildAll(config) {
   const isProd = config.mode === "production";
 
   const extensionCfg = isProd
@@ -107,7 +100,7 @@ async function buildAll(config: BuildOptions): Promise<void> {
       const wvCtx = await esbuild.context(webviewCfg);
       await wvCtx.watch();
     } catch {
-      // webview index may not exist yet
+      console.log("[StoryTree] Webview bundle skipped (no entry point found)");
     }
 
     console.log("[StoryTree] Watching for changes...");
@@ -127,7 +120,6 @@ async function buildAll(config: BuildOptions): Promise<void> {
       reportResult("Webview Bundle", wvResult, isProd);
       if (wvResult.errors.length > 0) hasErrors = true;
     } catch {
-      // webview bundle may not have an entry point yet
       console.log("[StoryTree] Webview bundle skipped (no entry point found)");
     }
   } catch (err) {
@@ -145,7 +137,7 @@ async function buildAll(config: BuildOptions): Promise<void> {
   );
 }
 
-function reportResult(name: string, result: esbuild.BuildResult, isProd: boolean): void {
+function reportResult(name, result, isProd) {
   const errors = result.errors.length;
   const warnings = result.warnings.length;
 
@@ -169,7 +161,7 @@ function reportResult(name: string, result: esbuild.BuildResult, isProd: boolean
   }
 }
 
-async function analyzeBundle(name: string, metafile: string | Uint8Array): Promise<void> {
+async function analyzeBundle(name, metafile) {
   try {
     const analysis = await esbuild.analyzeMetafile(metafile, { verbose: false });
     console.log(`\n  📊 ${name} Bundle Analysis:`);
@@ -183,13 +175,13 @@ async function analyzeBundle(name: string, metafile: string | Uint8Array): Promi
   }
 }
 
-function formatBytes(bytes: number): string {
+function formatBytes(bytes) {
   if (bytes < 1024) return `${bytes} B`;
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
-const mode: "development" | "production" = isProduction
+const mode = isProduction
   ? "production"
   : "development";
 

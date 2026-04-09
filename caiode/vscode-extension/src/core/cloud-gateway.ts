@@ -215,7 +215,7 @@ export class CloudGateway implements AsyncDisposable {
     await this.request("POST", "/errors/report", error).catch(() => {});
   }
 
-  submitFeedback(feedback: {
+  async submitFeedback(feedback: {
     type: "bug" | "feature" | "general";
     subject: string;
     body: string;

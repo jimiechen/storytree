@@ -188,11 +188,11 @@ describe("T-SEC-003: Anti-Reverse Engineering Protection", () => {
   describe("Suite D: Self-Defending Code Injection", () => {
     it("should inject self-defending code when enabled", () => {
       const source = "console.log('hello');";
-      const protected = obfuscator.addSelfDefendingCode(source);
+      const defendedCode = obfuscator.addSelfDefendingCode(source);
 
-      expect(protected).toContain("(function(){");
-      expect(protected).toContain("debugger");
-      expect(protected).toContain("console.log('hello');");
+      expect(defendedCode).toContain("(function(){");
+      expect(defendedCode).toContain("debugger");
+      expect(defendedCode).toContain("console.log('hello');");
     });
 
     it("should NOT inject when selfDefending is disabled", () => {
@@ -215,10 +215,10 @@ describe("T-SEC-003: Anti-Reverse Engineering Protection", () => {
   describe("Suite E: Debug Protection Injection", () => {
     it("should inject debug protection when enabled", () => {
       const source = "function main() {}";
-      const protected = obfuscator.addDebugProtection(source);
+      const defendedCode = obfuscator.addDebugProtection(source);
 
-      expect(protected).toContain("debugger");
-      expect(protected).toContain("function main() {}");
+      expect(defendedCode).toContain("debugger");
+      expect(defendedCode).toContain("function main() {}");
     });
 
     it("should NOT inject when debugProtection is disabled", () => {

@@ -67,7 +67,7 @@ describe("TC-SEC-AUDIT: Security Audit Checklist", () => {
       // Check webview HTML files for proper nonce usage
       const webviewFiles = globSync(join(extPath, "src/webview/*.ts"));
 
-      webviewFiles.forEach((file) => {
+      webviewFiles.forEach((file: string) => {
         const content = readFileSync(file, "utf-8");
         // If script tag exists, it should use nonce
         if (content.includes("<script")) {
@@ -79,7 +79,7 @@ describe("TC-SEC-AUDIT: Security Audit Checklist", () => {
     it("should not load external resources", () => {
       const webviewFiles = globSync(join(extPath, "src/webview/*.ts"));
 
-      webviewFiles.forEach((file) => {
+      webviewFiles.forEach((file: string) => {
         const content = readFileSync(file, "utf-8");
         // Should not have external URLs
         expect(content).not.toMatch(/src="https?:\/\//);
@@ -98,7 +98,7 @@ describe("TC-SEC-AUDIT: Security Audit Checklist", () => {
         /api[_-]?key["']?\s*[:=]\s*["'][a-zA-Z0-9]{10,}/i,
       ];
 
-      srcFiles.forEach((file) => {
+      srcFiles.forEach((file: string) => {
         const content = readFileSync(file, "utf-8");
 
         apiKeyPatterns.forEach((pattern) => {
@@ -135,7 +135,7 @@ describe("TC-SEC-AUDIT: Security Audit Checklist", () => {
     it("should use parameterized queries", () => {
       const dbFiles = globSync(join(extPath, "src/core/*.ts"));
 
-      dbFiles.forEach((file) => {
+      dbFiles.forEach((file: string) => {
         const content = readFileSync(file, "utf-8");
 
         // Should not have string concatenation in SQL
@@ -172,7 +172,7 @@ describe("TC-SEC-AUDIT: Security Audit Checklist", () => {
     it("should escape HTML in webview content", () => {
       const webviewFiles = globSync(join(extPath, "src/webview/*.ts"));
 
-      webviewFiles.forEach((file) => {
+      webviewFiles.forEach((file: string) => {
         const content = readFileSync(file, "utf-8");
 
         // If rendering user content, should escape
@@ -199,7 +199,7 @@ describe("TC-SEC-AUDIT: Security Audit Checklist", () => {
       let innerHtmlCount = 0;
       let textContentCount = 0;
 
-      webviewFiles.forEach((file) => {
+      webviewFiles.forEach((file: string) => {
         const content = readFileSync(file, "utf-8");
         innerHtmlCount += (content.match(/innerHTML/g) || []).length;
         textContentCount += (content.match(/textContent/g) || []).length;

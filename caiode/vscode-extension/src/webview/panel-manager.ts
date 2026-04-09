@@ -51,6 +51,96 @@ export class WebviewPanelManager implements vscode.Disposable {
     console.log("[WebviewManager] Dashboard panel created");
   }
 
+  async toggleAIChat(): Promise<void> {
+    const aiChatPanel = vscode.window.createWebviewPanel(
+      "storytree.aiChat",
+      "StoryTree AI 对话",
+      vscode.ViewColumn.Two,
+      {
+        enableScripts: true,
+        retainContextWhenHidden: true,
+      }
+    );
+
+    const nonce = getNonce();
+    const { getAIChatPanelHtml } = await import("./ai-chat-panel");
+    aiChatPanel.webview.html = getAIChatPanelHtml({ nonce });
+
+    console.log("[WebviewManager] AI Chat panel opened");
+  }
+
+  async createNewProject(): Promise<void> {
+    const projectName = await vscode.window.showInputBox({
+      prompt: "输入新项目名称",
+      placeHolder: "例如：星际迷途",
+    });
+
+    if (!projectName) return;
+
+    try {
+      const response = await this.router.processMessage({
+        jsonrpc: "2.0",
+        id: Date.now().toString(),
+        action: "project.create",
+        payload: { name: projectName },
+      });
+
+      if (response?.status === "success") {
+        vscode.window.showInformationMessage(`项目 "${projectName}" 创建成功!`);
+        await this.refresh();
+      }
+    } catch (error) {
+      vscode.window.showErrorMessage(`创建项目失败: ${error}`);
+    }
+  }
+
+  async createNewChapter(): Promise<void> {
+    const chapterTitle = await vscode.window.showInputBox({
+      prompt: "输入新章节标题",
+      placeHolder: "例如：第一章 启程",
+    });
+
+    if (!chapterTitle) return;
+
+    try {
+      await this.router.processMessage({
+        jsonrpc: "2.0",
+        id: Date.now().toString(),
+        action: "chapter.create",
+        payload: { title: chapterTitle },
+      });
+
+      vscode.window.showInformationMessage(`章节 "${chapterTitle}" 创建成功!`);
+      await this.refresh();
+    } catch (error) {
+      vscode.window.showErrorMessage(`创建章节失败: ${error}`);
+    }
+  }
+
+  async showWordCount(): Promise<void> {
+    try {
+      const response = await this.router.processMessage({
+        jsonrpc: "2.0",
+        id: Date.now().toString(),
+        action: "system.healthCheck",
+        payload: {},
+      });
+
+      const mockStats = (response && response.status === "success" ? (response as { status: string; data: { mockStats?: Record<string, unknown> } }).data?.mockStats : {}) || {};
+      const projects = Number(mockStats.projects || 0);
+      const chapters = Number(mockStats.chapters || 0);
+
+      vscode.window.showInformationMessage(
+        `📊 字数统计:\n` +
+        `• 项目总数: ${projects}\n` +
+        `• 章节总数: ${chapters}\n` +
+        `• 总字数约: ${chapters * 1500} 字 (估算)`
+      );
+    } catch (error) {
+      vscode.window.showErrorMessage(`获取字数统计失败: ${error}`);
+    }
+  }
+
   async refresh(): Promise<void> {
     if (this.panel) {
       this.setupWebviewContent();

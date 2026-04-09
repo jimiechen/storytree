@@ -22,9 +22,7 @@
     "IDE"
   ],
   "activationEvents": [
-    "onCommand:storytree.openDashboard",
-    "onCommand:storytree.newProject",
-    "onView:storytreeExplorer"
+    "*"
   ],
   "main": "./dist/extension.js",
   "contributes": {
@@ -127,7 +125,12 @@
         "storytree.ai.provider": {
           "type": "string",
           "default": "openai",
-          "enum": ["openai", "anthropic", "ollama", "custom"],
+          "enum": [
+            "openai",
+            "anthropic",
+            "ollama",
+            "custom"
+          ],
           "description": "AI provider for story enhancement"
         },
         "storytree.ai.openai.apiKey": {
@@ -164,9 +167,12 @@
     "vscode:prepublish": "npm run build:prod"
   },
   "devDependencies": {
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/glob": "^8.1.0",
     "@types/node": "^20.10.0",
     "@types/vscode": "^1.85.0",
     "esbuild": "^0.19.0",
+    "glob": "^13.0.6",
     "typescript": "^5.3.0",
     "vitest": "^1.2.0"
   },

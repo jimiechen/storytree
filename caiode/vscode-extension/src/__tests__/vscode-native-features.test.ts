@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import * as vscode from "vscode";
 import { StatusBarManager } from "../core/status-bar-manager";
 import { CommandPaletteManager } from "../core/command-palette";
 import { ExternalFileSync } from "../core/external-file-sync";
@@ -344,7 +345,6 @@ describe("ExternalFileSync", () => {
       debounceMs: 30,
       onFileChanged: callback,
     });
-    (syncWithCallback as any)._onDidChange = sync._onDidChange;
 
     syncWithCallback.start();
     const uri = vscode.Uri.file("/test/changed.json");

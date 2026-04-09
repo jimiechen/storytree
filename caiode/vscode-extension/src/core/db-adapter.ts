@@ -38,7 +38,7 @@ class SQLiteAdapter implements DatabaseAdapter {
     return this.repo.getProjectById(id);
   }
 
-  createProject(data) {
+  createProject(data: { name: string; description?: string; genre?: string; status?: "draft" | "in_progress" | "completed" | "archived" }) {
     return this.repo.createProject(data);
   }
 
@@ -65,8 +65,8 @@ class SQLiteAdapter implements DatabaseAdapter {
     return this.repo.getCharacterById(id);
   }
 
-  createCharacter(data) {
-    return this.repo.createCharacter(data);
+  createCharacter(data: { project_id: string; name: string; role: "protagonist" | "antagonist" | "supporting" | "minor"; description?: string; traits?: string[] }) {
+    return this.repo.createCharacter(data as { project_id: string; name: string; role?: "protagonist" | "antagonist" | "supporting" | "minor"; description?: string; traits?: string[] });
   }
 
   getWorldSettingsByProject(projectId: string) {

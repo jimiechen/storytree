@@ -100,8 +100,7 @@ describe("TC-FE: Stitch UI E2E Tests", () => {
       mockPage.evaluate.mockResolvedValue("Name is required");
 
       const validationMessage = await mockPage.evaluate(() => {
-        // @ts-ignore
-        const input = document.querySelector('[data-testid="character-name-input"]');
+        const input = document.querySelector('[data-testid="character-name-input"]') as HTMLInputElement | null;
         return input?.validationMessage;
       });
 

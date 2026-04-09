@@ -41,7 +41,7 @@ export class StoryTreeTreeItem extends vscode.TreeItem {
   ) {
     super(node.label, node.collapsibleState);
     this.id = node.id;
-    this.iconPath = node.iconPath || new ThemeIcon("file");
+    this.iconPath = node.iconPath || new vscode.ThemeIcon("file");
     this.description = node.description;
     if ("tooltip" in node && node.tooltip) {
       this.tooltip = node.tooltip;
@@ -89,7 +89,7 @@ export class StoryTreeTreeViewProvider
 
   async getProjectItems(): Promise<StoryTreeTreeItem[]> {
     try {
-      const projectList = await this.repository.listProjects();
+      const projectList = await this.repository.getProjects();
       this.projects = projectList.map((p) => ({
         id: p.id,
         name: p.name,
@@ -103,7 +103,7 @@ export class StoryTreeTreeViewProvider
             label: p.name,
             type: "project",
             collapsibleState: vscode.TreeItemCollapsibleState.Expanded,
-            iconPath: new ThemeIcon("book"),
+            iconPath: new vscode.ThemeIcon("book"),
             description: undefined,
             tooltip: `${p.name}${p.description ? `\n${p.description}` : ""}`,
           };
@@ -118,11 +118,11 @@ export class StoryTreeTreeViewProvider
 
   async getChapterItems(projectId: string): Promise<StoryTreeTreeItem[]> {
     try {
-      const chapters = await this.repository.listChaptersByProjectId(projectId);
+      const chapters = await this.repository.getChaptersByProject(projectId);
 
       return chapters.map(
         (ch, index): StoryTreeTreeItem => {
-          const wc = ch.wordCount ?? ch.content?.length ?? 0;
+          const wc = ch.word_count ?? ch.content?.length ?? 0;
           const displayWc = wc > 1000 ? `${(wc / 1000).toFixed(1)}k` : String(wc);
           const node: TreeChapterNode = {
             id: `ch-${ch.id}`,
@@ -130,10 +130,10 @@ export class StoryTreeTreeViewProvider
             label: ch.title || `Chapter ${index + 1}`,
             type: "chapter",
             collapsibleState: vscode.TreeItemCollapsibleState.Collapsed,
-            iconPath: new ThemeIcon(ch.status === "completed" ? "check" : "file-code"),
+            iconPath: new vscode.ThemeIcon(ch.status === "final" ? "check" : "file-code"),
             description: `${displayWc}w`,
             wordCount: wc,
-            orderIndex: ch.orderIndex ?? index,
+            orderIndex: ch.order_num ?? index,
           };
           return new StoryTreeTreeItem(node);
         },
@@ -146,7 +146,7 @@ export class StoryTreeTreeViewProvider
 
   async getSceneItems(chapterNode: TreeChapterNode): Promise<StoryTreeTreeItem[]> {
     try {
-      const outlineNodes = await this.repository.listOutlineNodesByChapterId(
+      const outlineNodes = await this.repository.getOutlineNodesByChapterId(
         chapterNode.id.replace("ch-", ""),
       );
 
@@ -158,7 +158,7 @@ export class StoryTreeTreeViewProvider
             label: node.title || `Scene ${i + 1}`,
             type: "scene",
             collapsibleState: vscode.TreeItemCollapsibleState.None,
-            iconPath: new ThemeIcon(
+            iconPath: new vscode.ThemeIcon(
               node.type === "scene"
                 ? "list-ordered"
                 : node.type === "note"

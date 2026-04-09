@@ -15,7 +15,18 @@ const mockWebviewPanel = {
   dispose: vi.fn(),
 };
 
-const mockExtensionContext = {
+const mockExtensionContext: {
+  subscriptions: { dispose: () => void }[];
+  extensionPath: string;
+  extensionUri: vscode.Uri;
+  storageUri: vscode.Uri;
+  globalStorageUri: vscode.Uri;
+  logUri: vscode.Uri;
+  extensionMode: number;
+  globalState: { get: (key: string, defaultValue?: unknown) => unknown; update: (key: string, value: unknown) => Promise<void> };
+  workspaceState: { get: (key: string, defaultValue?: unknown) => unknown; update: (key: string, value: unknown) => Promise<void> };
+  secrets: { get: (key: string) => Promise<unknown>; store: (key: string, value: string) => Promise<void>; delete: (key: string) => Promise<void> };
+} = {
   subscriptions: [],
   extensionPath: "/test/extension",
   extensionUri: { fsPath: "/test/extension" } as vscode.Uri,
@@ -45,7 +56,12 @@ const mockCommands = {
 };
 
 const mockWindow = {
-  createWebviewPanel: vi.fn(() => mockWebviewPanel),
+  createWebviewPanel: vi.fn((
+    _viewType: string,
+    _title: string,
+    _showOptions: number | { viewColumn: number; preserveFocus?: boolean },
+    _options?: { enableScripts?: boolean; retainContextWhenHidden?: boolean; localResourceRoots?: { fsPath: string }[] }
+  ) => mockWebviewPanel),
   showErrorMessage: vi.fn(),
   showInformationMessage: vi.fn(),
 };

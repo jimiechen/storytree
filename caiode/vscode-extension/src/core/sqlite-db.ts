@@ -1,3 +1,4 @@
+import * as fs from "fs";
 import * as path from "path";
 
 export interface DatabaseConfig {
@@ -37,7 +38,9 @@ export class SQLiteDatabaseManager implements AsyncDisposable {
 
     await fs.promises.mkdir(dirPath, { recursive: true });
 
-    this.db = new Database(this.config.dbPath);
+    this.db = new (Database as new (path: string) => unknown)(this.config.dbPath);
+
+    this.initialized = true;
 
     this.pragma("journal_mode = " + (this.config.journalMode || "WAL"));
 
@@ -46,7 +49,6 @@ export class SQLiteDatabaseManager implements AsyncDisposable {
     }
 
     this.runMigrations();
-    this.initialized = true;
   }
 
   private async importDriver(): Promise<unknown> {
@@ -74,9 +76,17 @@ export class SQLiteDatabaseManager implements AsyncDisposable {
     return db.pragma(sql);
   }
 
-  prepare(sql: string): unknown {
+  prepare(sql: string): {
+    run: (...args: unknown[]) => { changes: number; lastInsertRowid: number };
+    get: <T>(...args: unknown[]) => T | undefined;
+    all: <T>(...args: unknown[]) => T[];
+  } {
     const db = this.getDb() as {
-      prepare: (sql: string) => unknown;
+      prepare: (sql: string) => {
+        run: (...args: unknown[]) => { changes: number; lastInsertRowid: number };
+        get: <T>(...args: unknown[]) => T | undefined;
+        all: <T>(...args: unknown[]) => T[];
+      };
     };
     return db.prepare(sql);
   }

@@ -88,7 +88,7 @@ describe("StreamProcessor", () => {
         created: 0,
         model: "m",
         content: `${i}`,
-        finishReason: null as const,
+        finishReason: null as unknown as "stop" | "length" | "tool_calls" | null,
       }));
 
       const provider = createMockProvider(chunks);

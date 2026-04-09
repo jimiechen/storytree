@@ -23,9 +23,14 @@ describe("T-DB-001: SQLite Local Database", () => {
 
   beforeEach(async () => {
     dbManager = new SQLiteDatabaseManager({ dbPath: testDbPath });
-    await dbManager.initialize();
-    repo = new StoryTreeRepository(dbManager);
-    dbManager.seedSampleData();
+    try {
+      await dbManager.initialize();
+      repo = new StoryTreeRepository(dbManager);
+      dbManager.seedSampleData();
+    } catch (err) {
+      console.error("[sqlite-db.test] Initialize failed:", err);
+      throw err;
+    }
   });
 
   afterEach(() => {

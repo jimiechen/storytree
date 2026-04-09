@@ -237,36 +237,36 @@ describe("PromptTemplateEngine", () => {
   describe("Built-in Template Content Verification", () => {
     it("chapter_continue should contain key sections", () => {
       const tpl = PromptTemplateEngine.get("chapter_continue")!;
-      expect(tpl.userPrompt).toContain("Project Information");
-      expect(tpl.userPrompt).toContain("Current Chapter");
-      expect(tpl.userPrompt).toContain("Existing Content");
-      expect(tpl.systemPrompt).toContain("fiction writer");
+      expect(tpl.userTemplate).toContain("Project Information");
+      expect(tpl.userTemplate).toContain("Current Chapter");
+      expect(tpl.userTemplate).toContain("Existing Content");
+      expect(tpl.systemTemplate).toContain("fiction writer");
     });
 
     it("character_dialogue should include character and scene fields", () => {
       const tpl = PromptTemplateEngine.get("character_dialogue")!;
-      expect(tpl.userPrompt).toContain("Characters Involved");
-      expect(tpl.userPrompt).toContain("Scene Context");
-      expect(tpl.userPrompt).toContain("Conversation Topic");
+      expect(tpl.userTemplate).toContain("Characters Involved");
+      expect(tpl.userTemplate).toContain("Scene Context");
+      expect(tpl.userTemplate).toContain("Conversation Topic");
     });
 
     it("outline_expand should request chapter-level structure", () => {
       const tpl = PromptTemplateEngine.get("outline_expand")!;
-      expect(tpl.userPrompt).toContain("High-Level Outline");
-      expect(tpl.userPrompt).toContain("chapter-level structure");
-      expect(tpl.userPrompt).toContain("Word count estimate");
+      expect(tpl.userTemplate).toContain("High-Level Outline");
+      expect(tpl.userTemplate).toContain("chapter-level structure");
+      expect(tpl.userTemplate).toContain("Word count estimate");
     });
 
     it("text_polish should ask for minimal changes", () => {
       const tpl = PromptTemplateEngine.get("text_polish")!;
-      expect(tpl.userPrompt).toContain("polished version");
-      expect(tpl.userPrompt).toContain("minimal changes");
+      expect(tpl.userTemplate).toContain("polished version");
+      expect(tpl.userTemplate).toContain("minimal changes");
     });
 
     it("style_transfer should preserve factual content", () => {
       const tpl = PromptTemplateEngine.get("style_transfer")!;
-      expect(tpl.userPrompt).toContain("Target Style");
-      expect(tpl.userPrompt).toContain("maintain all factual content");
+      expect(tpl.userTemplate).toContain("Target Style");
+      expect(tpl.userTemplate).toContain("maintain all factual content");
     });
   });
 

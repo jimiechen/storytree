@@ -177,7 +177,7 @@ describe("WorkbenchPage HTML Generator", () => {
 
   describe("Auto-save Behavior", () => {
     it("should debounce saves at 500ms interval", () => {
-      const match = html.match(/setTimeout\(\(\) => \{/, "g");
+      const match = html.match(/setTimeout\(\(\) => \{/g);
       expect(match).not.toBeNull();
       const timeoutMatch = html.match(/500/g);
       expect(timeoutMatch).toBeTruthy();
@@ -210,7 +210,8 @@ describe("WorkbenchPage HTML Generator", () => {
 
   describe("XSS Prevention", () => {
     it("should use nonce-based script security", () => {
-      expect(html).toContain('nonce="${nonce}"');
+      expect(html).toContain('nonce="test-nonce-123"');
+      expect(html).toMatch(/<script\s+nonce="[^"]*"/);
     });
 
     it("should not contain any external script sources", () => {

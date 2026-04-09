@@ -112,6 +112,12 @@ export class IPCClient implements IRPCClient {
     { resolve: (value: unknown) => void; reject: (error: Error) => void }
   >();
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private pendingRequestsTyped = this.pendingRequests as Map<
+    RequestId,
+    { resolve: (value: any) => void; reject: (error: Error) => void }
+  >;
+
   constructor() {
     this.tryInitialize();
   }
@@ -135,10 +141,10 @@ export class IPCClient implements IRPCClient {
       const response = event.data as IPCResponse<unknown>;
       if (!response || !response.id) return;
 
-      const pending = this.pendingRequests.get(response.id);
+      const pending = this.pendingRequestsTyped.get(response.id);
       if (!pending) return;
 
-      this.pendingRequests.delete(response.id);
+      this.pendingRequestsTyped.delete(response.id);
 
       if (response.status === "error") {
         pending.reject(
@@ -174,7 +180,7 @@ export class IPCClient implements IRPCClient {
     });
 
     return new Promise<T>((resolve, reject) => {
-      this.pendingRequests.set(requestId, { resolve, reject });
+      this.pendingRequestsTyped.set(requestId, { resolve, reject });
 
       // Set timeout for request
       setTimeout(() => {

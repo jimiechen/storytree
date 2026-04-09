@@ -4,6 +4,7 @@ import {
   isNoopProvider,
   NoopProvider,
   type AIConfig,
+  type ProviderType,
 } from "../core/ai/provider-factory";
 
 describe("NoopProvider", () => {
@@ -197,6 +198,7 @@ describe("createLLMProvider (Factory)", () => {
         provider: "custom",
         custom: {
           baseUrl: "https://local-server/v1",
+          apiKey: "",
           defaultModel: "local-model",
         },
       };

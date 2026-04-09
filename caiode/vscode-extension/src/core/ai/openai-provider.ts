@@ -172,7 +172,7 @@ export class OpenAIProvider implements LLMProvider {
         throw new Error("OpenAI API returned no stream body");
       }
 
-      return await this.processSSEStream(response.body, onChunk);
+      return await this.processSSEStream(response.body, onChunk, options.model);
     } finally {
       clearTimeout(timeout);
     }
@@ -239,12 +239,13 @@ export class OpenAIProvider implements LLMProvider {
   private async processSSEStream(
     body: ReadableStream<Uint8Array>,
     onChunk: StreamCallback,
+    defaultModel: string,
   ): Promise<ChatCompletionResult> {
     const reader = body.getReader();
     const decoder = new TextDecoder();
     let id = "";
     let created = 0;
-    let model = options.model;
+    let model = defaultModel;
     let fullContent = "";
     let finishReason: StreamChunk["finishReason"] = null;
     let usage: TokenUsage | undefined;
@@ -274,7 +275,7 @@ export class OpenAIProvider implements LLMProvider {
                 delta: { role?: string; content?: string };
                 finish_reason: string | null;
               }>;
-              usage?: TokenUsage;
+              usage?: { prompt_tokens: number; completion_tokens: number; total_tokens: number };
             };
 
             id = parsed.id ?? id;

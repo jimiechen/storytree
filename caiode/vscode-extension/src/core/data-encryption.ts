@@ -39,7 +39,7 @@ export class DataEncryption {
   }
 
   static generateKey(): string {
-    return crypto.randomBytes(this.DEFAULT_ENCRYPTION_CONFIG.keyLength).toString("hex");
+    return crypto.randomBytes(DEFAULT_ENCRYPTION_CONFIG.keyLength).toString("hex");
   }
 
   static generateKeyBuffer(): Buffer {
@@ -52,8 +52,8 @@ export class DataEncryption {
       this.config.algorithm,
       this.masterKey,
       iv,
-      { authTagLength: this.config.tagLength }
-    );
+      { authTagLength: this.config.tagLength } as crypto.CipherGCMOptions
+    ) as crypto.CipherGCM;
 
     if (aad) cipher.setAAD(Buffer.from(aad, "utf8"));
 
@@ -78,8 +78,8 @@ export class DataEncryption {
       this.config.algorithm,
       this.masterKey,
       iv,
-      { authTagLength: this.config.tagLength }
-    );
+      { authTagLength: this.config.tagLength } as crypto.CipherGCMOptions
+    ) as crypto.DecipherGCM;
 
     if (payload.authData) {
       decipher.setAAD(Buffer.from(payload.authData, "utf8"));

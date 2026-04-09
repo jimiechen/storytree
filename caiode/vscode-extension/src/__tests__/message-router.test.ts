@@ -12,13 +12,13 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { MessageRouter } from "../core/message-router";
 import type {
-  IPCRequest,
   ActionHandler,
   BeforeMiddleware,
   AfterMiddleware,
   RouterContext,
 } from "../core/message-router";
-import type { ErrorCode } from "../types/ipc-protocol";
+import type { IPCRequest } from "../types/ipc-protocol";
+import { ErrorCode } from "../types/ipc-protocol";
 
 // ============================================================
 // Test Helpers
@@ -289,7 +289,7 @@ describe("MessageRouter Core Tests", () => {
 
       router.registerRoutes({
         "action.1": handler1,
-        "action.2": { handler: handler2, description: "Second action" },
+        "action.2": { handler: handler2, options: { description: "Second action" } },
       });
 
       expect(router.hasHandler("action.1")).toBe(true);

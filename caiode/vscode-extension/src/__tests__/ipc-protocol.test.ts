@@ -90,8 +90,9 @@ describe("TC-IPC: IPC Protocol Design Tests", () => {
       expect(parsed.jsonrpc).toBe("2.0");
       expect(parsed.id).toBe("req-001");
       expect(parsed.status).toBe("success");
-      expect(parsed.data.projects).toHaveLength(1);
-      expect(parsed.data.total).toBe(1);
+      const data = parsed.data as { projects: unknown[]; total: number };
+      expect(data.projects).toHaveLength(1);
+      expect(data.total).toBe(1);
       expect(parsed.timestamp).toBe("2026-04-07T10:30:05Z");
       expect(parsed.durationMs).toBe(42);
     });
@@ -112,7 +113,7 @@ describe("TC-IPC: IPC Protocol Design Tests", () => {
       const successResponse = createSuccessResponse("req-001", { result: "ok" });
       const errorResponse = createErrorResponse(
         "req-002",
-        ErrorCode.NOT_FOUND,
+        ErrorCode.PROJECT_NOT_FOUND,
         "Not found"
       );
 
@@ -203,7 +204,7 @@ describe("TC-IPC: IPC Protocol Design Tests", () => {
       const successResponse = createSuccessResponse("req-001", { result: "ok" });
       const errorResponse = createErrorResponse(
         "req-002",
-        ErrorCode.NOT_FOUND,
+        ErrorCode.PROJECT_NOT_FOUND,
         "Not found"
       );
 

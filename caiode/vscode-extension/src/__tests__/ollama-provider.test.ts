@@ -44,6 +44,7 @@ function mockStreamBody(chunks: string[]): ReadableStream<Uint8Array> {
 describe("OllamaProvider", () => {
   beforeEach(() => {
     vi.restoreAllMocks();
+    vi.stubGlobal("fetch", vi.fn());
   });
 
   describe("Constructor & Configuration", () => {
@@ -59,26 +60,26 @@ describe("OllamaProvider", () => {
 
     it("should use default baseUrl localhost:11434", () => {
       const provider = createProvider();
-      expect((provider as { baseUrl: string }).baseUrl).toBe(
+      expect((provider as unknown as { baseUrl: string }).baseUrl).toBe(
         "http://localhost:11434",
       );
     });
 
     it("should use custom baseUrl when provided", () => {
       const provider = createProvider({ baseUrl: "http://192.168.1.100:11434" });
-      expect((provider as { baseUrl: string }).baseUrl).toBe(
+      expect((provider as unknown as { baseUrl: string }).baseUrl).toBe(
         "http://192.168.1.100:11434",
       );
     });
 
     it("should default timeout to 120000ms (longer for local LLM)", () => {
       const provider = createProvider();
-      expect((provider as { timeoutMs: number }).timeoutMs).toBe(120_000);
+      expect((provider as unknown as { timeoutMs: number }).timeoutMs).toBe(120_000);
     });
 
     it("should accept custom timeout", () => {
       const provider = createProvider({ timeoutMs: 60_000 });
-      expect((provider as { timeoutMs: number }).timeoutMs).toBe(60_000);
+      expect((provider as unknown as { timeoutMs: number }).timeoutMs).toBe(60_000);
     });
 
     it("dispose should be a no-op", () => {

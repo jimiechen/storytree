@@ -10,6 +10,7 @@
  */
 
 import { describe, it, expect, beforeEach, vi } from "vitest";
+import type * as vscode from "vscode";
 import {
   SECRET_KEYS,
   SECRET_REGISTRY,

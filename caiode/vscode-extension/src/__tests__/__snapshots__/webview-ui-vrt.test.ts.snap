@@ -1,13 +1,9 @@
-/**
- * Webview HTML Generator
- *
- * Generates HTML content for VS Code Webview panels.
- * Each "page" is a self-contained view that communicates
- * with the extension host via IPC (postMessage/acquireVsCodeApi).
- */
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-export function getDashboardHtml(nonce: string): string {
-  return /* html */ `
+exports[`T-FE-002: Webview UI & VRT Testing > Suite K: VRT Baseline - Dashboard Full Render > should match card grid VRT baseline > project-card-grid 1`] = `"<div class="card-grid">' + renderProjectCards(projects) + '</div>"`;
+
+exports[`T-FE-002: Webview UI & VRT Testing > Suite K: VRT Baseline - Dashboard Full Render > should match dashboard VRT baseline snapshot > dashboard-full-html 1`] = `
+"
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -145,7 +141,7 @@ export function getDashboardHtml(nonce: string): string {
 <body>
   <div id="app"></div>
 
-  <script nonce="${nonce}">
+  <script nonce="test-nonce-12345">
     (function() {
       const vscode = acquireVsCodeApi();
       let currentPage = 'dashboard';
@@ -218,7 +214,7 @@ export function getDashboardHtml(nonce: string): string {
               '</div>' +
               '<h2 class="section-title">我的项目</h2>' +
               '<div class="card-grid">' + renderProjectCards(projects) + '</div>' +
-              '<div style="margin-top:24px;text-align:center"><button class="btn-primary" onclick="alert(\'创建功能即将上线\')">+ 创建新项目</button></div>' +
+              '<div style="margin-top:24px;text-align:center"><button class="btn-primary" onclick="alert('创建功能即将上线')">+ 创建新项目</button></div>' +
             '</div>';
           renderNav();
         } catch(e) { app.innerHTML = renderNavHtml() + '<div class="error-state">加载失败: ' + e.message + '</div>'; }
@@ -368,9 +364,213 @@ export function getDashboardHtml(nonce: string): string {
       }
 
       window.navigate = navigate;
-      navigate('dashboard');
+      window.addEventListener('load', function() { navigate('dashboard'); });
     })();
   </script>
 </body>
-</html>`;
-}
+</html>"
+`;
+
+exports[`T-FE-002: Webview UI & VRT Testing > Suite K: VRT Baseline - Dashboard Full Render > should match navigation bar VRT baseline > navigation-bar 1`] = `
+"<div class="nav-bar">' +
+          tabs.map(function(t) {
+            return '<button class="nav-tab' + (currentPage === t.id ? ' active' : '') + '" onclick="navigate(\\'' + t.id + '\\')">' +
+              t.icon + ' ' + t.label + '</button>';
+          }).join('') +
+          '</div>"
+`;
+
+exports[`T-FE-002: Webview UI & VRT Testing > Suite K: VRT Baseline - Dashboard Full Render > should match stats grid VRT baseline > stats-grid 1`] = `
+"<div class="stats-grid">' +
+                renderStatCard('小说项目', stats.projects || 0, '📚') +
+                renderStatCard('章节数量', stats.chapters || 0, '📖') +
+                renderStatCard('角色数量', stats.characters || 0, '👤') +
+                renderStatCard('世界观设定', stats.worldSettings || 0, '🌍') +
+              '</div>"
+`;
+
+exports[`T-FE-002: Webview UI & VRT Testing > Suite L: VRT Baseline - Characters Page > should match character table VRT baseline > character-table 1`] = `
+"<table><thead><tr><th>名称</th><th>类型</th><th>描述</th><th>特征</th></tr></thead>' +
+              '<tbody id="char-tbody">' + characters.map(renderCharacterRow).join('') + '</tbody></table>"
+`;
+
+exports[`T-FE-002: Webview UI & VRT Testing > Suite M: VRT Baseline - Outline Page > should match outline list VRT baseline > outline-list 1`] = `
+"<div id="outline-list">' + chapters.map(function(ch, i) {
+                    return '<div class="outline-item" data-index="' + i + '" onclick="selectChapter(' + i + ')">' +
+                      '<span class="outline-order">' + ch.order + '</span>' +
+                      '<span>' + esc(ch.title) + '</span>' +
+                      '<span style="float:right;font-size:11px;opacity:0.45">' + (ch.wordCount || 0) + '字</span>' +
+                    '</div>';
+                  }).join('') + '</div>' +
+                '</div>' +
+                '<div style="width:320px;border-left:1px solid var(--border);padding-left:16px" id="outline-detail">' +
+                  '<div class="empty-state">选择章节查看详情</div>' +
+                '</div>' +
+              '</div>' +
+            '</div>';
+          window._allChapters = chapters;
+          renderNav();
+        } catch(e) { app.innerHTML = renderNavHtml() + '<div class="error-state">加载失败: ' + e.message + '</div>'; }
+      }
+
+      function selectChapter(idx) {
+        var ch = window._allChapters[idx];
+        if (!ch) return;
+        document.querySelectorAll('.outline-item').forEach(function(el, i) {
+          el.classList.toggle('active', i === idx);
+        });
+        var statusMap = { outline: '草稿', draft: '写作中', review: '审阅中', final: '已定稿' };
+        document.getElementById('outline-detail').innerHTML =
+          '<h3 style="font-size:15px;margin-bottom:8px">' + esc(ch.title) + '</h3>' +
+          '<div style="display:flex;gap:12px;margin-bottom:12px;font-size:11px">' +
+            '<span class="status-tag" style="background:#89d18522;color:#89d185">' + (statusMap[ch.status] || ch.status) + '</span>' +
+            '<span>' + (ch.wordCount || 0) + ' 字</span>' +
+            '<span>顺序: ' + ch.order + '</span>' +
+          '</div>' +
+          (ch.content ? '<p style="font-size:13px;opacity:0.75;line-height:1.7">' + esc(ch.content.substring(0, 500)) + (ch.content.length > 500 ? '...' : '') + '</p>' : '');
+      }
+
+      async function loadWorldSettings() {
+        var app = document.getElementById('app');
+        try {
+          var res = await sendMessage('worldsetting.list', {});
+          var settings = res?.worldSettings || [];
+          app.innerHTML =
+            renderNavHtml() +
+            '<div class="app-container">' +
+              '<div class="header-row"><h1 class="header-title">🌍 世界观设定</h1></div>' +
+              '<div class="search-bar"><input class="search-input" type="text" placeholder="搜索设定..." id="ws-search" oninput="filterWorldSettings()"></div>' +
+              '<div class="card-grid">' + settings.map(renderWorldSettingCard).join('') + '</div>' +
+              (settings.length === 0 ? '<div class="empty-state">暂无世界观设定</div>' : '') +
+            '</div>';
+          window._allWorldSettings = settings;
+          renderNav();
+        } catch(e) { app.innerHTML = renderNavHtml() + '<div class="error-state">加载失败: ' + e.message + '</div>'; }
+      }
+
+      function filterWorldSettings() {
+        var q = (document.getElementById('ws-search').value || '').toLowerCase();
+        var cards = document.querySelectorAll('.ws-card');
+        window._allWorldSettings.forEach(function(s, i) {
+          if (cards[i]) cards[i].style.display = (s.name.toLowerCase().indexOf(q) !== -1 || (s.description||'').toLowerCase().indexOf(q) !== -1) ? '' : 'none';
+        });
+      }
+
+      function renderNavHtml() { return '<div id="nav"></div>'; }
+
+      function renderStatCard(label, value, icon) {
+        return '<div class="stat-card"><div class="stat-icon">' + icon + '</div><div class="stat-value">' + value + '</div><div class="stat-label">' + label + '</div></div>"
+`;
+
+exports[`T-FE-002: Webview UI & VRT Testing > Suite N: VRT Baseline - World Settings Page > should match world settings card grid VRT baseline > world-settings-cards 1`] = `
+"class="card-grid">' + renderProjectCards(projects) + '</div>' +
+              '<div style="margin-top:24px;text-align:center"><button class="btn-primary" onclick="alert('创建功能即将上线')">+ 创建新项目</button></div>' +
+            '</div>';
+          renderNav();
+        } catch(e) { app.innerHTML = renderNavHtml() + '<div class="error-state">加载失败: ' + e.message + '</div>'; }
+      }
+
+      async function loadCharacters() {
+        var app = document.getElementById('app');
+        try {
+          var res = await sendMessage('character.list', {});
+          var characters = res?.characters || [];
+          app.innerHTML =
+            renderNavHtml() +
+            '<div class="app-container">' +
+              '<div class="header-row"><h1 class="header-title">👥 角色管理</h1></div>' +
+              '<div class="search-bar"><input class="search-input" type="text" placeholder="搜索角色名称..." id="char-search" oninput="filterCharacters()"></div>' +
+              '<table><thead><tr><th>名称</th><th>类型</th><th>描述</th><th>特征</th></tr></thead>' +
+              '<tbody id="char-tbody">' + characters.map(renderCharacterRow).join('') + '</tbody></table>' +
+              (characters.length === 0 ? '<div class="empty-state">暂无角色数据</div>' : '') +
+            '</div>';
+          window._allCharacters = characters;
+          renderNav();
+        } catch(e) { app.innerHTML = renderNavHtml() + '<div class="error-state">加载失败: ' + e.message + '</div>'; }
+      }
+
+      function filterCharacters() {
+        var q = (document.getElementById('char-search').value || '').toLowerCase();
+        var rows = document.querySelectorAll('#char-tbody tr');
+        window._allCharacters.forEach(function(c, i) {
+          if (rows[i]) rows[i].style.display = (c.name.toLowerCase().indexOf(q) !== -1 || (c.description||'').toLowerCase().indexOf(q) !== -1) ? '' : 'none';
+        });
+      }
+
+      async function loadOutline() {
+        var app = document.getElementById('app');
+        try {
+          var res = await sendMessage('chapter.list', {});
+          var chapters = res?.chapters || [];
+          app.innerHTML =
+            renderNavHtml() +
+            '<div class="app-container">' +
+              '<div class="header-row"><h1 class="header-title">📖 大纲编辑</h1></div>' +
+              '<div style="display:flex;gap:20px">' +
+                '<div style="flex:1;min-width:0"><h3 style="font-size:14px;margin-bottom:12px">章节列表 (' + chapters.length + ')</h3>' +
+                  '<div id="outline-list">' + chapters.map(function(ch, i) {
+                    return '<div class="outline-item" data-index="' + i + '" onclick="selectChapter(' + i + ')">' +
+                      '<span class="outline-order">' + ch.order + '</span>' +
+                      '<span>' + esc(ch.title) + '</span>' +
+                      '<span style="float:right;font-size:11px;opacity:0.45">' + (ch.wordCount || 0) + '字</span>' +
+                    '</div>';
+                  }).join('') + '</div>' +
+                '</div>' +
+                '<div style="width:320px;border-left:1px solid var(--border);padding-left:16px" id="outline-detail">' +
+                  '<div class="empty-state">选择章节查看详情</div>' +
+                '</div>' +
+              '</div>' +
+            '</div>';
+          window._allChapters = chapters;
+          renderNav();
+        } catch(e) { app.innerHTML = renderNavHtml() + '<div class="error-state">加载失败: ' + e.message + '</div>'; }
+      }
+
+      function selectChapter(idx) {
+        var ch = window._allChapters[idx];
+        if (!ch) return;
+        document.querySelectorAll('.outline-item').forEach(function(el, i) {
+          el.classList.toggle('active', i === idx);
+        });
+        var statusMap = { outline: '草稿', draft: '写作中', review: '审阅中', final: '已定稿' };
+        document.getElementById('outline-detail').innerHTML =
+          '<h3 style="font-size:15px;margin-bottom:8px">' + esc(ch.title) + '</h3>' +
+          '<div style="display:flex;gap:12px;margin-bottom:12px;font-size:11px">' +
+            '<span class="status-tag" style="background:#89d18522;color:#89d185">' + (statusMap[ch.status] || ch.status) + '</span>' +
+            '<span>' + (ch.wordCount || 0) + ' 字</span>' +
+            '<span>顺序: ' + ch.order + '</span>' +
+          '</div>' +
+          (ch.content ? '<p style="font-size:13px;opacity:0.75;line-height:1.7">' + esc(ch.content.substring(0, 500)) + (ch.content.length > 500 ? '...' : '') + '</p>' : '');
+      }
+
+      async function loadWorldSettings() {
+        var app = document.getElementById('app');
+        try {
+          var res = await sendMessage('worldsetting.list', {});
+          var settings = res?.worldSettings || [];
+          app.innerHTML =
+            renderNavHtml() +
+            '<div class="app-container">' +
+              '<div class="header-row"><h1 class="header-title">🌍 世界观设定</h1></div>' +
+              '<div class="search-bar"><input class="search-input" type="text" placeholder="搜索设定..." id="ws-search" oninput="filterWorldSettings()"></div>' +
+              '<div class="card-grid">' + settings.map(renderWorldSettingCard).join('') + '</div>' +
+              (settings.length === 0 ? '<div class="empty-state">暂无世界观设定</div>' : '') +
+            '</div>';
+          window._allWorldSettings = settings;
+          renderNav();
+        } catch(e) { app.innerHTML = renderNavHtml() + '<div class="error-state">加载失败: ' + e.message + '</div>'; }
+      }
+
+      function filterWorldSettings() {
+        var q = (document.getElementById('ws-search').value || '').toLowerCase();
+        var cards = document.querySelectorAll('.ws-card');
+        window._allWorldSettings.forEach(function(s, i) {
+          if (cards[i]) cards[i].style.display = (s.name.toLowerCase().indexOf(q) !== -1 || (s.description||'').toLowerCase().indexOf(q) !== -1) ? '' : 'none';
+        });
+      }
+
+      function renderNavHtml() { return '<div id="nav"></div>'; }
+
+      function renderStatCard(label, value, icon) {
+        return '<div class="stat-card"><div class="stat-icon">' + icon + '</div><div class="stat-value">' + value + '</div><div class="stat-label">' + label + '</div></div>"
+`;

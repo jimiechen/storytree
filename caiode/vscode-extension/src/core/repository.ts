@@ -266,6 +266,13 @@ export class StoryTreeRepository {
     );
   }
 
+  getOutlineNodesByChapterId(chapterId: string): OutlineNode[] {
+    return this.db.all<OutlineNode>(
+      "SELECT * FROM outline_nodes WHERE parent_id = ? AND type = 'scene' ORDER BY order_num ASC",
+      [chapterId]
+    );
+  }
+
   search(query: string): Array<{ type: string; item: unknown }> {
     const likePattern = `%${query}%`;
     const results: Array<{ type: string; item: unknown }> = [];

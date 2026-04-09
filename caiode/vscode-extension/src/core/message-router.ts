@@ -273,8 +273,8 @@ export class MessageRouter {
       this.emit({ event: RouterEvent.REQUEST_RECEIVED, request, durationMs: 0 });
 
       if (this.isNotification(request)) {
-        await this.handleNotification(request as IPCNotification, context);
-        return createSuccessResponse(null, null as unknown); // No response expected
+        await this.handleNotification(request as unknown as IPCNotification, context);
+        return createSuccessResponse("null", null as unknown); // No response expected
       }
 
       const response = await this.processRequest(request, context);

@@ -449,7 +449,8 @@ function stopGeneration() {
   updateAIStatus("online");
 }
 function openSettings() { if (vscode) { vscode.postMessage({ type: "navigation.navigate", payload: { page: "settings" } }); } }
-document.addEventListener("DOMContentLoaded", function() {
+
+function initChatPanel() {
   const chatInput = document.getElementById("chatInput");
   const sendBtn = document.getElementById("sendBtn");
   const stopBtn = document.getElementById("stopBtn");
@@ -529,7 +530,13 @@ document.addEventListener("DOMContentLoaded", function() {
   updateEmptyState();
   updateAIStatus("online");
   if (vscode) { vscode.postMessage({ type: "ai.ready", payload: {} }); }
-});
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initChatPanel);
+} else {
+  initChatPanel();
+}
 })();`;
 }
 

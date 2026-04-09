@@ -12,11 +12,14 @@
  */
 
 import { describe, it, expect, beforeEach } from "vitest";
+import * as crypto from "crypto";
+import * as fs from "fs";
 import {
   DataEncryption,
   createEncryption,
 } from "../core/data-encryption";
-import { EncryptedDatabase } from "../core/encrypted-db";
+import { EncryptedDatabase as EncryptedDB } from "../core/encrypted-db";
+import type { EncryptedDatabase } from "../core/encrypted-db";
 import type { EncryptedPayload } from "../core/data-encryption";
 
 describe("T-SEC-004: Local Database Encryption", () => {
@@ -287,7 +290,7 @@ describe("T-SEC-004: Local Database Encryption", () => {
 
       const entries = db.entries<string>("default");
       expect(entries.length).toBe(2);
-      expect(entries.map((e) => e.key)).toEqual(expect.arrayContaining(["k1", "k2"]));
+      expect(entries.map((e: { key: string }) => e.key)).toEqual(expect.arrayContaining(["k1", "k2"]));
     });
 
     it("should clear individual tables", () => {

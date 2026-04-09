@@ -197,6 +197,49 @@ function registerCommands(): void {
     }
   );
 
+  const toggleAIChatCommand = vscode.commands.registerCommand(
+    "storytree.toggleAIChat",
+    async () => {
+      if (webviewManager) {
+        await webviewManager.toggleAIChat();
+      }
+    }
+  );
+
+  const newProjectCommand = vscode.commands.registerCommand(
+    "storytree.newProject",
+    async () => {
+      if (webviewManager) {
+        await webviewManager.createNewProject();
+      }
+    }
+  );
+
+  const newChapterCommand = vscode.commands.registerCommand(
+    "storytree.newChapter",
+    async () => {
+      if (webviewManager) {
+        await webviewManager.createNewChapter();
+      }
+    }
+  );
+
+  const showSettingsCommand = vscode.commands.registerCommand(
+    "storytree.showSettings",
+    async () => {
+      vscode.commands.executeCommand("workbench.action.openSettings", "storytree");
+    }
+  );
+
+  const wordCountCommand = vscode.commands.registerCommand(
+    "storytree.wordCount",
+    async () => {
+      if (webviewManager) {
+        await webviewManager.showWordCount();
+      }
+    }
+  );
+
   const refreshCommand = vscode.commands.registerCommand(
     "storytree.refresh",
     async () => {
@@ -206,7 +249,15 @@ function registerCommands(): void {
     }
   );
 
-  context.subscriptions.push(openDashboardCommand, refreshCommand);
+  extensionContext.subscriptions.push(
+    openDashboardCommand,
+    toggleAIChatCommand,
+    newProjectCommand,
+    newChapterCommand,
+    showSettingsCommand,
+    wordCountCommand,
+    refreshCommand
+  );
 
-  console.log("[StoryTree] Commands registered");
+  console.log("[StoryTree] All commands registered (7 total)");
 }

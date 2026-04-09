@@ -46,6 +46,7 @@ function mockStreamBody(chunks: string[]): ReadableStream<Uint8Array> {
 describe("AnthropicProvider", () => {
   beforeEach(() => {
     vi.restoreAllMocks();
+    vi.stubGlobal("fetch", vi.fn());
   });
 
   describe("Constructor & Configuration", () => {
@@ -63,14 +64,14 @@ describe("AnthropicProvider", () => {
 
     it("should use default baseUrl when not provided", () => {
       const provider = createProvider();
-      expect((provider as { baseUrl: string }).baseUrl).toBe(
+      expect((provider as unknown as { baseUrl: string }).baseUrl).toBe(
         "https://api.anthropic.com/v1",
       );
     });
 
     it("should use custom baseUrl when provided", () => {
       const provider = createProvider({ baseUrl: "https://custom.anthropic.com/v1" });
-      expect((provider as { baseUrl: string }).baseUrl).toBe(
+      expect((provider as unknown as { baseUrl: string }).baseUrl).toBe(
         "https://custom.anthropic.com/v1",
       );
     });
@@ -78,7 +79,7 @@ describe("AnthropicProvider", () => {
     it("should clear apiKey on dispose", () => {
       const provider = createProvider();
       provider.dispose();
-      expect((provider as { apiKey: string }).apiKey).toBe("");
+      expect((provider as unknown as { apiKey: string }).apiKey).toBe("");
     });
   });
 

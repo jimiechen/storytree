@@ -62,7 +62,7 @@ describe("TC-ADAPTER: RPC Adapter Environment Switching Tests", () => {
       const originalLocation = global.window?.location;
       // @ts-ignore
       global.window = {
-        location: { protocol: "vscode-webview:" },
+        location: { protocol: "vscode-webview:" } as unknown as Location,
         addEventListener: vi.fn(),
       };
 
@@ -133,7 +133,8 @@ describe("TC-ADAPTER: RPC Adapter Environment Switching Tests", () => {
       await client.request("project.list", { page: 1 });
 
       expect(fetchMock).toHaveBeenCalled();
-      const requestBody = JSON.parse(fetchMock.mock.calls[0][1].body);
+      const callArgs = fetchMock.mock.calls[0] as unknown as [string, { body?: string }];
+      const requestBody = JSON.parse(callArgs[1]?.body || "{}");
       expect(requestBody.id).toBeDefined();
       expect(requestBody.id).toMatch(/^req-\d+-/);
     });
@@ -157,7 +158,8 @@ describe("TC-ADAPTER: RPC Adapter Environment Switching Tests", () => {
       const client = new HTTPRPCClient("http://localhost:3000");
       await client.request("project.list", {});
 
-      const requestBody = JSON.parse(fetchMock.mock.calls[0][1].body);
+      const callArgs = fetchMock.mock.calls[0] as unknown as [string, { body?: string }];
+      const requestBody = JSON.parse(callArgs[1]?.body || "{}");
       expect(requestBody.timestamp).toBeDefined();
       expect(new Date(requestBody.timestamp!).toISOString()).toBe(
         requestBody.timestamp
@@ -264,7 +266,8 @@ describe("TC-ADAPTER: RPC Adapter Environment Switching Tests", () => {
       const client = new HTTPRPCClient("http://localhost:3000");
       await client.request("project.list", { page: 1 });
 
-      const requestBody = JSON.parse(fetchMock.mock.calls[0][1].body);
+      const callArgs = fetchMock.mock.calls[0] as unknown as [string, { body?: string }];
+      const requestBody = JSON.parse(callArgs[1]?.body || "{}");
       expect(requestBody.jsonrpc).toBe("2.0");
       expect(requestBody.action).toBe("project.list");
       expect(requestBody.payload).toEqual({ page: 1 });

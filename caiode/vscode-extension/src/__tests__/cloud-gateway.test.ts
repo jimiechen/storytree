@@ -28,6 +28,7 @@ describe("T-GW-001: Cloud Gateway - User Login & Authorization", () => {
       baseUrl: "https://api.storytree.dev",
       timeout: 5000,
       retryCount: 1,
+      retryDelay: 1000,
     });
   });
 
@@ -46,6 +47,7 @@ describe("T-GW-001: Cloud Gateway - User Login & Authorization", () => {
         baseUrl: "https://custom.api.example.com",
         timeout: 30000,
         retryCount: 5,
+        retryDelay: 1000,
         apiKey: "test-key-12345",
       });
 
@@ -156,10 +158,10 @@ describe("T-GW-001: Cloud Gateway - User Login & Authorization", () => {
       ).rejects.toThrow("Token verification failed");
     });
 
-    it("should throw when no refresh token available for refresh", () => {
-      expect(() => gateway.refreshAccessToken()).toThrow(
-        "No refresh token available"
-      );
+    it("should throw when no refresh token available for refresh", async () => {
+      await expect(
+        gateway.refreshAccessToken()
+      ).rejects.toThrow("No refresh token available");
     });
 
     it("should update token on successful refresh", async () => {
@@ -406,8 +408,7 @@ describe("T-GW-001: Cloud Gateway - User Login & Authorization", () => {
 
     it("should compare semantic versions correctly", async () => {
       vi.spyOn(gateway, "request" as never).mockImplementation(async (
-        _method: string,
-        path: string
+        ..._args: unknown[]
       ) => {
         return {
           success: true,

@@ -46,6 +46,7 @@ function mockStreamBody(chunks: string[]): ReadableStream<Uint8Array> {
 describe("OpenAIProvider", () => {
   beforeEach(() => {
     vi.restoreAllMocks();
+    vi.stubGlobal("fetch", vi.fn());
   });
 
   describe("Constructor & Configuration", () => {
@@ -64,37 +65,37 @@ describe("OpenAIProvider", () => {
 
     it("should use default baseUrl when not provided", () => {
       const provider = createProvider();
-      expect((provider as { baseUrl: string }).baseUrl).toBe(
+      expect((provider as unknown as { baseUrl: string }).baseUrl).toBe(
         "https://api.openai.com/v1",
       );
     });
 
     it("should use custom baseUrl when provided", () => {
       const provider = createProvider({ baseUrl: "https://custom.api/v1" });
-      expect((provider as { baseUrl: string }).baseUrl).toBe(
+      expect((provider as unknown as { baseUrl: string }).baseUrl).toBe(
         "https://custom.api/v1",
       );
     });
 
     it("should default timeout to 30000ms", () => {
       const provider = createProvider();
-      expect((provider as { timeoutMs: number }).timeoutMs).toBe(30_000);
+      expect((provider as unknown as { timeoutMs: number }).timeoutMs).toBe(30_000);
     });
 
     it("should accept custom timeout", () => {
       const provider = createProvider({ timeoutMs: 60_000 });
-      expect((provider as { timeoutMs: number }).timeoutMs).toBe(60_000);
+      expect((provider as unknown as { timeoutMs: number }).timeoutMs).toBe(60_000);
     });
 
     it("should default maxRetries to 3", () => {
       const provider = createProvider();
-      expect((provider as { maxRetries: number }).maxRetries).toBe(3);
+      expect((provider as unknown as { maxRetries: number }).maxRetries).toBe(3);
     });
 
     it("should clear apiKey on dispose", () => {
       const provider = createProvider();
       provider.dispose();
-      expect((provider as { apiKey: string }).apiKey).toBe("");
+      expect((provider as unknown as { apiKey: string }).apiKey).toBe("");
     });
   });
 
@@ -571,9 +572,9 @@ describe("OpenAIProvider", () => {
     it("should support abort via signal parameter", async () => {
       const controller = new AbortController();
 
-      vi.mocked(globalThis.fetch).mockImplementationOnce(async (_url, opts) => {
+      vi.mocked(globalThis.fetch).mockImplementationOnce(async (_url, _opts) => {
         controller.abort();
-        return new Response(null, { status: 200, body: mockStreamBody([]) });
+        return new Response(mockStreamBody([]), { status: 200 });
       });
 
       const provider = createProvider({ timeoutMs: 60_000 });
