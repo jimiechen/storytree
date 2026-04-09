@@ -17,10 +17,21 @@ import {
   CharacterAction,
   SystemAction,
 } from "./types/ipc-protocol";
+import {
+  GlobalModelRequestQueue,
+  type LLMRequest,
+  type LLMResponse,
+} from "./core/global-model-request-queue";
+import {
+  createQueueMonitor,
+  getQueueMonitor,
+} from "./core/queue-monitor";
 
 let webviewManager: WebviewPanelManager | undefined;
 let messageRouter: MessageRouter | undefined;
 let extensionContext: vscode.ExtensionContext | undefined;
+let globalModelQueue: GlobalModelRequestQueue | undefined;
+let queueMonitor: ReturnType<typeof createQueueMonitor> | undefined;
 
 export function activate(context: vscode.ExtensionContext): void {
   extensionContext = context;
@@ -30,6 +41,7 @@ export function activate(context: vscode.ExtensionContext): void {
   initializeMockData();
   initializeMessageRouter();
   initializeWebviewManager();
+  initializeGlobalModelQueue();
   registerCommands();
 
   console.log("[StoryTree] Extension activated successfully!");
@@ -37,6 +49,16 @@ export function activate(context: vscode.ExtensionContext): void {
 
 export function deactivate(): void {
   console.log("[StoryTree] Extension deactivating...");
+
+  if (queueMonitor) {
+    queueMonitor.dispose();
+    queueMonitor = undefined;
+  }
+
+  if (globalModelQueue) {
+    globalModelQueue.clear();
+    globalModelQueue = undefined;
+  }
 
   if (webviewManager) {
     webviewManager.dispose();
@@ -185,6 +207,38 @@ function initializeWebviewManager(): void {
   console.log("[StoryTree] Webview manager initialized");
 }
 
+function initializeGlobalModelQueue(): void {
+  const mockProvider = async (request: LLMRequest): Promise<LLMResponse> => {
+    await new Promise((resolve) => setTimeout(resolve, 500 + Math.random() * 1000));
+    return {
+      requestId: request.id,
+      content: `Mock response for: ${request.prompt.substring(0, 50)}...`,
+      model: request.model,
+      usage: {
+        promptTokens: 100,
+        completionTokens: 50,
+        totalTokens: 150,
+      },
+      durationMs: 500 + Math.random() * 1000,
+      timestamp: new Date().toISOString(),
+    };
+  };
+
+  globalModelQueue = new GlobalModelRequestQueue(mockProvider, {
+    maxConcurrent: 3,
+    defaultTimeout: 30000,
+    maxRetries: 2,
+  });
+
+  queueMonitor = createQueueMonitor(globalModelQueue, {
+    channelName: "Caiode Queue Monitor",
+    updateIntervalMs: 2000,
+    maxDisplayedRequests: 10,
+  });
+
+  console.log("[StoryTree] Global model queue initialized");
+}
+
 function registerCommands(): void {
   if (!extensionContext) return;
 
@@ -256,8 +310,14 @@ function registerCommands(): void {
     newChapterCommand,
     showSettingsCommand,
     wordCountCommand,
-    refreshCommand
+    refreshCommand,
+    vscode.commands.registerCommand("storytree.showQueueMonitor", () => {
+      const monitor = getQueueMonitor();
+      if (monitor) {
+        monitor.show();
+      }
+    })
   );
 
-  console.log("[StoryTree] All commands registered (7 total)");
+  console.log("[StoryTree] All commands registered (8 total)");
 }
