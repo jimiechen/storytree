@@ -185,7 +185,5 @@
     "typescript": "^5.3.0",
     "vitest": "^1.2.0"
   },
-  "dependencies": {
-    "better-sqlite3": "^9.4.0"
-  }
+  "dependencies": {}
 }

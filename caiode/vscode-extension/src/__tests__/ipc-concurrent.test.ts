@@ -58,7 +58,7 @@ describe("TC-EXT-HP-008: Concurrent IPC Requests", () => {
     expect(endTime - startTime).toBeLessThan(100); // Allow some overhead
 
     // Verify all responses are present
-    const successResults = results as IPCSuccessResponse<{ id?: number }>[];
+    const successResults = results as any[];
     const responseIds = successResults.map((r) => r.data.id).sort((a, b) => (a ?? 0) - (b ?? 0));
     expect(responseIds).toEqual([1, 2, 3, 4, 5]);
 
@@ -83,7 +83,7 @@ describe("TC-EXT-HP-008: Concurrent IPC Requests", () => {
     const results = await Promise.all(requests);
 
     // Each response should match its request
-    const successResults2 = results as IPCSuccessResponse<{ echo?: string }>[];
+    const successResults2 = results as any[];
     successResults2.forEach((result, index) => {
       expect(result.data.echo).toBe(values[index]);
     });

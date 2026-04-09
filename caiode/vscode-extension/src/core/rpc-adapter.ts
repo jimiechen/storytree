@@ -50,10 +50,7 @@ export class HTTPRPCClient implements IRPCClient {
     }
 
     const requestId = generateRequestId();
-    const request = createRequest(requestId, action, params, {
-      client: "http",
-      timestamp: Date.now(),
-    });
+    const request = createRequest(requestId, action, params);
 
     try {
       const response = await fetch(`${this.baseUrl}/api/rpc`, {
@@ -70,7 +67,7 @@ export class HTTPRPCClient implements IRPCClient {
         );
       }
 
-      const rpcResponse = (await response.json()) as IPCResponse<T>;
+      const rpcResponse = (await response.json()) as IPCResponse;
       return this.handleResponse(rpcResponse);
     } catch (error) {
       if (error instanceof RPCError) {
@@ -84,15 +81,15 @@ export class HTTPRPCClient implements IRPCClient {
     }
   }
 
-  private handleResponse<T>(response: IPCResponse<T>): T {
+  private handleResponse<T>(response: IPCResponse): T {
     if (response.status === "error") {
       throw new RPCError(
-        response.error.code,
-        response.error.message,
-        response.error.data
+        response.error?.code || ErrorCode.INTERNAL_ERROR,
+        response.error?.message || "Unknown error",
+        response.error
       );
     }
-    return response.data;
+    return response.data as T;
   }
 
   dispose(): void {
@@ -138,7 +135,7 @@ export class IPCClient implements IRPCClient {
     if (typeof window === "undefined") return;
 
     window.addEventListener("message", (event) => {
-      const response = event.data as IPCResponse<unknown>;
+      const response = event.data as IPCResponse;
       if (!response || !response.id) return;
 
       const pending = this.pendingRequestsTyped.get(response.id);
@@ -149,9 +146,9 @@ export class IPCClient implements IRPCClient {
       if (response.status === "error") {
         pending.reject(
           new RPCError(
-            response.error.code,
-            response.error.message,
-            response.error.data
+            response.error?.code || ErrorCode.INTERNAL_ERROR,
+            response.error?.message || "Unknown error",
+            response.error
           )
         );
       } else {
@@ -174,10 +171,7 @@ export class IPCClient implements IRPCClient {
     }
 
     const requestId = generateRequestId();
-    const request = createRequest(requestId, action, params, {
-      client: "vscode",
-      timestamp: Date.now(),
-    });
+    const request = createRequest(requestId, action, params);
 
     return new Promise<T>((resolve, reject) => {
       this.pendingRequestsTyped.set(requestId, { resolve, reject });

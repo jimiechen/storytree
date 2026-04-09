@@ -29,30 +29,38 @@ describe('IPC Protocol Types', () => {
   describe('IPCResponse', () => {
     it('should create a valid success response', () => {
       const response: IPCResponse = {
+        jsonrpc: '2.0',
         id: '789',
-        result: { success: true, data: 'test' },
+        status: 'success',
+        data: { success: true, data: 'test' },
+        timestamp: new Date().toISOString(),
       };
       
       expect(response.id).toBe('789');
-      expect(response.result).toEqual({ success: true, data: 'test' });
+      expect(response.status).toBe('success');
+      expect(response.data).toEqual({ success: true, data: 'test' });
       expect(response.error).toBeUndefined();
     });
 
     it('should create a valid error response', () => {
       const response: IPCResponse = {
+        jsonrpc: '2.0',
         id: '987',
+        status: 'error',
         error: {
           code: IPCErrorCode.METHOD_NOT_FOUND,
           message: 'Method not found',
         },
+        timestamp: new Date().toISOString(),
       };
       
       expect(response.id).toBe('987');
+      expect(response.status).toBe('error');
       expect(response.error).toEqual({
         code: IPCErrorCode.METHOD_NOT_FOUND,
         message: 'Method not found',
       });
-      expect(response.result).toBeUndefined();
+      expect(response.data).toBeUndefined();
     });
   });
 
