@@ -501,17 +501,99 @@ describe('FileMutex', () => {
 
 ---
 
+## M1.5 Claude-Code 移植
+
+> 状态: ⏳ 待开始（部分任务可与 M1.1/M1.2 并行）
+
+---
+
+### DEV-PORT-1 ToolRegistry 骨架初始化
+
+**描述**：创建 `src/agent/tool-registry.ts`，定义 `Tool` 接口（`name / description / inputSchema / execute`），实现注册和查找方法，用 stub 注册 Bash/Read/Write/Grep/WebFetch 五个工具，每个 stub 返回 `{ success: false, error: 'not implemented' }`。
+
+**完成标准**：
+- [ ] 工具注册表可被 `AgentLoop` 调用
+- [ ] 五个核心工具均已注册（stub 实现）
+- [ ] 提供工具查找和执行接口
+
+**前置依赖**：M1.1 完成
+**负责角色**：VS Code 插件架构师
+
+---
+
+### DEV-PORT-2 AgentLoop 核心实现
+
+**描述**：从 opencode 的 `packages/opencode/src/session/` 移植 Session 管理层，实现 `while (hasMoreWork)` 循环，接收模型输出 → 解析工具调用 → 执行工具 → 追加消息历史 → 再次入队。循环的"调用模型"步骤通过 `GlobalModelRequestQueue` 代理。
+
+**完成标准**：
+- [ ] AgentLoop 能处理完整的任务循环
+- [ ] 与 `GlobalModelRequestQueue` 正确集成
+- [ ] 支持工具调用和消息历史管理
+
+**前置依赖**：M1.1 完成
+**负责角色**：VS Code 插件架构师
+
+---
+
+### DEV-PORT-3 Bash/Read/Write 核心工具实现
+
+**描述**：将 stub 替换为真实实现，每个工具的 `execute()` 接收 `ToolContext`（含 `WorktreeManager` 实例和 `PermissionManager` 实例），所有文件操作路径自动限定在当前 Worktree 沙箱内。Bash 工具需要对接 `PermissionManager.checkCommandExecution()`。
+
+**完成标准**：
+- [ ] 三个核心工具均有真实实现
+- [ ] 沙箱隔离正常工作
+- [ ] 权限检查机制有效
+
+**前置依赖**：M1.2 完成
+**负责角色**：VS Code 插件架构师 + Python 工程师
+
+---
+
+### DEV-PORT-4 Grep/WebFetch 工具实现
+
+**描述**：从 opencode 直接复用 `GrepTool`（`ripgrep` + `child_process`）和 `WebFetchTool`（`node-fetch` + `cheerio`），写接口适配层对齐 `Tool` 接口规范。
+
+**完成标准**：
+- [ ] 两个工具均能正常执行
+- [ ] 接口与 `Tool` 规范对齐
+- [ ] 与沙箱环境集成
+
+**前置依赖**：M1.3 完成
+**负责角色**：VS Code 插件架构师 + Python 工程师
+
+---
+
+### DEV-PORT-5 端到端 Agent 验证
+
+**描述**：在 Trae 里创建一个测试任务，触发单个 Agent 执行"读取一个文件 → 修改内容 → 写回"的三步任务，验证 AgentLoop + ToolRegistry + 沙箱隔离全链路打通。
+
+**完成标准**：
+- [ ] 端到端任务执行成功
+- [ ] 沙箱隔离有效
+- [ ] 工具调用正常
+
+**前置依赖**：DEV-PORT-1 至 DEV-PORT-4 完成
+**负责角色**：QA 工程师
+
+---
+
 ## 任务依赖关系
 
 ```
 M1.0（工程规范）✅ DEV 完成
   └─► M1.1（生命周期）✅ DEV 完成，TEST 待验证
-        └─► M1.2（LLM 队列）✅ DEV 完成，TEST 待验证
-        └─► M1.3（文件锁 PoC → 实现）✅ DEV 完成，TEST 待验证
-              └─► M1.4（配置 + 打包 + E2E 验收）⏳ DEV-1.4.1 完成，DEV-1.4.2 待开发
+        ├─► M1.2（LLM 队列）✅ DEV 完成，TEST 待验证
+        │     └─► DEV-PORT-3（核心工具实现）⏳ 待开始
+        ├─► M1.3（文件锁）✅ DEV 完成，TEST 待验证
+        │     └─► DEV-PORT-4（Grep/WebFetch 实现）⏳ 待开始
+        └─► DEV-PORT-1（ToolRegistry 骨架）⏳ 待开始
+              └─► DEV-PORT-2（AgentLoop 实现）⏳ 待开始
+                    └─► DEV-PORT-5（端到端验证）⏳ 待开始
+        └─► M1.4（配置 + 打包 + E2E 验收）⏳ DEV-1.4.1 完成，DEV-1.4.2 待开发
 ```
 
 > M1.2 和 M1.3 可并行开发，但均依赖 M1.1 完成。
+> DEV-PORT-1/2 可与 M1.2/M1.3 并行开发，DEV-PORT-3/4 分别依赖 M1.2/M1.3 完成。
 
 ---
 
@@ -524,7 +606,8 @@ M1.0（工程规范）✅ DEV 完成
 | M1.2 | 2 | 3 | 2 | 0 |
 | M1.3 | 2 | 4 | 2 | 0 |
 | M1.4 | 2 | 3 | 1 | 0 |
-| **总计** | **10** | **15** | **9** | **0** |
+| M1.5 | 5 | 0 | 0 | 0 |
+| **总计** | **15** | **15** | **9** | **0** |
 
 **当前进度**: M1.0-M1.4 DEV 完成（9/10），TEST 待验证，DEV-1.4.2 待开发
 
