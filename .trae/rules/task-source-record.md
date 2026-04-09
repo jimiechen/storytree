@@ -4,10 +4,10 @@
 
 ## 当前任务状态
 
-**最后更新时间**: 2026-04-09 20:45:00
+**最后更新时间**: 2026-04-09 21:15:00
 **当前任务来源**: `docs/planning/vscode-oss-integration/phase1-task-breakdown.md`
-**当前阶段**: Phase1 单元测试已完成，环境配置待修复
-**下一步**: 修复环境配置问题
+**当前阶段**: Phase1 单元测试已完成，环境配置待修复，前端战略调整为 opencode 二次开发
+**下一步**: 执行 FE-OP-001 调研 opencode 项目结构
 
 ## 任务来源清单
 
@@ -72,10 +72,46 @@
 - [ ] DEV-1.3.1 实现基于文件路径的跨进程 Mutex
 - [ ] DEV-1.4.1 实现 CDP 连接管理器
 - [ ] DEV-1.4.2 实现 SandboxValidator
-- [ ] DEV-1.5.1 实现 VS Code 扩展打包脚本
 - [ ] DEV-1.6.1 实现端到端测试框架
 - [ ] DEV-1.7.1 实现 Git Worktree 管理
 - [ ] DEV-1.8.1 实现配置管理
+
+### 作废任务（cancelled）
+
+- [-] DEV-1.4.1 插件配置页面 Settings UI（原 dreamweaver 前端）
+- [-] DEV-1.5.1 实现 VS Code 扩展打包脚本（依赖旧前端，暂缓）
+- [-] 所有 dreamweaver/ 目录下的前端开发任务
+
+### 新增任务（基于 opencode 二次开发）
+
+- [ ] FE-OP-001 调研 opencode 项目结构，输出二次开发可行性报告
+  - 角色：前端工程师
+  - 优先级：P0
+  - 截止：今日
+  - 产出：docs/planning/opencode-integration-feasibility.md
+  - 重点：opencode 的插件/扩展机制、UI 定制入口、构建方式
+
+- [ ] FE-OP-002 将 dreamweaver 的核心 UI 模块（多模型对话面板、任务状态看板）迁移为 opencode 的扩展组件
+  - 角色：前端工程师
+  - 优先级：P1
+  - 截止：明日
+  - 产出：opencode/extensions/ralph-panel/ 目录骨架
+  - 依赖：FE-OP-001 完成后开始
+  - 参考：dreamweaver/ 目录现有代码
+
+- [ ] BE-OP-001 梳理 dw 项目与 opencode 的 API 对接方案
+  - 角色：Node.js 后端工程师
+  - 优先级：P1
+  - 截止：明日
+  - 产出：docs/planning/opencode-api-bridge-design.md
+  - 重点：dw 的 LLM 调度逻辑如何挂载到 opencode 的 provider 体系
+
+- [ ] ARCH-OP-001 评估 caiode 插件是否需要适配 opencode 的通信协议
+  - 角色：VS Code 插件架构师
+  - 优先级：P2
+  - 截止：后天
+  - 产出：docs/planning/caiode-opencode-compat.md
+  - 重点：当前 IPC/CDP 机制是否与 opencode 兼容
 
 **TEST 任务**:
 - [x] TEST-1.1.1a 单元测试 - Disposable注册机制 ✅
@@ -133,7 +169,7 @@
 **Agent**: Claude (秘书 Agent)
 **确认日期**: 2026-04-09
 **当前任务来源**: phase1-task-breakdown.md
-**下一步**: 修复环境配置问题
+**下一步**: 执行 FE-OP-001 调研 opencode 项目结构
 
 ---
 
