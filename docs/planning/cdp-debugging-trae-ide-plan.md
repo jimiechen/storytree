@@ -23,6 +23,18 @@ Chrome DevTools Protocol (CDP) 是一套用于与 Chrome 浏览器进行通信�
 3. 模拟用户操作（点击、输入等）
 4. 监控页面状态变化
 
+### 2.3 实际 CDP 实现架构
+
+```mermaid
+flowchart TD
+    A[VS Code 插件] --> B[CDP 客户端]
+    B --> C[CDP 驱动]
+    C --> D[CDP 适配器]
+    D --> E[Trae IDE 页面]
+    F[配置管理] --> C
+    G[监控系统] --> C
+```
+
 ## 3. 页面元素获取方案
 
 ### 3.1 元素选择器策略
@@ -35,30 +47,124 @@ Chrome DevTools Protocol (CDP) 是一套用于与 Chrome 浏览器进行通信�
 | 标签选择器 | 4 | `input[type="text"]` |
 | 组合选择器 | 5 | `.chat-container input` |
 
-### 3.2 元素获取方法
+### 3.2 实际元素操作实现
 
-#### 3.2.1 基本元素获取
+基于实际的 CDP 驱动实现，我们提供以下元素操作方法：
+
+#### 3.2.1 聊天输入框操作
 
 ```typescript
-async function getElement(selector: string): Promise<any> {
+// 实际实现代码
+async typeInChatInput(text: string): Promise<void> {
   const script = `
-    const element = document.querySelector('${selector}');
+    const element = document.querySelector('${this.selectors.chatInput}');
     if (element) {
-      return {
-        tagName: element.tagName,
-        id: element.id,
-        className: element.className,
-        textContent: element.textContent,
-        value: element.value,
-        disabled: element.disabled,
-        visible: element.offsetParent !== null
-      };
+      element.value = '${text.replace(/'/g, "\\'")}';
+      ${this.inputMethod.triggerEvents.map((event: string) => {
+        return `element.dispatchEvent(new Event('${event}', { bubbles: true }));`;
+      }).join('\n        ')}
     } else {
-      return null;
+      throw new Error('Chat input element not found');
     }
   `;
 
-  const result = await cdpClient.send('Runtime.evaluate', {
+  await this.cdpClient.send('Runtime.evaluate', {
+    expression: script,
+    returnByValue: true
+  });
+}
+```
+
+#### 3.2.2 消息提交操作
+
+```typescript
+// 实际实现代码
+async submitMessage(): Promise<void> {
+  if (this.submitMethod === 'button') {
+    const script = `
+      const button = document.querySelector('${this.selectors.submitButton}');
+      if (button) {
+        button.click();
+      } else {
+        throw new Error('Submit button not found');
+      }
+    `;
+    await this.cdpClient.send('Runtime.evaluate', {
+      expression: script,
+      returnByValue: true
+    });
+  } else {
+    // 使用回车键提交
+    const script = `
+      const element = document.querySelector('${this.selectors.chatInput}');
+      if (element) {
+        element.dispatchEvent(new KeyboardEvent('keydown', {
+          key: 'Enter',
+          code: 'Enter',
+          bubbles: true,
+          cancelable: true
+        }));
+      } else {
+        throw new Error('Chat input element not found');
+      }
+    `;
+    await this.cdpClient.send('Runtime.evaluate', {
+      expression: script,
+      returnByValue: true
+    });
+  }
+}
+```
+
+#### 3.2.3 响应等待与获取
+
+```typescript
+// 实际实现代码
+async waitForResponseComplete(timeoutMs: number): Promise<string> {
+  const startTime = Date.now();
+  const pollInterval = 500;
+
+  while (Date.now() - startTime < timeoutMs) {
+    const script = `
+      const stopButton = document.querySelector('${this.selectors.stopButton}');
+      const streamingIndicator = document.querySelector('${this.selectors.streamingIndicator}');
+      
+      // 检查停止按钮是否存在且可见
+      const stopButtonVisible = stopButton && stopButton.style.display !== 'none' && stopButton.offsetParent !== null;
+      
+      // 检查流式输出指示器
+      const isStreaming = streamingIndicator !== null;
+      
+      !stopButtonVisible && !isStreaming;
+    `;
+
+    const result = await this.cdpClient.send('Runtime.evaluate', {
+      expression: script,
+      returnByValue: true
+    });
+
+    if (result.result.value) {
+      // 响应完成，读取最后一条消息
+      return this.getLastResponse();
+    }
+
+    await new Promise(resolve => setTimeout(resolve, pollInterval));
+  }
+
+  throw new Error('Response timeout');
+}
+
+async getLastResponse(): Promise<string> {
+  const script = `
+    const container = document.querySelector('${this.selectors.responseContainer}');
+    if (container) {
+      return container.textContent || '';
+    } else {
+      throw new Error('Response container not found');
+    }
+  `;
+
+  const result = await this.cdpClient.send('Runtime.evaluate', {
     expression: script,
     returnByValue: true
   });
@@ -67,10 +173,10 @@ async function getElement(selector: string): Promise<any> {
 }
 ```
 
-#### 3.2.2 弹框元素获取
+#### 3.2.4 弹框元素获取与处理
 
 ```typescript
-async function getDialogElements(): Promise<any> {
+async getDialogElements(): Promise<any> {
   const script = `
     const dialogs = document.querySelectorAll('dialog, .modal, .popup');
     return Array.from(dialogs).map(dialog => ({
@@ -93,31 +199,55 @@ async function getDialogElements(): Promise<any> {
     }));
   `;
 
-  const result = await cdpClient.send('Runtime.evaluate', {
+  const result = await this.cdpClient.send('Runtime.evaluate', {
     expression: script,
     returnByValue: true
   });
 
   return result.result.value;
 }
+
+async closeDialog(dialogId: string): Promise<void> {
+  const script = `
+    const dialog = document.getElementById('${dialogId}') || document.querySelector('.modal, .popup');
+    if (dialog) {
+      // 尝试点击关闭按钮
+      const closeButton = dialog.querySelector('.close, .cancel, .dismiss');
+      if (closeButton) {
+        closeButton.click();
+      } else {
+        // 尝试按 ESC 键
+        dialog.dispatchEvent(new KeyboardEvent('keydown', {
+          key: 'Escape',
+          bubbles: true
+        }));
+      }
+    }
+  `;
+
+  await this.cdpClient.send('Runtime.evaluate', {
+    expression: script,
+    returnByValue: true
+  });
+}
 ```
 
 ### 3.3 元素监控
 
 ```typescript
-async function monitorElementChanges(selector: string, callback: (changes: any) => void): Promise<void> {
+async monitorElementChanges(selector: string, callback: (changes: any) => void): Promise<void> {
   // 启用 DOM 监控
-  await cdpClient.send('DOM.enable');
+  await this.cdpClient.send('DOM.enable');
   
   // 获取元素
-  const result = await cdpClient.send('DOM.querySelector', {
+  const result = await this.cdpClient.send('DOM.querySelector', {
     nodeId: 1, // 根节点
     selector
   });
   
   if (result.nodeId) {
     // 订阅元素属性变化
-    await cdpClient.send('DOM.setAttributeValue', {
+    await this.cdpClient.send('DOM.setAttributeValue', {
       nodeId: result.nodeId,
       name: 'data-monitored',
       value: 'true'
@@ -133,9 +263,139 @@ async function monitorElementChanges(selector: string, callback: (changes: any) 
 }
 ```
 
-## 4. 配置页面设计
+## 4. Ralph 与 CDP 集成方案
 
-### 4.1 页面结构
+### 4.1 Ralph 集成架构
+
+```mermaid
+flowchart TD
+    A[Ralph 核心] --> B[CDP 管理服务]
+    B --> C[CDP 驱动]
+    C --> D[Trae IDE]
+    B --> E[配置管理]
+    B --> F[监控系统]
+    B --> G[版本管理]
+    H[VS Code 扩展] --> B
+```
+
+### 4.2 Ralph 调用流程
+
+1. **初始化阶段**：
+   - Ralph 启动时初始化 CDP 管理服务
+   - 加载配置文件
+   - 建立 CDP 连接
+   - 启动监控系统
+
+2. **任务执行阶段**：
+   - Ralph 接收用户任务
+   - 通过 CDP 驱动执行 IDE 操作
+   - 监控执行状态
+   - 获取执行结果
+
+3. **维护阶段**：
+   - 定期检查 Trae 状态
+   - 处理弹框和异常
+   - 自动恢复故障
+
+### 4.3 实际集成代码
+
+```typescript
+// Ralph 与 CDP 集成代码
+class RalphCDPIntegration {
+  private cdpManager: TraeCDPManager;
+  private isInitialized: boolean = false;
+  
+  constructor(configPath: string) {
+    // 初始化 CDP 管理
+    this.cdpManager = new TraeCDPManager(configPath);
+  }
+  
+  async initialize() {
+    if (this.isInitialized) return;
+    
+    // 建立 CDP 连接
+    const cdpClient = await this.createCDPClient();
+    
+    // 初始化 CDP 管理
+    await this.cdpManager.initialize(cdpClient);
+    
+    this.isInitialized = true;
+    console.log('Ralph CDP 集成初始化完成');
+  }
+  
+  async createCDPClient(): Promise<CDPClient> {
+    // 实现 CDP 客户端创建
+    // 这里可以使用 puppeteer 或其他 CDP 客户端库
+    return new CDPClient();
+  }
+  
+  async executeTask(task: any): Promise<any> {
+    // 执行具体任务
+    switch (task.type) {
+      case 'chat':
+        return this.executeChatTask(task);
+      case 'navigation':
+        return this.executeNavigationTask(task);
+      default:
+        throw new Error(`Unknown task type: ${task.type}`);
+    }
+  }
+  
+  private async executeChatTask(task: any): Promise<any> {
+    // 输入文本
+    await this.cdpManager.typeInChatInput(task.text);
+    
+    // 提交消息
+    await this.cdpManager.submitMessage();
+    
+    // 等待响应
+    const response = await this.cdpManager.waitForResponseComplete(60000);
+    
+    return { success: true, response };
+  }
+  
+  private async executeNavigationTask(task: any): Promise<any> {
+    // 导航相关操作
+    switch (task.action) {
+      case 'newConversation':
+        await this.cdpManager.newConversation();
+        return { success: true };
+      case 'refresh':
+        await this.cdpManager.refreshPage();
+        return { success: true };
+      default:
+        throw new Error(`Unknown navigation action: ${task.action}`);
+    }
+  }
+  
+  async getStatus(): Promise<any> {
+    // 获取当前状态
+    const health = await this.cdpManager.checkHealth();
+    const config = this.cdpManager.getConfig();
+    
+    return {
+      health,
+      config,
+      isInitialized: this.isInitialized
+    };
+  }
+  
+  async updateConfig(config: any): Promise<void> {
+    // 更新配置
+    await this.cdpManager.updateConfig(config);
+  }
+  
+  stop() {
+    // 停止 CDP 管理
+    this.cdpManager.stop();
+    this.isInitialized = false;
+  }
+}
+```
+
+## 5. 配置页面设计
+
+### 5.1 页面结构
 
 **配置页面路径**: `caiode/vscode-extension/src/webview/settings-page.ts`
 
@@ -231,7 +491,7 @@ function createSettingsPage(config: any): string {
 }
 ```
 
-### 4.2 配置数据结构
+### 5.2 配置数据结构
 
 ```typescript
 interface CDPConfig {
@@ -254,7 +514,7 @@ interface CDPConfig {
 }
 ```
 
-### 4.3 配置管理
+### 5.3 配置管理
 
 ```typescript
 class ConfigManager {
@@ -312,9 +572,9 @@ class ConfigManager {
 }
 ```
 
-## 5. 版本维护与升级
+## 6. 版本维护与升级
 
-### 5.1 版本控制机制
+### 6.1 版本控制机制
 
 ```typescript
 class VersionManager {
@@ -361,7 +621,7 @@ class VersionManager {
 }
 ```
 
-### 5.2 自动检测元素
+### 6.2 自动检测元素
 
 ```typescript
 class ElementDetector {
@@ -421,9 +681,9 @@ class ElementDetector {
 }
 ```
 
-## 6. 实现 Trae 不间断运行
+## 7. 实现 Trae 不间断运行
 
-### 6.1 监控与自动恢复
+### 7.1 监控与自动恢复
 
 ```typescript
 class TraeMonitor {
@@ -504,7 +764,7 @@ class TraeMonitor {
 }
 ```
 
-### 6.2 心跳检测
+### 7.2 心跳检测
 
 ```typescript
 class HeartbeatMonitor {
@@ -549,9 +809,9 @@ class HeartbeatMonitor {
 }
 ```
 
-## 7. 集成方案
+## 8. 增强 CDP 驱动实现
 
-### 7.1 CDP 驱动增强
+### 8.1 增强 CDP 驱动
 
 ```typescript
 export class EnhancedCDPDriver extends CDPDriver {
@@ -620,7 +880,7 @@ export class EnhancedCDPDriver extends CDPDriver {
 }
 ```
 
-### 7.2 主集成流程
+### 8.2 主集成流程
 
 ```typescript
 class TraeCDPManager {
@@ -631,16 +891,17 @@ class TraeCDPManager {
   private heartbeatMonitor: HeartbeatMonitor;
   private versionManager: VersionManager;
   
-  constructor(configPath: string, cdpClient: any) {
+  constructor(configPath: string) {
     this.configManager = new ConfigManager(configPath);
+  }
+  
+  async initialize(cdpClient: any) {
     this.cdpClient = cdpClient;
     this.cdpDriver = new EnhancedCDPDriver(cdpClient, this.configManager);
     this.traeMonitor = new TraeMonitor(this.configManager, this.cdpDriver);
     this.heartbeatMonitor = new HeartbeatMonitor(cdpClient);
     this.versionManager = new VersionManager(this.configManager);
-  }
-  
-  async initialize() {
+    
     // 检查版本更新
     if (this.versionManager.checkForUpdates()) {
       const latestVersion = this.versionManager.getLatestVersion();
@@ -670,11 +931,14 @@ class TraeCDPManager {
     
     for (const [key, selector] of Object.entries(config.selectors)) {
       try {
-        const element = await this.cdpDriver.getElement(selector);
+        const script = `document.querySelector('${selector}') !== null`;
+        const result = await this.cdpClient.send('Runtime.evaluate', {
+          expression: script,
+          returnByValue: true
+        });
         results[key] = {
           selector,
-          found: !!element,
-          element
+          found: result.result.value
         };
       } catch (error) {
         results[key] = {
@@ -696,15 +960,77 @@ class TraeCDPManager {
     return elements;
   }
   
+  // 代理 CDP 驱动方法
+  async typeInChatInput(text: string): Promise<void> {
+    return this.cdpDriver.typeInChatInput(text);
+  }
+  
+  async submitMessage(): Promise<void> {
+    return this.cdpDriver.submitMessage();
+  }
+  
+  async waitForResponseComplete(timeoutMs: number): Promise<string> {
+    return this.cdpDriver.waitForResponseComplete(timeoutMs);
+  }
+  
+  async getLastResponse(): Promise<string> {
+    return this.cdpDriver.getLastResponse();
+  }
+  
+  async newConversation(): Promise<void> {
+    return this.cdpDriver.newConversation();
+  }
+  
+  async isReady(): Promise<boolean> {
+    return this.cdpDriver.isReady();
+  }
+  
+  async refreshPage(): Promise<void> {
+    return this.cdpDriver.refreshPage();
+  }
+  
+  async checkHealth(): Promise<HealthReport> {
+    const config = this.configManager.getConfig();
+    const results = [];
+    
+    for (const [key, selector] of Object.entries(config.selectors)) {
+      try {
+        const script = `document.querySelector('${selector}') !== null`;
+        const result = await this.cdpClient.send('Runtime.evaluate', {
+          expression: script,
+          returnByValue: true
+        });
+        results.push({
+          key,
+          selector,
+          exists: result.result.value
+        });
+      } catch (error) {
+        results.push({
+          key,
+          selector,
+          exists: false
+        });
+      }
+    }
+    
+    const failedSelectors = results.filter(r => !r.exists);
+    
+    return {
+      healthy: failedSelectors.length === 0,
+      failedSelectors
+    };
+  }
+  
   stop() {
     this.traeMonitor.stopMonitoring();
   }
 }
 ```
 
-## 8. 技术挑战与解决方案
+## 9. 技术挑战与解决方案
 
-### 8.1 技术挑战
+### 9.1 技术挑战
 
 1. **元素选择器稳定性**：
    - 页面结构变化导致选择器失效
@@ -726,7 +1052,7 @@ class TraeCDPManager {
    - 频繁的 CDP 通信可能影响性能
    - 需要合理的监控间隔
 
-### 8.2 解决方案
+### 9.2 解决方案
 
 1. **元素选择器稳定性**：
    - 使用多层级选择器策略（ID > 类 > 属性 > 标签）
@@ -753,9 +1079,9 @@ class TraeCDPManager {
    - 使用批量操作减少 CDP 通信次数
    - 实现缓存机制，减少重复操作
 
-## 9. 实施步骤
+## 10. 实施步骤
 
-### 9.1 阶段一：基础架构搭建
+### 10.1 阶段一：基础架构搭建
 
 1. **创建配置管理模块**：
    - 实现配置文件读写
@@ -767,7 +1093,7 @@ class TraeCDPManager {
    - 添加元素获取和弹框处理功能
    - 实现页面刷新和状态检查
 
-### 9.2 阶段二：监控与恢复系统
+### 10.2 阶段二：监控与恢复系统
 
 1. **实现心跳检测**：
    - 定期发送心跳请求
@@ -779,7 +1105,7 @@ class TraeCDPManager {
    - 处理弹框
    - 自动恢复功能
 
-### 9.3 阶段三：配置页面开发
+### 10.3 阶段三：配置页面开发
 
 1. **创建配置页面**：
    - 设计页面结构
@@ -791,7 +1117,7 @@ class TraeCDPManager {
    - 集成到配置页面
    - 实现一键更新配置
 
-### 9.4 阶段四：版本管理
+### 10.4 阶段四：版本管理
 
 1. **实现版本检测**：
    - 检查当前版本
@@ -803,81 +1129,88 @@ class TraeCDPManager {
    - 处理向后兼容性
    - 记录版本变更
 
-### 9.5 阶段五：集成与测试
+### 10.5 阶段五：Ralph 集成
 
-1. **集成到 VS Code 插件**：
-   - 连接 CDP 管理系统
-   - 集成配置页面
-   - 启动监控系统
+1. **实现 Ralph 集成层**：
+   - 创建 RalphCDPIntegration 类
+   - 实现任务执行方法
+   - 集成配置管理
 
 2. **测试与优化**：
-   - 测试元素获取功能
-   - 测试弹框处理
-   - 测试自动恢复机制
-   - 性能优化
+   - 测试 Ralph 与 CDP 集成
+   - 优化执行性能
+   - 确保稳定性
 
-## 10. 预期成果
+## 11. 预期成果
 
-### 10.1 功能成果
+### 11.1 功能成果
 
 - ✅ 使用 CDP 调试获取 Trae IDE 页面元素
 - ✅ 自动检测和处理弹框
 - ✅ 配置页面用于管理元素选择器
 - ✅ 版本维护和自动升级机制
 - ✅ Trae 不间断运行监控和恢复
+- ✅ Ralph 与 CDP 深度集成
 
-### 10.2 技术成果
+### 11.2 技术成果
 
 - 🚀 稳定的 CDP 通信机制
 - 📱 友好的配置管理界面
 - 🔌 灵活的元素选择器策略
 - 🌍 版本兼容性管理
 - 🎯 可靠的监控和恢复系统
+- 🔄 Ralph 与 CDP 无缝集成
 
-### 10.3 业务价值
+### 11.3 业务价值
 
 - 减少人工干预，实现 Trae 自动运行
 - 提高系统稳定性和可靠性
 - 简化版本升级和维护
 - 提供可视化配置管理
 - 降低运维成本
+- 增强 Ralph 的自动化能力
 
-## 11. 风险评估
+## 12. 风险评估
 
-### 11.1 风险因素
+### 12.1 风险因素
 
 1. **技术风险**：
    - CDP 通信不稳定
    - 页面结构变化导致选择器失效
    - 弹框处理逻辑不完善
+   - Ralph 集成复杂度高
 
 2. **业务风险**：
    - 配置错误导致 Trae 无法正常运行
    - 自动恢复机制失效
    - 版本升级导致系统故障
+   - Ralph 任务执行失败
 
-### 11.2 风险缓解
+### 12.2 风险缓解
 
 1. **技术风险缓解**：
    - 实现重试机制和错误处理
    - 定期更新选择器
    - 增加弹框处理的多样性
+   - 模块化 Ralph 集成，便于调试
 
 2. **业务风险缓解**：
    - 配置验证和测试功能
    - 多重恢复机制
    - 版本回滚功能
+   - 完善的错误处理和日志记录
 
-## 12. 结论
+## 13. 结论
 
 通过本方案，我们可以实现使用 CDP 调试获取 Trae IDE 页面元素和弹框，并通过配置页面管理这些元素的选择器，支持后续版本的维护和升级，同时实现 Trae 的不间断运行。
 
-**推荐方案**：采用增强的 CDP 驱动，结合配置管理、监控恢复和版本管理系统，实现 Trae IDE 的自动化管理和不间断运行。通过分阶段实施，可以确保系统的稳定性和可靠性。
+**推荐方案**：采用增强的 CDP 驱动，结合配置管理、监控恢复和版本管理系统，实现 Trae IDE 的自动化管理和不间断运行。通过与 Ralph 的深度集成，提高系统的自动化能力和稳定性。
 
 **预期成果**：
 - 实现 Trae IDE 的自动化监控和管理
 - 提供友好的配置界面
 - 支持版本升级和维护
 - 确保 Trae 不间断运行
+- 增强 Ralph 的自动化能力
 
 [READY_FOR_REVIEW]
