@@ -263,51 +263,279 @@ async monitorElementChanges(selector: string, callback: (changes: any) => void):
 }
 ```
 
-## 4. Ralph 与 CDP 集成方案
+## 4. Trae-Ralph 的 CDP 实现与 Claude 任务移植
 
-### 4.1 Ralph 集成架构
+### 4.1 Trae-Ralph CDP 实现架构
 
 ```mermaid
 flowchart TD
-    A[Ralph 核心] --> B[CDP 管理服务]
-    B --> C[CDP 驱动]
-    C --> D[Trae IDE]
-    B --> E[配置管理]
-    B --> F[监控系统]
-    B --> G[版本管理]
-    H[VS Code 扩展] --> B
+    A[Ralph 核心引擎] --> B[CDP 管理服务]
+    B --> C[CDP 驱动] --> D[CDP 客户端]
+    D --> E[Trae IDE WebView]
+    B --> F[配置管理]
+    B --> G[监控系统]
+    B --> H[版本管理]
+    I[VS Code 扩展] --> B
+    J[Claude 任务处理] --> A
 ```
 
-### 4.2 Ralph 调用流程
+### 4.2 核心实现组件
 
-1. **初始化阶段**：
-   - Ralph 启动时初始化 CDP 管理服务
-   - 加载配置文件
-   - 建立 CDP 连接
-   - 启动监控系统
+#### 4.2.1 CDP 驱动实现
 
-2. **任务执行阶段**：
-   - Ralph 接收用户任务
-   - 通过 CDP 驱动执行 IDE 操作
-   - 监控执行状态
-   - 获取执行结果
-
-3. **维护阶段**：
-   - 定期检查 Trae 状态
-   - 处理弹框和异常
-   - 自动恢复故障
-
-### 4.3 实际集成代码
+CDP 驱动是 Trae-Ralph CDP 实现的核心，负责与 Trae IDE 进行通信：
 
 ```typescript
-// Ralph 与 CDP 集成代码
+// 实际的 CDP 驱动实现 (cdp-driver.ts)
+export class CDPDriver implements IDEDriver {
+  private cdpClient: CDPClient;
+  private selectors: any;
+  private inputMethod: any;
+  private submitMethod: string;
+
+  constructor(cdpClient: CDPClient, selectors: any, inputMethod: any, submitMethod: string) {
+    this.cdpClient = cdpClient;
+    this.selectors = selectors;
+    this.inputMethod = inputMethod;
+    this.submitMethod = submitMethod;
+  }
+
+  // 在聊天输入框中输入文本
+  async typeInChatInput(text: string): Promise<void> {
+    const script = `
+      const element = document.querySelector('${this.selectors.chatInput}');
+      if (element) {
+        element.value = '${text.replace(/'/g, "\\'")}';
+        ${this.inputMethod.triggerEvents.map((event: string) => {
+          return `element.dispatchEvent(new Event('${event}', { bubbles: true }));`;
+        }).join('\n        ')}
+      } else {
+        throw new Error('Chat input element not found');
+      }
+    `;
+
+    await this.cdpClient.send('Runtime.evaluate', {
+      expression: script,
+      returnByValue: true
+    });
+  }
+
+  // 提交消息
+  async submitMessage(): Promise<void> {
+    if (this.submitMethod === 'button') {
+      const script = `
+        const button = document.querySelector('${this.selectors.submitButton}');
+        if (button) {
+          button.click();
+        } else {
+          throw new Error('Submit button not found');
+        }
+      `;
+      await this.cdpClient.send('Runtime.evaluate', {
+        expression: script,
+        returnByValue: true
+      });
+    } else {
+      // 使用回车键提交
+      const script = `
+        const element = document.querySelector('${this.selectors.chatInput}');
+        if (element) {
+          element.dispatchEvent(new KeyboardEvent('keydown', {
+            key: 'Enter',
+            code: 'Enter',
+            bubbles: true,
+            cancelable: true
+          }));
+        } else {
+          throw new Error('Chat input element not found');
+        }
+      `;
+      await this.cdpClient.send('Runtime.evaluate', {
+        expression: script,
+        returnByValue: true
+      });
+    }
+  }
+
+  // 等待响应完成
+  async waitForResponseComplete(timeoutMs: number): Promise<string> {
+    const startTime = Date.now();
+    const pollInterval = 500;
+
+    while (Date.now() - startTime < timeoutMs) {
+      const script = `
+        const stopButton = document.querySelector('${this.selectors.stopButton}');
+        const streamingIndicator = document.querySelector('${this.selectors.streamingIndicator}');
+        
+        // 检查停止按钮是否存在且可见
+        const stopButtonVisible = stopButton && stopButton.style.display !== 'none' && stopButton.offsetParent !== null;
+        
+        // 检查流式输出指示器
+        const isStreaming = streamingIndicator !== null;
+        
+        !stopButtonVisible && !isStreaming;
+      `;
+
+      const result = await this.cdpClient.send('Runtime.evaluate', {
+        expression: script,
+        returnByValue: true
+      });
+
+      if (result.result.value) {
+        // 响应完成，读取最后一条消息
+        return this.getLastResponse();
+      }
+
+      await new Promise(resolve => setTimeout(resolve, pollInterval));
+    }
+
+    throw new Error('Response timeout');
+  }
+
+  // 获取最后一条响应
+  async getLastResponse(): Promise<string> {
+    const script = `
+      const container = document.querySelector('${this.selectors.responseContainer}');
+      if (container) {
+        return container.textContent || '';
+      } else {
+        throw new Error('Response container not found');
+      }
+    `;
+
+    const result = await this.cdpClient.send('Runtime.evaluate', {
+      expression: script,
+      returnByValue: true
+    });
+
+    return result.result.value;
+  }
+
+  // 检查 IDE 是否就绪
+  async isReady(): Promise<boolean> {
+    const script = `
+      const input = document.querySelector('${this.selectors.chatInput}');
+      input && input.disabled === false && input.offsetParent !== null;
+    `;
+
+    const result = await this.cdpClient.send('Runtime.evaluate', {
+      expression: script,
+      returnByValue: true
+    });
+
+    return result.result.value;
+  }
+
+  // 新建对话
+  async newConversation(): Promise<void> {
+    const script = `
+      const button = document.querySelector('${this.selectors.newChatButton}');
+      if (button) {
+        button.click();
+      } else {
+        throw new Error('New chat button not found');
+      }
+    `;
+
+    await this.cdpClient.send('Runtime.evaluate', {
+      expression: script,
+      returnByValue: true
+    });
+  }
+}
+```
+
+#### 4.2.2 CDP 适配器实现
+
+CDP 适配器负责管理 CDP 驱动，提供更高级的接口：
+
+```typescript
+// CDP 适配器实现 (cdp-based-adapter.ts)
+export class CDPBasedAdapter implements IDEAdapter {
+  config: IDEAdapterConfig;
+  private driver: CDPDriver;
+  private cdpClient: CDPClient;
+
+  constructor(cdpClient: CDPClient, config: IDEAdapterConfig) {
+    this.cdpClient = cdpClient;
+    this.config = config;
+    this.driver = new CDPDriver(
+      cdpClient,
+      config.selectors,
+      config.inputMethod,
+      config.submitMethod
+    );
+  }
+
+  // 等待 IDE 就绪
+  async waitForReady(): Promise<void> {
+    const startTime = Date.now();
+    const { pollInterval, timeout } = this.config.waitStrategies.inputReady;
+
+    while (Date.now() - startTime < timeout) {
+      const ready = await this.isReady();
+      if (ready) {
+        return;
+      }
+      await new Promise(resolve => setTimeout(resolve, pollInterval));
+    }
+
+    throw new Error('IDE not ready within timeout');
+  }
+
+  // 健康检查
+  async checkHealth(): Promise<HealthReport> {
+    const results: SelectorCheckResult[] = [];
+
+    for (const [key, selector] of Object.entries(this.config.selectors)) {
+      const exists = await this.checkSelector(selector as string);
+      results.push({
+        key,
+        selector: selector as string,
+        exists
+      });
+    }
+
+    const failedSelectors = results.filter(r => !r.exists);
+
+    return {
+      healthy: failedSelectors.length === 0,
+      failedSelectors
+    };
+  }
+
+  // 检查选择器是否存在
+  private async checkSelector(selector: string): Promise<boolean> {
+    const script = `
+      document.querySelector('${selector}') !== null;
+    `;
+
+    const result = await this.cdpClient.send('Runtime.evaluate', {
+      expression: script,
+      returnByValue: true
+    });
+
+    return result.result.value;
+  }
+}
+```
+
+### 4.3 Ralph 与 CDP 集成实现
+
+#### 4.3.1 Ralph CDP 集成服务
+
+```typescript
+// Ralph CDP 集成服务
 class RalphCDPIntegration {
   private cdpManager: TraeCDPManager;
   private isInitialized: boolean = false;
+  private claudeTaskHandler: ClaudeTaskHandler;
   
   constructor(configPath: string) {
     // 初始化 CDP 管理
     this.cdpManager = new TraeCDPManager(configPath);
+    // 初始化 Claude 任务处理器
+    this.claudeTaskHandler = new ClaudeTaskHandler();
   }
   
   async initialize() {
@@ -324,9 +552,18 @@ class RalphCDPIntegration {
   }
   
   async createCDPClient(): Promise<CDPClient> {
-    // 实现 CDP 客户端创建
-    // 这里可以使用 puppeteer 或其他 CDP 客户端库
-    return new CDPClient();
+    // 使用 puppeteer 或其他 CDP 客户端库
+    const puppeteer = require('puppeteer');
+    const browser = await puppeteer.launch({ headless: false });
+    const page = await browser.newPage();
+    
+    // 连接到 Trae IDE 的 WebView
+    await page.goto('http://localhost:3000'); // 假设 Trae IDE 运行在 3000 端口
+    
+    // 获取 CDP 客户端
+    const cdpClient = await page.target().createCDPSession();
+    
+    return cdpClient;
   }
   
   async executeTask(task: any): Promise<any> {
@@ -336,6 +573,8 @@ class RalphCDPIntegration {
         return this.executeChatTask(task);
       case 'navigation':
         return this.executeNavigationTask(task);
+      case 'claude':
+        return this.executeClaudeTask(task);
       default:
         throw new Error(`Unknown task type: ${task.type}`);
     }
@@ -368,6 +607,20 @@ class RalphCDPIntegration {
     }
   }
   
+  private async executeClaudeTask(task: any): Promise<any> {
+    // 处理 Claude 任务
+    const claudeResult = await this.claudeTaskHandler.processTask(task);
+    
+    // 将 Claude 的结果输入到 Trae IDE
+    await this.cdpManager.typeInChatInput(JSON.stringify(claudeResult, null, 2));
+    await this.cdpManager.submitMessage();
+    
+    // 等待 Trae IDE 的响应
+    const traeResponse = await this.cdpManager.waitForResponseComplete(60000);
+    
+    return { success: true, claudeResult, traeResponse };
+  }
+  
   async getStatus(): Promise<any> {
     // 获取当前状态
     const health = await this.cdpManager.checkHealth();
@@ -391,6 +644,149 @@ class RalphCDPIntegration {
     this.isInitialized = false;
   }
 }
+```
+
+### 4.4 Claude 任务移植与改造
+
+#### 4.4.1 Claude 任务处理器
+
+```typescript
+// Claude 任务处理器
+class ClaudeTaskHandler {
+  private claudeClient: any;
+  
+  constructor() {
+    // 初始化 Claude 客户端
+    this.claudeClient = this.initClaudeClient();
+  }
+  
+  private initClaudeClient() {
+    // 初始化 Claude API 客户端
+    // 这里可以使用官方 SDK 或自定义实现
+    return {
+      async sendMessage(message: string) {
+        // 实际的 Claude API 调用
+        return { response: "Claude 响应" };
+      }
+    };
+  }
+  
+  async processTask(task: any): Promise<any> {
+    // 解析任务
+    const taskContent = task.content;
+    const taskType = task.taskType;
+    
+    // 根据任务类型处理
+    switch (taskType) {
+      case 'code':
+        return this.processCodeTask(taskContent);
+      case 'research':
+        return this.processResearchTask(taskContent);
+      case 'writing':
+        return this.processWritingTask(taskContent);
+      default:
+        return this.processGeneralTask(taskContent);
+    }
+  }
+  
+  private async processCodeTask(content: string): Promise<any> {
+    // 处理代码任务
+    const prompt = `请分析以下代码任务并提供解决方案：\n${content}`;
+    const response = await this.claudeClient.sendMessage(prompt);
+    
+    return {
+      type: 'code',
+      originalTask: content,
+      solution: response.response,
+      timestamp: new Date().toISOString()
+    };
+  }
+  
+  private async processResearchTask(content: string): Promise<any> {
+    // 处理研究任务
+    const prompt = `请完成以下研究任务：\n${content}`;
+    const response = await this.claudeClient.sendMessage(prompt);
+    
+    return {
+      type: 'research',
+      originalTask: content,
+      findings: response.response,
+      timestamp: new Date().toISOString()
+    };
+  }
+  
+  private async processWritingTask(content: string): Promise<any> {
+    // 处理写作任务
+    const prompt = `请完成以下写作任务：\n${content}`;
+    const response = await this.claudeClient.sendMessage(prompt);
+    
+    return {
+      type: 'writing',
+      originalTask: content,
+      content: response.response,
+      timestamp: new Date().toISOString()
+    };
+  }
+  
+  private async processGeneralTask(content: string): Promise<any> {
+    // 处理通用任务
+    const prompt = `请处理以下任务：\n${content}`;
+    const response = await this.claudeClient.sendMessage(prompt);
+    
+    return {
+      type: 'general',
+      originalTask: content,
+      result: response.response,
+      timestamp: new Date().toISOString()
+    };
+  }
+}
+```
+
+#### 4.4.2 任务移植流程
+
+1. **任务接收与解析**：
+   - Ralph 接收用户输入的任务
+   - 解析任务类型和内容
+   - 确定是否需要 Claude 处理
+
+2. **Claude 任务处理**：
+   - 将任务发送给 Claude API
+   - 等待 Claude 响应
+   - 处理 Claude 返回的结果
+
+3. **结果注入与执行**：
+   - 将 Claude 的结果转换为 Trae IDE 可接受的格式
+   - 通过 CDP 驱动将结果输入到 Trae IDE
+   - 提交消息并等待 Trae IDE 的处理
+
+4. **结果获取与反馈**：
+   - 获取 Trae IDE 的处理结果
+   - 将结果反馈给用户
+   - 记录任务执行情况
+
+### 4.5 完整集成流程
+
+```mermaid
+sequenceDiagram
+    participant User as 用户
+    participant Ralph as Ralph 核心
+    participant ClaudeHandler as Claude 任务处理器
+    participant CDPManager as CDP 管理服务
+    participant TraeIDE as Trae IDE
+
+    User->>Ralph: 提交任务
+    Ralph->>ClaudeHandler: 分析任务是否需要 Claude 处理
+    ClaudeHandler->>ClaudeHandler: 处理任务
+    ClaudeHandler-->>Ralph: 返回 Claude 处理结果
+    Ralph->>CDPManager: 准备将结果输入到 Trae IDE
+    CDPManager->>TraeIDE: 输入 Claude 结果
+    CDPManager->>TraeIDE: 提交消息
+    TraeIDE-->>CDPManager: 处理中...
+    CDPManager->>TraeIDE: 等待响应完成
+    TraeIDE-->>CDPManager: 返回处理结果
+    CDPManager-->>Ralph: 返回 Trae IDE 处理结果
+    Ralph-->>User: 展示最终结果
 ```
 
 ## 5. 配置页面设计
