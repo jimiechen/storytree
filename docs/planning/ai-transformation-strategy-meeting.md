@@ -18,7 +18,116 @@
 ### 会议时间
 - 2026年4月11日（下午）
 
-## 二、核心议题
+## 二、项目介绍
+
+### 项目概述
+
+StoryTree 是一个一体化定制开发环境，基于 VS Code OSS 构建，旨在提供 AI 驱动的开发体验。项目分为多个阶段，当前处于 Phase 1 阶段，主要目标是构建 caiode VS Code 插件宿主，实现核心功能模块。
+
+#### 核心功能
+- VS Code 插件生命周期管理
+- 串行化 LLM 请求队列
+- 跨进程文件锁
+- 插件配置页面
+- Claude-Code 移植
+
+### 人员分工
+
+| 角色 | 职责 | 负责模块 |
+|------|------|--------|
+| **VS Code 插件架构师** | 核心架构设计与实现 | 生命周期管理、LLM 请求队列、文件锁、插件配置 |
+| **Node.js 后端工程师** | 数据层与服务层实现 | SQLite 数据库适配、RPC 适配器、云端数据同步 |
+| **高级前端工程师** | React/Next.js 开发 | dreamweaver 前端 Webview 重构 |
+| **Python 后端工程师/AI Agent 集成工程师** | AI Agent 开发与 LLM 集成 | Python Agent 与 caiode 插件通信、跨进程文件锁 Python 实现 |
+| **DevOps/构建工程师** | CI/CD 流水线与多平台构建 | GitHub Actions 工作流、VS Code 插件打包 |
+| **QA 测试工程师** | 质量保障与测试 | 单元测试、集成测试、E2E 测试、压测 |
+
+### 项目进度
+
+#### 当前状态
+- **Phase 1 核心模块**：M1.0-M1.4 DEV 任务全部完成（10/10）
+- **测试验证**：TEST 任务待验证
+- **Claude-Code 移植**：M1.5 待开始
+
+#### 已完成的核心功能
+1. **M1.0 工程规范基线**：
+   - 初始化 caiode 扩展项目结构
+   - 建立 CI 流水线
+
+2. **M1.1 VS Code 插件生命周期管理**：
+   - 实现插件 activate / deactivate 生命周期
+   - 实现子进程守护与崩溃恢复机制
+
+3. **M1.2 串行化 LLM 请求队列**：
+   - 实现全局 LLM 请求队列调度器
+   - 实现队列监控 Output Channel
+
+4. **M1.3 并发文件锁**：
+   - 技术选型验证：OS 级文件锁 PoC
+   - 实现基于文件路径的跨进程 Mutex
+
+5. **M1.4 插件配置页面与打包**：
+   - 实现插件配置页面（Settings UI）
+   - 打包 .vsix 安装包
+
+#### 待完成的任务
+- **测试验证**：所有 TEST 任务需要执行
+- **M1.5 Claude-Code 移植**：
+  - ToolRegistry 骨架初始化
+  - AgentLoop 核心实现
+  - Bash/Read/Write 核心工具实现
+  - Grep/WebFetch 工具实现
+  - 端到端 Agent 验证
+
+### 各阶段目标方向
+
+#### Phase 1：caiode VS Code 插件宿主（当前阶段）
+- **目标**：构建稳定的 VS Code 插件基础架构
+- **核心功能**：
+  - 插件生命周期管理
+  - LLM 请求队列调度
+  - 跨进程文件锁
+  - 插件配置与打包
+  - Claude-Code 移植
+- **质量门禁**：
+  - UT 覆盖率 > 85%
+  - IT/AT 全量通过
+  - Extension Host 闲置内存 < 150MB
+  - 10 Agent × 10min 压测无崩溃
+  - 跨进程文件锁竞态测试无数据损坏
+
+#### Phase 2：Webview 重构
+- **目标**：将 dreamweaver 前端改造为 VS Code Webview 客户端
+- **核心任务**：
+  - Next.js 静态导出可行性扫描
+  - RPC Client 双模式适配（HTTP/IPC）
+  - 核心业务模块 Webview 兼容性改造
+  - Playwright UI 自动化测试
+
+#### Phase 3：VS Code OSS Fork 集成
+- **目标**：实现 VS Code OSS 的定制化集成
+- **核心任务**：
+  - VS Code OSS Fork 多平台构建
+  - 上游版本同步策略
+  - 定制化功能集成
+
+### 技术栈
+
+- **前端**：React 18+、Next.js 14+、TailwindCSS
+- **后端**：Node.js、TypeScript、Python
+- **数据库**：SQLite
+- **测试**：Vitest、Playwright、@vscode/test-electron
+- **构建**：GitHub Actions、esbuild、vsce
+
+### 项目特点
+
+1. **AI 驱动**：集成 LLM 能力，提供智能开发辅助
+2. **跨平台**：支持 Windows、macOS、Linux
+3. **安全可靠**：OS 级文件锁、进程守护、沙箱隔离
+4. **可扩展**：模块化设计，支持插件扩展
+5. **质量保障**：完善的测试体系，严格的质量门禁
+
+## 三、核心议题
 
 ### 1. AI时代的组织转型
 - Block公司的四层架构与组织创新
@@ -50,7 +159,7 @@
 - 人才培养与组织准备
 - 短期行动项与长期愿景
 
-## 三、详细内容
+## 四、详细内容
 
 ### 1. AI时代的组织转型
 
@@ -338,7 +447,7 @@
 - **持续学习**：建立学习机制，跟踪AI技术发展和最佳实践
 - **生态系统建设**：与相关技术提供商建立合作关系，构建生态系统
 
-## 四、讨论要点
+## 五、讨论要点
 
 ### 1. 战略层面
 - 公司是否应该采用Block的四层架构模式？
@@ -365,7 +474,7 @@
 - 如何制定AI服务的定价策略？
 - 如何构建AI应用的生态系统？
 
-## 五、行动建议
+## 六、行动建议
 
 ### 短期行动项（3-6个月）
 1. **启动POC项目**：选择一个具体业务场景进行Gemma 4蒸馏试点
@@ -388,7 +497,7 @@
 4. **持续创新**：不断探索AI技术的新应用场景
 5. **价值创造**：通过AI技术创造显著的商业价值
 
-## 六、会议议程
+## 七、会议议程
 
 ### 第一部分：行业趋势与组织转型（45分钟）
 - Block公司案例解析
@@ -415,21 +524,21 @@
 - 关键决策确认
 - 下一步安排
 
-## 七、预期成果
+## 八、预期成果
 - 形成AI转型战略框架
 - 制定具体实施路线图
 - 明确各部门责任分工
 - 建立定期评估机制
 - 确定POC项目启动方案
 
-## 八、参考文档
+## 九、参考文档
 - [AI时代组织转型：从层级到智能](file:///workspace/docs/planning/ai-era-organization-transformation.md)
 - [AI模型控制法则：防止大模型越权发颠的实战指南](file:///workspace/docs/planning/ai-model-control-laws.md)
 - [AI转型领导力讨论：高层学习会议主题](file:///workspace/docs/planning/ai-transformation-leadership-discussion.md)
 - [IDE隔离沙箱内蒸馏世界模型：建立公司模型的可行性分析](file:///workspace/docs/planning/ide-sandbox-world-model-distillation.md)
 - [Gemma 4模型与知识蒸馏技术分析](file:///workspace/docs/planning/gemma4-distillation-analysis.md)
 
-## 九、签名
+## 十、签名
 
 ### 会议召集人
 - **姓名**：_____________________
