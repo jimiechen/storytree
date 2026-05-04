@@ -39,8 +39,8 @@ yarn-error.log*
 # Package manager lock files (optional - uncomment if needed)
 # package-lock.json
 # yarn.lock
-# bun.lock
-# pnpm-lock.yaml
+bun.lock
+pnpm-lock.yaml
 
 # Cache
 .cache/
@@ -49,7 +49,6 @@ yarn-error.log*
 
 # Tauri build artifacts
 packages/desktop/src-tauri/target/
-packages/opencode/dist/
 
 # Temporary files
 tmp/
@@ -67,8 +66,16 @@ coverage/
 *.orig
 
 # StoryTree project specific
-# Third-party source code (too large for repo)
-caiode/opencode-1.4.0/
+# opencode-1.4.0: 只排除构建产物和依赖，保留源码
+caiode/opencode-1.4.0/node_modules/
+caiode/opencode-1.4.0/dist/
+caiode/opencode-1.4.0/target/
+caiode/opencode-1.4.0/packages/*/node_modules/
+caiode/opencode-1.4.0/packages/*/dist/
+caicode/opencode-1.4.0/.turbo/
+caiode/opencode-1.4.0/.cache/
+
+# Other third-party source (too large for repo)
 caiode/claude-code-src/
 caiode/Trae-Ralph-main/
 
