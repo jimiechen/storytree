@@ -949,9 +949,61 @@ opencode plugin install  # 安装新插件
 
 ---
 
-**报告编写**: AI Assistant (Week 0 Feasibility Analysis)  
-**审核状态**: 待人工审核  
-**下一步**: 根据 Week 1 计划开始环境搭建  
+## 十一、Git 仓库状态 (2026-05-04 更新)
+
+### 11.1 远程仓库信息
+
+| 项目 | 值 |
+|------|-----|
+| **远程地址** | `git@github.com:jimiechen/storytree.git` |
+| **主分支** | `main` |
+| **仓库路径** | `c:\projects\storytree` |
+
+### 11.2 提交历史
+
+| # | Commit Message | Hash | 日期 | 内容 |
+|---|---------------|------|------|------|
+| 1 | `feat(OPENCODE-001): 添加opencode v1.4.0关键源码` | `d4546c87` | 2026-05-04 | **4718 个文件, 48.11 MiB** - opencode 完整源码(排除 node_modules/dist/target) |
+| 2 | `docs(TABBIT): 添加tabbit文档目录` | `03b6183c` | 2026-05-04 | TabAI 会话文档 (289 行) |
+| 3 | `chore(CLEANUP-001): 删除opencode目录并提交编译文档` | `8ed9381c` | 2026-05-04 | 删除旧 opencode 目录, 更新 .gitignore, 添加 Week0/Week1 报告 |
+
+### 11.3 .gitignore 策略
+
+**opencode-1.4.0 目录排除规则**:
+```gitignore
+# 只排除构建产物和依赖，保留源码
+caiode/opencode-1.4.0/node_modules/
+caiode/opencode-1.4.0/dist/
+caiode/opencode-1.4.0/target/
+caiode/opencode-1.4.0/packages/*/node_modules/
+caiode/opencode-1.4.0/packages/*/dist/
+caiode/opencode-1.4.0/.turbo/
+caiode/opencode-1.4.0/.cache/
+```
+
+### 11.4 已提交的关键源码目录
+
+| 目录 | 说明 | 二开相关度 |
+|------|------|----------|
+| `packages/opencode/src/` | 核心后端 (agent/server/provider/tool) | ⭐⭐⭐⭐⭐ |
+| `packages/app/src/` | 前端应用 (Solid.js) | ⭐⭐⭐⭐⭐ |
+| `packages/desktop/src/` | Tauri 桌面应用 | ⭐⭐⭐⭐ |
+| `packages/ui/src/` | UI 组件库 | ⭐⭐⭐⭐ |
+| `packages/sdk/` | SDK 客户端 | ⭐⭐⭐ |
+| `packages/plugin/src/` | 插件系统 | ⭐⭐⭐⭐ |
+
+### 11.5 同步状态
+
+- ✅ **所有提交已推送到远程** (`origin/main`)
+- ✅ **工作区干净**, 无未提交更改
+- ✅ **其他开发分支可正常拉取源码**
+
+---
+
+**报告编写**: AI Assistant (Week 0 Feasibility Analysis)
+**审核状态**: 待人工审核
+**最后更新**: 2026-05-04 (添加 Git 仓库状态)
+**下一步**: 根据 Week 1 计划开始环境搭建
 
 ---
 

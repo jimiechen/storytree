@@ -959,12 +959,59 @@ A: Tauri 内置 Updater 插件:
 
 ---
 
-**报告编写**: AI Assistant (Tauri Build Test)  
-**审核状态**: 待人工审核  
-**关联文档**: 
+## 九、Git 仓库状态 (2026-05-04 更新)
+
+### 9.1 远程仓库信息
+
+| 项目 | 值 |
+|------|-----|
+| **远程地址** | `git@github.com:jimiechen/storytree.git` |
+| **主分支** | `main` |
+| **仓库路径** | `c:\projects\storytree` |
+
+### 9.2 提交历史
+
+| # | Commit Message | Hash | 日期 | 内容 |
+|---|---------------|------|------|------|
+| 1 | `feat(OPENCODE-001): 添加opencode v1.4.0关键源码` | `d4546c87` | 2026-05-04 | **4718 个文件, 48.11 MiB** - opencode 完整源码(含 Tauri 桌面应用源码) |
+| 2 | `docs(TABBIT): 添加tabbit文档目录` | `03b6183c` | 2026-05-04 | TabAI 会话文档 (289 行) |
+| 3 | `chore(CLEANUP-001): 删除opencode目录并提交编译文档` | `8ed9381c` | 2026-05-04 | 删除旧 opencode 目录, 更新 .gitignore, **包含本报告** |
+
+### 9.3 Tauri 源码已包含
+
+本次推送的 opencode-1.4.0 源码中**完整包含** Tauri 桌面应用源码:
+
+| 目录 | 说明 | 状态 |
+|------|------|------|
+| `packages/desktop/src/` | SolidJS 前端源码 | ✅ 已提交 |
+| `packages/desktop/src-tauri/` | Rust 后端 (Cargo.toml, tauri.conf.json) | ✅ 已提交 |
+| `packages/desktop/src-tauri/src/` | Rust 源码 (lib.rs, cli.rs) | ✅ 已提交 |
+| `packages/desktop/src-tauri/icons/` | 应用图标资源 | ✅ 已提交 |
+| `packages/desktop/scripts/` | 构建脚本 | ✅ 已提交 |
+
+### 9.4 .gitignore 策略
+
+```gitignore
+# Tauri build artifacts (排除编译产物，保留源码)
+packages/desktop/src-tauri/target/
+```
+
+### 9.5 同步状态
+
+- ✅ **所有提交已推送到远程** (`origin/main`)
+- ✅ **工作区干净**, 无未提交更改
+- ✅ **Tauri 桌面应用源码可供其他分支拉取**
+- ✅ **本报告已纳入版本控制**
+
+---
+
+**报告编写**: AI Assistant (Tauri Build Test)
+**审核状态**: 待人工审核
+**最后更新**: 2026-05-04 (添加 Git 仓库状态)
+**关联文档**:
 - [week-0-feasibility-report.md](./week-0-feasibility-report.md)
-- [week-1-environment-setup.md](./week-1-environment-setup.md)  
-**下一里程碑**: 完成首次 Tauri 桌面安装包构建  
+- [week-1-environment-setup.md](./week-1-environment-setup.md)
+**下一里程碑**: 完成首次 Tauri 桌面安装包构建
 
 ---
 
