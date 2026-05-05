@@ -33,13 +33,16 @@
 ### 2.1 当前开发环境
 
 ```bash
-操作系统: Windows
+操作系统: Windows 10 (19045) x64
 Node.js: v25.8.0
 npm: 11.11.0
-Bun: ❌ 未安装（需要安装）
+Bun: ✅ v1.3.13 (已安装)
+Rust: ✅ 1.95.0 (MSVC, 已安装)
 ```
 
-**环境状态**: ⚠️ **部分就绪** - 需要安装 Bun 运行时
+**环境状态**: ✅ **完全就绪** - 所有工具已安装 (Week 1 环境搭建完成)
+
+> 📝 **更新说明**: 本报告编写时 Bun 未安装，Week 1 已完成环境搭建。详见 [week-1-environment-setup.md](./week-1-environment-setup.md)。
 
 ### 2.2 opencode v1.4.0 项目结构
 
@@ -756,22 +759,24 @@ describe("NovelEditor Component", () => {
 
 ## 八、实施路线图 (Week 1-4 建议)
 
-### Week 1: 环境搭建与 Hello World
+### Week 1: 环境搭建与 Hello World ✅ **已完成**
 
 **目标**: 成功编译并运行 opencode v1.4.0
 
 **任务清单**:
-- [ ] 安装 Bun 运行时
-- [ ] 执行 `bun install`
-- [ ] 运行 `bun run typecheck` (修复可能的类型错误)
-- [ ] 启动 `opencode web` 并访问 Web UI
+- [x] 安装 Bun 运行时 (v1.3.13, 2026-05-04)
+- [x] 执行 `bun install` (2600+ packages, --ignore-scripts)
+- [x] 运行 `bun run typecheck` (13/13 packages 全部通过 ✅)
+- [x] 启动 Web UI 并访问 (Vite v7.1.4 @ localhost:3000 ✅)
+- [x] 启动后端 API 服务 (opencode serve @ localhost:4096 ✅)
 - [ ] 创建第一个 session 并完成对话测试
 - [ ] 编写首个单元测试验证测试框架可用
 
 **交付物**:
-- 可运行的 opencode 开发环境
-- 环境搭建文档 (含踩坑记录)
-- Smoke test 通过截图
+- [x] 可运行的 opencode 开发环境
+- [x] 环境搭建文档 → [week-1-environment-setup.md](./week-1-environment-setup.md)
+- [x] Tauri 打包测试报告 → [week-1-tauri-build-test.md](./week-1-tauri-build-test.md)
+- [ ] Smoke test 通过截图
 
 ### Week 2: 最小化 Novel Plugin 原型
 
