@@ -78,75 +78,329 @@
 ```text
 Design a desktop-first MVP prototype for an AI novel editor called "Card Story Novel Studio" (卡牌物语小说工作室).
 
+⚠️ CRITICAL REQUIREMENTS (MUST FOLLOW EXACTLY):
+This is v1.1 revised prompt based on prototype review feedback. You MUST satisfy ALL quantitative requirements below.
+
 The app is in Mock Mode only. It does not connect to real AI models, real agents, API keys, command execution, web search, or external tools.
 
 The product helps a novelist manage a fiction project, edit chapters, view character cards, and run simulated AI writing tasks through a FakeAgentProvider.
 
-Create a clean, modern, professional writing workspace with the following main areas:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📊 MANDATORY DATA QUANTITY REQUIREMENTS (v1.1 ENFORCEMENT)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-1. A top project header showing project name, genre, word count, last updated time, and a visible "Mock Mode" badge (🧪).
-2. A left sidebar with chapter list, chapter status (draft/revised/completed), word count, and selected chapter highlight.
-3. A central chapter editor with title input, outline section, main rich text writing area, and AI suggestion result cards below.
-4. A right sidebar with character cards (name, role, personality, speaking style, relationships) and worldbuilding notes.
-5. A bottom or floating AI task panel with buttons for "Continue Writing", "Rewrite Selection", "Summarize Chapter", and "Rewrite in Character Voice".
-6. An AI task log drawer sliding from the right, showing task history with status badges: pending, running, success, failed, cancelled, permission_denied, quota_exceeded.
-7. Clear action buttons on AI result cards: "Accept to Editor", "Save to Suggestions", "Discard".
+❗ YOU MUST include exactly the following quantities - no more, no less:
 
-Use a calm creative writing style with:
-- Soft neutral backgrounds (warm gray or soft parchment)
-- White or light content cards with subtle borders
-- Comfortable readable typography for long-form writing
-- Clear status badges with color coding (gray=pending, blue=running, green=success, red=failed, orange=warning)
-- Minimal distractions, editor-first layout
-- Elegant fantasy writing atmosphere but NOT game-like
-- Professional productivity tool feel, NOT chatbot UI
-- Side panels should feel supportive, not dominant
+1. CHAPTERS: Show exactly 3+ chapters in the left sidebar:
+   - Chapter 1: "雪岭异兽" (Snow Beast) - Status: ✅ COMPLETED (green) - 2,450 words
+   - Chapter 2: "流萤夜火" (Firefly Night) - Status: 🔄 REVISED (blue) - 3,180 words
+   - Chapter 3: "失落符牌" (Lost Cards) - Status: 📝 DRAFT (gray) - 1,260 words [SELECTED/HIGHLIGHTED]
+   Each chapter MUST show: title, status badge (colored dot + text), word count
 
-Color palette suggestions:
-- Background: #F5F1E8 (warm parchment) or #FAFAFA (soft gray)
-- Primary: #4338CA (deep indigo) or #7C3AED (muted violet)
-- Accent: #D97706 (amber) or #F59E0B (soft gold)
-- Success: #10B981 (green)
-- Warning: #F59E0B (orange)
-- Error: #EF4444 (red)
-- Info: #3B82F6 (blue)
+2. CHARACTERS: Show exactly 3+ characters in the right sidebar with FULL detail:
+   Character 1 (Primary/Active):
+   - Name: 苏瑶 (Su Yao) | Role: 神秘少女 (Mysterious Girl)
+   - Personality Tags: [冷静疏离] [内心藏有秘密]
+   - Speaking Style: "言简意赅，常用反问句。"
+   - Goal: 寻找失落符牌的真相
+   - Secret: 👁️ 能听到卡牌的低语（click to reveal）
+   - Relationships: ↗ 陆长风(导师) ↘ 凯瑟琳女王(对立)
 
-DO NOT INCLUDE:
-- Real AI model provider settings (OpenAI, Claude, Gemini, etc.)
-- API key input fields or configuration panels
-- Billing, subscription, or usage quota pages
-- Command execution tools, terminal panels, Shell/Bash interfaces
-- Web search tools, web scraping, URL fetchers
-- External agent tools, multi-agent orchestration
-- Deployment settings, Docker configs, CI/CD panels
-- Plugin marketplace or extension management
-- Admin dashboard, user management, role-based access
-- Real cloud sync settings or Git integration panels
-- Social features, community, comments, sharing
-- Publishing marketplace, e-book export, format conversion
-- NFT, token, blockchain, or Web3 features
-- Gaming UI elements, heavy gradients, cyberpunk aesthetics
-- Chat-first layouts or conversational interfaces
+   Character 2 (Secondary):
+   - Name: 陆长风 (Lu Changfeng) | Role: 铸卡师导师 (Mentor)
+   - Personality Tags: [谨慎] [博学] [隐瞒往事]
+   - Speaking Style: "学术性、隐喻多、停顿频繁..."
+   - Goal: 引导苏瑶但不暴露全部真相
+   - Secret: 曾是王室工程师
+   - Relationships: ↘ 苏瑶(学生) ↔ 维克多(旧友)
 
-The prototype must clearly communicate: "This is a Mock Mode prototype for validating the minimum viable product loop of an AI novel editor."
+   Character 3 (Antagonist):
+   - Name: 凯瑟琳女王 (Queen Catherine) | Role: 统治者 (Ruler)
+   - Personality Tags: [冷酷] [果断] [控制欲强]
+   - Speaking Style: "命令式、威严、不带感情"
+   - Goal: 维持统治，消灭威胁
+   - Secret: 发条核心正在衰竭
+   - Relationships: ↗ 苏瑶(猎物) ↘ 陆长风(叛徒)
+
+3. AI TASK STATUSES: Show ALL 7 statuses in the task log area:
+   - ⏳ pending (gray): "续写 第4章" - just created, waiting
+   - 🔄 running (blue with spinner): "改写 第3段" - processing 67%
+   - ✅ success (green): "续写 第2章" - completed, 2.3s
+   - ❌ failed (red): "摘要 第5章" - error: timeout
+   - 🚫 cancelled (gray strikethrough): "语气改写 第1章" - user cancelled
+   - ⛔ permission_denied (orange-red): "续写 第20章" - no permission
+   - 💳 quota_exceeded (amber): "改写 第18章" - daily limit reached
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🎨 LAYOUT STRUCTURE (Three-Column Editor Layout)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Create a clean, modern, professional writing workspace with these areas:
+
+┌──────────────────────────────────────────────────────────────────────┐
+│ [🧪 MOCK MODE - 模拟模式]  卡牌物语 | 山海关外·异兽录 | 12,400字    │
+│                        [发布] [☁] [🔔] [👤]                         │
+├──────────────┬─────────────────────────────┬────────────────────────┤
+│              │                             │                        │
+│  LEFT SIDEBAR│     CENTER EDITOR           │   RIGHT SIDEBAR        │
+│  (240px)     │     (flexible width)        │   (300px)              │
+│              │                             │                        │
+│  📖 当前项目  │  第三章：失落符牌            │  📝 上下文面板          │
+│  ─────────  │  ─────────────────────      │  ─────────────────    │
+│              │                             │                        │
+│  章节目录:   │  【本章大纲】(EXPANDED)      │  🔵 焦点角色           │
+│  ● 雪岭异兽  │  ▸ 目标: 揭示失落符牌的      │  ┌──────────────────┐ │
+│    ✅已完成   │    来源与苏瑶的身世之谜       │  │ 苏瑶 · 神秘少女    │ │
+│  ● 流萤夜火  │  ▸ 冲突: 陆长风隐瞒关键      │  │ 性格: 冷静疏离...  │ │
+│    🔄修订中   │    信息，苏瑶开始怀疑        │  │ 目标: 寻找真相     │ │
+│  ▸ 失落符牌  │  ▸ 关键剧情: 发现地下工坊    │  │ 秘密: 👁️ 点击查看  │ │
+│    📝草稿 ★  │    的异常发条装置            │  │ 关系: ↗导师 ↘对立  │ │
+│              │                             │  └──────────────────┘ │
+│  ─────────  │  ─────────────────────      │                        │
+│  ⚙️ 设置库   │                             │  🌍 世界观词条命中       │
+│  👤 角色档案  │  正文编辑区:                 │  ┌──────────────────┐ │
+│  🌐 世界设定  │  风雪交加的夜晚，客栈大门...  │  │ 失落符牌 🔗        │ │
+│  📋 剧情分支  │  （舒适阅读字体，行高1.8）    │  │ 具有破碎幻术的能力  │ │
+│  🏠 家族     │                             │  │ 前朝遗物...         │ │
+│  🤖 AI任务中心│  ████ 光标位置               │  └──────────────────┘ │
+│  📤 同步发布  │                             │                        │
+│              │  ─────────────────────      │  ─────────────────    │
+│              │                             │                        │
+│              │  🤖 AI 建议 (Mock Result)    │  📋 最近 AI 任务       │
+│              │  ┌──────────────────────┐   │  查看全部 →            │
+│              │  │✏️ 续写建议 [Mock Mode] │   │  重写任务 🔄运行中   │
+│              │  │状态: ✅ 成功 | 2.3s   │   │  续写任务 ✅成功     │
+│              │  │                     │   │  摘要生成 ❌失败      │
+│              │  │她轻轻转动最外面的...  │   │  配额超限 💳拒绝      │
+│              │  │[采纳] [存为灵感] [忽略]│   │                        │
+│              │  └──────────────────────┘   │                        │
+├──────────────┴─────────────────────────────┴────────────────────────┤
+│ [✏️AI续写] [🔄重写选段] [📝章节摘要] [🎭角色语气]  FakeAgentProvider │
+└──────────────────────────────────────────────────────────────────────┘
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🎯 DETAILED AREA SPECIFICATIONS (v1.1 REVISIONS)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+AREA 1: TOP HEADER (Fixed, Full Width)
+- Project name: "卡牌物语" (large bold)
+- Subtitle: "山海关外·异兽录"
+- Stats inline: "奇幻 | 12,400字 | 最后更新: 刚刚"
+- **🆕 Mock Mode Badge**: 
+  * Position: TOP-LEFT or TOP-CENTER (very prominent)
+  * Style: Amber gradient background (#FDE68A → #F59E0B), rounded pill shape
+  * Text: "🧪 Mock Mode ✏️" with subtle pulse animation
+  * Size: Large enough to be immediately noticeable (not tiny)
+  * Alternative: Full-width banner below header with amber tint (#FEF3C7 bg)
+
+AREA 2: LEFT SIDEBAR - CHAPTER LIST (Width: 220-240px)
+- Section header: "章节目录" with "+" button
+- Chapter list items (show 3+ chapters as specified above)
+- **🆕 Each chapter MUST show**:
+  * Colored status dot (●): Green=completed, Blue=revised, Gray=draft
+  * Chapter title (bold if selected)
+  * Status text label ("已发布"/"修订中"/"草稿")
+  * Word count (e.g., "2.4k字")
+  * Selected chapter: Soft highlight background + left border accent
+- Bottom section: Navigation links (设置库/角色档案/世界设定/...)
+- Very bottom: "+ 新建章节" button + settings gear icon
+
+AREA 3: CENTER EDITOR (Flexible Width, Takes 50-60% of screen)
+- Chapter title input field (large, editable)
+- **🆕 Outline Section (EXPANDED by default)**:
+  * Header: "本章大纲" with collapse arrow
+  * Show 3 bullet points visible:
+    - ▸ 目标: 揭示失落符牌的来源与苏瑶的身世之谜
+    - ▸ 冲突: 陆长风隐瞒关键信息，苏瑶开始怀疑
+    - ▸ 关键剧情: 发现地下工坊的异常发条装置
+- Main writing area:
+  * Clean typography, line-height 1.7-1.8 for long-form reading
+  * Comfortable font size (16-18px base)
+  * Show 2-3 paragraphs of mock novel text content
+  * Cursor position indicator
+- **🆕 AI Suggestion Result Card (Below editor)**:
+  * Header icon + "AI 建议" label
+  * Subtitle: "根据前文节点，是否深化角色老板娘的试探性对话？"
+  * Mock Mode badge on card: "[Generated by FakeAgentProvider]"
+  * Status badge: "✅ 成功 | 耗时 2.3s"
+  * Preview text (2-3 lines)
+  * Action buttons (FULL SIZE, not tiny):
+    - "采纳" (Primary, solid blue/indigo background)
+    - "存为灵感" (Secondary, outline style)
+    - "忽略" (Tertiary, text only)
+
+AREA 4: RIGHT SIDEBAR - CONTEXT PANEL (Width: 280-320px)
+- Header: "上下文面板" with ">>" collapse button
+- **🆕 Character Section (Show 3 characters as specified above)**:
+  * Active character card (expanded, full details)
+  * Character switcher tabs or mini-list below (show other 2 characters)
+  * Each character card MUST include ALL fields:
+    - Avatar/icon placeholder
+    - Name + Role identity
+    - Personality tags (pill badges)
+    - Goal (1 sentence)
+    - Secret (with eye icon, click-to-reveal interaction hint)
+    - Speaking style example (in quotes)
+    - Relationship list (with arrow indicators)
+- **🆕 Worldbuilding Section**:
+  * Header: "世界观词条命中"
+  * Current location entry (e.g., "失落符牌")
+  * Description paragraph (2-3 lines)
+  * Additional metadata: Location type, timeline position
+- **🆕 Recent AI Tasks List (Show all 7 statuses)**:
+  * Header: "最近 AI 任务" with "查看全部 →" link
+  * Task items (compact list, each showing):
+    * Task type icon + short name
+    * Related chapter reference
+    * Status badge (color-coded per the 7-status requirement)
+  * Must include examples of ALL 7 states (pending/running/success/failed/cancelled/permission_denied/quota_exceeded)
+
+AREA 5: BOTTOM AI TASK TOOLBAR (🆕 REVISED LAYOUT)
+- **NOT floating circular buttons** (that was v1.0 issue)
+- Instead use ONE of these layouts (choose one):
+  
+  Option A (Recommended): Fixed bottom toolbar
+  ┌─────────────────────────────────────────────────────────────────┐
+  │ [✏️ AI续写] [🔄 重写选段] [📝 章节摘要] [🎭 角色语气改写]  │ Provider: FakeAgentProvider | This is a Mock Mode prototype │
+  └─────────────────────────────────────────────────────────────────┘
+  * Full-width bar below editor
+  * Large touch-friendly buttons with icons AND text labels
+  * Right side: Provider label + Mock disclaimer
+  
+  Option B: Right-side fixed panel
+  * Narrow panel (200px) docked to right edge
+  * Vertical stack of task buttons
+  * Always visible, doesn't overlay content
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🎨 VISUAL STYLE SPECIFICATIONS (v1.1 COLOR ALIGNMENT)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Color Palette (EXACT values - use these hex codes):
+- Background: #F5F1E8 (warm parchment - NOT cold gray) ← 🆕 CORRECTED
+- Content Cards: #FFFFFF (white)
+- Borders: #E5E7EB (light gray, 1px solid)
+- Primary Action: #4338CA (deep indigo)
+- Primary Hover: #3730A3 (darker indigo)
+- Accent/CTA: #D97706 (amber) or #F59E0B (soft gold)
+- Success: #10B981 (green) / BG: #D1FAE5
+- Warning: #F59E0B (orange) / BG: #FEF3C7
+- Error: #EF4444 (red) / BG: #FEE2E2
+- Info: #3B82F6 (blue) / BG: #DBEAE
+- Text Primary: #111827 (near black)
+- Text Secondary: #6B7280 (medium gray)
+- Mock Mode Accent: #FDE68A → #F59E0B (amber gradient)
+
+Typography:
+- Interface: Inter, system-ui, sans-serif (clean, modern)
+- Editor Content: Source Serif Pro, Georgia, Noto Serif SC (for Chinese)
+- Code/Monospace: JetBrains Mono (for IDs, timestamps)
+- Base font size: 14-16px UI / 16-18px editor
+- Line height: 1.5 UI / 1.7-1.8 editor
+
+Spacing System:
+- Card padding: 16-20px internal
+- Section gaps: 16-24px between major areas
+- Component spacing: 8-12px between related elements
+- Border radius: 8px cards / 12px panels / 9999px pills
+
+Status Badge Styles (MANDATORY):
+- Shape: Pill (fully rounded) or rounded rectangle (6px radius)
+- Size: Height 20-22px, padding horizontal 10-12px
+- Icon prefix + text label
+- Color mapping (STRICT):
+  * pending: bg=#F3F4F6 text=#6B7280 icon=⏳
+  * running: bg=#DBEAFE text=#1E40AF icon=🔄 (+spinner animation)
+  * success: bg=#DCFCE7 text=#166534 icon=✅
+  * failed: bg=#FEE2E2 text=#991B1B icon=❌
+  * cancelled: bg=#F3F4F6 text=#6B7280 icon=🚫 (strikethrough text)
+  * permission_denied: bg=#FED7AA text=#9A3412 icon=⛔
+  * quota_exceeded: bg=#FEF3C7 text=#92400E icon=💳
+
+Design Principles:
+- Calm creative writing atmosphere (like Scrivener, Ulysses, Notion)
+- Elegant fantasy undertone but NOT game-like (no RPG elements)
+- Professional productivity tool feel (NOT chatbot UI)
+- Editor-first layout (center area dominates)
+- Side panels supportive, not distracting
+- Minimal chrome, maximum content visibility
+- Warm and inviting, not cold/clinical
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🚫 STRICT PROHIBITIONS (UNCHANGED FROM v1.0)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+DO NOT INCLUDE ANY OF THESE (absolute ban):
+
+❌ Real AI model provider settings (OpenAI/Claude/Gemini/etc.)
+❌ API key input fields or configuration panels
+❌ Billing, subscription, usage quota pages
+❌ Command execution tools, terminal panels, Shell/Bash interfaces
+❌ Web search tools, web scraping, URL fetchers
+❌ External agent tools, multi-agent orchestration
+❌ Deployment settings, Docker configs, CI/CD panels
+❌ Plugin marketplace or extension management
+❌ Admin dashboard, user management, role-based access
+❌ Real cloud sync settings or Git integration panels
+❌ Social features, community, comments, sharing
+❌ Publishing marketplace, e-book export, format conversion
+❌ NFT, token, blockchain, or Web3 features
+❌ Gaming UI elements (HP bars, inventory grids, achievements)
+❌ Heavy gradients, cyberpunk aesthetics, terminal style
+❌ Chat-first layouts, conversation threads, message bubbles
+❌ Notification badges, activity feeds, social proof
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+✅ VALIDATION CHECKLIST (Self-check before finalizing)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Verify your prototype includes ALL of these (mandatory):
+
+□ 3+ chapters with status dots, word counts, and labels
+□ 3+ characters with FULL details (name/role/personality/goal/secret/style/relationships)
+□ All 7 AI task statuses represented (pending/running/success/failed/cancelled/perm_denied/quota_exceeded)
+□ Mock Mode badge prominent (amber gradient, large, noticeable)
+□ AI result card with 3 action buttons (Accept/Save/Discard)
+□ Worldbuilding notes section with location/timeline info
+□ Chapter outline section expanded by default with 3+ bullets
+□ Warm parchment background color (#F5F1E8) not cold gray
+□ Fixed bottom toolbar OR right panel for AI tasks (not floating circles)
+□ "FakeAgentProvider" label visible somewhere
+□ No prohibited elements from the ban list above
+
+If ALL checkboxes pass, the prototype meets v1.1 requirements.
 ```
 
-### 中文说明
+### 中文说明 (v1.1 更新)
 
-这个提示词用于生成**完整 MVP 应用总览原型**。它强调：
+这个提示词用于生成**完整 MVP 应用总览原型（修正版）**。
 
-**核心要素**：
+#### 🆕 v1.0 → v1.1 主要变更：
+
+| 变更项 | v1.0 问题 | v1.1 修正 |
+|-------|----------|----------|
+| **数据密度** | 角色 1 个、状态 4 种 | **强制 ≥3 角色、全部 7 种状态** |
+| **AI 任务面板** | 底部圆形悬浮按钮 | **固定底部工具条 或 右侧面板** |
+| **Mock 提示** | 小徽章易忽略 | **琥珀色渐变大徽章 + 横幅备选** |
+| **角色信息** | 仅姓名/性格 | **补充目标/秘密/关系网络（完整卡片）** |
+| **章节大纲** | 折叠隐藏 | **默认展开显示 3 个要点** |
+| **色彩系统** | 冷灰色背景 | **暖羊皮纸色 #F5F1E8** |
+| **世界观** | 单薄词条 | **增加地点/时间线/元数据** |
+| **布局参考** | 文字描述 | **新增 ASCII 布局示意图** |
+
+#### 核心要素（保持不变）：
 - ✅ 桌面端优先的写作工作空间布局
-- ✅ 明确的 Mock Mode 标识
-- ✅ 5 大区域：项目头部 + 章节侧栏 + 编辑区 + 角色侧栏 + AI 任务面板
-- ✅ AI 日志抽屉 + 结果操作按钮
+- ✅ 明确的 Mock Mode 标识（强化版）
+- ✅ 三栏式：项目头部 + 章节侧栏 + 编辑区 + 角色侧栏 + AI 任务工具栏
+- ✅ AI 日志区域 + 结果操作按钮
 
-**设计风格**：
+#### 设计风格（对齐修正）：
 - 专业写作工具感（类似 Notion、Scrivener、Ulysses）
-- 温暖创意氛围（非游戏化、非聊天机器人）
-- 编辑器优先布局（侧栏辅助，不喧宾夺主）
+- **温暖创意氛围**（暖羊皮纸背景 #F5F1E8）
+- 编辑器优先布局（侧栏辅助）
+- 琥珀金色调点缀（非冷灰蓝）
 
-**严格禁止**：
+#### 严格禁止（保持不变）：
 - 所有真实模型配置、API Key、计费系统
 - 所有高权限工具（终端、命令行、网络搜索）
 - 所有非 MVP 功能（社交、发布、插件市场等）
