@@ -4,43 +4,69 @@
 
 ## 当前任务状态
 
-**最后更新时间**: 2026-04-09 21:15:00
-**当前任务来源**: `docs/planning/vscode-oss-integration/phase1-task-breakdown.md`
-**当前阶段**: Phase1 单元测试已完成，环境配置待修复，前端战略调整为 opencode 二次开发
-**下一步**: 执行 FE-OP-001 调研 opencode 项目结构
+**最后更新时间**: 2026-05-15 22:00:00
+**当前任务来源**: `caiode/docs/tabbit/TabAI会话_1778857995607.md`
+**当前阶段**: Phase 0 路书文档已完成，准备进入插件底座实现阶段
+**下一步**: 创建功能分支，启动 Plugin Runtime 核心接口实现
+
+---
 
 ## 任务来源清单
 
 ### 主要任务来源 (按优先级排序)
 
-1. **Phase1 任务分解文档**
+1. **OpenCode Creative Studio 插件化路书**
+   - 路径: `caiode/docs/tabbit/TabAI会话_1778857995607.md`
+   - 状态: 已解析，6份核心文档已创建
+   - 优先级: P0
+   - 时间跨度: 2026-05 ~ 2028-05 (两年)
+
+2. **Phase 0 前置工作清单**
+   - 路径: `docs/planning/PRE-PHASE0-CHECKLIST.md`
+   - 状态: 已完成
+   - 优先级: P0
+   - 内容: 工作空间清理、备份、路书解析
+
+3. **Phase 0 路书文档 (6份)**
+   - 路径: `docs/roadmap/`
+   - 状态: 已完成
+   - 优先级: P0
+   - 内容: 产品路书、插件架构、商业模型、两年规划、定价策略、30天计划
+
+4. **Phase1 任务分解文档 (历史)**
    - 路径: `docs/planning/vscode-oss-integration/phase1-task-breakdown.md`
    - 状态: 单元测试已完成，集成测试待执行
-   - 优先级: P0
+   - 优先级: P2 (历史任务)
 
-2. **Phase1 实现计划评审报告**
-   - 路径: `docs/reviews/phase1-implementation-plan-review-20260409.md`
-   - 状态: 已评审，待执行
-   - 优先级: P1
-
-3. **Phase1 执行报告**
-   - 路径: `docs/reports/phase1-execution-report-20260409.md`
-   - 状态: 已生成
-   - 优先级: P2
-
-4. **Ralph 任务列表**
-   - 路径: `04-ralph-tasks.md`
-   - 状态: 待检查
-   - 优先级: P0
-
-5. **测试计划**
-   - 路径: `05-test-plan.md`
-   - 状态: 待检查
-   - 优先级: P0
+---
 
 ## 已完成的任务
 
-### 2026-04-09 完成任务
+### 2026-05-15 完成任务
+
+1. **Phase 0 前置工作清单准备**
+   - 来源: `TabAI会话_1778857995607.md`
+   - 任务ID: PRE-PHASE0-20260515
+   - 状态: ✅ 已完成
+   - 完成内容:
+     - 清理不合规工作空间文件 (1.md, 2.md, 3.md)
+     - 备份 Week 0 临时文件到 backups/pre-phase0-20260515/
+     - 解析路书为 9 个阶段 + 30 天启动计划
+     - 生成前置工作清单文档
+
+2. **Phase 0 路书文档创建**
+   - 来源: `TabAI会话_1778857995607.md`
+   - 任务ID: DOC-PHASE0-002 ~ DOC-PHASE0-007
+   - 状态: ✅ 已完成
+   - 完成内容:
+     - `docs/roadmap/PRODUCT-ROADMAP-PLUGIN-FIRST.md` — 产品定位与插件化策略
+     - `docs/roadmap/PLUGIN-ARCHITECTURE.md` — 插件架构设计（Runtime/Manifest/Registry/Extension Points）
+     - `docs/roadmap/COMMERCIAL-PLUGIN-MODEL.md` — 商业模型（免费/付费/组合包/额度）
+     - `docs/roadmap/TWO-YEAR-DEVELOPMENT-PLAN.md` — 两年9阶段开发计划
+     - `docs/roadmap/MODULE-PRICING-STRATEGY.md` — 模块定价策略
+     - `docs/roadmap/FIRST-30-DAYS-ACTION-PLAN.md` — 30天启动计划（周任务分解）
+
+### 2026-04-09 完成任务 (历史)
 
 1. **Phase1 单元测试实现**
    - 来源: `phase1-task-breakdown.md`
@@ -54,106 +80,111 @@
    - 状态: ✅ 已完成
    - 完成内容: 队列监控 Output Channel、插件配置页面 Settings UI
 
+---
+
 ## 待执行任务
 
-### 环境配置修复任务
+### Phase 0 核心任务 (当前阶段)
+
+- [x] **DOC-PHASE0-001** 创建 `docs/roadmap/` 目录 ✅
+- [x] **DOC-PHASE0-002** 生成 `PRODUCT-ROADMAP-PLUGIN-FIRST.md` ✅
+- [x] **DOC-PHASE0-003** 生成 `PLUGIN-ARCHITECTURE.md` ✅
+- [x] **DOC-PHASE0-004** 生成 `COMMERCIAL-PLUGIN-MODEL.md` ✅
+- [x] **DOC-PHASE0-005** 生成 `TWO-YEAR-DEVELOPMENT-PLAN.md` ✅
+- [x] **DOC-PHASE0-006** 生成 `MODULE-PRICING-STRATEGY.md` ✅
+- [x] **DOC-PHASE0-007** 生成 `FIRST-30-DAYS-ACTION-PLAN.md` ✅
+
+### 环境配置修复任务 (历史遗留)
 
 - [ ] DEV-ENV-001 安装缺失依赖（@tailwindcss/postcss、proper-lockfile、retry）
 - [ ] DEV-ENV-002 修复 TypeScript 类型错误（MockFileMutex locks 属性）
 - [ ] DEV-ENV-003 修复 LockHandle 类型定义
 - [ ] DEV-ENV-004 修复 SkillRegistry 重复导出问题
 
-### 从 phase1-task-breakdown.md 解析
-
-**DEV 任务**:
-- [ ] DEV-1.1.1 实现 Extension 生命周期管理
-- [ ] DEV-1.1.2 实现 Process Guardian 进程守护
-- [ ] DEV-1.2.1 实现全局 LLM 请求队列调度器
-- [ ] DEV-1.3.1 实现基于文件路径的跨进程 Mutex
-- [ ] DEV-1.4.1 实现 CDP 连接管理器
-- [ ] DEV-1.4.2 实现 SandboxValidator
-- [ ] DEV-1.6.1 实现端到端测试框架
-- [ ] DEV-1.7.1 实现 Git Worktree 管理
-- [ ] DEV-1.8.1 实现配置管理
-
 ### 作废任务（cancelled）
 
 - [-] DEV-1.4.1 插件配置页面 Settings UI（原 dreamweaver 前端）
 - [-] DEV-1.5.1 实现 VS Code 扩展打包脚本（依赖旧前端，暂缓）
 - [-] 所有 dreamweaver/ 目录下的前端开发任务
+- [-] FE-OP-001 ~ ARCH-OP-001 (旧 opencode 调研任务，已被新路书覆盖)
 
-### 新增任务（基于 opencode 二次开发）
+---
 
-- [ ] FE-OP-001 调研 opencode 项目结构，输出二次开发可行性报告
-  - 角色：前端工程师
+## 新增任务（基于 OpenCode Creative Studio 路书）
+
+### 文档任务
+
+- [x] **DOC-ROADMAP-001** 创建插件化商业 Roadmap 项目路书 ✅
+  - 角色：项目协调 Agent
   - 优先级：P0
   - 截止：今日
-  - 产出：docs/planning/opencode-integration-feasibility.md
-  - 重点：opencode 的插件/扩展机制、UI 定制入口、构建方式
+  - 产出：docs/roadmap/ 下 6 份文档
+  - 重点：项目定位、插件架构、商业模式、两年规划、定价策略、30天计划
 
-- [ ] FE-OP-002 将 dreamweaver 的核心 UI 模块（多模型对话面板、任务状态看板）迁移为 opencode 的扩展组件
-  - 角色：前端工程师
-  - 优先级：P1
-  - 截止：明日
-  - 产出：opencode/extensions/ralph-panel/ 目录骨架
-  - 依赖：FE-OP-001 完成后开始
-  - 参考：dreamweaver/ 目录现有代码
+### 研发任务 (Phase 0)
 
-- [ ] BE-OP-001 梳理 dw 项目与 opencode 的 API 对接方案
+- [ ] **DEV-PHASE0-001** 实现 Plugin Runtime 核心接口
+  - 角色：VS Code 插件架构师
+  - 优先级：P0
+  - 截止：第 1 周末
+  - 产出：packages/app/src/core/plugin-runtime/
+
+- [ ] **DEV-PHASE0-002** 实现 Plugin Manifest 规范
+  - 角色：VS Code 插件架构师
+  - 优先级：P0
+  - 截止：第 1 周末
+  - 产出：PLUGIN-MANIFEST-SPEC.md + TypeScript 类型定义
+
+- [ ] **DEV-PHASE0-003** 实现 Mock License Gate
+  - 角色：Node.js 后端工程师
+  - 优先级：P0
+  - 截止：第 1 周末
+  - 产出：License Gate 模拟实现
+
+- [ ] **DEV-PHASE0-004** 实现 Skill Registry
   - 角色：Node.js 后端工程师
   - 优先级：P1
-  - 截止：明日
-  - 产出：docs/planning/opencode-api-bridge-design.md
-  - 重点：dw 的 LLM 调度逻辑如何挂载到 opencode 的 provider 体系
+  - 截止：第 2 周末
+  - 产出：Skill 注册与调用规范
 
-- [ ] ARCH-OP-001 评估 caiode 插件是否需要适配 opencode 的通信协议
-  - 角色：VS Code 插件架构师
-  - 优先级：P2
-  - 截止：后天
-  - 产出：docs/planning/caiode-opencode-compat.md
-  - 重点：当前 IPC/CDP 机制是否与 opencode 兼容
+- [ ] **DEV-PHASE0-005** 实现 Provider Registry
+  - 角色：Node.js 后端工程师
+  - 优先级：P1
+  - 截止：第 2 周末
+  - 产出：OpenRouter/图像/视频 Provider 规范
 
-**TEST 任务**:
-- [x] TEST-1.1.1a 单元测试 - Disposable注册机制 ✅
-- [x] TEST-1.1.2a 单元测试 - 心跳检测逻辑 ✅
-- [x] TEST-1.2.1a 单元测试 - 队列串行性保证 ✅
-- [x] TEST-1.3.2a 单元测试 - FileMutex核心逻辑 ✅
-- [ ] TEST-1.4.1a 集成测试 - CDP连接管理
-- [ ] TEST-1.5.1a 集成测试 - Sandbox验证
-- [ ] TEST-1.6.1a E2E测试 - 扩展安装/卸载
-- [ ] TEST-1.7.1a E2E测试 - 核心功能路径
-- [ ] TEST-1.8.1a 性能测试 - 队列性能基准
-- [ ] TEST-1.9.1a 性能测试 - 内存占用监控
-- [ ] TEST-1.10.1a 安全测试 - 权限边界
-- [ ] TEST-1.11.1a 兼容性测试 - 多平台验证
-- [ ] TEST-1.12.1a 回归测试 - 完整功能验证
-- [ ] TEST-1.13.1a 文档测试 - 安装指南验证
-- [ ] TEST-1.14.1a 文档测试 - API文档准确性
-- [ ] TEST-1.15.1a 验收测试 - 用户场景验证
+### 测试任务
+
+- [ ] **TEST-PHASE0-001** Plugin Runtime 单元测试
+- [ ] **TEST-PHASE0-002** License Gate 单元测试
+- [ ] **TEST-PHASE0-003** Mock Provider 集成测试
+
+---
 
 ## 任务获取流程
 
-### 明天会话开始时的操作顺序
+### 下次会话开始时的操作顺序
 
 1. **读取扣分档案** (第一优先级)
    ```
-   Read /Users/mac/StudioProjects/storytree2/.trae/rules/agent-score-record.md
+   Read c:\projects\storytree\.trae\rules\agent-score-record.md
    ```
 
 2. **读取任务来源记录** (第二优先级)
    ```
-   Read /Users/mac/StudioProjects/storytree2/.trae/rules/task-source-record.md
+   Read c:\projects\storytree\.trae\rules\task-source-record.md
    ```
 
-3. **检查 Ralph 任务列表** (第三优先级)
+3. **检查路书文档** (第三优先级)
    ```
-   Read /Users/mac/StudioProjects/storytree2/04-ralph-tasks.md
-   Read /Users/mac/StudioProjects/storytree2/05-test-plan.md
+   Read c:\projects\storytree\docs\roadmap\FIRST-30-DAYS-ACTION-PLAN.md
    ```
 
 4. **确认当前任务**
    - 根据任务状态确定下一步任务
    - 向用户确认任务来源
+
+---
 
 ## 任务状态标记
 
@@ -164,13 +195,15 @@
 | `[x]` | 已完成 | 已完成并通过测试 |
 | `[-]` | 已阻塞 | 有依赖或其他问题 |
 
+---
+
 ## 签名确认
 
-**Agent**: Claude (秘书 Agent)
-**确认日期**: 2026-04-09
-**当前任务来源**: phase1-task-breakdown.md
-**下一步**: 执行 FE-OP-001 调研 opencode 项目结构
+**Agent**: Kimi-K2.6
+**确认日期**: 2026-05-15
+**当前任务来源**: TabAI会话_1778857995607.md
+**下一步**: 创建功能分支，启动 Plugin Runtime 核心接口实现
 
 ---
 
-*每次会话开始时必须首先读取此文件和agent-score-record.md*
+*每次会话开始时必须首先读取此文件和 agent-score-record.md*

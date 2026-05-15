@@ -85,6 +85,27 @@ export default function Home() {
         />
         {server.name}
       </Button>
+
+      {/* Novel Editor Entry */}
+      <div class="mt-8 flex justify-center gap-4">
+        <Button
+          size="large"
+          class="px-6 flex items-center gap-2"
+          onClick={() => navigate("/novel")}
+        >
+          <span>📖</span>
+          <span>AI 小说编辑器 (Mock)</span>
+        </Button>
+        <Button
+          size="large"
+          class="px-6 flex items-center gap-2"
+          onClick={() => navigate("/canvas")}
+        >
+          <span>🎨</span>
+          <span>故事画布 (Mock)</span>
+        </Button>
+      </div>
+
       <Switch>
         <Match when={sync.data.project.length > 0}>
           <div class="mt-20 w-full flex flex-col gap-4">

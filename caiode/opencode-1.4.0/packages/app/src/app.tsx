@@ -49,6 +49,12 @@ import { useCheckServerHealth } from "./utils/server-health"
 const HomeRoute = lazy(() => import("@/pages/home"))
 const loadSession = () => import("@/pages/session")
 const Session = lazy(loadSession)
+const loadNovel = () => import("@/novel")
+const NovelRoute = lazy(loadNovel)
+const loadCanvas = () => import("@/novel-canvas")
+const CanvasRoute = lazy(loadCanvas)
+const loadShot3D = () => import("@/novel-3d")
+const Shot3DRoute = lazy(loadShot3D)
 const Loading = () => <div class="size-full" />
 
 if (typeof location === "object" && /\/session(?:\/|$)/.test(location.pathname)) {
@@ -297,6 +303,9 @@ export function AppInterface(props: {
                 root={(routerProps) => <RouterRoot appChildren={props.children}>{routerProps.children}</RouterRoot>}
               >
                 <Route path="/" component={HomeRoute} />
+                <Route path="/novel" component={NovelRoute} />
+                <Route path="/canvas" component={CanvasRoute} />
+                <Route path="/shot3d" component={Shot3DRoute} />
                 <Route path="/:dir" component={DirectoryLayout}>
                   <Route path="/" component={SessionIndexRoute} />
                   <Route path="/session/:id?" component={SessionRoute} />
