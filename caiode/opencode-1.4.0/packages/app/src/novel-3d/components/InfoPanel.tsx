@@ -12,6 +12,8 @@ export default function InfoPanel(props: InfoPanelProps) {
     return s.cylinders.find(c => c.id === s.selectedObjectId);
   };
 
+  const mode = () => props.store.transformMode();
+
   return (
     <Show when={selected()}>
       {cyl => (
@@ -37,6 +39,40 @@ export default function InfoPanel(props: InfoPanelProps) {
           <div>ID: {cyl().id}</div>
           <div>Label: {cyl().label}</div>
           <div>Importance: {cyl().importance}</div>
+
+          <div style={{ display: 'flex', gap: '4px', 'margin-top': '4px' }}>
+            <button
+              onClick={() => props.store.setTransformMode('translate')}
+              style={{
+                flex: 1,
+                padding: '6px',
+                'border-radius': '6px',
+                border: '1px solid #444',
+                background: mode() === 'translate' ? '#3d6cff' : '#25262b',
+                color: '#e0e0e0',
+                cursor: 'pointer',
+                'font-size': '12px'
+              }}
+            >
+              移动
+            </button>
+            <button
+              onClick={() => props.store.setTransformMode('scale')}
+              style={{
+                flex: 1,
+                padding: '6px',
+                'border-radius': '6px',
+                border: '1px solid #444',
+                background: mode() === 'scale' ? '#3d6cff' : '#25262b',
+                color: '#e0e0e0',
+                cursor: 'pointer',
+                'font-size': '12px'
+              }}
+            >
+              缩放
+            </button>
+          </div>
+
           <div style={{ display: 'grid', 'grid-template-columns': '1fr 1fr 1fr', gap: '4px' }}>
             <div>X</div>
             <div>Y</div>

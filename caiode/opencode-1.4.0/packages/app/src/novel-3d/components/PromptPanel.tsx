@@ -28,13 +28,17 @@ export default function PromptPanel(props: PromptPanelProps) {
         display: 'flex',
         gap: '8px',
         'align-items': 'center',
-        'z-index': 10
+        'z-index': 100,
+        'pointer-events': 'auto'
       }}
     >
       <input
         type="text"
         value={input()}
         onInput={e => setInput(e.currentTarget.value)}
+        onKeyDown={e => {
+          if (e.key === 'Enter') handleGenerate();
+        }}
         placeholder="输入 prompt，例如：生成 5x4 圆柱体方阵，低机位广角..."
         style={{
           flex: 1,
@@ -44,7 +48,8 @@ export default function PromptPanel(props: PromptPanelProps) {
           background: '#25262b',
           color: '#e0e0e0',
           'font-size': '14px',
-          outline: 'none'
+          outline: 'none',
+          'pointer-events': 'auto'
         }}
       />
       <button
@@ -56,7 +61,9 @@ export default function PromptPanel(props: PromptPanelProps) {
           background: '#3d6cff',
           color: '#fff',
           'font-size': '14px',
-          cursor: 'pointer'
+          cursor: 'pointer',
+          'pointer-events': 'auto',
+          'white-space': 'nowrap'
         }}
       >
         生成
@@ -70,7 +77,9 @@ export default function PromptPanel(props: PromptPanelProps) {
           background: '#25262b',
           color: '#e0e0e0',
           'font-size': '14px',
-          cursor: 'pointer'
+          cursor: 'pointer',
+          'pointer-events': 'auto',
+          'white-space': 'nowrap'
         }}
         title="导出 PNG"
       >
@@ -85,7 +94,9 @@ export default function PromptPanel(props: PromptPanelProps) {
           background: '#25262b',
           color: '#e0e0e0',
           'font-size': '14px',
-          cursor: 'pointer'
+          cursor: 'pointer',
+          'pointer-events': 'auto',
+          'white-space': 'nowrap'
         }}
         title="复制 Prompt"
       >

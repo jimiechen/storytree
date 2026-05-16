@@ -3,7 +3,7 @@
 > **角色**: 项目协调 Agent (Kimi-K2.6)  
 > **任务ID**: DOC-PHASE0-004  
 > **日期**: 2026-05-15  
-> **版本**: v1.0  
+> **版本**: v2.0 (架构优化后)  
 > **状态**: [READY_FOR_REVIEW]
 
 ---
@@ -14,21 +14,22 @@
 
 | 模块 | 是否付费 | 说明 |
 |------|---------|------|
-| Workspace Core | 免费/基础授权 | 项目、文件、任务、资产基础管理 |
+| Novel Editor Core | 免费/基础授权 | 小说编辑器（Core Product，非插件） |
+| Project Workspace | 免费 | 项目、文件、任务、资产基础管理 |
 | Plugin Runtime | 免费 | 插件加载、扩展点、权限系统 |
 | Mock Provider | 免费 | 用于试用和演示 |
 | Basic Asset Library | 免费 | 基础资产管理 |
 | Basic Task Center | 免费 | 本地任务状态和日志 |
+| Skill Loader | 免费 | 发现 .claude/skills 中的 SKILL.md |
 
 ---
 
 ## 二、单模块付费插件
 
-每个创作环节做成独立付费插件。
+每个创作环节做成独立付费插件。**Novel Studio 已从付费插件移出，改为 Novel Editor Core（免费）。**
 
 | 插件 | 付费方式 | 核心价值 |
 |------|---------|---------|
-| Novel Studio Plugin | 单模块购买 / 订阅 | 小说、角色、世界观、章节 |
 | Script Studio Plugin | 单模块购买 / 订阅 | 小说转剧本、对白、动作行 |
 | Storyboard Studio Plugin | 单模块购买 / 订阅 | 剧本转分镜、镜头卡 |
 | 3D Shot Draft Plugin | 单模块购买 / 订阅 | Three.js 3D 镜头草稿 |
@@ -50,7 +51,7 @@
 
 | 套餐 | 包含模块 | 目标用户 |
 |------|---------|---------|
-| Writer Pack | Novel + Script | 小说作者、网文作者 |
+| Writer Pack | Novel Editor Core + Script Studio | 小说作者、网文作者 |
 | Visual Story Pack | Script + Storyboard + Image Prompt | 分镜师、短视频策划 |
 | Short Video Pack | Storyboard + Image + Video + Subtitle + Timeline | 短视频创作者 |
 | 3D Director Pack | Storyboard + 3D Shot Draft + Camera Tools | 分镜导演、AI 视觉策划 |

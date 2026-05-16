@@ -3,7 +3,7 @@
 > **角色**: 项目协调 Agent (Kimi-K2.6)  
 > **任务ID**: DOC-PHASE0-006  
 > **日期**: 2026-05-15  
-> **版本**: v1.0  
+> **版本**: v2.0 (架构优化后)  
 > **状态**: [READY_FOR_REVIEW]
 
 ---
@@ -16,8 +16,7 @@
 
 | 插件 | 定价方式 | 原因 |
 |------|---------|------|
-| Novel Studio | 一次性 / 低价订阅 | 用户入口，开发可控 |
-| Script Studio | 一次性 / 低价订阅 | 与 Novel 强关联 |
+| Script Studio | 一次性 / 低价订阅 | 与 Novel Core 强关联 |
 | Storyboard Studio | 一次性 / 低价订阅 | 连接文本和视频的关键 |
 | 3D Shot Draft | 一次性 / 低价订阅 | 差异化强，视觉价值高 |
 | Timeline Draft | 一次性 | 短片闭环工具 |
@@ -57,7 +56,7 @@
 
 | 套餐 | 包含模块 | 目标用户 | 定价策略 |
 |------|---------|---------|---------|
-| Writer Pack | Novel + Script | 小说作者、网文作者 | 单模块总和的 75% |
+| Writer Pack | Novel Editor Core + Script Studio | 小说作者、网文作者 | 单模块总和的 75% |
 | Visual Story Pack | Script + Storyboard + Image Prompt | 分镜师、短视频策划 | 单模块总和的 70% |
 | Short Video Pack | Storyboard + Image + Video + Subtitle + Timeline | 短视频创作者 | 单模块总和的 65% |
 | 3D Director Pack | Storyboard + 3D Shot Draft + Camera Tools | 分镜导演、AI 视觉策划 | 单模块总和的 70% |
@@ -128,7 +127,7 @@
 
 | 类型 | 适合模块 | 定价方式 |
 |------|---------|---------|
-| 一次性购买 | Novel, Script, Storyboard, 3D Shot Draft, Timeline | 固定价格 |
+| 一次性购买 | Script, Storyboard, 3D Shot Draft, Timeline | 固定价格 |
 | 订阅 | Image Generation, Video Generation, Long Video Manager, Consistency | 月付/年付 |
 | 订阅 + 额度 | 所有生成类插件 | 功能费 + 生成消耗 |
 | 按席位订阅 | Team Collaboration | 按用户数 |

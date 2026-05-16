@@ -1,106 +1,143 @@
 import * as THREE from 'three';
+import { createSignal, type Accessor } from 'solid-js';
 import type { CylinderObject } from '../../types';
 
 const CYLINDER_SEGMENTS = 32;
 
 export interface CylinderMeshEntry {
-  mesh: THREE.Mesh;
   id: string;
-  originalColor: THREE.Color;
+  mesh: THREE.Mesh;
 }
 
 export interface CylinderManager {
   group: THREE.Group;
-  entries: CylinderMeshEntry[];
+  boxGroup: THREE.Group;
+  entries: Accessor<CylinderMeshEntry[]>;
   update: (cylinders: CylinderObject[], selectedId?: string) => void;
   dispose: () => void;
   raycast: (raycaster: THREE.Raycaster) => string | undefined;
+  findById: (id: string) => CylinderMeshEntry | undefined;
+  findMeshById: (id: string) => THREE.Mesh | undefined;
+  getBoxMeshes: () => THREE.Mesh[];
 }
 
-function createCylinderMesh(c: CylinderObject): THREE.Mesh {
-  const geometry = new THREE.CylinderGeometry(c.radius, c.radius, c.height, CYLINDER_SEGMENTS);
+function createMesh(c: CylinderObject): THREE.Mesh {
+  const isBox = c.id.startsWith('box-');
+  let geometry: THREE.BufferGeometry;
+
+  if (isBox) {
+    geometry = new THREE.BoxGeometry(c.radius * 2, c.height, c.radius * 2);
+  } else {
+    geometry = new THREE.CylinderGeometry(c.radius, c.radius, c.height, CYLINDER_SEGMENTS);
+  }
+
   const material = new THREE.MeshStandardMaterial({
     color: c.color,
     roughness: 0.5,
     metalness: 0.1,
-    emissive: c.glow ? c.color : '#000000',
-    emissiveIntensity: c.glow ? 0.4 : 0
+    emissive: '#000000',
+    emissiveIntensity: 0
   });
   const mesh = new THREE.Mesh(geometry, material);
   mesh.position.set(c.position.x, c.position.y + c.height / 2, c.position.z);
   mesh.castShadow = true;
   mesh.receiveShadow = true;
-  mesh.userData = { cylinderId: c.id };
+  mesh.userData = {
+    id: c.id,
+    kind: 'cylinder',
+    height: c.height,
+    originalScale: { radius: c.radius, height: c.height }
+  };
   return mesh;
 }
 
 export function createCylinderManager(): CylinderManager {
   const group = new THREE.Group();
-  let entries: CylinderMeshEntry[] = [];
+  group.name = 'CylinderGroup';
 
-  const update = (cylinders: CylinderObject[], selectedId?: string) => {
-    const toKeep = new Set(cylinders.map(c => c.id));
+  const boxGroup = new THREE.Group();
+  boxGroup.name = 'BoxGroup';
 
-    for (const entry of entries) {
-      if (!toKeep.has(entry.id)) {
-        group.remove(entry.mesh);
-        entry.mesh.geometry.dispose();
-        (entry.mesh.material as THREE.Material).dispose();
+  const [entries, setEntries] = createSignal<CylinderMeshEntry[]>([]);
+  const meshMap = new Map<string, THREE.Mesh>();
+
+  const update = (cylinders: CylinderObject[], selectedId?: string): void => {
+    const incomingIds = new Set(cylinders.map(c => c.id));
+
+    for (const [id, mesh] of meshMap) {
+      if (!incomingIds.has(id)) {
+        group.remove(mesh);
+        boxGroup.remove(mesh);
+        mesh.geometry.dispose();
+        (mesh.material as THREE.Material).dispose();
+        meshMap.delete(id);
       }
     }
 
-    entries = entries.filter(e => toKeep.has(e.id));
-    const existingMap = new Map(entries.map(e => [e.id, e]));
-
-    const newEntries: CylinderMeshEntry[] = [];
     for (const c of cylinders) {
-      const existing = existingMap.get(c.id);
-      if (existing) {
-        existing.mesh.position.set(c.position.x, c.position.y + c.height / 2, c.position.z);
-        const mat = existing.mesh.material as THREE.MeshStandardMaterial;
-        mat.color.set(c.color);
-        mat.emissive.set(c.glow ? c.color : '#000000');
-        mat.emissiveIntensity = c.glow ? 0.4 : 0;
+      let mesh = meshMap.get(c.id);
+      const isNew = !mesh;
 
-        if (c.id === selectedId) {
-          mat.emissive.set('#ffaa00');
-          mat.emissiveIntensity = 0.6;
-        }
-        newEntries.push(existing);
-      } else {
-        const mesh = createCylinderMesh(c);
-        const mat = mesh.material as THREE.MeshStandardMaterial;
-        const originalColor = mat.color.clone();
-        if (c.id === selectedId) {
-          mat.emissive.set('#ffaa00');
-          mat.emissiveIntensity = 0.6;
-        }
+      if (!mesh) {
+        mesh = createMesh(c);
         group.add(mesh);
-        newEntries.push({ mesh, id: c.id, originalColor });
+        if (c.id.startsWith('box-')) {
+          boxGroup.add(mesh);
+        }
+        meshMap.set(c.id, mesh);
+      }
+
+      const mat = mesh.material as THREE.MeshStandardMaterial;
+
+      mat.color.set(c.color);
+      const isSelected = c.id === selectedId;
+      mat.emissive.set(isSelected ? '#ffaa00' : (c.glow ? c.color : '#000000'));
+      mat.emissiveIntensity = isSelected ? 0.6 : (c.glow ? 0.4 : 0);
+
+      const targetY = c.position.y + c.height / 2;
+      const dx = Math.abs(mesh.position.x - c.position.x);
+      const dy = Math.abs(mesh.position.y - targetY);
+      const dz = Math.abs(mesh.position.z - c.position.z);
+      if (isNew || dx > 1e-4 || dy > 1e-4 || dz > 1e-4) {
+        mesh.position.set(c.position.x, targetY, c.position.z);
       }
     }
 
-    entries = newEntries;
+    const next: CylinderMeshEntry[] = [];
+    for (const c of cylinders) {
+      const m = meshMap.get(c.id);
+      if (m) next.push({ id: c.id, mesh: m });
+    }
+    setEntries(next);
   };
 
-  const dispose = () => {
-    for (const entry of entries) {
-      entry.mesh.geometry.dispose();
-      (entry.mesh.material as THREE.Material).dispose();
-    }
-    entries = [];
-    group.clear();
+  const findById = (id: string) => entries().find(e => e.id === id);
+
+  const findMeshById = (id: string) => meshMap.get(id);
+
+  const getBoxMeshes = (): THREE.Mesh[] => {
+    return Array.from(boxGroup.children) as THREE.Mesh[];
   };
 
   const raycast = (raycaster: THREE.Raycaster): string | undefined => {
-    const meshes = entries.map(e => e.mesh);
+    const meshes = Array.from(meshMap.values());
     const hits = raycaster.intersectObjects(meshes, false);
     if (hits.length > 0) {
-      const first = hits[0].object;
-      return first.userData.cylinderId as string | undefined;
+      return hits[0].object.userData?.id as string | undefined;
     }
     return undefined;
   };
 
-  return { group, entries, update, dispose, raycast };
+  const dispose = () => {
+    for (const [, mesh] of meshMap) {
+      mesh.geometry.dispose();
+      (mesh.material as THREE.Material).dispose();
+    }
+    meshMap.clear();
+    setEntries([]);
+    group.clear();
+    boxGroup.clear();
+  };
+
+  return { group, boxGroup, entries, update, dispose, raycast, findById, findMeshById, getBoxMeshes };
 }

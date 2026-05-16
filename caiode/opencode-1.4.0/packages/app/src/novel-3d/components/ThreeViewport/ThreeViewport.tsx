@@ -1,10 +1,11 @@
-import { onMount, onCleanup, createEffect } from 'solid-js';
+import { createEffect, onCleanup, on, onMount } from 'solid-js';
 import type { Shot3DStore } from '../../shot-3d-store';
 import { createScene, updateCameraFromStore, updateCameraTarget } from './scene-setup';
 import { createControls, syncControlsTarget } from './controls-setup';
 import { startRenderLoop } from './render-loop';
 import { createCylinderManager } from './cylinder-manager';
 import { createTransformControls } from './transform-controls-setup';
+import { createGroupTransform } from './group-transform';
 import { exportPNG, copyToClipboard } from '../../export-utils';
 import * as THREE from 'three';
 
@@ -20,13 +21,21 @@ export default function ThreeViewport(props: ThreeViewportProps) {
 
     const ctx = createScene(containerRef);
     const controls = createControls(ctx.camera, ctx.renderer, props.store);
-    const loop = startRenderLoop(ctx.renderer, ctx.scene, ctx.camera, controls.orbit);
 
     const cylManager = createCylinderManager();
     ctx.scene.add(cylManager.group);
+    ctx.scene.add(cylManager.boxGroup);
 
-    const transformCtx = createTransformControls(ctx.camera, ctx.renderer, props.store);
-    ctx.scene.add(transformCtx.transform as unknown as THREE.Object3D);
+    const transformCtx = createTransformControls(ctx.camera, ctx.renderer, props.store, controls.orbit);
+    const groupCtx = createGroupTransform(ctx.camera, ctx.renderer, props.store, controls.orbit);
+
+    ctx.scene.add(groupCtx.group);
+    groupCtx.group.visible = false;
+
+    ctx.scene.add(transformCtx.transform.getHelper() as THREE.Object3D);
+    (transformCtx.transform.getHelper() as THREE.Object3D).visible = false;
+
+    const loop = startRenderLoop(ctx.renderer, ctx.scene, ctx.camera, controls.orbit, transformCtx.transform, groupCtx.transform);
 
     containerRef.appendChild(ctx.renderer.domElement);
 
@@ -71,10 +80,17 @@ export default function ThreeViewport(props: ThreeViewportProps) {
       pointer.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
       raycaster.setFromCamera(pointer, ctx.camera);
       const hitId = cylManager.raycast(raycaster);
+      console.info('[ThreeViewport] Cylinder clicked:', hitId);
       props.store.selectCylinder(hitId);
     };
 
     ctx.renderer.domElement.addEventListener('click', handleClick);
+
+    createEffect(() => {
+      const mode = props.store.transformMode();
+      transformCtx.setMode(mode);
+      groupCtx.setMode(mode);
+    });
 
     createEffect(() => {
       const cam = props.store.scene().camera;
@@ -83,21 +99,48 @@ export default function ThreeViewport(props: ThreeViewportProps) {
       syncControlsTarget(controls.orbit, cam.target);
     });
 
-    createEffect(() => {
-      const s = props.store.scene();
-      cylManager.update(s.cylinders, s.selectedObjectId);
+    // Effect 1: 同步 cylinder mesh 数据（依赖 cylinders 数组）
+    createEffect(on(
+      () => props.store.scene().cylinders,
+      (cylinders) => {
+        const selectedId = props.store.scene().selectedObjectId;
+        cylManager.update(cylinders, selectedId);
+      }
+    ));
 
-      if (s.selectedObjectId) {
-        const entry = cylManager.entries.find(e => e.id === s.selectedObjectId);
+    // Effect 2: TransformControls 绑定（显式依赖 entries Signal + selectedId）
+    createEffect(on(
+      () => [cylManager.entries(), props.store.scene().selectedObjectId] as const,
+      ([list, selectedId]) => {
+        if (!selectedId) {
+          transformCtx.attach(null);
+          return;
+        }
+
+        const isBox = selectedId.startsWith('box-');
+
+        if (isBox) {
+          transformCtx.attach(cylManager.boxGroup);
+          return;
+        }
+
+        const entry = list.find(e => e.id === selectedId);
         if (entry) {
           transformCtx.attach(entry.mesh);
+          return;
+        }
+
+        const fallback = cylManager.group.children.find(
+          (o: any) => o.userData?.id === selectedId
+        ) as THREE.Mesh | undefined;
+
+        if (fallback) {
+          transformCtx.attach(fallback);
         } else {
           transformCtx.attach(null);
         }
-      } else {
-        transformCtx.attach(null);
       }
-    });
+    ));
 
     onCleanup(() => {
       window.removeEventListener('resize', handleResize);
@@ -108,6 +151,7 @@ export default function ThreeViewport(props: ThreeViewportProps) {
       controls.dispose();
       cylManager.dispose();
       transformCtx.dispose();
+      groupCtx.dispose();
       ctx.renderer.dispose();
       ctx.scene.clear();
       if (containerRef && ctx.renderer.domElement.parentNode === containerRef) {

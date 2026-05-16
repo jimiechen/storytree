@@ -1,6 +1,7 @@
 import { useIsRouting, useLocation } from "@solidjs/router"
-import { batch, createEffect, onCleanup, onMount } from "solid-js"
+import { batch, createEffect, createSignal, onCleanup, onMount } from "solid-js"
 import { createStore } from "solid-js/store"
+import { Show } from "solid-js/web"
 import { makeEventListener } from "@solid-primitives/event-listener"
 import { Tooltip } from "@opencode-ai/ui/tooltip"
 import { useLanguage } from "@/context/language"
@@ -79,6 +80,7 @@ export function DebugBar() {
   const language = useLanguage()
   const location = useLocation()
   const routing = useIsRouting()
+  const [visible, setVisible] = createSignal(true)
   const [state, setState] = createStore({
     cls: undefined as number | undefined,
     delay: undefined as number | undefined,
@@ -361,11 +363,21 @@ export function DebugBar() {
   })
 
   return (
-    <aside
-      aria-label={language.t("debugBar.ariaLabel")}
-      class="pointer-events-auto fixed bottom-3 right-3 z-50 w-[308px] max-w-[calc(100vw-1.5rem)] overflow-hidden rounded-xl border border-border-base bg-surface-raised-stronger-non-alpha p-0.5 text-text-strong shadow-[var(--shadow-lg-border-base)] sm:bottom-4 sm:right-4 sm:w-[324px]"
-    >
-      <div class="grid grid-cols-5 gap-px font-mono">
+    <>
+      <Show when={visible()}>
+        <aside
+          aria-label={language.t("debugBar.ariaLabel")}
+          class="pointer-events-auto fixed bottom-3 right-3 z-50 w-[308px] max-w-[calc(100vw-1.5rem)] overflow-hidden rounded-xl border border-border-base bg-surface-raised-stronger-non-alpha p-0.5 text-text-strong shadow-[var(--shadow-lg-border-base)] sm:bottom-4 sm:right-4 sm:w-[324px]"
+        >
+          <button
+            onClick={() => setVisible(false)}
+            class="absolute top-1 right-1 z-10 flex h-6 w-6 items-center justify-center rounded-md bg-transparent text-text-muted hover:bg-surface-hover hover:text-text-strong transition-colors cursor-pointer"
+            title={language.t("debugBar.hide") || "隐藏"}
+            aria-label="Hide debug bar"
+          >
+            ✕
+          </button>
+          <div class="grid grid-cols-5 gap-px font-mono">
         <Cell
           label={language.t("debugBar.nav.label")}
           tip={language.t("debugBar.nav.tip")}
@@ -438,6 +450,21 @@ export function DebugBar() {
           wide
         />
       </div>
-    </aside>
+        </aside>
+      </Show>
+      <Show when={!visible()}>
+        <button
+          onClick={() => setVisible(true)}
+          class="pointer-events-auto fixed bottom-3 right-3 z-50 flex h-8 w-8 items-center justify-center rounded-lg border border-border-base bg-surface-raised-stronger-non-alpha text-text-muted hover:bg-surface-hover hover:text-text-strong shadow-[var(--shadow-lg-border-base)] transition-colors cursor-pointer sm:bottom-4 sm:right-4"
+          title={language.t("debugBar.show") || "显示性能诊断"}
+          aria-label="Show debug bar"
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+            <path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"></path>
+          </svg>
+        </button>
+      </Show>
+    </>
   )
 }

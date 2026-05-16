@@ -4,10 +4,10 @@
 
 ## 当前任务状态
 
-**最后更新时间**: 2026-05-15 22:00:00
-**当前任务来源**: `caiode/docs/tabbit/TabAI会话_1778857995607.md`
-**当前阶段**: Phase 0 路书文档已完成，准备进入插件底座实现阶段
-**下一步**: 创建功能分支，启动 Plugin Runtime 核心接口实现
+**最后更新时间**: 2026-05-15 22:30:00
+**当前任务来源**: `caiode/docs/tabbit/TabAI会话_1778901717836.md`
+**当前阶段**: Phase 0 架构优化路书已解析，13份文档已创建/更新
+**下一步**: 按新架构启动 Creative Agent Runtime 实现
 
 ---
 
@@ -15,23 +15,21 @@
 
 ### 主要任务来源 (按优先级排序)
 
-1. **OpenCode Creative Studio 插件化路书**
-   - 路径: `caiode/docs/tabbit/TabAI会话_1778857995607.md`
-   - 状态: 已解析，6份核心文档已创建
+1. **OpenCode Creative Studio 架构优化路书**
+   - 路径: `caiode/docs/tabbit/TabAI会话_1778901717836.md`
+   - 状态: 已解析，13份文档已创建/更新
    - 优先级: P0
-   - 时间跨度: 2026-05 ~ 2028-05 (两年)
+   - 核心变更: Novel Editor 移出付费插件改为 Core Product、Claude-Code-Style Agent Runtime 架构、Skill/Plugin/Provider 严格区分
 
-2. **Phase 0 前置工作清单**
-   - 路径: `docs/planning/PRE-PHASE0-CHECKLIST.md`
-   - 状态: 已完成
-   - 优先级: P0
-   - 内容: 工作空间清理、备份、路书解析
-
-3. **Phase 0 路书文档 (6份)**
+2. **Phase 0 路书文档 (13份)**
    - 路径: `docs/roadmap/`
    - 状态: 已完成
    - 优先级: P0
-   - 内容: 产品路书、插件架构、商业模型、两年规划、定价策略、30天计划
+
+3. **Phase 0 前置工作清单**
+   - 路径: `docs/planning/PRE-PHASE0-CHECKLIST.md`
+   - 状态: 已完成
+   - 优先级: P0
 
 4. **Phase1 任务分解文档 (历史)**
    - 路径: `docs/planning/vscode-oss-integration/phase1-task-breakdown.md`
@@ -48,37 +46,43 @@
    - 来源: `TabAI会话_1778857995607.md`
    - 任务ID: PRE-PHASE0-20260515
    - 状态: ✅ 已完成
-   - 完成内容:
-     - 清理不合规工作空间文件 (1.md, 2.md, 3.md)
-     - 备份 Week 0 临时文件到 backups/pre-phase0-20260515/
-     - 解析路书为 9 个阶段 + 30 天启动计划
-     - 生成前置工作清单文档
 
-2. **Phase 0 路书文档创建**
+2. **Phase 0 初始路书文档创建 (6份)**
    - 来源: `TabAI会话_1778857995607.md`
    - 任务ID: DOC-PHASE0-002 ~ DOC-PHASE0-007
    - 状态: ✅ 已完成
+
+3. **Phase 0 架构优化路书文档创建/更新 (13份)**
+   - 来源: `TabAI会话_1778901717836.md`
+   - 任务ID: DOC-PHASE0-002 ~ DOC-PHASE0-014
+   - 状态: ✅ 已完成
    - 完成内容:
-     - `docs/roadmap/PRODUCT-ROADMAP-PLUGIN-FIRST.md` — 产品定位与插件化策略
-     - `docs/roadmap/PLUGIN-ARCHITECTURE.md` — 插件架构设计（Runtime/Manifest/Registry/Extension Points）
-     - `docs/roadmap/COMMERCIAL-PLUGIN-MODEL.md` — 商业模型（免费/付费/组合包/额度）
-     - `docs/roadmap/TWO-YEAR-DEVELOPMENT-PLAN.md` — 两年9阶段开发计划
-     - `docs/roadmap/MODULE-PRICING-STRATEGY.md` — 模块定价策略
-     - `docs/roadmap/FIRST-30-DAYS-ACTION-PLAN.md` — 30天启动计划（周任务分解）
+     - **更新文档 (6份)**:
+       - `PRODUCT-ROADMAP-PLUGIN-FIRST.md` v2.0 — Novel Editor Core + Skill Loader
+       - `PLUGIN-ARCHITECTURE.md` v2.0 — Creative Agent Runtime 架构
+       - `COMMERCIAL-PLUGIN-MODEL.md` v2.0 — Novel 移出付费插件
+       - `TWO-YEAR-DEVELOPMENT-PLAN.md` v2.0 — 阶段调整
+       - `MODULE-PRICING-STRATEGY.md` v2.0 — 定价调整
+       - `FIRST-30-DAYS-ACTION-PLAN.md` v2.0 — 30天计划调整
+     - **新建文档 (7份)**:
+       - `CLAUDE-CODE-SRC-ARCHITECTURE-BASELINE.md` — claude-code-src 模块分析
+       - `CREATIVE-AGENT-RUNTIME-ARCHITECTURE.md` — 11个核心模块接口定义
+       - `CREATIVE-CORE-ARCHITECTURE.md` — Creative Core 业务抽象层
+       - `SKILL-DEFINITION-AND-USAGE.md` — Skill 定义与使用规范
+       - `PLUGIN-RUNTIME-SPEC.md` — Plugin Runtime 规范
+       - `PLUGIN-LOAD-AND-LICENSE-FLOW.md` — 插件加载与 License 流程
+       - `NOVEL-EDITOR-AS-CORE-PRODUCT.md` — Novel Editor Core 定位
 
 ### 2026-04-09 完成任务 (历史)
 
 1. **Phase1 单元测试实现**
-   - 来源: `phase1-task-breakdown.md`
    - 任务ID: TEST-PHASE1-UNIT
    - 状态: ✅ 已完成
    - 测试数: 68个全部通过
 
 2. **Phase1 核心模块实现与文档更新**
-   - 来源: `phase1-task-breakdown.md`
    - 任务ID: T-PHASE1-20260409
    - 状态: ✅ 已完成
-   - 完成内容: 队列监控 Output Channel、插件配置页面 Settings UI
 
 ---
 
@@ -86,13 +90,97 @@
 
 ### Phase 0 核心任务 (当前阶段)
 
+#### 文档任务 (全部完成)
+
 - [x] **DOC-PHASE0-001** 创建 `docs/roadmap/` 目录 ✅
-- [x] **DOC-PHASE0-002** 生成 `PRODUCT-ROADMAP-PLUGIN-FIRST.md` ✅
-- [x] **DOC-PHASE0-003** 生成 `PLUGIN-ARCHITECTURE.md` ✅
-- [x] **DOC-PHASE0-004** 生成 `COMMERCIAL-PLUGIN-MODEL.md` ✅
-- [x] **DOC-PHASE0-005** 生成 `TWO-YEAR-DEVELOPMENT-PLAN.md` ✅
-- [x] **DOC-PHASE0-006** 生成 `MODULE-PRICING-STRATEGY.md` ✅
-- [x] **DOC-PHASE0-007** 生成 `FIRST-30-DAYS-ACTION-PLAN.md` ✅
+- [x] **DOC-PHASE0-002** `PRODUCT-ROADMAP-PLUGIN-FIRST.md` v2.0 ✅
+- [x] **DOC-PHASE0-003** `PLUGIN-ARCHITECTURE.md` v2.0 ✅
+- [x] **DOC-PHASE0-004** `COMMERCIAL-PLUGIN-MODEL.md` v2.0 ✅
+- [x] **DOC-PHASE0-005** `TWO-YEAR-DEVELOPMENT-PLAN.md` v2.0 ✅
+- [x] **DOC-PHASE0-006** `MODULE-PRICING-STRATEGY.md` v2.0 ✅
+- [x] **DOC-PHASE0-007** `FIRST-30-DAYS-ACTION-PLAN.md` v2.0 ✅
+- [x] **DOC-PHASE0-008** `CLAUDE-CODE-SRC-ARCHITECTURE-BASELINE.md` ✅
+- [x] **DOC-PHASE0-009** `CREATIVE-AGENT-RUNTIME-ARCHITECTURE.md` ✅
+- [x] **DOC-PHASE0-010** `CREATIVE-CORE-ARCHITECTURE.md` ✅
+- [x] **DOC-PHASE0-011** `SKILL-DEFINITION-AND-USAGE.md` ✅
+- [x] **DOC-PHASE0-012** `PLUGIN-RUNTIME-SPEC.md` ✅
+- [x] **DOC-PHASE0-013** `PLUGIN-LOAD-AND-LICENSE-FLOW.md` ✅
+- [x] **DOC-PHASE0-014** `NOVEL-EDITOR-AS-CORE-PRODUCT.md` ✅
+
+#### 研发任务 (Phase 0)
+
+- [ ] **DEV-PHASE0-001** 实现 CreativeQueryEngine
+  - 角色：VS Code 插件架构师
+  - 优先级：P0
+  - 截止：第 1 周末
+  - 产出：packages/app/src/core/creative-query-engine/
+
+- [ ] **DEV-PHASE0-002** 实现 AgentLoop
+  - 角色：VS Code 插件架构师
+  - 优先级：P0
+  - 截止：第 1 周末
+  - 产出：packages/app/src/core/agent-loop/
+
+- [ ] **DEV-PHASE0-003** 实现 CreativeContextBuilder
+  - 角色：VS Code 插件架构师
+  - 优先级：P0
+  - 截止：第 1 周末
+
+- [ ] **DEV-PHASE0-004** 实现 TaskRuntime
+  - 角色：Node.js 后端工程师
+  - 优先级：P0
+  - 截止：第 1 周末
+
+- [ ] **DEV-PHASE0-005** 实现 ToolRuntime
+  - 角色：Node.js 后端工程师
+  - 优先级：P0
+  - 截止：第 1 周末
+
+- [ ] **DEV-PHASE0-006** 实现 SkillLoader
+  - 角色：Node.js 后端工程师
+  - 优先级：P0
+  - 截止：第 2 周末
+
+- [ ] **DEV-PHASE0-007** 实现 PluginRuntime
+  - 角色：VS Code 插件架构师
+  - 优先级：P0
+  - 截止：第 1 周末
+
+- [ ] **DEV-PHASE0-008** 实现 HookPipeline
+  - 角色：Node.js 后端工程师
+  - 优先级：P1
+  - 截止：第 2 周末
+
+- [ ] **DEV-PHASE0-009** 实现 CommandRegistry
+  - 角色：Node.js 后端工程师
+  - 优先级：P1
+  - 截止：第 2 周末
+
+- [ ] **DEV-PHASE0-010** 实现 StateStore
+  - 角色：Node.js 后端工程师
+  - 优先级：P0
+  - 截止：第 1 周末
+
+- [ ] **DEV-PHASE0-011** 实现 CostTracker
+  - 角色：Node.js 后端工程师
+  - 优先级：P1
+  - 截止：第 2 周末
+
+- [ ] **DEV-PHASE0-012** 实现 Novel Editor Core
+  - 角色：前端工程师
+  - 优先级：P0
+  - 截止：第 3 周末
+  - 产出：Novel Editor 页面 + 数据模型
+
+- [ ] **DEV-PHASE0-013** 实现 Mock License Gate
+  - 角色：Node.js 后端工程师
+  - 优先级：P0
+  - 截止：第 1 周末
+
+- [ ] **DEV-PHASE0-014** 实现 Mock Provider (LLM/Image/Video)
+  - 角色：Node.js 后端工程师
+  - 优先级：P0
+  - 截止：第 2 周末
 
 ### 环境配置修复任务 (历史遗留)
 
@@ -110,54 +198,25 @@
 
 ---
 
-## 新增任务（基于 OpenCode Creative Studio 路书）
+## 新增任务（基于架构优化路书）
 
-### 文档任务
+### 核心原则
 
-- [x] **DOC-ROADMAP-001** 创建插件化商业 Roadmap 项目路书 ✅
-  - 角色：项目协调 Agent
-  - 优先级：P0
-  - 截止：今日
-  - 产出：docs/roadmap/ 下 6 份文档
-  - 重点：项目定位、插件架构、商业模式、两年规划、定价策略、30天计划
+- **Novel Editor Core** 是免费 Core Product，不是付费插件
+- **Creative Agent Runtime** 是底层执行内核，负责 Agent 怎么运行
+- **Creative Core** 是业务抽象层，负责创作项目怎么管理
+- **Skill** 是 Agent 按需加载的 SKILL.md 任务说明包
+- **Plugin** 是产品模块和商业模块
+- **Provider** 是外部服务适配器
+- **Tool** 是 Agent 可调用的具体执行动作
 
-### 研发任务 (Phase 0)
+### 关键约束
 
-- [ ] **DEV-PHASE0-001** 实现 Plugin Runtime 核心接口
-  - 角色：VS Code 插件架构师
-  - 优先级：P0
-  - 截止：第 1 周末
-  - 产出：packages/app/src/core/plugin-runtime/
-
-- [ ] **DEV-PHASE0-002** 实现 Plugin Manifest 规范
-  - 角色：VS Code 插件架构师
-  - 优先级：P0
-  - 截止：第 1 周末
-  - 产出：PLUGIN-MANIFEST-SPEC.md + TypeScript 类型定义
-
-- [ ] **DEV-PHASE0-003** 实现 Mock License Gate
-  - 角色：Node.js 后端工程师
-  - 优先级：P0
-  - 截止：第 1 周末
-  - 产出：License Gate 模拟实现
-
-- [ ] **DEV-PHASE0-004** 实现 Skill Registry
-  - 角色：Node.js 后端工程师
-  - 优先级：P1
-  - 截止：第 2 周末
-  - 产出：Skill 注册与调用规范
-
-- [ ] **DEV-PHASE0-005** 实现 Provider Registry
-  - 角色：Node.js 后端工程师
-  - 优先级：P1
-  - 截止：第 2 周末
-  - 产出：OpenRouter/图像/视频 Provider 规范
-
-### 测试任务
-
-- [ ] **TEST-PHASE0-001** Plugin Runtime 单元测试
-- [ ] **TEST-PHASE0-002** License Gate 单元测试
-- [ ] **TEST-PHASE0-003** Mock Provider 集成测试
+- 禁止把 Skill 写成 Plugin
+- 禁止把 OpenRouter 写成 Skill
+- 禁止让 UI 直接调用插件生成逻辑
+- 任务必须通过 Task Runtime 运行
+- 任务过程中通过 Skill 指导 Agent 调用 Plugin Capability
 
 ---
 
@@ -177,6 +236,7 @@
 
 3. **检查路书文档** (第三优先级)
    ```
+   Read c:\projects\storytree\docs\roadmap\CREATIVE-AGENT-RUNTIME-ARCHITECTURE.md
    Read c:\projects\storytree\docs\roadmap\FIRST-30-DAYS-ACTION-PLAN.md
    ```
 
@@ -201,8 +261,8 @@
 
 **Agent**: Kimi-K2.6
 **确认日期**: 2026-05-15
-**当前任务来源**: TabAI会话_1778857995607.md
-**下一步**: 创建功能分支，启动 Plugin Runtime 核心接口实现
+**当前任务来源**: TabAI会话_1778901717836.md
+**下一步**: 按新架构启动 Creative Agent Runtime 实现
 
 ---
 

@@ -16,6 +16,7 @@ export function createShot3DStore() {
   };
 
   const [scene, setScene] = createSignal<ShotScene3D>(defaultScene);
+  const [transformMode, setTransformMode] = createSignal<'translate' | 'scale'>('translate');
 
   let exportPNGAction: (() => void) | undefined;
   let copyPromptAction: (() => void) | undefined;
@@ -61,14 +62,28 @@ export function createShot3DStore() {
   };
 
   const selectCylinder = (id: string | undefined) => {
-    setScene(prev => ({
-      ...prev,
-      selectedObjectId: id,
-      cylinders: prev.cylinders.map(c => ({
-        ...c,
-        selected: c.id === id
-      }))
-    }));
+    console.info('[store] selectCylinder called:', { prev: scene().selectedObjectId, next: id });
+    setScene(prev => {
+      const currentSelected = prev.selectedObjectId;
+      if (currentSelected === id) return prev;
+
+      const cylindersChanged = prev.cylinders.some(c => {
+        const wasSelected = c.id === currentSelected;
+        const willBeSelected = c.id === id;
+        return wasSelected !== willBeSelected;
+      });
+
+      if (!cylindersChanged && currentSelected === id) return prev;
+
+      return {
+        ...prev,
+        selectedObjectId: id,
+        cylinders: prev.cylinders.map(c => ({
+          ...c,
+          selected: c.id === id
+        }))
+      };
+    });
   };
 
   const setPrompt = (prompt: string) => {
@@ -93,6 +108,8 @@ export function createShot3DStore() {
 
   return {
     scene,
+    transformMode,
+    setTransformMode,
     updateCamera,
     updateCameraPosition,
     updateCameraTarget,
