@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>The Nocturnal Manuscript - Project Alpha</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&amp;family=Noto+Serif+SC:wght@400;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "on-primary-fixed": "#001e2b",
+              "on-secondary": "#452b00",
+              "on-surface": "#e2e0fc",
+              "on-tertiary": "#00390e",
+              "on-primary-container": "#0094c4",
+              "primary-fixed": "#c2e8ff",
+              "surface-variant": "#333348",
+              "on-surface-variant": "#c6c6ce",
+              "on-tertiary-container": "#469a4e",
+              "on-secondary-container": "#3c2500",
+              "tertiary": "#83da85",
+              "surface-container-lowest": "#0c0c20",
+              "on-secondary-fixed": "#291800",
+              "error": "#ffb4ab",
+              "tertiary-container": "#002908",
+              "primary-container": "#002535",
+              "outline": "#909098",
+              "tertiary-fixed": "#9ff79f",
+              "error-container": "#93000a",
+              "surface": "#111125",
+              "secondary-fixed-dim": "#ffb954",
+              "on-tertiary-fixed-variant": "#005318",
+              "on-error-container": "#ffdad6",
+              "on-background": "#e2e0fc",
+              "background": "#111125",
+              "on-primary-fixed-variant": "#004d67",
+              "on-secondary-fixed-variant": "#633f00",
+              "surface-container-high": "#28283d",
+              "inverse-surface": "#e2e0fc",
+              "surface-dim": "#111125",
+              "tertiary-fixed-dim": "#83da85",
+              "secondary-fixed": "#ffddb4",
+              "surface-tint": "#75d1ff",
+              "surface-container": "#1e1e32",
+              "primary-fixed-dim": "#75d1ff",
+              "primary": "#75d1ff",
+              "surface-bright": "#37374d",
+              "on-primary": "#003548",
+              "secondary-container": "#c3841b",
+              "secondary": "#ffb954",
+              "surface-container-low": "#1a1a2e",
+              "outline-variant": "#45464d",
+              "inverse-on-surface": "#2f2e44",
+              "surface-container-highest": "#333348",
+              "on-tertiary-fixed": "#002105",
+              "on-error": "#690005",
+              "inverse-primary": "#006688"
+            },
+            fontFamily: {
+              "headline": ["Manrope"],
+              "body": ["Noto Serif SC"],
+              "label": ["Manrope"]
+            },
+            borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #37374d; border-radius: 10px; }
+        .glass-panel {
+            background: rgba(51, 51, 72, 0.6);
+            backdrop-filter: blur(12px);
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-surface font-label selection:bg-primary/30 h-screen overflow-hidden flex flex-col">
+<!-- TopNavBar - Rendered as per JSON -->
+<header class="w-full border-none bg-[#111125] dark:bg-[#111125] flex justify-between items-center px-6 py-3 z-50">
+<div class="flex items-center gap-4">
+<span class="text-xl font-bold text-[#75d1ff] font-['Manrope'] tracking-tight">The Nocturnal Manuscript</span>
+</div>
+<div class="flex items-center gap-2">
+<button class="p-2 text-[#e2e0fc]/60 hover:bg-[#37374d]/50 transition-colors rounded-full">
+<span class="material-symbols-outlined" data-icon="history">history</span>
+</button>
+<button class="p-2 text-[#e2e0fc]/60 hover:bg-[#37374d]/50 transition-colors rounded-full">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+</button>
+</div>
+</header>
+<div class="flex-1 flex overflow-hidden">
+<!-- SideNavBar - Rendered as per JSON -->
+<aside class="hidden md:flex h-full w-64 border-none bg-[#1e1e32] dark:bg-[#1e1e32] flex-col pt-4 relative">
+<div class="px-6 mb-8">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-xl bg-surface-container-highest overflow-hidden">
+<img alt="Writer Profile" data-alt="minimalist avatar of a writer with glasses and a thoughtful expression in deep blue tones" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD83PAOgLYopNSVRzIZsFBqIPGV6KFD7tPQ3w6f4OzC05HFBjdPNi5QG_AjT-mWYGP3JbAikiUHWqalVQJcPG_FHuxYYVkdh5qYF1vBHOrqKx3D1cDrHyzbQv9ESKbklnurSxWWoM0AqhOrnS1G8oBDOVbV1oldg5h5cvGz-yXIaDbnsJsMuxhDARp0bZtUA8PdN77HGcdwZx4e2C2N8LSpf_8J_lQyieFbDbpM8uPeP0dq1ltv1hty5BQBtLpBY9zJJesONSNO-C8"/>
+</div>
+<div>
+<h3 class="text-[#75d1ff] font-bold font-['Manrope'] text-sm">Project Alpha</h3>
+<p class="text-[#e2e0fc]/50 text-xs font-['Manrope']">Novel Layout</p>
+</div>
+</div>
+</div>
+<nav class="flex-1 space-y-1 px-3">
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[#75d1ff] bg-[#37374d]/30 border-l-2 border-[#75d1ff] transition-all ease-in-out duration-300" href="#">
+<span class="material-symbols-outlined" data-icon="book_2">book_2</span>
+<span class="font-medium">Manuscript</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[#e2e0fc]/50 hover:text-[#75d1ff] hover:bg-[#37374d]/20 transition-all ease-in-out duration-300" href="#">
+<span class="material-symbols-outlined" data-icon="group">group</span>
+<span class="font-medium">Characters</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[#e2e0fc]/50 hover:text-[#75d1ff] hover:bg-[#37374d]/20 transition-all ease-in-out duration-300" href="#">
+<span class="material-symbols-outlined" data-icon="public">public</span>
+<span class="font-medium">Worldbuilding</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[#e2e0fc]/50 hover:text-[#75d1ff] hover:bg-[#37374d]/20 transition-all ease-in-out duration-300" href="#">
+<span class="material-symbols-outlined" data-icon="auto_stories">auto_stories</span>
+<span class="font-medium">Timeline</span>
+</a>
+</nav>
+<div class="p-4">
+<button class="w-full py-3 px-4 rounded-xl bg-gradient-to-br from-primary to-on-primary-container text-on-primary-fixed font-bold text-xs uppercase tracking-wider shadow-lg shadow-primary/10 hover:opacity-90 transition-opacity">
+                    Generate Insight
+                </button>
+</div>
+<div class="mt-auto border-t border-outline-variant/10 p-3 space-y-1">
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-[#e2e0fc]/50 hover:text-[#75d1ff] hover:bg-[#37374d]/20 transition-all ease-in-out duration-300" href="#">
+<span class="material-symbols-outlined" data-icon="help">help</span>
+<span class="text-xs">Help</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-[#e2e0fc]/50 hover:text-[#75d1ff] hover:bg-[#37374d]/20 transition-all ease-in-out duration-300" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="text-xs">Settings</span>
+</a>
+</div>
+</aside>
+<!-- Main Workspace (Central Canvas) -->
+<main class="flex-1 bg-surface-container-lowest relative flex flex-col items-center overflow-y-auto custom-scrollbar">
+<div class="max-w-[700px] w-full px-12 py-20 min-h-full">
+<h1 class="font-headline text-4xl font-extrabold text-on-surface mb-12 tracking-tight">第三章：悬崖之约</h1>
+<div class="font-body text-xl leading-relaxed text-on-surface/90 space-y-8">
+<p>
+                        李云在崖边驻足，风中似乎带着一丝幽香。苏婉缓步走近，轻声道：'风大，别站得太近了。'
+                    </p>
+<p>
+                        夜色如同浓稠的墨汁，在崖底翻滚。李云没有回头，他知道那是谁。在这个世上，只有她的脚步声，能让这寂寥的绝岭生出一丝暖意。
+                    </p>
+<div class="h-1 w-12 bg-primary/20 rounded-full my-12"></div>
+</div>
+</div>
+</main>
+<!-- AI Assistant Chat Panel (Right Sidebar) -->
+<aside class="w-[380px] bg-surface-container flex flex-col border-l border-outline-variant/10">
+<!-- Context Bar -->
+<div class="px-4 py-3 bg-surface-container-high flex items-center gap-2 text-xs text-on-surface/70 font-label">
+<span class="material-symbols-outlined text-sm" data-icon="book_2">book_2</span>
+<span>第三章</span>
+<span class="mx-1 text-outline-variant">|</span>
+<span class="material-symbols-outlined text-sm" data-icon="group">group</span>
+<span>李云, 苏婉</span>
+<span class="mx-1 text-outline-variant">|</span>
+<span class="material-symbols-outlined text-sm" data-icon="location_on">location_on</span>
+<span>悬崖</span>
+</div>
+<!-- Chat Area -->
+<div class="flex-1 overflow-y-auto custom-scrollbar p-4 space-y-6">
+<!-- User Message 1 -->
+<div class="flex flex-col items-end space-y-2">
+<div class="max-w-[85%] px-4 py-3 rounded-2xl rounded-tr-none border border-outline-variant/30 bg-surface-container-highest/40 text-sm text-on-surface leading-relaxed">
+                        帮我续写下一段，李云在悬崖边遇到苏婉的场景
+                    </div>
+</div>
+<!-- AI Response 1 -->
+<div class="flex flex-col items-start space-y-3">
+<div class="flex items-center gap-2 px-1">
+<div class="w-6 h-6 rounded bg-primary/20 flex items-center justify-center">
+<span class="material-symbols-outlined text-primary text-[14px]" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
+</div>
+<span class="text-[10px] font-bold text-primary tracking-widest uppercase">DreamWeaver AI</span>
+</div>
+<div class="max-w-[95%] px-4 py-4 rounded-2xl rounded-tl-none border-l-4 border-primary bg-surface-container-high/50 glass-panel shadow-xl">
+<p class="font-body text-base leading-loose text-on-surface/90 italic">
+                            “李云站在悬崖边缘，狂风卷起他的衣角。一个清冷的声音从身后传来：'你还是来了。' 是苏婉。”
+                        </p>
+<div class="mt-4 flex flex-wrap gap-2">
+<button class="px-3 py-1.5 rounded bg-primary text-on-primary-fixed text-[11px] font-bold hover:opacity-90 transition-opacity">采纳</button>
+<button class="px-3 py-1.5 rounded bg-surface-container-highest text-on-surface text-[11px] hover:bg-surface-bright transition-colors">重新生成</button>
+<button class="px-3 py-1.5 rounded bg-surface-container-highest text-on-surface text-[11px] hover:bg-surface-bright transition-colors">扩写</button>
+<button class="px-3 py-1.5 rounded bg-surface-container-highest text-on-surface text-[11px] hover:bg-surface-bright transition-colors">改写</button>
+</div>
+</div>
+</div>
+<!-- User Message 2 -->
+<div class="flex flex-col items-end space-y-2">
+<div class="max-w-[85%] px-4 py-3 rounded-2xl rounded-tr-none border border-outline-variant/30 bg-surface-container-highest/40 text-sm text-on-surface leading-relaxed">
+                        把苏婉的对话改得更温柔一些
+                    </div>
+</div>
+<!-- AI Response 2 -->
+<div class="flex flex-col items-start space-y-3">
+<div class="flex items-center gap-2 px-1">
+<div class="w-6 h-6 rounded bg-primary/20 flex items-center justify-center">
+<span class="material-symbols-outlined text-primary text-[14px]" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
+</div>
+<span class="text-[10px] font-bold text-primary tracking-widest uppercase">DreamWeaver AI</span>
+</div>
+<div class="max-w-[95%] px-4 py-4 rounded-2xl rounded-tl-none border-l-4 border-primary bg-surface-container-high/50 glass-panel shadow-xl">
+<p class="font-body text-base leading-loose text-on-surface/90">
+                            李云在崖边驻足，风中似乎带着一丝幽香。苏婉缓步走近，轻声道：<span class="bg-primary/20 text-primary px-1 rounded">'风大，别站得太近了。'</span>
+</p>
+<div class="mt-4 flex gap-2">
+<button class="flex items-center gap-1 text-[10px] text-primary hover:underline">
+<span class="material-symbols-outlined text-[14px]" data-icon="check_circle">check_circle</span> 采纳修改
+                            </button>
+<button class="flex items-center gap-1 text-[10px] text-on-surface/50 hover:text-on-surface">
+<span class="material-symbols-outlined text-[14px]" data-icon="history">history</span> 查看对比
+                            </button>
+</div>
+</div>
+</div>
+</div>
+<!-- Input Area -->
+<div class="p-4 bg-surface-container-high border-t border-outline-variant/10">
+<!-- Action Chips -->
+<div class="flex gap-2 overflow-x-auto custom-scrollbar pb-3 mb-3 no-scrollbar">
+<button class="whitespace-nowrap px-3 py-1 rounded-full bg-primary-container text-primary text-[11px] font-medium border border-primary/20">/续写</button>
+<button class="whitespace-nowrap px-3 py-1 rounded-full bg-surface-container-highest text-on-surface/70 text-[11px] font-medium border border-outline-variant/30 hover:border-primary/50 transition-colors">/扩写</button>
+<button class="whitespace-nowrap px-3 py-1 rounded-full bg-surface-container-highest text-on-surface/70 text-[11px] font-medium border border-outline-variant/30 hover:border-primary/50 transition-colors">/改写</button>
+<button class="whitespace-nowrap px-3 py-1 rounded-full bg-surface-container-highest text-on-surface/70 text-[11px] font-medium border border-outline-variant/30 hover:border-primary/50 transition-colors">/对话</button>
+<button class="whitespace-nowrap px-3 py-1 rounded-full bg-surface-container-highest text-on-surface/70 text-[11px] font-medium border border-outline-variant/30 hover:border-primary/50 transition-colors">/描写</button>
+<button class="whitespace-nowrap px-3 py-1 rounded-full bg-surface-container-highest text-on-surface/70 text-[11px] font-medium border border-outline-variant/30 hover:border-primary/50 transition-colors">/推演</button>
+</div>
+<div class="relative group">
+<textarea class="w-full bg-surface-container-highest rounded-xl border-none focus:ring-1 focus:ring-primary/40 text-sm p-4 pr-12 min-h-[100px] placeholder:text-on-surface/30 resize-none transition-all" placeholder="输入指令或与 AI 对话..."></textarea>
+<button class="absolute bottom-3 right-3 w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-on-primary shadow-lg shadow-primary/20 hover:scale-105 active:scale-95 transition-all">
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'wght' 700;">arrow_upward</span>
+</button>
+</div>
+<div class="mt-2 flex justify-between items-center px-1">
+<div class="flex gap-3">
+<button class="text-on-surface/40 hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-lg" data-icon="attach_file">attach_file</span>
+</button>
+<button class="text-on-surface/40 hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-lg" data-icon="mood">mood</span>
+</button>
+</div>
+<span class="text-[10px] text-on-surface/30 font-medium">Shift + Enter 换行</span>
+</div>
+</div>
+</aside>
+</div>
+<!-- Mobile BottomNavBar (Hidden on desktop) -->
+<nav class="md:hidden flex justify-around items-center bg-[#1e1e32] px-4 py-3 border-none">
+<button class="flex flex-col items-center gap-1 text-[#75d1ff]">
+<span class="material-symbols-outlined" data-icon="book_2">book_2</span>
+<span class="text-[10px]">书卷</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-[#e2e0fc]/50">
+<span class="material-symbols-outlined" data-icon="group">group</span>
+<span class="text-[10px]">角色</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-[#e2e0fc]/50">
+<span class="material-symbols-outlined" data-icon="auto_awesome" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
+<span class="text-[10px]">AI</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-[#e2e0fc]/50">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="text-[10px]">设置</span>
+</button>
+</nav>
+</body></html>

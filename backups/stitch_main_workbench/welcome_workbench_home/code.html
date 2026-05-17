@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>DreamWeaver | 织梦笔 - AI 驱动的长篇小说创作平台</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=Noto+Serif+SC:wght@400;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "secondary": "#ffb954",
+              "on-secondary-fixed-variant": "#633f00",
+              "secondary-fixed-dim": "#ffb954",
+              "on-tertiary-fixed-variant": "#005318",
+              "on-primary-container": "#0094c4",
+              "on-surface-variant": "#c6c6ce",
+              "primary-fixed": "#c2e8ff",
+              "surface-dim": "#111125",
+              "outline": "#909098",
+              "error": "#ffb4ab",
+              "outline-variant": "#45464d",
+              "primary": "#75d1ff",
+              "primary-fixed-dim": "#75d1ff",
+              "surface-bright": "#37374d",
+              "inverse-surface": "#e2e0fc",
+              "surface-container-lowest": "#0c0c20",
+              "on-error-container": "#ffdad6",
+              "inverse-primary": "#006688",
+              "on-primary-fixed-variant": "#004d67",
+              "on-error": "#690005",
+              "on-background": "#e2e0fc",
+              "on-primary": "#003548",
+              "on-surface": "#e2e0fc",
+              "primary-container": "#002535",
+              "error-container": "#93000a",
+              "surface-variant": "#333348",
+              "surface-container-highest": "#333348",
+              "on-secondary-fixed": "#291800",
+              "inverse-on-surface": "#2f2e44",
+              "on-primary-fixed": "#001e2b",
+              "on-secondary-container": "#3c2500",
+              "tertiary-fixed-dim": "#83da85",
+              "on-tertiary": "#00390e",
+              "surface-container": "#1e1e32",
+              "surface-tint": "#75d1ff",
+              "secondary-container": "#c3841b",
+              "on-secondary": "#452b00",
+              "tertiary-container": "#002908",
+              "secondary-fixed": "#ffddb4",
+              "tertiary-fixed": "#9ff79f",
+              "surface-container-high": "#28283d",
+              "on-tertiary-fixed": "#002105",
+              "on-tertiary-container": "#469a4e",
+              "background": "#111125",
+              "surface": "#111125",
+              "surface-container-low": "#1a1a2e",
+              "tertiary": "#83da85"
+            },
+            fontFamily: {
+              "headline": ["Manrope", "sans-serif"],
+              "body": ["Noto Serif SC", "serif"],
+              "label": ["Manrope", "sans-serif"]
+            },
+            borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .serif-text { font-family: 'Noto Serif SC', serif; }
+        .interface-text { font-family: 'Manrope', sans-serif; }
+        .glass-panel {
+            background: rgba(51, 51, 72, 0.6);
+            backdrop-filter: blur(12px);
+        }
+        .text-glow {
+            text-shadow: 0 0 15px rgba(117, 209, 255, 0.5);
+        }
+        body {
+            background: radial-gradient(circle at top right, #1e1e32, #111125);
+            min-height: 100vh;
+        }
+    </style>
+</head>
+<body class="text-on-surface selection:bg-primary/30">
+<!-- SideNavBar Anchor -->
+<nav class="fixed inset-y-0 left-0 z-50 flex flex-col w-64 bg-[#1e1e32] dark:bg-slate-900 shadow-none">
+<div class="p-6">
+<div class="text-xl font-bold tracking-tight text-[#75d1ff] flex items-center gap-2">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
+                DreamWeaver
+            </div>
+<p class="text-slate-400 text-[10px] uppercase tracking-[0.2em] mt-1 font-medium">Master Architect</p>
+</div>
+<div class="flex-1 px-4 space-y-2 mt-4">
+<a class="flex items-center gap-3 px-4 py-3 text-[#75d1ff] bg-[#37374d]/50 border-l-2 border-[#75d1ff] shadow-[0_0_15px_rgba(117,209,255,0.1)] transition-all ease-in-out duration-300" href="#">
+<span class="material-symbols-outlined">book_5</span>
+<span class="text-xs font-medium uppercase tracking-wider">Library</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-slate-200 transition-colors duration-300 hover:bg-[#37374d]/30 transition-all active:scale-95" href="#">
+<span class="material-symbols-outlined">edit_note</span>
+<span class="text-xs font-medium uppercase tracking-wider">Manuscript</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-slate-200 transition-colors duration-300 hover:bg-[#37374d]/30 transition-all active:scale-95" href="#">
+<span class="material-symbols-outlined">groups</span>
+<span class="text-xs font-medium uppercase tracking-wider">Characters</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-slate-200 transition-colors duration-300 hover:bg-[#37374d]/30 transition-all active:scale-95" href="#">
+<span class="material-symbols-outlined">explore</span>
+<span class="text-xs font-medium uppercase tracking-wider">World Building</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-slate-200 transition-colors duration-300 hover:bg-[#37374d]/30 transition-all active:scale-95" href="#">
+<span class="material-symbols-outlined">insights</span>
+<span class="text-xs font-medium uppercase tracking-wider">Analytics</span>
+</a>
+</div>
+<div class="p-4 space-y-2">
+<button class="w-full bg-gradient-to-br from-primary to-on-primary-container text-on-primary py-3 rounded-lg text-xs font-bold uppercase tracking-widest shadow-lg shadow-primary/10 active:scale-95 transition-all">
+                New Manuscript
+            </button>
+<div class="pt-4 mt-4 border-t border-outline-variant/20">
+<a class="flex items-center gap-3 px-4 py-2 text-slate-400 hover:text-slate-200 text-xs font-medium uppercase tracking-wider transition-all" href="#">
+<span class="material-symbols-outlined text-lg">settings</span>
+                    Settings
+                </a>
+<a class="flex items-center gap-3 px-4 py-2 text-slate-400 hover:text-slate-200 text-xs font-medium uppercase tracking-wider transition-all" href="#">
+<span class="material-symbols-outlined text-lg">help_outline</span>
+                    Support
+                </a>
+</div>
+</div>
+</nav>
+<!-- Main Content Area -->
+<main class="ml-64 min-h-screen flex flex-col">
+<!-- TopNavBar Anchor -->
+<header class="h-16 flex items-center justify-between px-8 bg-[#111125]/80 backdrop-blur-xl z-40">
+<div class="flex items-center gap-8">
+<div class="flex flex-col">
+<h1 class="serif-text text-2xl font-bold text-primary text-glow leading-none">织梦笔</h1>
+<span class="interface-text text-[10px] text-primary/60 tracking-wider font-medium mt-1">AI 驱动的长篇小说创作平台</span>
+</div>
+<nav class="hidden md:flex items-center gap-6">
+<a class="text-[#75d1ff] border-b-2 border-[#75d1ff] pb-1 text-xs font-bold uppercase tracking-widest transition-all" href="#">Dashboard</a>
+<a class="text-slate-400 hover:text-[#75d1ff] text-xs font-bold uppercase tracking-widest transition-all" href="#">Timeline</a>
+<a class="text-slate-400 hover:text-[#75d1ff] text-xs font-bold uppercase tracking-widest transition-all" href="#">Collaborators</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<div class="relative group">
+<span class="absolute inset-y-0 left-3 flex items-center text-slate-500">
+<span class="material-symbols-outlined text-lg">search</span>
+</span>
+<input class="bg-surface-container-highest/50 border-none rounded-full pl-10 pr-4 py-1.5 text-sm focus:ring-1 focus:ring-primary/40 w-64 transition-all interface-text" placeholder="Search manuscripts..." type="text"/>
+</div>
+<div class="flex items-center gap-3">
+<button class="text-slate-400 hover:text-primary transition-all p-2">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="text-slate-400 hover:text-secondary transition-all p-2">
+<span class="material-symbols-outlined">auto_awesome</span>
+</button>
+<button class="w-8 h-8 rounded-full bg-surface-container-highest overflow-hidden border border-outline-variant/30">
+<img alt="Profile" class="w-full h-full object-cover" data-alt="close-up portrait of a thoughtful person in a dimly lit studio environment with blue ambient light" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCfx4Bn3iTnRxmFApPCBAP_hf-4T9bvpIA35D4EsnOzGLvSt3xtnsve2mUOVl1qtIBvW-lZwLJSZu7GnbOGcAILkSSIx4vrFjAz5AXCKA5oQUmlXfb-pf_OsBfSmfoCB7gmcx_wz0Dktf9skZ9Q2r0t3ex-zQ3nilkAZq_dkWkdOa20Dj08Xz_BnABkspEvY9CvPjObpj8c8m14h73RQzU9DxMtI4BDz1RAqmQh8R-GwJ9q-malsDNwME7iSeY8MeypW9bOox7GSAs"/>
+</button>
+</div>
+</div>
+</header>
+<div class="flex-1 p-10 space-y-12 max-w-7xl mx-auto w-full">
+<!-- Dashboard Top Grid -->
+<div class="grid grid-cols-12 gap-10">
+<!-- Center-Left: Recent Works -->
+<section class="col-span-12 lg:col-span-5 space-y-6">
+<div class="flex items-center justify-between">
+<h2 class="serif-text text-xl font-bold tracking-tight">Recent Works</h2>
+<a class="text-primary text-xs font-semibold hover:underline" href="#">View All</a>
+</div>
+<div class="space-y-4">
+<!-- Card 1 -->
+<div class="bg-surface-container border-l-4 border-primary rounded-lg p-5 flex items-start gap-5 hover:bg-surface-container-high transition-all group cursor-pointer">
+<div class="w-20 h-28 flex-shrink-0 bg-surface-container-highest rounded overflow-hidden relative shadow-lg">
+<img alt="Cover" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="aesthetic book cover art for a xianxia novel featuring a lone silhouette standing on a mountain peak against a massive moon and swirling clouds" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCe_qalSFL-shlIHOu53A46_0ovjvn3Sqmyy9Ft7Zhc7PU6TGAsddY1N7D7CneNdII5jAzamF4cTZ-5nTV7wqE5lmtnyHBVfey2LJqVsTDSGLPCLPo5xxBZKfi6Wk0s5k6HGGkI9wkuVC86priIZRn8HATeMu59j6BCJlXF5Ed1ZHMqEVW3z1P_v_uIU3o80NW0rl7Tz3UbhQLAHSNzS-CwTF_Bj0R0ukCMWV_Kr_MTZpI7zWw7DcTWsfU0JMOiBT2DmCal8yxGrpU"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+</div>
+<div class="flex-1 space-y-2">
+<div class="flex justify-between items-start">
+<h3 class="serif-text text-lg font-bold">青云志</h3>
+<span class="bg-primary-container text-primary text-[10px] px-2 py-0.5 rounded-full font-bold">连载中</span>
+</div>
+<div class="flex items-center gap-3 text-xs text-on-surface-variant font-medium">
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-sm">category</span>仙侠</span>
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-sm">description</span>128,450 字</span>
+</div>
+<div class="flex items-center gap-2 text-[10px] text-slate-500 font-medium">
+<span class="material-symbols-outlined text-xs">schedule</span>
+                                    Last edited 2h ago
+                                </div>
+<div class="pt-2 flex gap-2">
+<button class="bg-primary/10 hover:bg-primary/20 text-primary text-[10px] px-3 py-1 rounded transition-colors font-bold tracking-wider">CONTINUE WRITING</button>
+</div>
+</div>
+</div>
+<!-- Card 2 -->
+<div class="bg-surface-container border-l-4 border-secondary rounded-lg p-5 flex items-start gap-5 hover:bg-surface-container-high transition-all group cursor-pointer">
+<div class="w-20 h-28 flex-shrink-0 bg-surface-container-highest rounded overflow-hidden relative shadow-lg">
+<img alt="Cover" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="dark mystery novel book cover with a rainy city street at night, neon reflections on wet pavement, cinematic lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD4Y-wjNfYoe_-iwYVGlf2HKzN8XP7P3WFsRqBPN37NF3hcl_CXShPRVJUTtEmfSMc5-iAp_pqKOWNCr232jOgqOFyZEAQVpx-V23MyE4U9FlEaesovwI20Qx1d8rKBrFGGhXhzlm6b1au22tYsheuv5KJvmEWs4IitMZ8iR0fVEzMoWSoq0dRcJnXZq5FPTrW7iZKi7lJnDVzhoihUk_pMqjPEQGyXBfEJ66ZsL8KFLP4t6ug6nuyGbT5ggDRQsSLY6ytiGuaOHJY"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+</div>
+<div class="flex-1 space-y-2">
+<div class="flex justify-between items-start">
+<h3 class="serif-text text-lg font-bold">夜幕下的告别</h3>
+<span class="bg-secondary-container/20 text-secondary text-[10px] px-2 py-0.5 rounded-full font-bold">草稿箱</span>
+</div>
+<div class="flex items-center gap-3 text-xs text-on-surface-variant font-medium">
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-sm">category</span>悬疑</span>
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-sm">description</span>42,012 字</span>
+</div>
+<div class="flex items-center gap-2 text-[10px] text-slate-500 font-medium">
+<span class="material-symbols-outlined text-xs">schedule</span>
+                                    Last edited 1d ago
+                                </div>
+</div>
+</div>
+</div>
+</section>
+<!-- Center-Right: Quick Start -->
+<section class="col-span-12 lg:col-span-7 space-y-8">
+<div class="grid grid-cols-2 gap-6">
+<div class="col-span-2 md:col-span-1 h-44 bg-gradient-to-br from-surface-container to-surface-container-high rounded-xl p-6 flex flex-col justify-between border border-primary/10 hover:border-primary/40 transition-all group cursor-pointer">
+<div class="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-primary text-3xl">add</span>
+</div>
+<div>
+<h3 class="serif-text text-xl font-bold">New Work</h3>
+<p class="text-xs text-slate-400 mt-1">Start your masterpiece with AI assistance.</p>
+</div>
+</div>
+<div class="col-span-2 md:col-span-1 h-44 bg-surface-container rounded-xl p-6 flex flex-col justify-between border border-outline-variant/20 hover:bg-surface-container-high transition-all cursor-pointer">
+<div class="w-12 h-12 rounded-full bg-surface-container-highest flex items-center justify-center">
+<span class="material-symbols-outlined text-slate-400 text-3xl">grid_view</span>
+</div>
+<div>
+<h3 class="serif-text text-xl font-bold">World Forge</h3>
+<p class="text-xs text-slate-400 mt-1">Define characters, lore, and geography.</p>
+</div>
+</div>
+</div>
+<div class="space-y-4">
+<h3 class="interface-text text-xs font-bold uppercase tracking-[0.2em] text-slate-500">Writing Templates</h3>
+<div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+<!-- Template 1 -->
+<div class="bg-surface-container-low p-4 rounded-lg border-t-2 border-primary/40 hover:bg-surface-container transition-colors cursor-pointer group">
+<div class="text-primary mb-3">
+<span class="material-symbols-outlined text-2xl">swords</span>
+</div>
+<span class="serif-text block font-bold text-sm">仙侠</span>
+<span class="text-[10px] text-slate-500">Cultivation &amp; Immortals</span>
+</div>
+<!-- Template 2 -->
+<div class="bg-surface-container-low p-4 rounded-lg border-t-2 border-secondary/40 hover:bg-surface-container transition-colors cursor-pointer">
+<div class="text-secondary mb-3">
+<span class="material-symbols-outlined text-2xl">apartment</span>
+</div>
+<span class="serif-text block font-bold text-sm">都市</span>
+<span class="text-[10px] text-slate-500">Urban Legends</span>
+</div>
+<!-- Template 3 -->
+<div class="bg-surface-container-low p-4 rounded-lg border-t-2 border-error/40 hover:bg-surface-container transition-colors cursor-pointer">
+<div class="text-error mb-3">
+<span class="material-symbols-outlined text-2xl">search_check</span>
+</div>
+<span class="serif-text block font-bold text-sm">悬疑</span>
+<span class="text-[10px] text-slate-500">Mystery &amp; Noir</span>
+</div>
+<!-- Template 4 -->
+<div class="bg-surface-container-low p-4 rounded-lg border-t-2 border-tertiary/40 hover:bg-surface-container transition-colors cursor-pointer">
+<div class="text-tertiary mb-3">
+<span class="material-symbols-outlined text-2xl">rocket_launch</span>
+</div>
+<span class="serif-text block font-bold text-sm">科幻</span>
+<span class="text-[10px] text-slate-500">Futuristic Worlds</span>
+</div>
+</div>
+</div>
+</section>
+</div>
+<!-- Bottom: Writing Stats Dashboard -->
+<section class="bg-surface-container-low/50 rounded-2xl p-8 space-y-8 relative overflow-hidden">
+<div class="flex items-center justify-between relative z-10">
+<div class="flex items-center gap-4">
+<div class="bg-primary/10 p-2 rounded-lg">
+<span class="material-symbols-outlined text-primary">analytics</span>
+</div>
+<div>
+<h2 class="serif-text text-xl font-bold">Writing Insights</h2>
+<p class="text-xs text-slate-500">Weekly progress and achievement tracking</p>
+</div>
+</div>
+<div class="flex gap-10">
+<div class="text-center">
+<span class="block text-[10px] uppercase tracking-widest text-slate-500 font-bold">Total Works</span>
+<span class="serif-text text-2xl font-bold text-primary">14</span>
+</div>
+<div class="text-center">
+<span class="block text-[10px] uppercase tracking-widest text-slate-500 font-bold">Weekly Avg</span>
+<span class="serif-text text-2xl font-bold text-secondary">3.2k</span>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-10 relative z-10">
+<!-- Daily Word Count Bar Chart Simulation -->
+<div class="md:col-span-2 space-y-4">
+<span class="interface-text text-[10px] font-bold uppercase tracking-widest text-slate-500">Words per day (Last 7 Days)</span>
+<div class="h-48 flex items-end justify-between gap-4 px-2">
+<div class="w-full flex flex-col items-center gap-2">
+<div class="w-full bg-surface-container-highest rounded-t-sm h-[40%] group-hover:bg-primary/50 transition-all"></div>
+<span class="text-[10px] text-slate-500">Mon</span>
+</div>
+<div class="w-full flex flex-col items-center gap-2">
+<div class="w-full bg-surface-container-highest rounded-t-sm h-[65%]"></div>
+<span class="text-[10px] text-slate-500">Tue</span>
+</div>
+<div class="w-full flex flex-col items-center gap-2">
+<div class="w-full bg-surface-container-highest rounded-t-sm h-[50%]"></div>
+<span class="text-[10px] text-slate-500">Wed</span>
+</div>
+<div class="w-full flex flex-col items-center gap-2">
+<div class="w-full bg-surface-container-highest rounded-t-sm h-[90%] border-t-2 border-primary shadow-[0_-10px_20px_-10px_rgba(117,209,255,0.4)]"></div>
+<span class="text-[10px] text-primary font-bold">Thu</span>
+</div>
+<div class="w-full flex flex-col items-center gap-2">
+<div class="w-full bg-surface-container-highest rounded-t-sm h-[30%]"></div>
+<span class="text-[10px] text-slate-500">Fri</span>
+</div>
+<div class="w-full flex flex-col items-center gap-2">
+<div class="w-full bg-surface-container-highest rounded-t-sm h-[75%]"></div>
+<span class="text-[10px] text-slate-500">Sat</span>
+</div>
+<div class="w-full flex flex-col items-center gap-2">
+<div class="w-full bg-surface-container-highest rounded-t-sm h-[45%]"></div>
+<span class="text-[10px] text-slate-500">Sun</span>
+</div>
+</div>
+</div>
+<!-- Trend / Next Goal -->
+<div class="bg-surface-container rounded-xl p-6 flex flex-col justify-center gap-4">
+<div class="space-y-1">
+<span class="interface-text text-[10px] font-bold uppercase tracking-widest text-secondary">Creative Momentum</span>
+<h4 class="serif-text text-lg font-bold">Level 12: Lorem Weaver</h4>
+</div>
+<div class="w-full bg-surface-container-highest h-2 rounded-full overflow-hidden">
+<div class="bg-gradient-to-r from-secondary to-orange-400 h-full w-[72%]"></div>
+</div>
+<p class="text-[10px] text-slate-500">840 words until next rank. Keep the ink flowing.</p>
+<button class="mt-2 flex items-center justify-center gap-2 border border-outline-variant py-2 rounded text-[10px] font-bold uppercase tracking-widest hover:bg-surface-container-highest transition-all">
+<span class="material-symbols-outlined text-sm">emoji_events</span>
+                            Achievements
+                        </button>
+</div>
+</div>
+<!-- Abstract Decorative Background -->
+<div class="absolute bottom-0 right-0 w-96 h-96 opacity-5 pointer-events-none">
+<span class="material-symbols-outlined text-[24rem] text-primary" style="font-variation-settings: 'FILL' 1;">ink_pen</span>
+</div>
+</section>
+</div>
+<footer class="mt-auto py-8 px-10 border-t border-outline-variant/10 text-center">
+<p class="interface-text text-[10px] text-slate-500 uppercase tracking-[0.3em]">© 2024 DREAMWEAVER LABS • THE DIGITAL SANCTUARY</p>
+</footer>
+</main>
+<!-- Contextual FAB -->
+<button class="fixed bottom-10 right-10 w-16 h-16 rounded-full bg-gradient-to-br from-primary to-on-primary-container text-on-primary shadow-2xl flex items-center justify-center hover:scale-110 active:scale-95 transition-all z-50">
+<span class="material-symbols-outlined text-3xl" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
+</button>
+</body></html>

@@ -1,0 +1,426 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+// ============================================
+// 用户与认证相关表
+// ============================================
+
+model User {
+  id               String   @id @default(uuid())
+  email            String   @unique
+  passwordHash     String   @map("password_hash")
+  nickname         String?
+  avatarUrl        String?  @map("avatar_url")
+  subscriptionTier String   @default("free") @map("subscription_tier")
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  preferences      UserPreferences?
+  subscription     Subscription?
+  projects         Project[]
+  agentSessions    AgentSession[]
+  hooks            HookConfig[]
+  companionSprite  CompanionSprite?
+  usageRecords     UsageRecord[]
+  payments         Payment[]
+  permissionAudits PermissionAuditLog[]
+
+  @@map("users")
+}
+
+model UserPreferences {
+  id              String   @id @default(uuid())
+  userId          String   @unique @map("user_id")
+  uiLanguage      String   @default("zh") @map("ui_language")
+  writingLanguage String   @default("zh") @map("writing_language")
+  timezone        String   @default("Asia/Shanghai")
+  currency        String   @default("CNY")
+  region          String   @default("ap")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_preferences")
+}
+
+model Subscription {
+  id                   String    @id @default(uuid())
+  userId               String    @unique @map("user_id")
+  plan                 String    @default("free")
+  status               String    @default("trialing")
+  stripeCustomerId     String?   @map("stripe_customer_id")
+  stripeSubscriptionId String?   @map("stripe_subscription_id")
+  currentPeriodStart   DateTime? @map("current_period_start")
+  currentPeriodEnd     DateTime? @map("current_period_end")
+  cancelAtPeriodEnd    Boolean   @default(false) @map("cancel_at_period_end")
+  createdAt            DateTime  @default(now()) @map("created_at")
+  updatedAt            DateTime  @updatedAt @map("updated_at")
+
+  // Relations
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  payments Payment[]
+
+  @@map("subscriptions")
+}
+
+// ============================================
+// 项目与创作相关表
+// ============================================
+
+model Project {
+  id               String   @id @default(uuid())
+  userId           String   @map("user_id")
+  name             String
+  description      String?
+  genre            String?
+  targetWordCount  Int?     @map("target_word_count")
+  currentWordCount Int      @default(0) @map("current_word_count")
+  status           String   @default("draft")
+  settings         String?
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  user              User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  chapters          Chapter[]
+  characters        Character[]
+  worldSettings     WorldSetting[]
+  branches          Branch[]
+  foreshadowing     Foreshadowing[]
+  agentSessions     AgentSession[]
+  hooks             HookConfig[]
+  memoryEntries     MemoryEntry[]
+  promptCaches      PromptCacheEntry[]
+  compactionRecords CompactionRecord[]
+  permissionAudits  PermissionAuditLog[]
+
+  @@map("projects")
+}
+
+model Chapter {
+  id            String   @id @default(uuid())
+  projectId     String   @map("project_id")
+  volumeNumber  Int      @map("volume_number")
+  chapterNumber Int      @map("chapter_number")
+  title         String
+  content       String?
+  wordCount     Int      @default(0) @map("word_count")
+  status        String   @default("outline")
+  branchId      String?  @map("branch_id")
+  parentVersion String?  @map("parent_version")
+  metadata      String?
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  branch  Branch? @relation(fields: [branchId], references: [id])
+
+  @@map("chapters")
+}
+
+model Character {
+  id              String   @id @default(uuid())
+  projectId       String   @map("project_id")
+  name            String
+  aliases         String?
+  roleType        String   @map("role_type")
+  profile         String?
+  relationships   String?
+  arc             String?
+  firstAppearance String?  @map("first_appearance")
+  wordCount       Int      @default(0) @map("word_count")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@map("characters")
+}
+
+model WorldSetting {
+  id             String   @id @default(uuid())
+  projectId      String   @map("project_id")
+  name           String
+  category       String
+  type           String
+  description    String?
+  properties     String?
+  relations      String?
+  sourceChapters String?  @map("source_chapters")
+  version        Int      @default(1)
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@map("world_settings")
+}
+
+model Branch {
+  id             String   @id @default(uuid())
+  projectId      String   @map("project_id")
+  name           String
+  type           String
+  parentBranchId String?  @map("parent_branch_id")
+  forkPoint      String?  @map("fork_point")
+  description    String?
+  wordCount      Int      @default(0) @map("word_count")
+  status         String   @default("active")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  project  Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  chapters Chapter[]
+
+  @@map("branches")
+}
+
+model Foreshadowing {
+  id                    String   @id @default(uuid())
+  projectId             String   @map("project_id")
+  content               String
+  plantedChapterId      String?  @map("planted_chapter_id")
+  plantedText           String?  @map("planted_text")
+  expectedPayoffChapter Int?     @map("expected_payoff_chapter")
+  actualPayoffChapterId String?  @map("actual_payoff_chapter_id")
+  status                String   @default("planted")
+  priority              String   @default("medium")
+  relatedCharacters     String?  @map("related_characters")
+  notes                 String?
+  createdAt             DateTime @default(now()) @map("created_at")
+  updatedAt             DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@map("foreshadowing")
+}
+
+// ============================================
+// AI 与 Harness 相关表
+// ============================================
+
+model AgentSession {
+  id              String    @id @default(uuid())
+  projectId       String    @map("project_id")
+  userId          String    @map("user_id")
+  agentType       String    @map("agent_type")
+  parentAgentId   String?   @map("parent_agent_id")
+  mode            String
+  status          String    @default("active")
+  task            String?
+  turnCount       Int       @default(0) @map("turn_count")
+  maxTurns        Int       @default(10) @map("max_turns")
+  model           String?
+  contextSnapshot String?   @map("context_snapshot")
+  result          String?
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+  completedAt     DateTime? @map("completed_at")
+
+  // Relations
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("agent_sessions")
+}
+
+model HookConfig {
+  id           String   @id @default(uuid())
+  projectId    String?  @map("project_id")
+  userId       String   @map("user_id")
+  name         String
+  event        String
+  matchPattern String?  @map("match_pattern")
+  actionType   String   @map("action_type")
+  scriptType   String   @map("script_type")
+  scriptPath   String?  @map("script_path")
+  priority     Int      @default(0)
+  enabled      Boolean  @default(true)
+  config       String?
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  project Project? @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("hooks_config")
+}
+
+model MemoryEntry {
+  id               String    @id @default(uuid())
+  projectId        String    @map("project_id")
+  sessionId        String?   @map("session_id")
+  type             String
+  content          String
+  summary          String?
+  sourceChapterId  String?   @map("source_chapter_id")
+  sourceText       String?   @map("source_text")
+  entities         String?
+  importance       String    @default("medium")
+  compressionLevel Int       @default(0) @map("compression_level")
+  accessCount      Int       @default(0) @map("access_count")
+  lastAccessed     DateTime? @map("last_accessed")
+  expiresAt        DateTime? @map("expires_at")
+  createdAt        DateTime  @default(now()) @map("created_at")
+  updatedAt        DateTime  @updatedAt @map("updated_at")
+
+  // Relations
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@map("memory_entries")
+}
+
+model CompanionSprite {
+  id                  String   @id @default(uuid())
+  userId              String   @unique @map("user_id")
+  species             String
+  rarity              String
+  name                String?
+  level               Int      @default(1)
+  experience          Int      @default(0)
+  attributes          String?
+  evolution           String?
+  totalCompanionHours Float    @default(0) @map("total_companion_hours")
+  seed                BigInt?
+  createdAt           DateTime @default(now()) @map("created_at")
+  updatedAt           DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("companion_sprites")
+}
+
+// ============================================
+// Harness 专用表
+// ============================================
+
+model PromptCacheEntry {
+  id          String    @id @default(uuid())
+  projectId   String    @map("project_id")
+  cacheScope  String    @map("cache_scope")
+  blockType   String    @map("block_type")
+  contentHash String    @map("content_hash")
+  tokenCount  Int       @map("token_count")
+  hitCount    Int       @default(0) @map("hit_count")
+  lastHitAt   DateTime? @map("last_hit_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+
+  // Relations
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@map("prompt_cache_entries")
+}
+
+model CompactionRecord {
+  id                  String   @id @default(uuid())
+  sessionId           String?  @map("session_id")
+  projectId           String   @map("project_id")
+  compactionLevel     String   @map("compaction_level")
+  tokensBefore        Int      @map("tokens_before")
+  tokensAfter         Int      @map("tokens_after")
+  summaryContent      String?  @map("summary_content")
+  firstArchivedMsgId  String?  @map("first_archived_msg_id")
+  lastArchivedMsgId   String?  @map("last_archived_msg_id")
+  isReversible        Boolean  @default(true) @map("is_reversible")
+  consecutiveFailures Int      @default(0) @map("consecutive_failures")
+  createdAt           DateTime @default(now()) @map("created_at")
+
+  // Relations
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@map("compaction_records")
+}
+
+model PermissionAuditLog {
+  id               String   @id @default(uuid())
+  projectId        String?  @map("project_id")
+  userId           String   @map("user_id")
+  sessionId        String?  @map("session_id")
+  operationType    String   @map("operation_type")
+  classifierStage  String   @map("classifier_stage")
+  decision         String
+  reason           String?
+  racerId          String?  @map("racer_id")
+  processingTimeMs Int      @map("processing_time_ms")
+  createdAt        DateTime @default(now()) @map("created_at")
+
+  // Relations
+  project Project? @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("permission_audit_log")
+}
+
+model FeatureGate {
+  id                String   @id @default(uuid())
+  featureName       String   @unique @map("feature_name")
+  gateLevel         String   @map("gate_level")
+  enabled           Boolean  @default(false)
+  rolloutPercentage Int      @default(0) @map("rollout_percentage")
+  config            String?
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+
+  @@map("feature_gates")
+}
+
+// ============================================
+// 支付与用量相关表
+// ============================================
+
+model UsageRecord {
+  id           String   @id @default(uuid())
+  userId       String   @map("user_id")
+  periodStart  DateTime @map("period_start")
+  periodEnd    DateTime @map("period_end")
+  wordsUsed    Int      @default(0) @map("words_used")
+  wordsLimit   Int      @default(0) @map("words_limit")
+  aiTokensUsed BigInt   @default(0) @map("ai_tokens_used")
+  planId       String?  @map("plan_id")
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("usage_records")
+}
+
+model Payment {
+  id                    String    @id @default(uuid())
+  userId                String    @map("user_id")
+  subscriptionId        String?   @map("subscription_id")
+  stripePaymentIntentId String?   @map("stripe_payment_intent_id")
+  amount                Float
+  currency              String
+  status                String    @default("pending")
+  refundedAt            DateTime? @map("refunded_at")
+  createdAt             DateTime  @default(now()) @map("created_at")
+
+  // Relations
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subscription Subscription? @relation(fields: [subscriptionId], references: [id])
+
+  @@map("payments")
+}
+
+// ============================================
+// Enums
+// ============================================

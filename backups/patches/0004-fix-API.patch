@@ -1,0 +1,392 @@
+From e202bfc954a8c3998a9a4915528880500669d0c0 Mon Sep 17 00:00:00 2001
+From: jimiechan <85342677@qq.com>
+Date: Sat, 4 Apr 2026 16:40:14 +0800
+Subject: [PATCH 04/14] =?UTF-8?q?fix:=20=E4=BF=AE=E5=A4=8D=E9=A3=9E?=
+ =?UTF-8?q?=E4=B9=A6=20API=20=E8=B0=83=E7=94=A8=E5=91=BD=E4=BB=A4=E5=92=8C?=
+ =?UTF-8?q?=E5=AD=97=E6=AE=B5=E6=A0=BC=E5=BC=8F?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+- 使用正确的 lark-cli base +record-upsert 格式
+- 修复 datetime 字段格式为字符串
+- 使用正确的 lark-cli im +messages-send 命令
+---
+ .../skills/ralph-feishu-sync/lib/base-sync.ts |  56 ++++++---
+ .../skills/ralph-feishu-sync/lib/im-notify.ts | 112 ++++++------------
+ test-real-api.ts                              |  69 +++++++++++
+ 3 files changed, 143 insertions(+), 94 deletions(-)
+ create mode 100644 test-real-api.ts
+
+diff --git a/.trae/skills/ralph-feishu-sync/lib/base-sync.ts b/.trae/skills/ralph-feishu-sync/lib/base-sync.ts
+index aa3fb06..cbe96fe 100644
+--- a/.trae/skills/ralph-feishu-sync/lib/base-sync.ts
++++ b/.trae/skills/ralph-feishu-sync/lib/base-sync.ts
+@@ -83,31 +83,41 @@ function mapStatusToFeishu(status: TaskItem['status']): string {
+ }
+ 
+ /**
+- * 构建飞书记录字段 - 根据实际字段ID
++ * 格式化日期时间为字符串
++ */
++function formatDateTime(date: Date = new Date()): string {
++  const pad = (n: number) => n.toString().padStart(2, '0');
++  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
++}
++
++/**
++ * 构建飞书记录字段 - 根据实际字段ID和正确格式
+  */
+ function buildRecordFields(
+   task: TaskItem,
+   projectId: string
+ ): Record<string, any> {
+-  const now = new Date();
+-  const timestamp = now.getTime();
+-  
+-  return {
+-    // 任务ID - fldV7UZaeC
++  const fields: Record<string, any> = {
++    // 任务ID - fldV7UZaeC (text)
+     'fldV7UZaeC': task.id,
+-    // 任务名称 - fldUnb5miD
++    // 任务名称 - fldUnb5miD (text)
+     'fldUnb5miD': task.description,
+-    // 任务描述 - fldaxqIJ1m
++    // 任务描述 - fldaxqIJ1m (text)
+     'fldaxqIJ1m': `[${task.module}] ${task.submodule || ''}`,
+-    // 状态 - fldRJHcSxn
++    // 状态 - fldRJHcSxn (text)
+     'fldRJHcSxn': mapStatusToFeishu(task.status),
+-    // 优先级 - fldDUkYmxk
++    // 优先级 - fldDUkYmxk (text)
+     'fldDUkYmxk': task.priority || 'P2',
+-    // 预计工时 - fldE1AiQBe
++    // 预计工时 - fldE1AiQBe (number)
+     'fldE1AiQBe': task.estimatedHours || 1,
+-    // 开始时间 - fldalVm7gV (如果是进行中)
+-    ...(task.status === 'in_progress' && { 'fldalVm7gV': timestamp }),
+   };
++
++  // 开始时间 - fldalVm7gV (datetime) - 仅当状态为进行中时
++  if (task.status === 'in_progress') {
++    fields['fldalVm7gV'] = formatDateTime();
++  }
++
++  return fields;
+ }
+ 
+ /**
+@@ -118,13 +128,17 @@ async function createRecord(
+   fields: Record<string, any>
+ ): Promise<string | null> {
+   try {
+-    const cmd = `lark-cli base +record-upsert --base-token ${config.base.app_token} --table-id ${config.base.table_id} --json '${JSON.stringify({ fields })}'`;
++    const jsonPayload = JSON.stringify({ fields });
++    console.log('   创建记录 payload:', jsonPayload.substring(0, 200) + '...');
++    
++    const cmd = `lark-cli base +record-upsert --base-token ${config.base.app_token} --table-id ${config.base.table_id} --json '${jsonPayload}'`;
+     const result = execSync(cmd, { encoding: 'utf-8', stdio: ['pipe', 'pipe', 'pipe'] });
+     const data = JSON.parse(result);
+     
+     if (data.ok && data.data?.record?.record_id) {
+       return data.data.record.record_id;
+     }
++    console.error('   创建记录失败:', data.error || data);
+     return null;
+   } catch (error) {
+     console.error('❌ 创建记录失败:', error);
+@@ -141,11 +155,18 @@ async function updateRecord(
+   fields: Record<string, any>
+ ): Promise<boolean> {
+   try {
+-    const cmd = `lark-cli base +record-upsert --base-token ${config.base.app_token} --table-id ${config.base.table_id} --record-id ${recordId} --json '${JSON.stringify({ fields })}'`;
++    const jsonPayload = JSON.stringify({ fields });
++    console.log('   更新记录 payload:', jsonPayload.substring(0, 200) + '...');
++    
++    const cmd = `lark-cli base +record-upsert --base-token ${config.base.app_token} --table-id ${config.base.table_id} --record-id ${recordId} --json '${jsonPayload}'`;
+     const result = execSync(cmd, { encoding: 'utf-8', stdio: ['pipe', 'pipe', 'pipe'] });
+     const data = JSON.parse(result);
+     
+-    return data.ok === true;
++    if (data.ok) {
++      return true;
++    }
++    console.error('   更新记录失败:', data.error || data);
++    return false;
+   } catch (error) {
+     console.error('❌ 更新记录失败:', error);
+     return false;
+@@ -263,10 +284,9 @@ export async function syncTaskComplete(
+     console.log(`🔄 正在更新任务状态: ${existing.feishuTaskId}`);
+     
+     // 构建更新字段
+-    const now = new Date();
+     const updateFields: Record<string, any> = {
+       'fldRJHcSxn': '已完成',
+-      'flddhwzCZW': now.getTime(),
++      'flddhwzCZW': formatDateTime(),
+     };
+     
+     // 如果有 commit hash，添加到备注
+diff --git a/.trae/skills/ralph-feishu-sync/lib/im-notify.ts b/.trae/skills/ralph-feishu-sync/lib/im-notify.ts
+index fd51101..0edeb55 100644
+--- a/.trae/skills/ralph-feishu-sync/lib/im-notify.ts
++++ b/.trae/skills/ralph-feishu-sync/lib/im-notify.ts
+@@ -25,22 +25,12 @@ interface NotifyData {
+  * 构建任务拆分通知消息
+  */
+ function buildSplitMessage(data: NotifyData): string {
+-  return JSON.stringify({
+-    msg_type: 'interactive',
+-    card: {
+-      config: { wide_screen_mode: true },
+-      header: {
+-        title: { tag: 'plain_text', content: '📋 任务拆分完成' },
+-        template: 'blue'
+-      },
+-      elements: [
+-        { tag: 'div', text: { tag: 'lark_md', content: `**项目：** ${data.project}` } },
+-        { tag: 'div', text: { tag: 'lark_md', content: `**任务数：** ${data.taskCount} 个` } },
+-        { tag: 'hr' },
+-        { tag: 'div', text: { tag: 'lark_md', content: '✅ 已同步到飞书多维表格' } }
+-      ]
+-    }
+-  });
++  return `📋 **任务拆分完成**
++━━━━━━━━━━━━━━━━━━━━
++📁 项目：${data.project}
++📊 任务数：${data.taskCount} 个
++
++✅ 已同步到飞书多维表格`;
+ }
+ 
+ /**
+@@ -49,22 +39,12 @@ function buildSplitMessage(data: NotifyData): string {
+ function buildCompleteMessage(data: NotifyData): string {
+   const commitInfo = data.commitHash ? `\n🔖 Commit: \`${data.commitHash}\`` : '';
+   
+-  return JSON.stringify({
+-    msg_type: 'interactive',
+-    card: {
+-      config: { wide_screen_mode: true },
+-      header: {
+-        title: { tag: 'plain_text', content: '✅ 任务完成' },
+-        template: 'green'
+-      },
+-      elements: [
+-        { tag: 'div', text: { tag: 'lark_md', content: `**项目：** ${data.project}` } },
+-        { tag: 'div', text: { tag: 'lark_md', content: `**任务：** ${data.taskDescription?.substring(0, 50)}...${commitInfo}` } },
+-        { tag: 'hr' },
+-        { tag: 'div', text: { tag: 'lark_md', content: '📊 进度已更新' } }
+-      ]
+-    }
+-  });
++  return `✅ **任务完成**
++━━━━━━━━━━━━━━━━━━━━
++📁 项目：${data.project}
++📝 任务：${data.taskDescription?.substring(0, 50)}...${commitInfo}
++
++📊 进度已更新`;
+ }
+ 
+ /**
+@@ -74,50 +54,32 @@ function buildDailyMessage(data: NotifyData): string {
+   const { total, completed, percentage } = data.progress || { total: 0, completed: 0, percentage: 0 };
+   const remaining = total - completed;
+   
+-  return JSON.stringify({
+-    msg_type: 'interactive',
+-    card: {
+-      config: { wide_screen_mode: true },
+-      header: {
+-        title: { tag: 'plain_text', content: '📊 Ralph 项目日报' },
+-        template: 'blue'
+-      },
+-      elements: [
+-        { tag: 'div', text: { tag: 'lark_md', content: `**项目：** ${data.project}` } },
+-        { tag: 'div', text: { tag: 'lark_md', content: `**日期：** ${new Date().toLocaleDateString()}` } },
+-        { tag: 'hr' },
+-        { tag: 'div', text: { tag: 'lark_md', content: `✅ 已完成：${completed}/${total} (${percentage}%)` } },
+-        { tag: 'div', text: { tag: 'lark_md', content: `📋 剩余任务：${remaining} 个` } }
+-      ]
+-    }
+-  });
++  return `📊 **Ralph 项目日报**
++━━━━━━━━━━━━━━━━━━━━
++📁 项目：${data.project}
++📅 日期：${new Date().toLocaleDateString()}
++
++✅ 已完成：${completed}/${total} (${percentage}%)
++📋 剩余任务：${remaining} 个`;
+ }
+ 
+ /**
+  * 构建里程碑通知消息
+  */
+ function buildMilestoneMessage(data: NotifyData): string {
+-  return JSON.stringify({
+-    msg_type: 'interactive',
+-    card: {
+-      config: { wide_screen_mode: true },
+-      header: {
+-        title: { tag: 'plain_text', content: '🎉 里程碑达成' },
+-        template: 'orange'
+-      },
+-      elements: [
+-        { tag: 'div', text: { tag: 'lark_md', content: `**项目：** ${data.project}` } },
+-        { tag: 'div', text: { tag: 'lark_md', content: `**模块：** ${data.module}` } },
+-        { tag: 'hr' },
+-        { tag: 'div', text: { tag: 'lark_md', content: `✅ ${data.module} 模块全部完成！` } },
+-        { tag: 'div', text: { tag: 'lark_md', content: '🚀 进入下一阶段开发' } }
+-      ]
+-    }
+-  });
++  return `🎉 **里程碑达成**
++━━━━━━━━━━━━━━━━━━━━
++📁 项目：${data.project}
++🎯 模块：${data.module}
++
++✅ ${data.module} 模块全部完成！
++
++🚀 进入下一阶段开发`;
+ }
+ 
+ /**
+  * 调用 lark-cli 发送群聊消息 - 真实 API 实现
++ * 使用 lark-cli im +messages-send
+  */
+ export async function notifyProgress(
+   type: NotificationType,
+@@ -149,14 +111,17 @@ export async function notifyProgress(
+         messageContent = buildMilestoneMessage(data);
+         break;
+       default:
+-        messageContent = JSON.stringify({ msg_type: 'text', content: { text: JSON.stringify(data) } });
++        messageContent = JSON.stringify(data, null, 2);
+     }
+     
+     console.log(`📤 发送${type}通知到飞书群聊...`);
+     console.log(`   Chat ID: ${config.im.chat_id}`);
+     
+     // 调用 lark-cli 发送消息
+-    const cmd = `lark-cli chat +message-create --receive-id ${config.im.chat_id} --content '${messageContent}'`;
++    // 使用 +messages-send shortcut
++    const cmd = `lark-cli im +messages-send --chat-id ${config.im.chat_id} --msg-type text --content '${messageContent}'`;
++    console.log('   执行命令:', cmd.substring(0, 100) + '...');
++    
+     const result = execSync(cmd, { encoding: 'utf-8', stdio: ['pipe', 'pipe', 'pipe'] });
+     const response = JSON.parse(result);
+     
+@@ -170,7 +135,7 @@ export async function notifyProgress(
+       console.error('❌ 消息发送失败:', response);
+       return {
+         success: false,
+-        message: `发送失败: ${response.msg || '未知错误'}`,
++        message: `发送失败: ${response.msg || response.error?.message || '未知错误'}`,
+       };
+     }
+   } catch (error) {
+@@ -198,14 +163,9 @@ export async function sendCustomMessage(
+       };
+     }
+     
+-    const content = JSON.stringify({
+-      msg_type: 'text',
+-      content: { text: message }
+-    });
+-    
+     console.log(`📤 发送自定义消息...`);
+     
+-    const cmd = `lark-cli chat +message-create --receive-id ${config.im.chat_id} --content '${content}'`;
++    const cmd = `lark-cli im +messages-send --chat-id ${config.im.chat_id} --msg-type text --content '${message}'`;
+     const result = execSync(cmd, { encoding: 'utf-8', stdio: ['pipe', 'pipe', 'pipe'] });
+     const response = JSON.parse(result);
+     
+@@ -217,7 +177,7 @@ export async function sendCustomMessage(
+     } else {
+       return {
+         success: false,
+-        message: `发送失败: ${response.msg || '未知错误'}`,
++        message: `发送失败: ${response.msg || response.error?.message || '未知错误'}`,
+       };
+     }
+   } catch (error) {
+diff --git a/test-real-api.ts b/test-real-api.ts
+new file mode 100644
+index 0000000..97c08b3
+--- /dev/null
++++ b/test-real-api.ts
+@@ -0,0 +1,69 @@
++/**
++ * 真实飞书 API 测试
++ */
++
++import { loadConfig } from './.trae/skills/ralph-feishu-sync/lib/config';
++import { parseTasks } from './.trae/skills/ralph-feishu-sync/lib/parser';
++import { syncTasksToBase, syncTaskComplete } from './.trae/skills/ralph-feishu-sync/lib/base-sync';
++import { notifyProgress } from './.trae/skills/ralph-feishu-sync/lib/im-notify';
++
++async function main() {
++  console.log('🚀 真实飞书 API 测试\n');
++  console.log('=====================================\n');
++
++  // 加载配置
++  const config = loadConfig();
++  console.log('✅ 配置加载完成');
++  console.log('   飞书启用:', config.enabled);
++  console.log('   Base Token:', config.base.app_token);
++  console.log('   Table ID:', config.base.table_id);
++  console.log('   Chat ID:', config.im.chat_id);
++
++  if (!config.enabled) {
++    console.log('\n❌ 飞书集成未启用，跳过测试');
++    return;
++  }
++
++  // 测试 1: 发送群聊消息
++  console.log('\n📢 测试 1: 发送群聊消息');
++  const notifyResult = await notifyProgress('split', {
++    project: 'storytree2',
++    taskCount: 3,
++  }, config);
++  console.log('   结果:', notifyResult.success ? '✅ 成功' : '❌ 失败');
++  console.log('   消息:', notifyResult.message);
++
++  // 测试 2: 同步任务到多维表格
++  console.log('\n📋 测试 2: 同步任务到多维表格');
++  const tasks = parseTasks('04-ralph-tasks.md', 'storytree2');
++  console.log('   解析到任务数:', tasks.length);
++  
++  // 只同步前3个任务进行测试
++  const testTasks = tasks.slice(0, 3);
++  console.log('   测试同步前3个任务...');
++  
++  const syncResult = await syncTasksToBase(testTasks, 'storytree2', config);
++  console.log('   结果:', syncResult.success ? '✅ 成功' : '❌ 失败');
++  console.log('   消息:', syncResult.message);
++
++  // 测试 3: 更新任务完成状态
++  if (syncResult.success && testTasks.length > 0) {
++    console.log('\n✅ 测试 3: 更新任务完成状态');
++    const completeResult = await syncTaskComplete(
++      testTasks[0].description,
++      '271ae43',
++      config
++    );
++    console.log('   结果:', completeResult.success ? '✅ 成功' : '❌ 失败');
++    console.log('   消息:', completeResult.message);
++  }
++
++  console.log('\n=====================================');
++  console.log('✅ 真实 API 测试完成');
++  console.log('\n请检查：');
++  console.log('   1. 飞书群聊是否收到消息');
++  console.log('   2. 多维表格是否添加了任务记录');
++  console.log('   3. 第一个任务状态是否更新为"已完成"');
++}
++
++main().catch(console.error);
+-- 
+2.37.1 (Apple Git-137.1)
+

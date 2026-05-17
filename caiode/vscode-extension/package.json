@@ -1,0 +1,219 @@
+{
+  "name": "storytree-vscode",
+  "displayName": "StoryTree IDE",
+  "description": "AI-powered novel writing environment integrated into VS Code. Write, organize, and enhance your stories with AI assistance.",
+  "version": "1.0.0",
+  "publisher": "storytree",
+  "license": "MIT",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Programming Languages",
+    "Other",
+    "Visualization"
+  ],
+  "keywords": [
+    "novel",
+    "writing",
+    "AI",
+    "storytelling",
+    "fiction",
+    "IDE"
+  ],
+  "activationEvents": [
+    "*"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "storytree.openDashboard",
+        "title": "Open StoryTree Dashboard",
+        "category": "StoryTree"
+      },
+      {
+        "command": "storytree.newProject",
+        "title": "Create New Project",
+        "category": "StoryTree"
+      },
+      {
+        "command": "storytree.newChapter",
+        "title": "Create New Chapter",
+        "category": "StoryTree"
+      },
+      {
+        "command": "storytree.toggleAIChat",
+        "title": "Toggle AI Chat Panel",
+        "category": "StoryTree"
+      },
+      {
+        "command": "storytree.showSettings",
+        "title": "Open StoryTree Settings",
+        "category": "StoryTree"
+      },
+      {
+        "command": "storytree.wordCount",
+        "title": "Show Word Count Statistics",
+        "category": "StoryTree"
+      },
+      {
+        "command": "storytree.showQueueMonitor",
+        "title": "Show Caiode Queue Monitor",
+        "category": "Caiode"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "storytree.openDashboard",
+        "key": "cmd+shift+t",
+        "mac": "cmd+shift+t"
+      },
+      {
+        "command": "storytree.newProject",
+        "key": "cmd+shift+n",
+        "mac": "cmd+shift+n"
+      },
+      {
+        "command": "storytree.newChapter",
+        "key": "cmd+shift+c",
+        "mac": "cmd+shift+c"
+      },
+      {
+        "command": "storytree.toggleAIChat",
+        "key": "cmd+shift+i",
+        "mac": "cmd+shift+i"
+      },
+      {
+        "command": "storytree.showSettings",
+        "key": "cmd+shift+, ",
+        "mac": "cmd+shift+,"
+      }
+    ],
+    "menus": {
+      "editor/title": [
+        {
+          "when": "resourceLangId == markdown",
+          "command": "storytree.openDashboard",
+          "group": "navigation"
+        }
+      ],
+      "view/item/context": [
+        {
+          "when": "view == storytreeExplorer && viewItem == project",
+          "command": "storytree.openDashboard",
+          "group": "inline"
+        }
+      ]
+    },
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "storytree-sidebar",
+          "title": "StoryTree",
+          "icon": "$(book)"
+        }
+      ]
+    },
+    "views": {
+      "storytree-sidebar": [
+        {
+          "id": "storytreeExplorer",
+          "name": "Projects",
+          "when": "storytree.enabled"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "StoryTree",
+      "properties": {
+        "storytree.ai.provider": {
+          "type": "string",
+          "default": "openai",
+          "enum": [
+            "openai",
+            "anthropic",
+            "ollama",
+            "custom"
+          ],
+          "description": "AI provider for story enhancement"
+        },
+        "storytree.ai.openai.apiKey": {
+          "type": "string",
+          "default": "",
+          "description": "OpenAI API Key (stored securely)"
+        },
+        "storytree.ai.anthropic.apiKey": {
+          "type": "string",
+          "default": "",
+          "description": "Anthropic API Key (stored securely)"
+        },
+        "storytree.ai.ollama.baseUrl": {
+          "type": "string",
+          "default": "http://localhost:11434",
+          "description": "Ollama server base URL"
+        },
+        "storytree.editor.autoSaveMs": {
+          "type": "number",
+          "default": 5000,
+          "description": "Auto-save interval in milliseconds"
+        },
+        "caiode.queue.timeout": {
+          "type": "number",
+          "default": 30000,
+          "description": "LLM request timeout in milliseconds"
+        },
+        "caiode.lock.staleLockTimeout": {
+          "type": "number",
+          "default": 10000,
+          "description": "Stale lock timeout in milliseconds"
+        },
+        "caiode.heartbeat.interval": {
+          "type": "number",
+          "default": 5000,
+          "description": "Heartbeat check interval in milliseconds"
+        },
+        "caiode.heartbeat.maxMisses": {
+          "type": "number",
+          "default": 3,
+          "description": "Maximum missed heartbeat count before process termination"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "build:dev": "node esbuild.config.mjs --dev",
+    "build:prod": "node esbuild.config.mjs --prod",
+    "watch": "node esbuild.config.mjs --watch",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "lint": "eslint src --ext .ts,.tsx",
+    "lint:fix": "eslint src --ext .ts,.tsx --fix",
+    "format": "prettier --write \"src/**/*.ts\"",
+    "format:check": "prettier --check \"src/**/*.ts\"",
+    "typecheck": "tsc --noEmit",
+    "package": "vsce package --no-dependencies",
+    "vscode:prepublish": "npm run build:prod"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/glob": "^8.1.0",
+    "@types/node": "^20.10.0",
+    "@types/proper-lockfile": "^4.1.4",
+    "@types/vscode": "^1.85.0",
+    "@typescript-eslint/eslint-plugin": "^7.0.0",
+    "@typescript-eslint/parser": "^7.0.0",
+    "@vitest/coverage-v8": "^1.6.1",
+    "esbuild": "^0.19.0",
+    "eslint": "^8.56.0",
+    "glob": "^13.0.6",
+    "prettier": "^3.2.0",
+    "typescript": "^5.3.0",
+    "vitest": "^1.2.0",
+    "vsce": "^2.15.0"
+  },
+  "dependencies": {
+    "proper-lockfile": "^4.1.2"
+  }
+}

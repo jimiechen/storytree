@@ -1,0 +1,16 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Chrome CDP Debug",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:3000", // 替换为您的应用URL
+      "webRoot": "${workspaceFolder}",
+      "runtimeArgs": [
+        "--remote-debugging-port=9222" // 启用CDP调试端口
+      ],
+      "sourceMaps": true
+    }
+  ]
+}

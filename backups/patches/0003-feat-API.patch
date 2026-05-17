@@ -1,0 +1,607 @@
+From 271ae43a4315e558847aff1cabdeec46be39524a Mon Sep 17 00:00:00 2001
+From: jimiechan <85342677@qq.com>
+Date: Sat, 4 Apr 2026 16:37:43 +0800
+Subject: [PATCH 03/14] =?UTF-8?q?feat:=20=E5=AE=9E=E7=8E=B0=E7=9C=9F?=
+ =?UTF-8?q?=E5=AE=9E=E7=9A=84=E9=A3=9E=E4=B9=A6=20API=20=E8=B0=83=E7=94=A8?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+- 使用 lark-base skill 实现多维表格同步
+- 使用 lark-im skill 实现群聊通知
+- 根据实际字段结构更新字段映射
+- 添加真实 API 调用的错误处理
+---
+ .../skills/ralph-feishu-sync/lib/base-sync.ts | 220 ++++++++++--------
+ .../skills/ralph-feishu-sync/lib/im-notify.ts | 188 +++++++++------
+ 2 files changed, 239 insertions(+), 169 deletions(-)
+
+diff --git a/.trae/skills/ralph-feishu-sync/lib/base-sync.ts b/.trae/skills/ralph-feishu-sync/lib/base-sync.ts
+index a450aca..aa3fb06 100644
+--- a/.trae/skills/ralph-feishu-sync/lib/base-sync.ts
++++ b/.trae/skills/ralph-feishu-sync/lib/base-sync.ts
+@@ -1,10 +1,11 @@
+ /**
+  * 多维表格同步模块
+- * 将任务同步到飞书多维表格 (Base)
++ * 将任务同步到飞书多维表格 (Base) - 真实 API 实现
+  */
+ 
+ import * as fs from 'fs';
+ import * as path from 'path';
++import { execSync } from 'child_process';
+ import { FeishuConfig } from './config';
+ import { TaskItem } from './parser';
+ 
+@@ -82,31 +83,77 @@ function mapStatusToFeishu(status: TaskItem['status']): string {
+ }
+ 
+ /**
+- * 构建飞书记录字段
++ * 构建飞书记录字段 - 根据实际字段ID
+  */
+ function buildRecordFields(
+   task: TaskItem,
+   projectId: string
+ ): Record<string, any> {
++  const now = new Date();
++  const timestamp = now.getTime();
++  
+   return {
+-    任务ID: task.id,
+-    任务名称: task.description,
+-    模块: task.module,
+-    子模块: task.submodule,
+-    状态: mapStatusToFeishu(task.status),
+-    优先级: task.priority || 'P2',
+-    预估工时: task.estimatedHours || 1,
+-    创建时间: new Date().toISOString(),
+-    本地文件: '04-ralph-tasks.md',
+-    行号: task.lineNumber,
++    // 任务ID - fldV7UZaeC
++    'fldV7UZaeC': task.id,
++    // 任务名称 - fldUnb5miD
++    'fldUnb5miD': task.description,
++    // 任务描述 - fldaxqIJ1m
++    'fldaxqIJ1m': `[${task.module}] ${task.submodule || ''}`,
++    // 状态 - fldRJHcSxn
++    'fldRJHcSxn': mapStatusToFeishu(task.status),
++    // 优先级 - fldDUkYmxk
++    'fldDUkYmxk': task.priority || 'P2',
++    // 预计工时 - fldE1AiQBe
++    'fldE1AiQBe': task.estimatedHours || 1,
++    // 开始时间 - fldalVm7gV (如果是进行中)
++    ...(task.status === 'in_progress' && { 'fldalVm7gV': timestamp }),
+   };
+ }
+ 
+ /**
+- * 同步任务到飞书 Base
+- * 
+- * 注意：这是一个模拟实现，实际使用时需要调用飞书 API
+- * 可以通过 lark-base skill 或直接调用飞书 OpenAPI
++ * 调用 lark-cli 创建记录
++ */
++async function createRecord(
++  config: FeishuConfig,
++  fields: Record<string, any>
++): Promise<string | null> {
++  try {
++    const cmd = `lark-cli base +record-upsert --base-token ${config.base.app_token} --table-id ${config.base.table_id} --json '${JSON.stringify({ fields })}'`;
++    const result = execSync(cmd, { encoding: 'utf-8', stdio: ['pipe', 'pipe', 'pipe'] });
++    const data = JSON.parse(result);
++    
++    if (data.ok && data.data?.record?.record_id) {
++      return data.data.record.record_id;
++    }
++    return null;
++  } catch (error) {
++    console.error('❌ 创建记录失败:', error);
++    return null;
++  }
++}
++
++/**
++ * 调用 lark-cli 更新记录
++ */
++async function updateRecord(
++  config: FeishuConfig,
++  recordId: string,
++  fields: Record<string, any>
++): Promise<boolean> {
++  try {
++    const cmd = `lark-cli base +record-upsert --base-token ${config.base.app_token} --table-id ${config.base.table_id} --record-id ${recordId} --json '${JSON.stringify({ fields })}'`;
++    const result = execSync(cmd, { encoding: 'utf-8', stdio: ['pipe', 'pipe', 'pipe'] });
++    const data = JSON.parse(result);
++    
++    return data.ok === true;
++  } catch (error) {
++    console.error('❌ 更新记录失败:', error);
++    return false;
++  }
++}
++
++/**
++ * 同步任务到飞书 Base - 真实 API 实现
+  */
+ export async function syncTasksToBase(
+   tasks: TaskItem[],
+@@ -123,63 +170,65 @@ export async function syncTasksToBase(
+     }
+     
+     console.log(`🔄 正在同步 ${tasks.length} 个任务到飞书多维表格...`);
++    console.log(`   Base: ${config.base.app_token}`);
++    console.log(`   Table: ${config.base.table_id}`);
+     
+     // 加载现有映射
+     const mapping = loadMappings(projectId);
+     
+-    // 准备批量创建记录
+-    const recordsToCreate = [];
+-    const recordsToUpdate = [];
++    let created = 0;
++    let updated = 0;
++    let failed = 0;
+     
+     for (const task of tasks) {
+       const existing = findMapping(mapping.mappings, task.description);
+       const fields = buildRecordFields(task, projectId);
+       
+-      if (existing) {
++      if (existing?.feishuRecordId) {
+         // 更新现有记录
+-        recordsToUpdate.push({
+-          recordId: existing.feishuRecordId,
+-          fields,
+-        });
+-        existing.updatedAt = new Date().toISOString();
++        console.log(`   更新: ${task.id}`);
++        const success = await updateRecord(config, existing.feishuRecordId, fields);
++        if (success) {
++          updated++;
++          existing.updatedAt = new Date().toISOString();
++        } else {
++          failed++;
++        }
+       } else {
+         // 创建新记录
+-        recordsToCreate.push({
+-          task,
+-          fields,
+-        });
++        console.log(`   创建: ${task.id}`);
++        const recordId = await createRecord(config, fields);
++        if (recordId) {
++          created++;
++          mapping.mappings.push({
++            localId: `${task.module}-${task.lineNumber}`,
++            localDesc: task.description,
++            feishuRecordId: recordId,
++            feishuTaskId: task.id,
++            createdAt: new Date().toISOString(),
++            updatedAt: new Date().toISOString(),
++          });
++        } else {
++          failed++;
++        }
+       }
+-    }
+-    
+-    // 模拟 API 调用（实际使用时替换为真实的飞书 API 调用）
+-    console.log(`   新建: ${recordsToCreate.length} 条记录`);
+-    console.log(`   更新: ${recordsToUpdate.length} 条记录`);
+-    
+-    // 模拟创建记录并获取 recordId
+-    for (const item of recordsToCreate) {
+-      // 这里应该调用飞书 API 创建记录
+-      // const result = await createFeishuRecord(config, item.fields);
+-      const mockRecordId = `rec_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+       
+-      mapping.mappings.push({
+-        localId: `${item.task.module}-${item.task.lineNumber}`,
+-        localDesc: item.task.description,
+-        feishuRecordId: mockRecordId,
+-        feishuTaskId: item.task.id,
+-        createdAt: new Date().toISOString(),
+-        updatedAt: new Date().toISOString(),
+-      });
++      // 延迟 0.5 秒避免限流
++      await new Promise(resolve => setTimeout(resolve, 500));
+     }
+     
+     // 保存映射
+     saveMappings(mapping);
+     
+     console.log(`✅ 任务同步完成`);
++    console.log(`   新建: ${created}`);
++    console.log(`   更新: ${updated}`);
++    console.log(`   失败: ${failed}`);
+     console.log(`   映射文件: ${MAPPING_FILE}`);
+     
+     return {
+-      success: true,
+-      message: `成功同步 ${tasks.length} 个任务`,
++      success: failed === 0,
++      message: `同步完成: 新建${created}, 更新${updated}, 失败${failed}`,
+     };
+   } catch (error) {
+     const errorMsg = error instanceof Error ? error.message : String(error);
+@@ -192,7 +241,7 @@ export async function syncTasksToBase(
+ }
+ 
+ /**
+- * 同步任务完成状态
++ * 同步任务完成状态 - 真实 API 实现
+  */
+ export async function syncTaskComplete(
+   taskDescription: string,
+@@ -204,7 +253,7 @@ export async function syncTaskComplete(
+     const mapping = loadMappings(config.project.id);
+     const existing = findMapping(mapping.mappings, taskDescription);
+     
+-    if (!existing) {
++    if (!existing?.feishuRecordId) {
+       return {
+         success: false,
+         message: `❌ 未找到任务映射: ${taskDescription.substring(0, 50)}...`,
+@@ -214,29 +263,36 @@ export async function syncTaskComplete(
+     console.log(`🔄 正在更新任务状态: ${existing.feishuTaskId}`);
+     
+     // 构建更新字段
+-    const updateFields = {
+-      状态: '已完成',
+-      完成时间: new Date().toISOString(),
+-      ...(commitHash && { 'Commit Hash': commitHash }),
++    const now = new Date();
++    const updateFields: Record<string, any> = {
++      'fldRJHcSxn': '已完成',
++      'flddhwzCZW': now.getTime(),
+     };
+     
+-    // 这里应该调用飞书 API 更新记录
+-    // await updateFeishuRecord(config, existing.feishuRecordId, updateFields);
+-    
+-    console.log(`   Record ID: ${existing.feishuRecordId}`);
+-    console.log(`   状态: 已完成`);
++    // 如果有 commit hash，添加到备注
+     if (commitHash) {
+-      console.log(`   Commit: ${commitHash}`);
++      updateFields['fldXB7VBoE'] = `Git Commit: ${commitHash}`;
+     }
+     
+-    // 更新映射时间
+-    existing.updatedAt = new Date().toISOString();
+-    saveMappings(mapping);
++    // 调用 API 更新
++    const success = await updateRecord(config, existing.feishuRecordId, updateFields);
+     
+-    return {
+-      success: true,
+-      message: `任务状态已更新: ${existing.feishuTaskId}`,
+-    };
++    if (success) {
++      // 更新映射时间
++      existing.updatedAt = new Date().toISOString();
++      saveMappings(mapping);
++      
++      console.log(`✅ 任务状态已更新: ${existing.feishuTaskId}`);
++      return {
++        success: true,
++        message: `任务状态已更新: ${existing.feishuTaskId}`,
++      };
++    } else {
++      return {
++        success: false,
++        message: '❌ 更新飞书记录失败',
++      };
++    }
+   } catch (error) {
+     const errorMsg = error instanceof Error ? error.message : String(error);
+     console.error('❌ 更新任务状态失败:', errorMsg);
+@@ -247,33 +303,7 @@ export async function syncTaskComplete(
+   }
+ }
+ 
+-/**
+- * 获取任务统计
+- */
+-export async function getTaskStats(
+-  config: FeishuConfig
+-): Promise<{
+-  total: number;
+-  completed: number;
+-  inProgress: number;
+-  blocked: number;
+-  pending: number;
+-}> {
+-  // 这里应该调用飞书 API 查询统计
+-  // 简化实现，返回本地映射统计
+-  const mapping = loadMappings(config.project.id);
+-  
+-  return {
+-    total: mapping.mappings.length,
+-    completed: 0,
+-    inProgress: 0,
+-    blocked: 0,
+-    pending: mapping.mappings.length,
+-  };
+-}
+-
+ export default {
+   syncTasksToBase,
+   syncTaskComplete,
+-  getTaskStats,
+ };
+diff --git a/.trae/skills/ralph-feishu-sync/lib/im-notify.ts b/.trae/skills/ralph-feishu-sync/lib/im-notify.ts
+index 1d9c5b7..fd51101 100644
+--- a/.trae/skills/ralph-feishu-sync/lib/im-notify.ts
++++ b/.trae/skills/ralph-feishu-sync/lib/im-notify.ts
+@@ -1,8 +1,9 @@
+ /**
+  * 群聊通知模块
+- * 发送进度通知到飞书群聊
++ * 发送进度通知到飞书群聊 - 真实 API 实现
+  */
+ 
++import { execSync } from 'child_process';
+ import { FeishuConfig } from './config';
+ 
+ export type NotificationType = 'split' | 'complete' | 'daily' | 'milestone';
+@@ -24,13 +25,22 @@ interface NotifyData {
+  * 构建任务拆分通知消息
+  */
+ function buildSplitMessage(data: NotifyData): string {
+-  return `📋 **任务拆分完成**
+-━━━━━━━━━━━━━━━━━━━━
+-📁 项目：${data.project}
+-📊 任务数：${data.taskCount} 个
+-
+-✅ 已同步到飞书多维表格
+-📎 查看详情：[多维表格链接]`;
++  return JSON.stringify({
++    msg_type: 'interactive',
++    card: {
++      config: { wide_screen_mode: true },
++      header: {
++        title: { tag: 'plain_text', content: '📋 任务拆分完成' },
++        template: 'blue'
++      },
++      elements: [
++        { tag: 'div', text: { tag: 'lark_md', content: `**项目：** ${data.project}` } },
++        { tag: 'div', text: { tag: 'lark_md', content: `**任务数：** ${data.taskCount} 个` } },
++        { tag: 'hr' },
++        { tag: 'div', text: { tag: 'lark_md', content: '✅ 已同步到飞书多维表格' } }
++      ]
++    }
++  });
+ }
+ 
+ /**
+@@ -39,66 +49,75 @@ function buildSplitMessage(data: NotifyData): string {
+ function buildCompleteMessage(data: NotifyData): string {
+   const commitInfo = data.commitHash ? `\n🔖 Commit: \`${data.commitHash}\`` : '';
+   
+-  return `✅ **任务完成**
+-━━━━━━━━━━━━━━━━━━━━
+-📁 项目：${data.project}
+-📝 任务：${data.taskDescription?.substring(0, 50)}...${commitInfo}
+-
+-📊 进度已更新`;
++  return JSON.stringify({
++    msg_type: 'interactive',
++    card: {
++      config: { wide_screen_mode: true },
++      header: {
++        title: { tag: 'plain_text', content: '✅ 任务完成' },
++        template: 'green'
++      },
++      elements: [
++        { tag: 'div', text: { tag: 'lark_md', content: `**项目：** ${data.project}` } },
++        { tag: 'div', text: { tag: 'lark_md', content: `**任务：** ${data.taskDescription?.substring(0, 50)}...${commitInfo}` } },
++        { tag: 'hr' },
++        { tag: 'div', text: { tag: 'lark_md', content: '📊 进度已更新' } }
++      ]
++    }
++  });
+ }
+ 
+ /**
+  * 构建每日摘要通知消息
+  */
+ function buildDailyMessage(data: NotifyData): string {
+-  if (!data.progress) {
+-    return `📊 **Ralph 项目日报**
+-━━━━━━━━━━━━━━━━━━━━
+-📁 项目：${data.project}
+-⏰ 时间：${new Date().toLocaleDateString()}
+-
+-暂无进度数据`;
+-  }
+-  
+-  const { total, completed, percentage } = data.progress;
++  const { total, completed, percentage } = data.progress || { total: 0, completed: 0, percentage: 0 };
+   const remaining = total - completed;
+-  const estimatedDays = remaining > 0 ? Math.ceil(remaining / 3) : 0; // 假设每天完成3个任务
+   
+-  return `📊 **Ralph 项目日报**
+-━━━━━━━━━━━━━━━━━━━━
+-📁 项目：${data.project}
+-📅 日期：${new Date().toLocaleDateString()}
+-
+-✅ 今日完成：待统计
+-📋 剩余任务：${remaining}/${total} (${percentage}%)
+-⏱️ 预计完成：${estimatedDays > 0 ? estimatedDays + ' 天后' : '即将完成'}
+-
+-━━━━━━━━━━━━━━━━━━━━
+-📎 查看详情：[多维表格链接]`;
++  return JSON.stringify({
++    msg_type: 'interactive',
++    card: {
++      config: { wide_screen_mode: true },
++      header: {
++        title: { tag: 'plain_text', content: '📊 Ralph 项目日报' },
++        template: 'blue'
++      },
++      elements: [
++        { tag: 'div', text: { tag: 'lark_md', content: `**项目：** ${data.project}` } },
++        { tag: 'div', text: { tag: 'lark_md', content: `**日期：** ${new Date().toLocaleDateString()}` } },
++        { tag: 'hr' },
++        { tag: 'div', text: { tag: 'lark_md', content: `✅ 已完成：${completed}/${total} (${percentage}%)` } },
++        { tag: 'div', text: { tag: 'lark_md', content: `📋 剩余任务：${remaining} 个` } }
++      ]
++    }
++  });
+ }
+ 
+ /**
+  * 构建里程碑通知消息
+  */
+ function buildMilestoneMessage(data: NotifyData): string {
+-  return `🎉 **里程碑达成**
+-━━━━━━━━━━━━━━━━━━━━
+-📁 项目：${data.project}
+-🎯 模块：${data.module}
+-
+-✅ ${data.module} 模块全部完成！
+-
+-🚀 进入下一阶段开发
+-
+-━━━━━━━━━━━━━━━━━━━━
+-📎 查看详情：[多维表格链接]`;
++  return JSON.stringify({
++    msg_type: 'interactive',
++    card: {
++      config: { wide_screen_mode: true },
++      header: {
++        title: { tag: 'plain_text', content: '🎉 里程碑达成' },
++        template: 'orange'
++      },
++      elements: [
++        { tag: 'div', text: { tag: 'lark_md', content: `**项目：** ${data.project}` } },
++        { tag: 'div', text: { tag: 'lark_md', content: `**模块：** ${data.module}` } },
++        { tag: 'hr' },
++        { tag: 'div', text: { tag: 'lark_md', content: `✅ ${data.module} 模块全部完成！` } },
++        { tag: 'div', text: { tag: 'lark_md', content: '🚀 进入下一阶段开发' } }
++      ]
++    }
++  });
+ }
+ 
+ /**
+- * 发送群聊通知
+- * 
+- * 注意：这是一个模拟实现，实际使用时需要调用飞书 API
+- * 可以通过 lark-im skill 或直接调用飞书 OpenAPI
++ * 调用 lark-cli 发送群聊消息 - 真实 API 实现
+  */
+ export async function notifyProgress(
+   type: NotificationType,
+@@ -115,36 +134,45 @@ export async function notifyProgress(
+     }
+     
+     // 根据类型构建消息
+-    let message: string;
++    let messageContent: string;
+     switch (type) {
+       case 'split':
+-        message = buildSplitMessage(data);
++        messageContent = buildSplitMessage(data);
+         break;
+       case 'complete':
+-        message = buildCompleteMessage(data);
++        messageContent = buildCompleteMessage(data);
+         break;
+       case 'daily':
+-        message = buildDailyMessage(data);
++        messageContent = buildDailyMessage(data);
+         break;
+       case 'milestone':
+-        message = buildMilestoneMessage(data);
++        messageContent = buildMilestoneMessage(data);
+         break;
+       default:
+-        message = `📊 **Ralph 通知**\n\n${JSON.stringify(data, null, 2)}`;
++        messageContent = JSON.stringify({ msg_type: 'text', content: { text: JSON.stringify(data) } });
+     }
+     
+     console.log(`📤 发送${type}通知到飞书群聊...`);
+-    console.log('━━━━━━━━━━━━━━━━━━━━');
+-    console.log(message);
+-    console.log('━━━━━━━━━━━━━━━━━━━━');
++    console.log(`   Chat ID: ${config.im.chat_id}`);
+     
+-    // 这里应该调用飞书 API 发送消息
+-    // await sendFeishuMessage(config.im.chat_id, message);
++    // 调用 lark-cli 发送消息
++    const cmd = `lark-cli chat +message-create --receive-id ${config.im.chat_id} --content '${messageContent}'`;
++    const result = execSync(cmd, { encoding: 'utf-8', stdio: ['pipe', 'pipe', 'pipe'] });
++    const response = JSON.parse(result);
+     
+-    return {
+-      success: true,
+-      message: `通知已发送: ${type}`,
+-    };
++    if (response.ok) {
++      console.log('✅ 消息发送成功');
++      return {
++        success: true,
++        message: `通知已发送: ${type}`,
++      };
++    } else {
++      console.error('❌ 消息发送失败:', response);
++      return {
++        success: false,
++        message: `发送失败: ${response.msg || '未知错误'}`,
++      };
++    }
+   } catch (error) {
+     const errorMsg = error instanceof Error ? error.message : String(error);
+     console.error('❌ 发送通知失败:', errorMsg);
+@@ -156,7 +184,7 @@ export async function notifyProgress(
+ }
+ 
+ /**
+- * 发送自定义消息
++ * 发送自定义消息 - 真实 API 实现
+  */
+ export async function sendCustomMessage(
+   message: string,
+@@ -170,16 +198,28 @@ export async function sendCustomMessage(
+       };
+     }
+     
++    const content = JSON.stringify({
++      msg_type: 'text',
++      content: { text: message }
++    });
++    
+     console.log(`📤 发送自定义消息...`);
+-    console.log(message);
+     
+-    // 这里应该调用飞书 API 发送消息
+-    // await sendFeishuMessage(config.im.chat_id, message);
++    const cmd = `lark-cli chat +message-create --receive-id ${config.im.chat_id} --content '${content}'`;
++    const result = execSync(cmd, { encoding: 'utf-8', stdio: ['pipe', 'pipe', 'pipe'] });
++    const response = JSON.parse(result);
+     
+-    return {
+-      success: true,
+-      message: '消息已发送',
+-    };
++    if (response.ok) {
++      return {
++        success: true,
++        message: '消息已发送',
++      };
++    } else {
++      return {
++        success: false,
++        message: `发送失败: ${response.msg || '未知错误'}`,
++      };
++    }
+   } catch (error) {
+     const errorMsg = error instanceof Error ? error.message : String(error);
+     return {
+-- 
+2.37.1 (Apple Git-137.1)
+
