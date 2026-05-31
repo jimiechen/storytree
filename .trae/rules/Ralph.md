@@ -1,7 +1,10 @@
 ---
 alwaysApply: false
 ---
+
 # Ralph 执行铁律 (Execution Iron Rules)
+
+> **⚠️ 宪法优先**: 本规则受 `docs/boundary/BOUNDARY.md` 约束。当 Ralph.md 与 BOUNDARY.md 冲突时，以 BOUNDARY.md 为准。
 
 > **⚠️ 注意**: 这是 Ralph 开发流程的最高指令。所有 Agent 必须无条件遵守。每次行动前请自我检查。
 
