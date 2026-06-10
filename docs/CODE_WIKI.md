@@ -1,8 +1,8 @@
 # StoryTree2 Code Wiki
 
-> **项目**: OpenCode Creative Studio (StoryTree2)  
-> **版本**: v1.0  
-> **最后更新**: 2026-05-31  
+> **项目**: OpenCode Creative Studio (StoryTree2)
+> **版本**: v2.0
+> **最后更新**: 2026-06-10
 > **状态**: 持续更新中
 
 ---
@@ -17,6 +17,8 @@
 6. [项目运行方式](#6-项目运行方式)
 7. [数据类型定义](#7-数据类型定义)
 8. [扩展点与接口](#8-扩展点与接口)
+9. [测试体系](#9-测试体系)
+10. [附录](#10-附录)
 
 ---
 
@@ -40,25 +42,85 @@
 ```
 storytree2/
 ├── caiode/                          # 核心代码目录
-│   ├── claude-code-src/             # Claude Code 源码分析基准（研究材料，非开源）
-│   ├── opencode-1.4.0/              # OpenCode 核心实现
+│   ├── claude-code-src/             # Claude Code 源码分析基准（研究材料）
+│   │   ├── QueryEngine.ts           # 会话生命周期管理引擎
+│   │   ├── query.ts                 # Agent 主循环实现
+│   │   ├── Tool.ts / tools.ts       # 工具抽象与注册
+│   │   ├── Task.ts / tasks.ts       # 任务状态机管理
+│   │   ├── skills/                  # Skill 发现与加载
+│   │   ├── commands.ts              # 命令注册与分发
+│   │   ├── context.ts               # 上下文构建与压缩
+│   │   ├── state/                   # 状态持久化管理
+│   │   ├── bridge/                  # 外部服务桥接
+│   │   ├── hooks/                   # 生命周期扩展点
+│   │   └── cost-tracker.ts          # 成本追踪统计
+│   │
 │   ├── vscode-extension/            # VS Code 扩展实现
+│   │   ├── src/
+│   │   │   ├── extension.ts         # 扩展主入口
+│   │   │   ├── core/                # 核心服务层
+│   │   │   │   ├── message-router.ts      # JSON-RPC 消息路由
+│   │   │   │   ├── global-model-request-queue.ts  # LLM 请求队列
+│   │   │   │   ├── file-mutex.ts          # 文件互斥锁
+│   │   │   │   ├── config-service.ts      # 配置服务
+│   │   │   │   ├── mock-store.ts          # Mock 数据存储
+│   │   │   │   ├── process-guardian.ts    # 进程守护
+│   │   │   │   ├── event-bus.ts           # 事件总线
+│   │   │   │   ├── rpc-adapter.ts         # RPC 适配器
+│   │   │   │   ├── queue-monitor.ts       # 队列监控
+│   │   │   │   ├── sqlite-db.ts           # SQLite 数据库
+│   │   │   │   ├── secret-manager.ts      # 密钥管理
+│   │   │   │   └── ai/                    # AI Provider 层
+│   │   │   │       ├── provider-factory.ts    # Provider 工厂
+│   │   │   │       ├── openai-provider.ts     # OpenAI 适配
+│   │   │   │       ├── anthropic-provider.ts  # Anthropic 适配
+│   │   │   │       ├── ollama-provider.ts     # Ollama 本地模型
+│   │   │   │       ├── stream-processor.ts    # 流式响应处理
+│   │   │   │       └── conversation-manager.ts # 对话管理
+│   │   │   ├── webview/               # Webview 面板层
+│   │   │   │   ├── panel-manager.ts       # 面板管理器
+│   │   │   │   ├── ai-chat-panel.ts       # AI 聊天面板
+│   │   │   │   ├── enhanced-dashboard.ts  # 增强仪表板
+│   │   │   │   ├── settings-page.ts       # 设置页面
+│   │   │   │   ├── workbench-page.ts      # 工作台页面
+│   │   │   │   └── html-generator.ts      # HTML 生成器
+│   │   │   ├── automation/            # 自动化层
+│   │   │   │   ├── orchestrator/task-orchestrator.ts  # 任务编排器
+│   │   │   │   ├── queue/automation-queue.ts          # 自动化队列
+│   │   │   │   └── drivers/cdp-driver.ts              # CDP 驱动
+│   │   │   ├── skills/                # Skill 系统
+│   │   │   │   ├── skill-registry.ts      # Skill 注册表
+│   │   │   │   └── types.ts               # Skill 类型定义
+│   │   │   ├── rules/                 # 规则引擎
+│   │   │   │   ├── rule-engine.ts         # 规则执行引擎
+│   │   │   │   └── types.ts               # 规则类型定义
+│   │   │   └── types/                 # 共享类型
+│   │   │       └── ipc-protocol.ts        # IPC 通信协议
+│   │   └── __tests__/                 # 测试目录（45+ 测试文件）
+│   │
+│   ├── opencode-1.4.0/              # OpenCode 核心实现（参考）
 │   └── Trae-Ralph-main/             # Trae + Ralph 工具链
+│
 ├── backups/                         # 备份和历史文件
 │   ├── dreamweaver/                 # Next.js 前端（已废弃）
-│   └── dreamweaver/                # 补丁历史
+│   └── patches/                     # Git 补丁历史
+│
 ├── docs/                            # 项目文档
-│   ├── planning/                    # 规划文档
 │   ├── roadmap/                     # 路书文档（13份架构文档）
-│   └── task-reports/                # 任务报告
+│   ├── planning/                    # 规划文档
+│   ├── stitch/                      # Stitch 原型场景文档
+│   ├── task-reports/                # 任务报告
+│   ├── boundary/                    # 边界与规范
+│   ├── CODE_WIKI.md                 # 本文档
+│   └── CODE_WIKI_INDEX.md           # 文档索引
+│
 ├── workspaces/                      # 多模型 AI 工作空间
-│   ├── Claude/
-│   ├── Kimi-K2.5/
-│   ├── MiniMax-M2/
-│   └── Gemini/
+│   ├── Claude/, Kimi-K2.5/, MiniMax-M2/, Gemini/ 等
+│
 └── .trae/                           # Agent 规则和工具
     ├── rules/                       # Ralph 执行规则
-    └── skills/                      # Agent 技能定义
+    ├── skills/                      # Agent 技能定义
+    └── documents/                   # PRD 和分析文档
 ```
 
 ---
@@ -88,361 +150,338 @@ storytree2/
 └─────────────────────────────────────────────────────────────┘
 ```
 
-### 2.2 模块分层图
+### 2.2 VS Code Extension 运行时架构
 
-```mermaid
-graph TB
-    subgraph UI[Presentation Layer]
-        UI1[Novel Editor]
-        UI2[Plugin Pages]
-        UI3[Settings Panels]
-    end
-
-    subgraph Core[Creative Core]
-        Core1[Project Workspace]
-        Core2[Asset Library]
-        Core3[Task Center]
-        Core4[Provider Registry]
-        Core5[License Gate]
-        Core6[Workflow Orchestrator]
-    end
-
-    subgraph Runtime[Creative Agent Runtime]
-        RT1[CreativeQueryEngine]
-        RT2[AgentLoop]
-        RT3[CreativeContextBuilder]
-        RT4[TaskRuntime]
-        RT5[ToolRuntime]
-        RT6[SkillLoader]
-        RT7[PluginRuntime]
-        RT8[HookPipeline]
-        RT9[CommandRegistry]
-        RT10[StateStore]
-        RT11[CostTracker]
-    end
-
-    subgraph External[External Services]
-        Ext1[OpenRouter]
-        Ext2[Image Generation]
-        Ext3[Video Generation]
-        Ext4[TTS/FFmpeg]
-    end
-
-    UI --> Core
-    Core --> Runtime
-    Runtime --> Ext1
-    Runtime --> Ext2
-    Runtime --> Ext3
-    Runtime --> Ext4
+```text
+┌─────────────────────────────────────────────────────────────┐
+│                    VS Code Extension Host                    │
+│  ┌─────────────────────────────────────────────────────┐   │
+│  │              extension.ts (主入口)                   │   │
+│  │  • activate() / deactivate()                        │   │
+│  │  • 初始化所有子系统                                  │   │
+│  └─────────────────────────────────────────────────────┘   │
+│                              │                              │
+│  ┌───────────────────────────┼───────────────────────────┐ │
+│  │                           ▼                           │ │
+│  │  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐   │ │
+│  │  │ Message     │  │ Webview     │  │ GlobalModel │   │ │
+│  │  │ Router      │  │ Manager     │  │ Queue       │   │ │
+│  │  │ (JSON-RPC)  │  │ (UI 面板)    │  │ (LLM 调度)   │   │ │
+│  │  └─────────────┘  └─────────────┘  └─────────────┘   │ │
+│  │         │                  │                  │       │ │
+│  │         ▼                  ▼                  ▼       │ │
+│  │  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐   │ │
+│  │  │ Mock Store  │  │ AI Provider │  │ FileMutex   │   │ │
+│  │  │ (数据层)     │  │ Factory     │  │ (并发控制)   │   │ │
+│  │  └─────────────┘  └─────────────┘  └─────────────┘   │ │
+│  │                                                       │ │
+│  │  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐   │ │
+│  │  │ Skill       │  │ Process     │  │ Config      │   │ │
+│  │  │ Registry    │  │ Guardian    │  │ Service     │   │ │
+│  │  └─────────────┘  └─────────────┘  └─────────────┘   │ │
+│  └───────────────────────────────────────────────────────┘ │
+└─────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
 ## 3. 核心模块详解
 
-### 3.1 Creative Agent Runtime（底层执行内核）
+### 3.1 VS Code Extension 核心模块
 
-#### 3.1.1 CreativeQueryEngine
-
-| 属性 | 说明 |
-|------|------|
-| **职责** | 会话生命周期管理、Agent 请求入口、流式响应输出 |
-| **输入** | 用户请求、项目上下文、会话状态 |
-| **输出** | 流式响应、任务创建、状态更新 |
-| **依赖模块** | AgentLoop, StateStore, CostTracker |
-
-**核心接口**：
-```typescript
-interface CreativeQueryEngine {
-  createSession(config: SessionConfig): Promise<Session>
-  sendRequest(sessionId: string, request: UserRequest): AsyncGenerator<StreamChunk>
-  closeSession(sessionId: string): Promise<void>
-  getSession(sessionId: string): Session | undefined
-}
-```
-
-#### 3.1.2 AgentLoop
+#### 3.1.1 extension.ts - 扩展主入口
 
 | 属性 | 说明 |
 |------|------|
-| **职责** | 主循环：模型响应、工具调用、观察结果、继续推理 |
-| **输入** | 用户请求、上下文、可用工具列表 |
-| **输出** | 流式响应、工具调用结果、最终答案 |
-| **依赖模块** | ToolRuntime, SkillLoader, CreativeContextBuilder |
+| **职责** | VS Code 扩展生命周期管理、子系统初始化、命令注册 |
+| **核心函数** | `activate()`, `deactivate()`, `registerCommands()` |
+| **初始化顺序** | Mock Data → Message Router → Webview Manager → Global Queue → Config Service |
 
-**核心接口**：
+**关键代码**:
 ```typescript
-interface AgentLoop {
-  run(input: AgentInput): AsyncGenerator<AgentOutput>
-  pause(): void
-  resume(): void
-  stop(): void
+export function activate(context: vscode.ExtensionContext): void {
+  initializeMockData();
+  initializeMessageRouter();
+  initializeWebviewManager();
+  initializeGlobalModelQueue();
+  initializeConfigService();
+  registerCommands();
 }
-
-type AgentOutput =
-  | { type: 'thinking'; content: string }
-  | { type: 'tool_call'; tool: string; input: unknown }
-  | { type: 'tool_result'; tool: string; output: unknown }
-  | { type: 'final'; content: string }
-  | { type: 'error'; message: string }
 ```
 
-#### 3.1.3 TaskRuntime
+#### 3.1.2 MessageRouter - JSON-RPC 消息路由
 
 | 属性 | 说明 |
 |------|------|
-| **职责** | 所有生成任务统一调度 |
-| **输入** | 任务定义、Skill 名称、插件ID |
-| **输出** | 任务状态、任务结果 |
-| **依赖模块** | LicenseGate, SkillLoader, PluginRuntime |
+| **文件** | `caiode/vscode-extension/src/core/message-router.ts` |
+| **职责** | 接收 IPC 消息，解析 JSON-RPC 请求，路由到对应处理器 |
+| **核心能力** | Action 路由、中间件管道、错误处理、请求日志 |
 
-**核心接口**：
+**核心类**:
 ```typescript
-interface TaskRuntime {
-  createTask(task: TaskInput): Promise<CreativeTask>
-  getTask(taskId: string): CreativeTask | undefined
-  cancelTask(taskId: string): Promise<void>
-  retryTask(taskId: string): Promise<CreativeTask>
-  listTasks(filter?: TaskFilter): CreativeTask[]
+export class MessageRouter {
+  private handlers: Map<ActionName, { handler: ActionHandler; options: RouteOptions }>;
+  private beforeMiddlewares: BeforeMiddleware[];
+  private afterMiddlewares: AfterMiddleware[];
+
+  on<T>(action: ActionName, handler: ActionHandler<T>, options?: RouteOptions): this;
+  async processMessage(rawMessage: unknown): Promise<IPCResponse>;
+  useBefore(middleware: BeforeMiddleware): this;
+  useAfter(middleware: AfterMiddleware): this;
 }
 ```
 
-**CreativeTask 数据结构**：
-```typescript
-interface CreativeTask {
-  id: string
-  type: string
-  title: string
-  status: 'queued' | 'running' | 'waiting_for_permission' | 'waiting_for_user' | 'completed' | 'failed' | 'cancelled'
-  projectId: string
-  sourceAssetIds: string[]
-  outputAssetIds: string[]
-  skillName?: string
-  pluginId?: string
-  providerIds?: string[]
-  licenseFeature?: string
-  input: unknown
-  output?: unknown
-  error?: CreativeTaskError
-  cost?: {
-    inputTokens?: number
-    outputTokens?: number
-    providerCostUsd?: number
-    localComputeCost?: number
-  }
-  createdAt: string
-  updatedAt: string
-}
+**处理流程**:
+```
+接收消息 → 解析请求 → Before 中间件 → 路由匹配 → 执行 Handler → After 中间件 → 返回响应
 ```
 
-#### 3.1.4 ToolRuntime
+#### 3.1.3 GlobalModelRequestQueue - LLM 请求队列
 
 | 属性 | 说明 |
 |------|------|
-| **职责** | 具体可执行动作注册与执行 |
-| **输入** | 工具名称、工具输入 |
-| **输出** | 工具执行结果 |
-| **依赖模块** | ProviderBridge, AssetLibrary |
+| **文件** | `caiode/vscode-extension/src/core/global-model-request-queue.ts` |
+| **职责** | 全局 LLM 请求串行化调度、优先级管理、超时重试 |
+| **核心机制** | 全局锁 + 优先级队列 + 自动重试 |
 
-**核心接口**：
+**核心类**:
 ```typescript
-interface ToolRuntime {
-  registerTool(tool: ToolDefinition): void
-  unregisterTool(toolId: string): void
-  executeTool(toolId: string, input: unknown, context: ToolContext): Promise<ToolResult>
-  listTools(): ToolDefinition[]
-}
+export class GlobalModelRequestQueue extends EventEmitter {
+  private queue: QueueRequestEntry[];
+  private running: Set<string>;
+  private provider: LLMProvider;
+  private mutex: FileMutex;
 
-interface ToolDefinition {
-  id: string
-  name: string
-  description: string
-  inputSchema: JSONSchema
-  outputSchema: JSONSchema
-  execute: (input: unknown, context: ToolContext) => Promise<ToolResult>
-}
-
-interface ToolContext {
-  worktreePath: string
-  permissionManager: PermissionManager
-  taskCenter: TaskRuntime
-  assetLibrary: AssetLibrary
+  async enqueue(request: LLMRequest): Promise<LLMResponse>;
+  async enqueuePriority(request: LLMRequest, priority: number): Promise<LLMResponse>;
+  cancel(requestId: string): boolean;
+  getQueueStatus(): QueueStatus;
 }
 ```
 
-#### 3.1.5 SkillLoader
+**队列状态**:
+```typescript
+interface QueueStatus {
+  pending: number;           // 等待中
+  running: number;           // 运行中
+  completed: number;         // 已完成
+  failed: number;            // 失败
+  totalProcessed: number;    // 总处理数
+  averageWaitTime: number;   // 平均等待时间
+  averageProcessingTime: number; // 平均处理时间
+}
+```
+
+#### 3.1.4 FileMutex - 文件互斥锁
 
 | 属性 | 说明 |
 |------|------|
-| **职责** | 发现 `.claude/skills/*/SKILL.md`，按需加载 |
-| **输入** | Skill 名称、任务上下文 |
-| **输出** | Skill 定义、Skill 内容 |
-| **依赖模块** | 文件系统 |
+| **文件** | `caiode/vscode-extension/src/core/file-mutex.ts` |
+| **职责** | 基于文件系统的分布式锁，防止并发冲突 |
+| **依赖** | `proper-lockfile` |
 
-**核心接口**：
+**核心类**:
 ```typescript
-interface SkillLoader {
-  discoverSkills(): SkillCatalogEntry[]
-  loadSkill(skillName: string): Promise<SkillDefinition>
-  unloadSkill(skillName: string): void
-  getSkill(skillName: string): SkillDefinition | undefined
+export class FileMutex extends EventEmitter {
+  async acquire(lockId: string, options?: LockOptions): Promise<LockHandle>;
+  async release(handle: LockHandle): Promise<void>;
+  async withLock<T>(lockId: string, fn: () => Promise<T>, options?: LockOptions): Promise<T>;
+  async isLocked(lockId: string): Promise<boolean>;
+  async forceRelease(lockId: string): Promise<void>;
 }
 ```
 
-**Skill 目录结构**：
-```
-.claude/skills/
-├── novel-outline/
-│   └── SKILL.md
-├── novel-to-script/
-│   └── SKILL.md
-├── story-to-shot/
-│   └── SKILL.md
-├── shot-camera-plan/
-│   └── SKILL.md
-├── shot-to-image-prompt/
-│   └── SKILL.md
-├── shot-to-video-prompt/
-│   └── SKILL.md
-├── timeline-assembly/
-│   └── SKILL.md
-└── consistency-check/
-    └── SKILL.md
-```
-
-#### 3.1.6 PluginRuntime
+#### 3.1.5 WebviewPanelManager - Webview 面板管理
 
 | 属性 | 说明 |
 |------|------|
-| **职责** | 插件加载、扩展点、权限系统 |
-| **输入** | 插件 Manifest |
-| **输出** | 插件实例、扩展点注册 |
-| **依赖模块** | LicenseGate, StateStore |
+| **文件** | `caiode/vscode-extension/src/webview/panel-manager.ts` |
+| **职责** | 管理 VS Code Webview 面板生命周期、消息通信 |
 
-**核心接口**：
+**核心方法**:
 ```typescript
-interface PluginRuntime {
-  load(manifest: CreativePluginManifest): Promise<PluginInstance>
-  unload(pluginId: string): Promise<void>
-  enable(pluginId: string): Promise<void>
-  disable(pluginId: string): Promise<void>
-  getInstance(pluginId: string): PluginInstance | undefined
-  listPlugins(): CreativePluginManifest[]
-  getCapability(pluginId: string, capabilityId: string): PluginCapability | undefined
+export class WebviewPanelManager implements vscode.Disposable {
+  async showDashboard(): Promise<void>;      // 显示工作台
+  async toggleAIChat(): Promise<void>;       // 切换 AI 聊天
+  async createNewProject(): Promise<void>;   // 创建项目
+  async createNewChapter(): Promise<void>;   // 创建章节
+  async showWordCount(): Promise<void>;      // 字数统计
+  async refresh(): Promise<void>;            // 刷新面板
 }
 ```
 
-### 3.2 Creative Core（业务抽象层）
-
-#### 3.2.1 Novel Editor Core
-
-**定位**：Novel Editor Core 不是普通插件，而是 OpenCode Creative Studio 的基础入口和所有下游插件的内容源。
-
-**核心数据模型**：
-
-```typescript
-interface NovelProject {
-  id: string
-  name: string
-  description: string
-  type: 'novel' | 'screenplay' | 'short_story'
-  status: 'draft' | 'in_progress' | 'completed'
-  createdAt: string
-  updatedAt: string
-}
-
-interface Character {
-  id: string
-  projectId: string
-  name: string
-  role: 'protagonist' | 'antagonist' | 'supporting' | 'minor'
-  age: number
-  gender: string
-  appearance: string
-  personality: string
-  background: string
-  motivation: string
-  arc: string
-  relationships: CharacterRelationship[]
-}
-
-interface Chapter {
-  id: string
-  projectId: string
-  number: number
-  title: string
-  summary: string
-  scenes: Scene[]
-  status: 'outline' | 'draft' | 'revision' | 'final'
-}
-
-interface Scene {
-  id: string
-  chapterId: string
-  number: number
-  title: string
-  setting: string
-  characters: string[]
-  goal: string
-  conflict: string
-  outcome: string
-  beats: Beat[]
-}
-
-interface Beat {
-  id: string
-  sceneId: string
-  number: number
-  description: string
-  type: 'action' | 'dialogue' | 'description' | 'transition'
-}
-```
-
-#### 3.2.2 Asset Library
+#### 3.1.6 AI Provider 层
 
 | 属性 | 说明 |
 |------|------|
-| **职责** | 统一管理所有创作产物 |
-| **功能** | 资产版本管理、来源和引用关系维护 |
+| **文件** | `caiode/vscode-extension/src/core/ai/` |
+| **职责** | 多 LLM Provider 统一抽象和工厂创建 |
 
-**核心接口**：
+**Provider 接口**:
 ```typescript
-interface AssetLibrary {
-  createAsset(asset: AssetInput): Promise<Asset>
-  getAsset(assetId: string): Asset | undefined
-  updateAsset(assetId: string, data: Partial<Asset>): Promise<Asset>
-  deleteAsset(assetId: string): Promise<void>
-  listAssets(filter?: AssetFilter): Asset[]
-  createVersion(assetId: string, data: unknown): Promise<AssetVersion>
-  getVersions(assetId: string): AssetVersion[]
+export interface LLMProvider {
+  readonly providerName: string;
+  readonly supportedModels: readonly string[];
+
+  chatCompletion(options: ChatCompletionOptions): Promise<ChatCompletionResult>;
+  streamChatCompletion(options: ChatCompletionOptions, onChunk: StreamCallback, signal?: AbortSignal): Promise<ChatCompletionResult>;
+  listModels?(): Promise<string[]>;
+  dispose?(): void;
 }
 ```
 
-#### 3.2.3 License Gate
+**Provider 工厂**:
+```typescript
+export function createLLMProvider(config: AIConfig): LLMProvider;
+// 支持: openai | anthropic | ollama | custom
+```
+
+**已实现的 Provider**:
+| Provider | 文件 | 默认模型 |
+|----------|------|---------|
+| OpenAI | `openai-provider.ts` | gpt-4o-mini |
+| Anthropic | `anthropic-provider.ts` | claude-haiku-4-20250514 |
+| Ollama | `ollama-provider.ts` | qwen2.5:7b |
+| Noop (fallback) | `provider-factory.ts` | - |
+
+#### 3.1.7 MockStore - Mock 数据存储
 
 | 属性 | 说明 |
 |------|------|
-| **职责** | 单模块付费权限校验 |
+| **文件** | `caiode/vscode-extension/src/core/mock-store.ts` |
+| **职责** | 内存数据存储，模拟数据库操作，用于开发和测试 |
 
-**核心接口**：
+**数据实体**:
 ```typescript
-interface LicenseGate {
-  check(pluginId: string, feature?: string): LicenseGateResult
-  getLicenseInfo(pluginId: string): LicenseInfo
-}
+interface Project extends MockEntity { name, description, genre, status }
+interface Chapter extends MockEntity { projectId, title, content, order, wordCount, status }
+interface Character extends MockEntity { projectId, name, role, description, traits }
+interface WorldSetting extends MockEntity { projectId, category, name, description }
+interface OutlineNode extends MockEntity { projectId, chapterId, type, title, synopsis }
+```
 
-type LicenseGateResult = {
-  allowed: boolean
-  reason?: 'not_installed' | 'trial_expired' | 'license_missing' | 'quota_exceeded'
-  upgradeUrl?: string
+#### 3.1.8 ProcessGuardian - 进程守护
+
+| 属性 | 说明 |
+|------|------|
+| **文件** | `caiode/vscode-extension/src/core/process-guardian.ts` |
+| **职责** | 子进程生命周期管理、心跳监控、自动重启 |
+
+**核心类**:
+```typescript
+export class ProcessGuardian extends EventEmitter {
+  async spawn(config: ProcessConfig): Promise<ChildProcess>;
+  async restart(name: string): Promise<boolean>;
+  async stop(name: string): Promise<void>;
+  async stopAll(): Promise<void>;
+  getProcessStatus(name: string): ProcessStatus | null;
+  isRunning(name: string): boolean;
 }
+```
+
+**进程状态**:
+```typescript
+interface ProcessStatus {
+  pid: number | null;
+  name: string;
+  state: "starting" | "running" | "heartbeat_missing" | "stopping" | "stopped" | "crashed";
+  startTime: number;
+  lastHeartbeat: number;
+  restartCount: number;
+  exitCode: number | null;
+}
+```
+
+#### 3.1.9 SkillRegistry - Skill 注册表
+
+| 属性 | 说明 |
+|------|------|
+| **文件** | `caiode/vscode-extension/src/skills/skill-registry.ts` |
+| **职责** | Skill 发现、加载、沙箱绑定 |
+
+**内置 Skill**:
+| Skill ID | 名称 | 激活工具 | 触发关键词 |
+|----------|------|---------|-----------|
+| novel-writing | 小说写作 | ReadFileTool, WriteFileTool | 写小说、创作、故事 |
+| code-review | 代码审查 | ReadFileTool, GrepTool | 代码审查、review |
+| file-organizer | 文件整理 | ReadFileTool, WriteFileTool, BashTool | 整理文件、归档 |
+| researcher | 资料收集 | ReadFileTool, WebFetchTool | 搜索、资料、研究 |
+
+### 3.2 Claude-Code-Src 参考架构
+
+#### 3.2.1 QueryEngine - 会话生命周期管理
+
+| 属性 | 说明 |
+|------|------|
+| **文件** | `caiode/claude-code-src/QueryEngine.ts` |
+| **职责** | 拥有查询生命周期和会话状态，每会话一个实例 |
+| **核心方法** | `submitMessage()`, `interrupt()`, `getMessages()` |
+
+**核心类**:
+```typescript
+export class QueryEngine {
+  private config: QueryEngineConfig;
+  private mutableMessages: Message[];
+  private abortController: AbortController;
+  private totalUsage: NonNullableUsage;
+
+  async *submitMessage(prompt: string, options?: { uuid?: string; isMeta?: boolean }): AsyncGenerator<SDKMessage>;
+  interrupt(): void;
+  getMessages(): readonly Message[];
+  setModel(model: string): void;
+}
+```
+
+#### 3.2.2 Task - 任务状态机
+
+| 属性 | 说明 |
+|------|------|
+| **文件** | `caiode/claude-code-src/Task.ts` |
+| **职责** | 任务类型定义、状态管理、ID 生成 |
+
+**任务类型**:
+```typescript
+type TaskType = 'local_bash' | 'local_agent' | 'remote_agent' | 'in_process_teammate' | 'local_workflow' | 'monitor_mcp' | 'dream';
+type TaskStatus = 'pending' | 'running' | 'completed' | 'failed' | 'killed';
 ```
 
 ---
 
 ## 4. 关键类和函数说明
 
-### 4.1 claude-code-src 核心模块映射
+### 4.1 VS Code Extension 核心模块映射
+
+| 模块路径 | 核心文件 | 职责 | 关键类/函数 |
+|---------|---------|------|-----------|
+| **core/** | `message-router.ts` | JSON-RPC 路由 | `MessageRouter` |
+| | `global-model-request-queue.ts` | LLM 请求队列 | `GlobalModelRequestQueue` |
+| | `file-mutex.ts` | 文件互斥锁 | `FileMutex`, `createFileMutex()` |
+| | `config-service.ts` | 配置服务 | `ConfigService`, `getConfigService()` |
+| | `mock-store.ts` | Mock 数据 | `StoryTreeMockStore`, `mockStore` |
+| | `process-guardian.ts` | 进程守护 | `ProcessGuardian`, `createProcessGuardian()` |
+| | `event-bus.ts` | 事件总线 | `EventBus` |
+| | `rpc-adapter.ts` | RPC 适配 | `RpcAdapter` |
+| | `queue-monitor.ts` | 队列监控 | `createQueueMonitor()` |
+| | `sqlite-db.ts` | SQLite 数据库 | `SQLiteDB` |
+| | `secret-manager.ts` | 密钥管理 | `SecretManager` |
+| **core/ai/** | `provider-factory.ts` | Provider 工厂 | `createLLMProvider()`, `NoopProvider` |
+| | `openai-provider.ts` | OpenAI 适配 | `OpenAIProvider` |
+| | `anthropic-provider.ts` | Anthropic 适配 | `AnthropicProvider` |
+| | `ollama-provider.ts` | Ollama 适配 | `OllamaProvider` |
+| | `stream-processor.ts` | 流处理 | `StreamProcessor` |
+| | `conversation-manager.ts` | 对话管理 | `ConversationManager` |
+| **webview/** | `panel-manager.ts` | 面板管理 | `WebviewPanelManager` |
+| | `ai-chat-panel.ts` | AI 聊天 | `getAIChatPanelHtml()` |
+| | `enhanced-dashboard.ts` | 仪表板 | `getEnhancedDashboardHtml()` |
+| | `html-generator.ts` | HTML 生成 | `getDashboardHtml()` |
+| **automation/** | `task-orchestrator.ts` | 任务编排 | `TaskOrchestrator` |
+| | `queue/automation-queue.ts` | 自动化队列 | `AutomationQueue` |
+| | `drivers/cdp-driver.ts` | CDP 驱动 | `CDPDriver` |
+| **skills/** | `skill-registry.ts` | Skill 注册 | `SkillRegistry` |
+| **rules/** | `rule-engine.ts` | 规则引擎 | `RuleEngine` |
+| **types/** | `ipc-protocol.ts` | IPC 协议 | `IPCRequest`, `IPCResponse`, `ErrorCode` |
+
+### 4.2 claude-code-src 核心模块映射
 
 | claude-code-src 模块 | Creative Runtime 对应 | 职责说明 |
 |---------------------|----------------------|---------|
@@ -459,73 +498,39 @@ type LicenseGateResult = {
 | `hooks/` | `HookPipeline` | 生命周期扩展点 |
 | `cost-tracker.ts` | `CostTracker` | 成本追踪统计 |
 
-### 4.2 VS Code Extension 核心模块
-
-位于 `caiode/vscode-extension/src/`：
-
-| 模块路径 | 核心文件 | 职责 |
-|---------|---------|------|
-| **core/** | `sync-push-service.ts` | 同步推送服务 |
-| | `sqlite-db.ts` | SQLite 数据库操作 |
-| | `global-model-request-queue.ts` | 全局模型请求队列 |
-| | `file-mutex.ts` | 文件互斥锁 |
-| | `config-service.ts` | 配置服务 |
-| | `event-bus.ts` | 事件总线 |
-| | `rpc-adapter.ts` | RPC 适配器 |
-| | `queue-monitor.ts` | 队列监控 |
-| **core/ai/** | `anthropic-provider.ts` | Anthropic API 提供者 |
-| | `openai-provider.ts` | OpenAI API 提供者 |
-| | `ollama-provider.ts` | Ollama 本地模型 |
-| | `provider-factory.ts` | 提供者工厂 |
-| | `conversation-manager.ts` | 对话管理器 |
-| | `stream-processor.ts` | 流式响应处理 |
-| **core/db-adapter.ts** | - | 数据库适配器 |
-| **webview/** | `ai-chat-panel.ts` | AI 聊天面板 |
-| | `enhanced-dashboard.ts` | 增强仪表板 |
-| | `settings-page.ts` | 设置页面 |
-| | `html-generator.ts` | HTML 生成器 |
-| **automation/** | `task-orchestrator.ts` | 任务编排器 |
-| | `automation-queue.ts` | 自动化队列 |
-| | `cdp-driver.ts` | CDP 驱动 |
-| **skills/** | `skill-registry.ts` | Skill 注册表 |
-
 ---
 
 ## 5. 依赖关系
 
-### 5.1 模块依赖矩阵
+### 5.1 VS Code Extension 模块依赖矩阵
 
 ```mermaid
 graph LR
-    subgraph Runtime[Creative Agent Runtime]
-        A1[CreativeQueryEngine]
-        A2[AgentLoop]
-        A3[CreativeContextBuilder]
-        A4[TaskRuntime]
-        A5[ToolRuntime]
-        A6[SkillLoader]
-        A7[PluginRuntime]
-        A8[HookPipeline]
-        A9[CommandRegistry]
-        A10[StateStore]
-        A11[CostTracker]
+    subgraph Extension[VS Code Extension]
+        E1[extension.ts]
+        E2[MessageRouter]
+        E3[WebviewPanelManager]
+        E4[GlobalModelRequestQueue]
+        E5[FileMutex]
+        E6[ConfigService]
+        E7[MockStore]
+        E8[ProcessGuardian]
+        E9[AI Provider Factory]
+        E10[SkillRegistry]
     end
 
-    A1 --> A2
-    A1 --> A10
-    A2 --> A3
-    A2 --> A5
-    A2 --> A6
-    A4 --> A7
-    A4 --> A6
-    A4 --> A11
-    A5 --> A7
-    A7 --> A8
-    A9 --> A7
-    A9 --> A4
-    A10 --> A1
-    A10 --> A4
-    A11 --> A10
+    E1 --> E2
+    E1 --> E3
+    E1 --> E4
+    E1 --> E6
+    E1 --> E7
+    E3 --> E2
+    E4 --> E5
+    E4 --> E9
+    E8 --> E5
+    E10 --> E7
+    E2 --> E7
+    E2 --> E10
 ```
 
 ### 5.2 插件消费链路
@@ -562,11 +567,13 @@ Long Video Manager：管理长项目结构
 | | Ollama | 本地模型支持 |
 | **媒体处理** | FFmpeg | 视频处理 |
 | **存储** | SQLite | 本地数据库 |
-| **构建工具** | Next.js | 前端框架 |
-| | TypeScript | 类型系统 |
+| **构建工具** | TypeScript | 类型系统 |
 | | esbuild | 代码打包 |
+| | vsce | VS Code 扩展打包 |
 | **测试** | Vitest | 单元测试 |
 | | Playwright | E2E 测试 |
+| **运行时** | proper-lockfile | 文件锁 |
+| | retry | 重试逻辑 |
 
 ---
 
@@ -578,7 +585,7 @@ Long Video Manager：管理长项目结构
 
 - **Node.js**: >= 18.0.0
 - **npm/yarn/pnpm/bun**: 最新稳定版
-- **VS Code**: 最新版本
+- **VS Code**: >= 1.85.0
 - **Git**: 2.x
 
 #### 6.1.2 安装步骤
@@ -588,10 +595,7 @@ Long Video Manager：管理长项目结构
 git clone https://github.com/storytree/storytree2.git
 cd storytree2
 
-# 安装根目录依赖
-npm install
-
-# 安装 caiode 依赖
+# 安装 VS Code Extension 依赖
 cd caiode/vscode-extension
 npm install
 ```
@@ -621,15 +625,13 @@ ENABLE_AUTO_UPDATE=true
 ```bash
 cd caiode/vscode-extension
 
-# 开发模式运行
+# 开发模式（监听文件变化）
 npm run watch
-# 或
-npm run dev
 
-# 构建生产版本
-npm run build
+# 生产构建
+npm run build:prod
 
-# 打包 .vsix
+# 打包 .vsix 文件
 npm run package
 ```
 
@@ -637,19 +639,13 @@ npm run package
 
 ```bash
 # 单元测试
-npm run test:unit
+npm run test
 
 # 单元测试（监听模式）
-npm run test:unit:watch
-
-# E2E 测试
-npm run test:e2e
-
-# E2E 测试（UI 模式）
-npm run test:e2e:ui
+npm run test:watch
 
 # 覆盖率报告
-npm run coverage
+npm run test:coverage
 ```
 
 #### 6.2.3 代码质量
@@ -666,131 +662,224 @@ npm run format
 
 # 格式化检查
 npm run format:check
+
+# TypeScript 类型检查
+npm run typecheck
 ```
 
-### 6.3 项目启动流程
+### 6.3 扩展启动流程
 
 ```
-1. 初始化 StateStore
+1. VS Code 加载 extension.ts
    ↓
-2. 加载配置文件
+2. activate() 被调用
    ↓
-3. 初始化 ProviderRegistry
+3. 初始化 MockStore（内存数据）
    ↓
-4. 加载已安装插件
+4. 初始化 MessageRouter（消息路由）
    ↓
-5. 启动 PluginRuntime
+5. 初始化 WebviewPanelManager（UI 面板）
    ↓
-6. 启动 SkillLoader
+6. 初始化 GlobalModelRequestQueue（LLM 队列）
    ↓
-7. 启动 CreativeQueryEngine
+7. 初始化 ConfigService（配置服务）
    ↓
-8. 监听用户输入
+8. 注册所有 VS Code 命令
+   ↓
+9. 监听用户交互
+```
+
+### 6.4 消息处理流程
+
+```
+用户操作（Webview UI）
+   ↓
+发送 IPC 消息（JSON-RPC 2.0）
+   ↓
+MessageRouter.processMessage()
+   ↓
+Before 中间件
+   ↓
+路由匹配（action 名称）
+   ↓
+执行 Handler（操作 MockStore）
+   ↓
+After 中间件
+   ↓
+返回 IPCResponse
+   ↓
+Webview 更新 UI
 ```
 
 ---
 
 ## 7. 数据类型定义
 
-### 7.1 Plugin Manifest
+### 7.1 IPC 通信协议
+
+```typescript
+// 请求
+interface IPCRequest {
+  jsonrpc: "2.0";
+  id: string | number;
+  action: string;
+  payload?: any;
+  timestamp: string;
+}
+
+// 响应
+interface IPCResponse {
+  jsonrpc: "2.0";
+  id: string | number;
+  status: "success" | "error";
+  data?: any;
+  error?: { code: number; message: string };
+  timestamp: string;
+  durationMs?: number;
+}
+
+// 预定义 Action
+enum SystemAction {
+  HEALTH_CHECK = "system.healthCheck",
+  GET_CONFIG = "system.getConfig",
+}
+
+enum ProjectAction {
+  LIST = "project.list",
+  GET = "project.get",
+  CREATE = "project.create",
+  UPDATE = "project.update",
+  DELETE = "project.delete",
+}
+
+enum ChapterAction {
+  LIST = "chapter.list",
+  GET = "chapter.get",
+  CREATE = "chapter.create",
+  UPDATE = "chapter.update",
+  DELETE = "chapter.delete",
+}
+
+enum CharacterAction {
+  LIST = "character.list",
+  GET = "character.get",
+  CREATE = "character.create",
+  UPDATE = "character.update",
+  DELETE = "character.delete",
+}
+```
+
+### 7.2 LLM Provider 类型
+
+```typescript
+interface ChatCompletionOptions {
+  model: string;
+  messages: ChatMessage[];
+  temperature?: number;
+  maxTokens?: number;
+  topP?: number;
+  stopSequences?: string[];
+}
+
+interface ChatCompletionResult {
+  id: string;
+  object: "chat.completion";
+  created: number;
+  model: string;
+  content: string;
+  usage: TokenUsage;
+  finishReason: "stop" | "length" | "tool_calls" | "content_filter";
+}
+
+interface LLMProviderConfig {
+  apiKey: string;
+  baseUrl?: string;
+  defaultModel: string;
+  timeoutMs?: number;
+  maxRetries?: number;
+}
+```
+
+### 7.3 Skill 定义
+
+```typescript
+interface Skill {
+  id: string;
+  name: string;
+  description: string;
+  enabledTools: string[];
+  systemPromptFragment: string;
+  triggerKeywords: string[];
+}
+
+interface SkillRegistry {
+  loadSkill(id: string): Skill | undefined;
+  listSkills(): Skill[];
+  registerSkill(skill: Skill): void;
+  removeSkill(id: string): void;
+  getSandboxSkills(sandboxName: string): Skill[];
+  bindSkillToSandbox(sandboxName: string, skillId: string): void;
+}
+```
+
+### 7.4 Plugin Manifest
 
 ```typescript
 type CreativePluginManifest = {
-  id: string
-  name: string
-  version: string
-  description: string
-  category:
-    | 'story'
-    | 'script'
-    | 'storyboard'
-    | '3d'
-    | 'image'
-    | 'video'
-    | 'audio'
-    | 'editing'
-    | 'workflow'
-    | 'team'
-
+  id: string;
+  name: string;
+  version: string;
+  description: string;
+  category: 'story' | 'script' | 'storyboard' | '3d' | 'image' | 'video' | 'audio' | 'editing' | 'workflow' | 'team';
   pricing: {
-    model: 'free' | 'one_time' | 'subscription' | 'credits' | 'bundle'
-    sku: string
-    trialDays?: number
-  }
-
+    model: 'free' | 'one_time' | 'subscription' | 'credits' | 'bundle';
+    sku: string;
+    trialDays?: number;
+  };
   dependencies: {
-    coreVersion: string
-    plugins?: string[]
-    providers?: string[]
-    skills?: string[]
-  }
-
+    coreVersion: string;
+    plugins?: string[];
+    providers?: string[];
+    skills?: string[];
+  };
   permissions: {
-    fileRead?: boolean
-    fileWrite?: boolean
-    assetRead?: boolean
-    assetWrite?: boolean
-    taskCreate?: boolean
-    providerUse?: string[]
-    networkAccess?: boolean
-    ffmpegAccess?: boolean
-  }
-
+    fileRead?: boolean;
+    fileWrite?: boolean;
+    assetRead?: boolean;
+    assetWrite?: boolean;
+    taskCreate?: boolean;
+    providerUse?: string[];
+    networkAccess?: boolean;
+    ffmpegAccess?: boolean;
+  };
   extensionPoints: {
-    pages?: string[]
-    panels?: string[]
-    commands?: string[]
-    assetTypes?: string[]
-    taskTypes?: string[]
-    skills?: string[]
-    providers?: string[]
-  }
-}
-```
-
-### 7.2 Provider Definition
-
-```typescript
-interface ProviderDefinition {
-  id: string
-  name: string
-  type: 'llm' | 'image' | 'video' | 'tts' | 'ffmpeg'
-  inputSchema: JSONSchema
-  outputSchema: JSONSchema
-  errorSchema: JSONSchema
-  execute: (input: unknown, context: ProviderContext) => Promise<ProviderResult>
-}
-
-interface ProviderResult {
-  success: boolean
-  data?: unknown
-  error?: string
-  costMetadata: CostMetadata
-  taskStatus: TaskStatus
-}
-```
-
-### 7.3 Skill Definition
-
-```typescript
-interface SkillDefinition {
-  name: string
-  description: string
-  whenToUse: string
-  requiredPluginCapabilities?: string[]
-  requiredProviders?: string[]
-  requiredContext?: string[]
-  workflow?: string[]
-  rules?: string[]
-  content: string
-}
+    pages?: string[];
+    panels?: string[];
+    commands?: string[];
+    assetTypes?: string[];
+    taskTypes?: string[];
+    skills?: string[];
+    providers?: string[];
+  };
+};
 ```
 
 ---
 
 ## 8. 扩展点与接口
 
-### 8.1 OpenCode Core 扩展点
+### 8.1 VS Code Extension 扩展点
+
+| 扩展点 | 用途 | 注册方式 |
+|--------|------|---------|
+| `commands` | 注册 VS Code 命令 | `vscode.commands.registerCommand()` |
+| `viewsContainers` | 注册侧边栏容器 | `package.json contributes.viewsContainers` |
+| `views` | 注册树视图 | `package.json contributes.views` |
+| `configuration` | 注册配置项 | `package.json contributes.configuration` |
+| `menus` | 注册上下文菜单 | `package.json contributes.menus` |
+| `keybindings` | 注册快捷键 | `package.json contributes.keybindings` |
+
+### 8.2 OpenCode Core 扩展点
 
 | 扩展点 | 用途 | 注册方式 |
 |--------|------|---------|
@@ -805,7 +894,7 @@ interface SkillDefinition {
 | `settings.section` | 注册设置页面 | `runtime.registerSettingsSection(manifest.id, sectionDef)` |
 | `license.feature` | 注册付费功能点 | `runtime.registerLicenseFeature(manifest.id, featureDef)` |
 
-### 8.2 权限边界
+### 8.3 权限边界
 
 | 权限 | 默认状态 | 说明 |
 |------|---------|------|
@@ -818,7 +907,7 @@ interface SkillDefinition {
 | networkAccess | false | 需显式申请 |
 | ffmpegAccess | false | 需显式申请 |
 
-### 8.3 高危操作限制
+### 8.4 高危操作限制
 
 以下操作插件禁止直接执行，必须通过 Core 提供的抽象接口：
 
@@ -832,7 +921,73 @@ interface SkillDefinition {
 
 ---
 
-## 附录
+## 9. 测试体系
+
+### 9.1 测试目录结构
+
+```
+caiode/vscode-extension/src/__tests__/
+├── extension-lifecycle.test.ts      # 扩展生命周期
+├── extension-skeleton.test.ts       # 扩展骨架
+├── message-router.test.ts           # 消息路由
+├── global-model-request-queue.test.ts  # LLM 队列
+├── file-mutex.test.ts               # 文件互斥锁
+├── mock-store.test.ts               # Mock 存储
+├── sqlite-db.test.ts                # SQLite 数据库
+├── db-integration.test.ts           # 数据库集成
+├── conversation-manager.test.ts     # 对话管理
+├── stream-processor.test.ts         # 流处理
+├── provider-factory.test.ts         # Provider 工厂
+├── openai-provider.test.ts          # OpenAI Provider
+├── anthropic-provider.test.ts       # Anthropic Provider
+├── ollama-provider.test.ts          # Ollama Provider
+├── ai-chat-panel.test.ts            # AI 聊天面板
+├── enhanced-dashboard.test.ts       # 增强仪表板
+├── settings-page.test.ts            # 设置页面
+├── workbench-page.test.ts           # 工作台页面
+├── tree-view-provider.test.ts       # 树视图
+├── event-sync.test.ts               # 事件同步
+├── rpc-adapter.test.ts              # RPC 适配
+├── cloud-gateway.test.ts            # 云网关
+├── secret-manager.test.ts           # 密钥管理
+├── encrypted-db.test.ts             # 加密数据库
+├── file-sandbox.test.ts             # 文件沙箱
+├── obfuscator.test.ts               # 混淆器
+├── security-audit.test.ts           # 安全审计
+├── process-guardian.test.ts         # 进程守护
+├── performance-benchmark.test.ts    # 性能基准
+├── ipc-protocol.test.ts             # IPC 协议
+├── ipc-coverage.test.ts             # IPC 覆盖
+├── ipc-concurrent.test.ts           # IPC 并发
+├── ipc-nested-performance.test.ts   # IPC 嵌套性能
+├── ipc-es6-types.test.ts            # IPC ES6 类型
+├── ipc-e2e.test.ts                  # IPC E2E
+├── ui-e2e.test.ts                   # UI E2E
+├── webview-ui-vrt.test.ts           # Webview VRT
+├── stitch-pages.test.ts             # Stitch 页面
+├── static-export.test.ts            # 静态导出
+├── build-config.test.ts             # 构建配置
+├── prompt-template.test.ts          # 提示模板
+├── vscode-native-features.test.ts   # VS Code 原生功能
+└── ... (45+ 测试文件)
+```
+
+### 9.2 测试命令
+
+```bash
+# 运行所有测试
+npm run test
+
+# 监听模式
+npm run test:watch
+
+# 覆盖率
+npm run test:coverage
+```
+
+---
+
+## 10. 附录
 
 ### A. 文件命名规范
 
@@ -868,6 +1023,22 @@ feat(DEV-1.2.1): 实现 GlobalModelRequestQueue 串行化调度器
 fix(DEV-1.3.2): 修复 FileMutex 重入检测逻辑
 ```
 
+### D. 项目状态速查
+
+| 模块 | 状态 | 说明 |
+|------|------|------|
+| VS Code Extension | 🔄 开发中 | 核心功能已实现，45+ 测试覆盖 |
+| Creative Agent Runtime | 📋 规划中 | 11个核心模块定义完成 |
+| Creative Core | 📋 规划中 | 业务抽象层设计完成 |
+| Novel Editor Core | 📋 规划中 | 数据模型定义完成 |
+| Plugin System | 📋 规划中 | 扩展点规范完成 |
+| AI Provider Layer | ✅ 已完成 | 支持 OpenAI/Anthropic/Ollama |
+| Message Router | ✅ 已完成 | JSON-RPC 路由实现 |
+| File Mutex | ✅ 已完成 | 基于 proper-lockfile |
+| Mock Store | ✅ 已完成 | 内存数据存储 |
+| Process Guardian | ✅ 已完成 | 进程守护实现 |
+| Skill Registry | ✅ 已完成 | 4个内置 Skill |
+
 ---
 
-*本文档由 AI 自动生成，最后更新于 2026-05-31*
+*本文档由 AI 自动生成，最后更新于 2026-06-10*
