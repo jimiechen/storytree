@@ -1,13 +1,9 @@
 # StoryTree2 Code Wiki
 
 > **项目**: OpenCode Creative Studio (StoryTree2)
-> **版本**: v2.0
+> **版本**: v2.1
 > **最后更新**: 2026-06-10
 > **状态**: 持续更新中
-
-## 废弃模块说明
-
-本文档中标注为 **(已废弃 / 归档)** 或 **[已废弃]** 的内容均为旧版 `caiode/vscode-extension` 模块的文档。该模块已不再维护，仅作为历史参考保留。当前唯一活跃的开发模块为 `caiode/opencode-1.4.0/packages/app/src/novel/`（Novel Editor）和 `caiode/claude-code-src/`（源码分析基准）。
 
 ---
 
@@ -16,16 +12,14 @@
 1. [项目概述](#1-项目概述)
 2. [项目架构](#2-项目架构)
 3. [核心模块详解](#3-核心模块详解)
-   - 3.1 [VS Code Extension 核心模块 (已废弃)](#31-vs-code-extension-核心模块)
-   - 3.2 [Claude-Code-Src 参考架构](#32-claude-code-src-参考架构)
-   - 3.3 [Novel Editor (OpenCode 二次开发)](#33-novel-editor-opencode-二次开发)
+   - 3.1 [Claude-Code-Src 参考架构](#31-claude-code-src-参考架构)
+   - 3.2 [Novel Editor (OpenCode 二次开发)](#32-novel-editor-opencode-二次开发)
 4. [关键类和函数说明](#4-关键类和函数说明)
 5. [依赖关系](#5-依赖关系)
 6. [项目运行方式](#6-项目运行方式)
 7. [数据类型定义](#7-数据类型定义)
-8. [扩展点与接口](#8-扩展点与接口)
-9. [测试体系](#9-测试体系)
-10. [附录](#10-附录)
+8. [测试体系](#8-测试体系)
+9. [附录](#9-附录)
 
 ---
 
@@ -34,6 +28,8 @@
 ### 1.1 项目定位
 
 **StoryTree2** 是一个基于 Claude-Code 架构的开放式 AI 创作平台，采用 **clean-room architecture rewrite** 方法论，在借鉴 Claude Code 架构、抽象、流程和模块边界的基础上，进行独立的原创实现。
+
+当前核心开发聚焦于 **Novel Editor** —— 基于 OpenCode 1.4.0 二次开发的 AI 小说编辑器，作为免费 Core Product 提供。
 
 ### 1.2 核心设计原则
 
@@ -62,50 +58,15 @@ storytree2/
 │   │   ├── hooks/                   # 生命周期扩展点
 │   │   └── cost-tracker.ts          # 成本追踪统计
 │   │
-│   ├── vscode-extension/            # [已废弃] VS Code 扩展实现（旧版，已归档）
-│   │   ├── src/
-│   │   │   ├── extension.ts         # 扩展主入口
-│   │   │   ├── core/                # 核心服务层
-│   │   │   │   ├── message-router.ts      # JSON-RPC 消息路由
-│   │   │   │   ├── global-model-request-queue.ts  # LLM 请求队列
-│   │   │   │   ├── file-mutex.ts          # 文件互斥锁
-│   │   │   │   ├── config-service.ts      # 配置服务
-│   │   │   │   ├── mock-store.ts          # Mock 数据存储
-│   │   │   │   ├── process-guardian.ts    # 进程守护
-│   │   │   │   ├── event-bus.ts           # 事件总线
-│   │   │   │   ├── rpc-adapter.ts         # RPC 适配器
-│   │   │   │   ├── queue-monitor.ts       # 队列监控
-│   │   │   │   ├── sqlite-db.ts           # SQLite 数据库
-│   │   │   │   ├── secret-manager.ts      # 密钥管理
-│   │   │   │   └── ai/                    # AI Provider 层
-│   │   │   │       ├── provider-factory.ts    # Provider 工厂
-│   │   │   │       ├── openai-provider.ts     # OpenAI 适配
-│   │   │   │       ├── anthropic-provider.ts  # Anthropic 适配
-│   │   │   │       ├── ollama-provider.ts     # Ollama 本地模型
-│   │   │   │       ├── stream-processor.ts    # 流式响应处理
-│   │   │   │       └── conversation-manager.ts # 对话管理
-│   │   │   ├── webview/               # Webview 面板层
-│   │   │   │   ├── panel-manager.ts       # 面板管理器
-│   │   │   │   ├── ai-chat-panel.ts       # AI 聊天面板
-│   │   │   │   ├── enhanced-dashboard.ts  # 增强仪表板
-│   │   │   │   ├── settings-page.ts       # 设置页面
-│   │   │   │   ├── workbench-page.ts      # 工作台页面
-│   │   │   │   └── html-generator.ts      # HTML 生成器
-│   │   │   ├── automation/            # 自动化层
-│   │   │   │   ├── orchestrator/task-orchestrator.ts  # 任务编排器
-│   │   │   │   ├── queue/automation-queue.ts          # 自动化队列
-│   │   │   │   └── drivers/cdp-driver.ts              # CDP 驱动
-│   │   │   ├── skills/                # Skill 系统
-│   │   │   │   ├── skill-registry.ts      # Skill 注册表
-│   │   │   │   └── types.ts               # Skill 类型定义
-│   │   │   ├── rules/                 # 规则引擎
-│   │   │   │   ├── rule-engine.ts         # 规则执行引擎
-│   │   │   │   └── types.ts               # 规则类型定义
-│   │   │   └── types/                 # 共享类型
-│   │   │       └── ipc-protocol.ts        # IPC 通信协议
-│   │   └── __tests__/                 # 测试目录（45+ 测试文件）
+│   ├── opencode-1.4.0/              # [当前活跃] OpenCode 核心实现
+│   │   └── packages/
+│   │       └── app/
+│   │           └── src/
+│   │               ├── novel/       # Novel Editor 模块
+│   │               ├── novel-3d/    # 3D 镜头预览模块
+│   │               ├── novel-canvas/ # 故事画布模块
+│   │               └── app.tsx      # 应用路由入口
 │   │
-│   ├── opencode-1.4.0/              # [当前活跃] OpenCode 核心实现（Novel Editor 所在）
 │   └── Trae-Ralph-main/             # Trae + Ralph 工具链
 │
 ├── backups/                         # 备份和历史文件
@@ -157,36 +118,29 @@ storytree2/
 └─────────────────────────────────────────────────────────────┘
 ```
 
-### 2.2 VS Code Extension 运行时架构 (已废弃 / 归档)
-
-> **说明**：此架构为旧版 VS Code Extension 实现，已废弃，仅供参考。
+### 2.2 Novel Editor 应用架构
 
 ```text
 ┌─────────────────────────────────────────────────────────────┐
-│                    VS Code Extension Host                    │
+│                    OpenCode App (SolidJS)                    │
 │  ┌─────────────────────────────────────────────────────┐   │
-│  │              extension.ts (主入口)                   │   │
-│  │  • activate() / deactivate()                        │   │
-│  │  • 初始化所有子系统                                  │   │
+│  │              app.tsx (路由入口)                       │   │
+│  │  • /novel → NovelEditor                             │   │
+│  │  • /canvas → StoryCanvas                            │   │
+│  │  • /shot3d → Shot3DPreview                          │   │
 │  └─────────────────────────────────────────────────────┘   │
 │                              │                              │
 │  ┌───────────────────────────┼───────────────────────────┐ │
 │  │                           ▼                           │ │
 │  │  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐   │ │
-│  │  │ Message     │  │ Webview     │  │ GlobalModel │   │ │
-│  │  │ Router      │  │ Manager     │  │ Queue       │   │ │
-│  │  │ (JSON-RPC)  │  │ (UI 面板)    │  │ (LLM 调度)   │   │ │
+│  │  │ NovelEditor │  │ StoryCanvas │  │ Shot3D      │   │ │
+│  │  │ (三栏布局)   │  │ (故事画布)   │  │ (3D预览)    │   │ │
 │  │  └─────────────┘  └─────────────┘  └─────────────┘   │ │
 │  │         │                  │                  │       │ │
 │  │         ▼                  ▼                  ▼       │ │
 │  │  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐   │ │
-│  │  │ Mock Store  │  │ AI Provider │  │ FileMutex   │   │ │
-│  │  │ (数据层)     │  │ Factory     │  │ (并发控制)   │   │ │
-│  │  └─────────────┘  └─────────────┘  └─────────────┘   │ │
-│  │                                                       │ │
-│  │  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐   │ │
-│  │  │ Skill       │  │ Process     │  │ Config      │   │ │
-│  │  │ Registry    │  │ Guardian    │  │ Service     │   │ │
+│  │  │ Hooks       │  │ Providers   │  │ Mock Data   │   │ │
+│  │  │ (状态管理)   │  │ (数据层)     │  │ (Mock驱动)   │   │ │
 │  │  └─────────────┘  └─────────────┘  └─────────────┘   │ │
 │  └───────────────────────────────────────────────────────┘ │
 └─────────────────────────────────────────────────────────────┘
@@ -196,231 +150,9 @@ storytree2/
 
 ## 3. 核心模块详解
 
-### 3.1 VS Code Extension 核心模块 (已废弃 / 归档)
+### 3.1 Claude-Code-Src 参考架构
 
-> **说明**：以下为旧版 VS Code Extension 实现，已废弃，仅供参考。
-
-#### 3.1.1 [已废弃] extension.ts - 扩展主入口
-
-| 属性 | 说明 |
-|------|------|
-| **职责** | VS Code 扩展生命周期管理、子系统初始化、命令注册 |
-| **核心函数** | `activate()`, `deactivate()`, `registerCommands()` |
-| **初始化顺序** | Mock Data → Message Router → Webview Manager → Global Queue → Config Service |
-
-**关键代码**:
-```typescript
-export function activate(context: vscode.ExtensionContext): void {
-  initializeMockData();
-  initializeMessageRouter();
-  initializeWebviewManager();
-  initializeGlobalModelQueue();
-  initializeConfigService();
-  registerCommands();
-}
-```
-
-#### 3.1.2 [已废弃] MessageRouter - JSON-RPC 消息路由
-
-| 属性 | 说明 |
-|------|------|
-| **文件** | `caiode/vscode-extension/src/core/message-router.ts` |
-| **职责** | 接收 IPC 消息，解析 JSON-RPC 请求，路由到对应处理器 |
-| **核心能力** | Action 路由、中间件管道、错误处理、请求日志 |
-
-**核心类**:
-```typescript
-export class MessageRouter {
-  private handlers: Map<ActionName, { handler: ActionHandler; options: RouteOptions }>;
-  private beforeMiddlewares: BeforeMiddleware[];
-  private afterMiddlewares: AfterMiddleware[];
-
-  on<T>(action: ActionName, handler: ActionHandler<T>, options?: RouteOptions): this;
-  async processMessage(rawMessage: unknown): Promise<IPCResponse>;
-  useBefore(middleware: BeforeMiddleware): this;
-  useAfter(middleware: AfterMiddleware): this;
-}
-```
-
-**处理流程**:
-```
-接收消息 → 解析请求 → Before 中间件 → 路由匹配 → 执行 Handler → After 中间件 → 返回响应
-```
-
-#### 3.1.3 [已废弃] GlobalModelRequestQueue - LLM 请求队列
-
-| 属性 | 说明 |
-|------|------|
-| **文件** | `caiode/vscode-extension/src/core/global-model-request-queue.ts` |
-| **职责** | 全局 LLM 请求串行化调度、优先级管理、超时重试 |
-| **核心机制** | 全局锁 + 优先级队列 + 自动重试 |
-
-**核心类**:
-```typescript
-export class GlobalModelRequestQueue extends EventEmitter {
-  private queue: QueueRequestEntry[];
-  private running: Set<string>;
-  private provider: LLMProvider;
-  private mutex: FileMutex;
-
-  async enqueue(request: LLMRequest): Promise<LLMResponse>;
-  async enqueuePriority(request: LLMRequest, priority: number): Promise<LLMResponse>;
-  cancel(requestId: string): boolean;
-  getQueueStatus(): QueueStatus;
-}
-```
-
-**队列状态**:
-```typescript
-interface QueueStatus {
-  pending: number;           // 等待中
-  running: number;           // 运行中
-  completed: number;         // 已完成
-  failed: number;            // 失败
-  totalProcessed: number;    // 总处理数
-  averageWaitTime: number;   // 平均等待时间
-  averageProcessingTime: number; // 平均处理时间
-}
-```
-
-#### 3.1.4 [已废弃] FileMutex - 文件互斥锁
-
-| 属性 | 说明 |
-|------|------|
-| **文件** | `caiode/vscode-extension/src/core/file-mutex.ts` |
-| **职责** | 基于文件系统的分布式锁，防止并发冲突 |
-| **依赖** | `proper-lockfile` |
-
-**核心类**:
-```typescript
-export class FileMutex extends EventEmitter {
-  async acquire(lockId: string, options?: LockOptions): Promise<LockHandle>;
-  async release(handle: LockHandle): Promise<void>;
-  async withLock<T>(lockId: string, fn: () => Promise<T>, options?: LockOptions): Promise<T>;
-  async isLocked(lockId: string): Promise<boolean>;
-  async forceRelease(lockId: string): Promise<void>;
-}
-```
-
-#### 3.1.5 [已废弃] WebviewPanelManager - Webview 面板管理
-
-| 属性 | 说明 |
-|------|------|
-| **文件** | `caiode/vscode-extension/src/webview/panel-manager.ts` |
-| **职责** | 管理 VS Code Webview 面板生命周期、消息通信 |
-
-**核心方法**:
-```typescript
-export class WebviewPanelManager implements vscode.Disposable {
-  async showDashboard(): Promise<void>;      // 显示工作台
-  async toggleAIChat(): Promise<void>;       // 切换 AI 聊天
-  async createNewProject(): Promise<void>;   // 创建项目
-  async createNewChapter(): Promise<void>;   // 创建章节
-  async showWordCount(): Promise<void>;      // 字数统计
-  async refresh(): Promise<void>;            // 刷新面板
-}
-```
-
-#### 3.1.6 [已废弃] AI Provider 层
-
-| 属性 | 说明 |
-|------|------|
-| **文件** | `caiode/vscode-extension/src/core/ai/` |
-| **职责** | 多 LLM Provider 统一抽象和工厂创建 |
-
-**Provider 接口**:
-```typescript
-export interface LLMProvider {
-  readonly providerName: string;
-  readonly supportedModels: readonly string[];
-
-  chatCompletion(options: ChatCompletionOptions): Promise<ChatCompletionResult>;
-  streamChatCompletion(options: ChatCompletionOptions, onChunk: StreamCallback, signal?: AbortSignal): Promise<ChatCompletionResult>;
-  listModels?(): Promise<string[]>;
-  dispose?(): void;
-}
-```
-
-**Provider 工厂**:
-```typescript
-export function createLLMProvider(config: AIConfig): LLMProvider;
-// 支持: openai | anthropic | ollama | custom
-```
-
-**已实现的 Provider**:
-| Provider | 文件 | 默认模型 |
-|----------|------|---------|
-| OpenAI | `openai-provider.ts` | gpt-4o-mini |
-| Anthropic | `anthropic-provider.ts` | claude-haiku-4-20250514 |
-| Ollama | `ollama-provider.ts` | qwen2.5:7b |
-| Noop (fallback) | `provider-factory.ts` | - |
-
-#### 3.1.7 [已废弃] MockStore - Mock 数据存储
-
-| 属性 | 说明 |
-|------|------|
-| **文件** | `caiode/vscode-extension/src/core/mock-store.ts` |
-| **职责** | 内存数据存储，模拟数据库操作，用于开发和测试 |
-
-**数据实体**:
-```typescript
-interface Project extends MockEntity { name, description, genre, status }
-interface Chapter extends MockEntity { projectId, title, content, order, wordCount, status }
-interface Character extends MockEntity { projectId, name, role, description, traits }
-interface WorldSetting extends MockEntity { projectId, category, name, description }
-interface OutlineNode extends MockEntity { projectId, chapterId, type, title, synopsis }
-```
-
-#### 3.1.8 [已废弃] ProcessGuardian - 进程守护
-
-| 属性 | 说明 |
-|------|------|
-| **文件** | `caiode/vscode-extension/src/core/process-guardian.ts` |
-| **职责** | 子进程生命周期管理、心跳监控、自动重启 |
-
-**核心类**:
-```typescript
-export class ProcessGuardian extends EventEmitter {
-  async spawn(config: ProcessConfig): Promise<ChildProcess>;
-  async restart(name: string): Promise<boolean>;
-  async stop(name: string): Promise<void>;
-  async stopAll(): Promise<void>;
-  getProcessStatus(name: string): ProcessStatus | null;
-  isRunning(name: string): boolean;
-}
-```
-
-**进程状态**:
-```typescript
-interface ProcessStatus {
-  pid: number | null;
-  name: string;
-  state: "starting" | "running" | "heartbeat_missing" | "stopping" | "stopped" | "crashed";
-  startTime: number;
-  lastHeartbeat: number;
-  restartCount: number;
-  exitCode: number | null;
-}
-```
-
-#### 3.1.9 [已废弃] SkillRegistry - Skill 注册表
-
-| 属性 | 说明 |
-|------|------|
-| **文件** | `caiode/vscode-extension/src/skills/skill-registry.ts` |
-| **职责** | Skill 发现、加载、沙箱绑定 |
-
-**内置 Skill**:
-| Skill ID | 名称 | 激活工具 | 触发关键词 |
-|----------|------|---------|-----------|
-| novel-writing | 小说写作 | ReadFileTool, WriteFileTool | 写小说、创作、故事 |
-| code-review | 代码审查 | ReadFileTool, GrepTool | 代码审查、review |
-| file-organizer | 文件整理 | ReadFileTool, WriteFileTool, BashTool | 整理文件、归档 |
-| researcher | 资料收集 | ReadFileTool, WebFetchTool | 搜索、资料、研究 |
-
-### 3.2 Claude-Code-Src 参考架构
-
-#### 3.2.1 QueryEngine - 会话生命周期管理
+#### 3.1.1 QueryEngine - 会话生命周期管理
 
 | 属性 | 说明 |
 |------|------|
@@ -443,7 +175,7 @@ export class QueryEngine {
 }
 ```
 
-#### 3.2.2 Task - 任务状态机
+#### 3.1.2 Task - 任务状态机
 
 | 属性 | 说明 |
 |------|------|
@@ -456,9 +188,9 @@ type TaskType = 'local_bash' | 'local_agent' | 'remote_agent' | 'in_process_team
 type TaskStatus = 'pending' | 'running' | 'completed' | 'failed' | 'killed';
 ```
 
-### 3.3 Novel Editor (OpenCode 二次开发)
+### 3.2 Novel Editor (OpenCode 二次开发)
 
-#### 3.3.1 模块定位
+#### 3.2.1 模块定位
 
 | 属性 | 说明 |
 |------|------|
@@ -468,7 +200,7 @@ type TaskStatus = 'pending' | 'running' | 'completed' | 'failed' | 'killed';
 | **路由** | `/novel` (App 路由懒加载) |
 | **定位** | Core Product（免费小说编辑器，非付费插件） |
 
-#### 3.3.2 目录结构
+#### 3.2.2 目录结构
 
 ```
 caiode/opencode-1.4.0/packages/app/src/novel/
@@ -516,7 +248,7 @@ caiode/opencode-1.4.0/packages/app/src/novel/
     └── mock-delay.ts                  # Mock 延迟工具函数
 ```
 
-#### 3.3.3 核心组件详解
+#### 3.2.3 核心组件详解
 
 **NovelEditor (`novel-editor/index.tsx`)**
 
@@ -585,7 +317,7 @@ caiode/opencode-1.4.0/packages/app/src/novel/
 | **显示条件** | `import.meta.env.DEV` 或 `import.meta.env.VITE_MOCK_MODE` |
 | **内容** | "当前处于 Mock 模式，AI 功能由 FakeAgent 模拟" |
 
-#### 3.3.4 核心 Hooks 详解
+#### 3.2.4 核心 Hooks 详解
 
 **useNovelProject (`hooks/use-novel-project.ts`)**
 
@@ -612,7 +344,7 @@ caiode/opencode-1.4.0/packages/app/src/novel/
 | **返回值** | `{ logs, addLog, clearLogs }` |
 | **存储** | 内存数组（非持久化） |
 
-#### 3.3.5 Provider 层详解
+#### 3.2.5 Provider 层详解
 
 **FakeAgentProvider (`providers/fake-agent.ts`)**
 
@@ -657,7 +389,7 @@ caiode/opencode-1.4.0/packages/app/src/novel/
 | **接口** | `getLogs()`, `addLog(log)`, `clearLogs()` |
 | **数据** | 基于 `mockAITasks`（2 个历史任务） |
 
-#### 3.3.6 类型定义
+#### 3.2.6 类型定义
 
 **Project (`types/project.ts`)**
 
@@ -780,7 +512,7 @@ interface Sandbox {
 }
 ```
 
-#### 3.3.7 Mock 数据
+#### 3.2.7 Mock 数据
 
 **项目数据 (`mock-data/projects.ts`)**
 
@@ -813,7 +545,7 @@ interface Sandbox {
 | 林小满 | 伙伴 | 活泼、机智、忠诚 | 保护苏瑶 | 拥有预知未来的能力 |
 | 沈墨白 | 对手 | 冷酷、野心、聪明 | 控制星际联盟 | 其实是苏瑶的失散多年的哥哥 |
 
-#### 3.3.8 测试覆盖
+#### 3.2.8 测试覆盖
 
 **FakeAgentProvider 测试 (`providers/fake-agent.test.ts`)**
 
@@ -842,7 +574,7 @@ interface Sandbox {
 | 核心主角 | 苏瑶存在且 role 包含"主角" |
 | AI 任务 | id、类型、状态、chapterId、createdAt |
 
-#### 3.3.9 与 App 的集成
+#### 3.2.9 与 App 的集成
 
 **路由配置 (`app.tsx`)**
 
@@ -865,59 +597,59 @@ const NovelRoute = lazy(loadNovel);
 
 **懒加载优势**：Novel 模块代码在访问 `/novel` 路由时才加载，减少首屏 bundle 体积。
 
-#### 3.3.10 与 VS Code Extension 的关系
+#### 3.2.10 关联模块
 
-| 层面 | OpenCode Novel | VS Code Extension |
-|------|---------------|-------------------|
-| **技术栈** | SolidJS + Vite | TypeScript + VS Code API |
-| **运行环境** | 浏览器 (Webview) | VS Code Extension Host |
-| **数据层** | Mock Provider（内存） | MockStore（内存） |
-| **AI 服务** | FakeAgentProvider | AI Provider Factory |
-| **通信** | 直接函数调用 | JSON-RPC IPC |
-| **目标** | 独立 Web 应用 | VS Code 插件 |
+**novel-3d** (`caiode/opencode-1.4.0/packages/app/src/novel-3d/`)
 
-**未来集成方向**：
-- Novel Editor 的数据层可从 Mock Provider 迁移到 VS Code Extension 的 MockStore
-- AI 服务可从 FakeAgentProvider 迁移到 GlobalModelRequestQueue
-- 通过 IPC 协议实现 Webview 与 Extension Host 的数据同步
+| 属性 | 说明 |
+|------|------|
+| **职责** | 3D 镜头预览，基于 Three.js |
+| **路由** | `/shot3d` |
+| **核心类型** | `ShotScene3D`, `ShotCamera`, `CylinderObject` |
+| **用途** | 将小说场景转换为 3D 构图草稿 |
+
+**novel-canvas** (`caiode/opencode-1.4.0/packages/app/src/novel-canvas/`)
+
+| 属性 | 说明 |
+|------|------|
+| **职责** | 故事画布，可视化故事结构 |
+| **路由** | `/canvas` |
+| **用途** | 以画布形式展示故事线、角色关系、情节发展 |
 
 ---
 
 ## 4. 关键类和函数说明
 
-### 4.1 VS Code Extension 核心模块映射 (已废弃 / 归档)
-
-> **说明**：以下模块映射为旧版 VS Code Extension 实现，已废弃，仅供参考。
+### 4.1 Novel Editor 核心模块映射
 
 | 模块路径 | 核心文件 | 职责 | 关键类/函数 |
 |---------|---------|------|-----------|
-| **core/** | `message-router.ts` | JSON-RPC 路由 | `MessageRouter` |
-| | `global-model-request-queue.ts` | LLM 请求队列 | `GlobalModelRequestQueue` |
-| | `file-mutex.ts` | 文件互斥锁 | `FileMutex`, `createFileMutex()` |
-| | `config-service.ts` | 配置服务 | `ConfigService`, `getConfigService()` |
-| | `mock-store.ts` | Mock 数据 | `StoryTreeMockStore`, `mockStore` |
-| | `process-guardian.ts` | 进程守护 | `ProcessGuardian`, `createProcessGuardian()` |
-| | `event-bus.ts` | 事件总线 | `EventBus` |
-| | `rpc-adapter.ts` | RPC 适配 | `RpcAdapter` |
-| | `queue-monitor.ts` | 队列监控 | `createQueueMonitor()` |
-| | `sqlite-db.ts` | SQLite 数据库 | `SQLiteDB` |
-| | `secret-manager.ts` | 密钥管理 | `SecretManager` |
-| **core/ai/** | `provider-factory.ts` | Provider 工厂 | `createLLMProvider()`, `NoopProvider` |
-| | `openai-provider.ts` | OpenAI 适配 | `OpenAIProvider` |
-| | `anthropic-provider.ts` | Anthropic 适配 | `AnthropicProvider` |
-| | `ollama-provider.ts` | Ollama 适配 | `OllamaProvider` |
-| | `stream-processor.ts` | 流处理 | `StreamProcessor` |
-| | `conversation-manager.ts` | 对话管理 | `ConversationManager` |
-| **webview/** | `panel-manager.ts` | 面板管理 | `WebviewPanelManager` |
-| | `ai-chat-panel.ts` | AI 聊天 | `getAIChatPanelHtml()` |
-| | `enhanced-dashboard.ts` | 仪表板 | `getEnhancedDashboardHtml()` |
-| | `html-generator.ts` | HTML 生成 | `getDashboardHtml()` |
-| **automation/** | `task-orchestrator.ts` | 任务编排 | `TaskOrchestrator` |
-| | `queue/automation-queue.ts` | 自动化队列 | `AutomationQueue` |
-| | `drivers/cdp-driver.ts` | CDP 驱动 | `CDPDriver` |
-| **skills/** | `skill-registry.ts` | Skill 注册 | `SkillRegistry` |
-| **rules/** | `rule-engine.ts` | 规则引擎 | `RuleEngine` |
-| **types/** | `ipc-protocol.ts` | IPC 协议 | `IPCRequest`, `IPCResponse`, `ErrorCode` |
+| **components/** | `novel-editor/index.tsx` | 主组件容器 | `NovelEditor` |
+| | `chapter-list.tsx` | 章节列表 | `ChapterList` |
+| | `chapter-editor.tsx` | 章节编辑 | `ChapterEditor` |
+| | `character-panel.tsx` | 角色面板 | `CharacterPanel` |
+| | `ai-task-panel.tsx` | AI 任务面板 | `AITaskPanel` |
+| | `ai-result-card.tsx` | AI 结果卡片 | `AIResultCard` |
+| | `ai-log-drawer.tsx` | AI 日志抽屉 | `AILogDrawer` |
+| | `mock-mode-banner.tsx` | Mock 提示 | `MockModeBanner` |
+| **hooks/** | `use-novel-project.ts` | 项目数据聚合 | `useNovelProject()` |
+| | `use-ai-task.ts` | AI 任务操作 | `useAITask()` |
+| | `use-ai-log.ts` | AI 日志管理 | `useAILog()` |
+| **providers/** | `fake-agent.ts` | Mock AI 服务 | `FakeAgentProvider` |
+| | `novel-project.ts` | 项目 CRUD | `NovelProjectProvider` |
+| | `novel-chapter.ts` | 章节 CRUD | `NovelChapterProvider` |
+| | `novel-character.ts` | 角色 CRUD | `NovelCharacterProvider` |
+| | `ai-log.ts` | 日志管理 | `AILogProvider` |
+| **types/** | `project.ts` | 项目类型 | `Project` |
+| | `chapter.ts` | 章节类型 | `Chapter`, `ChapterOutline` |
+| | `character.ts` | 角色类型 | `Character` |
+| | `ai-task.ts` | AI 任务类型 | `AITask`, `AITaskType` |
+| | `ai-log.ts` | AI 日志类型 | `AILog` |
+| | `sandbox.ts` | 沙箱类型 | `Sandbox` |
+| **mock-data/** | `projects.ts` | 项目 Mock | `mockProject` |
+| | `chapters.ts` | 章节 Mock | `mockChapters` |
+| | `characters.ts` | 角色 Mock | `mockCharacters` |
+| | `ai-tasks.ts` | AI 任务 Mock | `mockAITasks` |
 
 ### 4.2 claude-code-src 核心模块映射
 
@@ -940,35 +672,58 @@ const NovelRoute = lazy(loadNovel);
 
 ## 5. 依赖关系
 
-### 5.1 VS Code Extension 模块依赖矩阵 (已废弃 / 归档)
+### 5.1 Novel Editor 模块依赖矩阵
 
 ```mermaid
-graph LR
-    subgraph Extension[VS Code Extension]
-        E1[extension.ts]
-        E2[MessageRouter]
-        E3[WebviewPanelManager]
-        E4[GlobalModelRequestQueue]
-        E5[FileMutex]
-        E6[ConfigService]
-        E7[MockStore]
-        E8[ProcessGuardian]
-        E9[AI Provider Factory]
-        E10[SkillRegistry]
+graph TD
+    subgraph NovelEditor[Novel Editor]
+        N1[NovelEditor]
+        N2[ChapterList]
+        N3[ChapterEditor]
+        N4[CharacterPanel]
+        N5[AITaskPanel]
+        N6[AIResultCard]
+        N7[AILogDrawer]
     end
 
-    E1 --> E2
-    E1 --> E3
-    E1 --> E4
-    E1 --> E6
-    E1 --> E7
-    E3 --> E2
-    E4 --> E5
-    E4 --> E9
-    E8 --> E5
-    E10 --> E7
-    E2 --> E7
-    E2 --> E10
+    subgraph Hooks[Hooks]
+        H1[useNovelProject]
+        H2[useAITask]
+        H3[useAILog]
+    end
+
+    subgraph Providers[Providers]
+        P1[NovelProjectProvider]
+        P2[NovelChapterProvider]
+        P3[NovelCharacterProvider]
+        P4[FakeAgentProvider]
+        P5[AILogProvider]
+    end
+
+    subgraph MockData[Mock Data]
+        M1[mockProject]
+        M2[mockChapters]
+        M3[mockCharacters]
+        M4[mockAITasks]
+    end
+
+    N1 --> N2
+    N1 --> N3
+    N1 --> N4
+    N3 --> N5
+    N5 --> N6
+    N1 --> N7
+
+    H1 --> P1
+    H1 --> P2
+    H1 --> P3
+    H2 --> P4
+    H3 --> P5
+
+    P1 --> M1
+    P2 --> M2
+    P3 --> M3
+    P5 --> M4
 ```
 
 ### 5.2 插件消费链路
@@ -999,19 +754,20 @@ Long Video Manager：管理长项目结构
 
 | 依赖类型 | 具体依赖 | 说明 |
 |---------|---------|------|
-| **AI Provider** | Anthropic (Claude) | 主要 AI 模型 |
-| | OpenAI | GPT 模型支持 |
-| | OpenRouter | 多模型路由 |
-| | Ollama | 本地模型支持 |
-| **媒体处理** | FFmpeg | 视频处理 |
-| **存储** | SQLite | 本地数据库 |
-| **构建工具** | TypeScript | 类型系统 |
-| | esbuild | 代码打包 |
-| | vsce | VS Code 扩展打包 |
-| **测试** | Vitest | 单元测试 |
-| | Playwright | E2E 测试 |
-| **运行时** | proper-lockfile | 文件锁 |
-| | retry | 重试逻辑 |
+| **前端框架** | SolidJS | 响应式 UI 框架 |
+| **样式** | TailwindCSS | 原子化 CSS |
+| **UI 组件** | @kobalte/core | 无障碍 UI 组件库 |
+| **状态管理** | @tanstack/solid-query | 服务端状态管理 |
+| **路由** | @solidjs/router | 前端路由 |
+| **构建工具** | Vite | 开发服务器和打包 |
+| **测试** | bun:test | 单元测试 |
+| **E2E 测试** | Playwright | 端到端测试 |
+| **3D 渲染** | Three.js | 3D 镜头预览 |
+| **日期处理** | luxon | 日期时间库 |
+| **Markdown** | marked | Markdown 渲染 |
+| **代码高亮** | shiki | 语法高亮 |
+| **函数式编程** | effect | Effect-TS 函数式编程 |
+| **工具库** | remeda | 函数式工具库 |
 
 ---
 
@@ -1023,7 +779,6 @@ Long Video Manager：管理长项目结构
 
 - **Node.js**: >= 18.0.0
 - **npm/yarn/pnpm/bun**: 最新稳定版
-- **VS Code**: >= 1.85.0
 - **Git**: 2.x
 
 #### 6.1.2 安装步骤
@@ -1033,47 +788,12 @@ Long Video Manager：管理长项目结构
 git clone https://github.com/storytree/storytree2.git
 cd storytree2
 
-# 安装 VS Code Extension 依赖
-cd caiode/vscode-extension
+# 安装 OpenCode App 依赖
+cd caiode/opencode-1.4.0/packages/app
 npm install
 ```
 
-#### 6.1.3 环境变量配置
-
-创建 `.env` 文件：
-
-```bash
-# API Keys
-ANTHROPIC_API_KEY=your_key_here
-OPENAI_API_KEY=your_key_here
-OPENROUTER_API_KEY=your_key_here
-
-# 数据库配置
-DATABASE_PATH=./data/storytree.db
-
-# 功能开关
-ENABLE_TELEMETRY=true
-ENABLE_AUTO_UPDATE=true
-```
-
 ### 6.2 运行命令
-
-#### 6.2.1 VS Code Extension (已废弃 / 归档)
-
-> **说明**：以下命令为旧版 VS Code Extension 的运行命令，已废弃。
-
-```bash
-cd caiode/vscode-extension
-
-# 开发模式（监听文件变化）
-npm run watch
-
-# 生产构建
-npm run build:prod
-
-# 打包 .vsix 文件
-npm run package
-```
 
 #### 6.2.1 OpenCode App 运行命令
 
@@ -1086,384 +806,291 @@ npm run dev
 # 生产构建
 npm run build
 
-# 运行测试
-npm run test:unit
-
-# E2E 测试
-npm run test:e2e
+# 预览生产构建
+npm run serve
 ```
 
 #### 6.2.2 测试
 
 ```bash
 # 单元测试
-npm run test
+npm run test:unit
 
 # 单元测试（监听模式）
-npm run test:watch
+npm run test:unit:watch
 
-# 覆盖率报告
-npm run test:coverage
+# E2E 测试
+npm run test:e2e
+
+# E2E 测试（UI 模式）
+npm run test:e2e:ui
 ```
 
 #### 6.2.3 代码质量
 
 ```bash
-# 代码检查
+# TypeScript 类型检查
+npm run typecheck
+
+# 代码检查（如有配置）
 npm run lint
 
 # 自动修复
 npm run lint:fix
-
-# 代码格式化
-npm run format
-
-# 格式化检查
-npm run format:check
-
-# TypeScript 类型检查
-npm run typecheck
 ```
 
-### 6.3 扩展启动流程 (已废弃 / 归档)
-
-> **说明**：这是旧版 VS Code Extension 的启动流程，已废弃。
+### 6.3 Novel Editor 启动流程
 
 ```
-1. VS Code 加载 extension.ts
+1. 用户访问 /novel 路由
    ↓
-2. activate() 被调用
+2. App 懒加载 novel 模块
    ↓
-3. 初始化 MockStore（内存数据）
+3. NovelEditor 组件初始化
    ↓
-4. 初始化 MessageRouter（消息路由）
+4. useNovelProject Hook 加载 Mock 数据
    ↓
-5. 初始化 WebviewPanelManager（UI 面板）
+5. 渲染三栏布局（章节列表 | 编辑器 | 角色面板）
    ↓
-6. 初始化 GlobalModelRequestQueue（LLM 队列）
+6. 用户交互触发 AI 任务
    ↓
-7. 初始化 ConfigService（配置服务）
+7. useAITask Hook 调用 FakeAgentProvider
    ↓
-8. 注册所有 VS Code 命令
-   ↓
-9. 监听用户交互
+8. 模拟异步任务执行，更新 UI 状态
 ```
 
-### 6.4 消息处理流程 (已废弃 / 归档)
-
-> **说明**：这是旧版 VS Code Extension 的消息处理流程，已废弃。
+### 6.4 AI 任务处理流程
 
 ```
-用户操作（Webview UI）
+用户点击 AI 续写
    ↓
-发送 IPC 消息（JSON-RPC 2.0）
+ChapterEditor 调用 onAITask 回调
    ↓
-MessageRouter.processMessage()
+useAITask.continueWriting(chapterId, text)
    ↓
-Before 中间件
+FakeAgentProvider.submitTask({ type: "continue-writing", ... })
    ↓
-路由匹配（action 名称）
+任务状态: pending → running（1.5-2.5s 延迟）
    ↓
-执行 Handler（操作 MockStore）
+任务完成: success / failed / cancelled
    ↓
-After 中间件
+AITaskPanel 显示 AIResultCard
    ↓
-返回 IPCResponse
+用户选择接受/拒绝/重新生成
    ↓
-Webview 更新 UI
+ChapterEditor 更新内容（如接受）
+   ↓
+AILogDrawer 记录任务历史
 ```
 
 ---
 
 ## 7. 数据类型定义
 
-### 7.1 IPC 通信协议 (已废弃 / 归档)
+### 7.1 Novel Editor 核心类型
 
-> **说明**：这是旧版 VS Code Extension 的 IPC 通信协议，已废弃。
+**Project**
 
 ```typescript
-// 请求
-interface IPCRequest {
-  jsonrpc: "2.0";
-  id: string | number;
-  action: string;
-  payload?: any;
-  timestamp: string;
-}
-
-// 响应
-interface IPCResponse {
-  jsonrpc: "2.0";
-  id: string | number;
-  status: "success" | "error";
-  data?: any;
-  error?: { code: number; message: string };
-  timestamp: string;
-  durationMs?: number;
-}
-
-// 预定义 Action
-enum SystemAction {
-  HEALTH_CHECK = "system.healthCheck",
-  GET_CONFIG = "system.getConfig",
-}
-
-enum ProjectAction {
-  LIST = "project.list",
-  GET = "project.get",
-  CREATE = "project.create",
-  UPDATE = "project.update",
-  DELETE = "project.delete",
-}
-
-enum ChapterAction {
-  LIST = "chapter.list",
-  GET = "chapter.get",
-  CREATE = "chapter.create",
-  UPDATE = "chapter.update",
-  DELETE = "chapter.delete",
-}
-
-enum CharacterAction {
-  LIST = "character.list",
-  GET = "character.get",
-  CREATE = "character.create",
-  UPDATE = "character.update",
-  DELETE = "character.delete",
+interface Project {
+  id: string;
+  name: string;
+  genre: string;
+  description: string;
+  targetAudience: string;
+  totalWordCount: number;
+  chapterCount: number;
+  characterCount: number;
+  status: 'active' | 'archived' | 'draft';
+  createdAt: Date;
+  updatedAt: Date;
 }
 ```
 
-### 7.2 LLM Provider 类型
+**Chapter**
 
 ```typescript
-interface ChatCompletionOptions {
-  model: string;
-  messages: ChatMessage[];
-  temperature?: number;
-  maxTokens?: number;
-  topP?: number;
-  stopSequences?: string[];
-}
-
-interface ChatCompletionResult {
+interface Chapter {
   id: string;
-  object: "chat.completion";
-  created: number;
-  model: string;
+  projectId: string;
+  title: string;
   content: string;
-  usage: TokenUsage;
-  finishReason: "stop" | "length" | "tool_calls" | "content_filter";
+  orderIndex: number;
+  wordCount: number;
+  status: 'draft' | 'writing' | 'review' | 'completed';
+  outline: ChapterOutline;
+  aiSuggestions: AISuggestion[];
+  createdAt: Date;
+  updatedAt: Date;
 }
 
-interface LLMProviderConfig {
-  apiKey: string;
-  baseUrl?: string;
-  defaultModel: string;
-  timeoutMs?: number;
-  maxRetries?: number;
-}
-```
-
-### 7.3 Skill 定义
-
-```typescript
-interface Skill {
-  id: string;
-  name: string;
-  description: string;
-  enabledTools: string[];
-  systemPromptFragment: string;
-  triggerKeywords: string[];
-}
-
-interface SkillRegistry {
-  loadSkill(id: string): Skill | undefined;
-  listSkills(): Skill[];
-  registerSkill(skill: Skill): void;
-  removeSkill(id: string): void;
-  getSandboxSkills(sandboxName: string): Skill[];
-  bindSkillToSandbox(sandboxName: string, skillId: string): void;
+interface ChapterOutline {
+  goal: string;
+  conflict: string;
+  resolution: string;
+  keyScenes: string[];
 }
 ```
 
-### 7.4 Plugin Manifest
+**Character**
 
 ```typescript
-type CreativePluginManifest = {
+interface Character {
   id: string;
+  projectId: string;
   name: string;
-  version: string;
+  role: string;
   description: string;
-  category: 'story' | 'script' | 'storyboard' | '3d' | 'image' | 'video' | 'audio' | 'editing' | 'workflow' | 'team';
-  pricing: {
-    model: 'free' | 'one_time' | 'subscription' | 'credits' | 'bundle';
-    sku: string;
-    trialDays?: number;
-  };
-  dependencies: {
-    coreVersion: string;
-    plugins?: string[];
-    providers?: string[];
-    skills?: string[];
-  };
-  permissions: {
-    fileRead?: boolean;
-    fileWrite?: boolean;
-    assetRead?: boolean;
-    assetWrite?: boolean;
-    taskCreate?: boolean;
-    providerUse?: string[];
-    networkAccess?: boolean;
-    ffmpegAccess?: boolean;
-  };
-  extensionPoints: {
-    pages?: string[];
-    panels?: string[];
-    commands?: string[];
-    assetTypes?: string[];
-    taskTypes?: string[];
-    skills?: string[];
-    providers?: string[];
-  };
-};
+  personalityTags: string[];
+  goal: string;
+  secret: string;
+  relationships: CharacterRelationship[];
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+interface CharacterRelationship {
+  characterId: string;
+  type: 'ally' | 'enemy' | 'neutral' | 'family' | 'romantic';
+  description: string;
+}
+```
+
+**AITask**
+
+```typescript
+type AITaskType = 'continue-writing' | 'rewrite-selection' | 'summarize-chapter' | 'character-voice';
+type AITaskStatus = 'pending' | 'running' | 'success' | 'failed' | 'cancelled' | 'denied' | 'quota';
+
+interface AITask {
+  id: string;
+  type: AITaskType;
+  status: AITaskStatus;
+  chapterId: string;
+  input: AITaskInput;
+  output?: AITaskOutput;
+  error?: string;
+  duration?: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+interface AITaskInput {
+  text: string;
+  selectedText?: string;
+  characterId?: string;
+}
+
+interface AITaskOutput {
+  text: string;
+  wordCount: number;
+  confidence: number;
+}
+```
+
+### 7.2 3D Shot 类型
+
+```typescript
+interface ShotCamera {
+  mode: 'perspective' | 'orthographic';
+  position: Vec3;
+  target: Vec3;
+  fov: number;
+  near: number;
+  far: number;
+}
+
+interface CylinderObject {
+  id: string;
+  label: string;
+  position: Vec3;
+  radius: number;
+  height: number;
+  color: string;
+  glow: boolean;
+  selected: boolean;
+  importance: 'hero' | 'secondary' | 'background';
+}
+
+interface ShotScene3D {
+  id: string;
+  title: string;
+  prompt: string;
+  camera: ShotCamera;
+  cylinders: CylinderObject[];
+  selectedObjectId?: string;
+}
 ```
 
 ---
 
-## 8. 扩展点与接口
+## 8. 测试体系
 
-### 8.1 VS Code Extension 扩展点
-
-| 扩展点 | 用途 | 注册方式 |
-|--------|------|---------|
-| `commands` | 注册 VS Code 命令 | `vscode.commands.registerCommand()` |
-| `viewsContainers` | 注册侧边栏容器 | `package.json contributes.viewsContainers` |
-| `views` | 注册树视图 | `package.json contributes.views` |
-| `configuration` | 注册配置项 | `package.json contributes.configuration` |
-| `menus` | 注册上下文菜单 | `package.json contributes.menus` |
-| `keybindings` | 注册快捷键 | `package.json contributes.keybindings` |
-
-### 8.2 OpenCode Core 扩展点
-
-| 扩展点 | 用途 | 注册方式 |
-|--------|------|---------|
-| `workspace.page` | 注册新页面 | `runtime.registerPage(manifest.id, pageConfig)` |
-| `workspace.panel` | 注册侧栏/右栏面板 | `runtime.registerPanel(manifest.id, panelConfig)` |
-| `command.palette` | 注册命令 | `runtime.registerCommand(manifest.id, commandDef)` |
-| `asset.type` | 注册资产类型 | `runtime.registerAssetType(manifest.id, assetTypeDef)` |
-| `task.type` | 注册任务类型 | `runtime.registerTaskType(manifest.id, taskTypeDef)` |
-| `skill.type` | 注册 Skill | `runtime.registerSkill(manifest.id, skillDef)` |
-| `provider.type` | 注册 Provider | `runtime.registerProvider(manifest.id, providerDef)` |
-| `export.format` | 注册导出格式 | `runtime.registerExportFormat(manifest.id, formatDef)` |
-| `settings.section` | 注册设置页面 | `runtime.registerSettingsSection(manifest.id, sectionDef)` |
-| `license.feature` | 注册付费功能点 | `runtime.registerLicenseFeature(manifest.id, featureDef)` |
-
-### 8.3 权限边界
-
-| 权限 | 默认状态 | 说明 |
-|------|---------|------|
-| fileRead | false | 需显式申请 |
-| fileWrite | false | 需显式申请 |
-| assetRead | true | 可读取资产库 |
-| assetWrite | false | 需显式申请 |
-| taskCreate | false | 需显式申请 |
-| providerUse | [] | 需显式申请可用 Provider |
-| networkAccess | false | 需显式申请 |
-| ffmpegAccess | false | 需显式申请 |
-
-### 8.4 高危操作限制
-
-以下操作插件禁止直接执行，必须通过 Core 提供的抽象接口：
-
-- Bash 命令执行
-- WebFetch 远程请求
-- WebSearch 网络搜索
-- 子 Agent 调用
-- 环境变量读取
-- 系统目录访问
-- 沙箱外路径访问
-
----
-
-## 9. 测试体系
-
-### 9.1 测试目录结构
-
-> **说明**：以下测试目录为旧版 VS Code Extension 的测试结构，已废弃。
+### 8.1 Novel Editor 测试结构
 
 ```
-caiode/vscode-extension/src/__tests__/ [已废弃]
-├── extension-lifecycle.test.ts      # 扩展生命周期
-├── extension-skeleton.test.ts       # 扩展骨架
-├── message-router.test.ts           # 消息路由
-├── global-model-request-queue.test.ts  # LLM 队列
-├── file-mutex.test.ts               # 文件互斥锁
-├── mock-store.test.ts               # Mock 存储
-├── sqlite-db.test.ts                # SQLite 数据库
-├── db-integration.test.ts           # 数据库集成
-├── conversation-manager.test.ts     # 对话管理
-├── stream-processor.test.ts         # 流处理
-├── provider-factory.test.ts         # Provider 工厂
-├── openai-provider.test.ts          # OpenAI Provider
-├── anthropic-provider.test.ts       # Anthropic Provider
-├── ollama-provider.test.ts          # Ollama Provider
-├── ai-chat-panel.test.ts            # AI 聊天面板
-├── enhanced-dashboard.test.ts       # 增强仪表板
-├── settings-page.test.ts            # 设置页面
-├── workbench-page.test.ts           # 工作台页面
-├── tree-view-provider.test.ts       # 树视图
-├── event-sync.test.ts               # 事件同步
-├── rpc-adapter.test.ts              # RPC 适配
-├── cloud-gateway.test.ts            # 云网关
-├── secret-manager.test.ts           # 密钥管理
-├── encrypted-db.test.ts             # 加密数据库
-├── file-sandbox.test.ts             # 文件沙箱
-├── obfuscator.test.ts               # 混淆器
-├── security-audit.test.ts           # 安全审计
-├── process-guardian.test.ts         # 进程守护
-├── performance-benchmark.test.ts    # 性能基准
-├── ipc-protocol.test.ts             # IPC 协议
-├── ipc-coverage.test.ts             # IPC 覆盖
-├── ipc-concurrent.test.ts           # IPC 并发
-├── ipc-nested-performance.test.ts   # IPC 嵌套性能
-├── ipc-es6-types.test.ts            # IPC ES6 类型
-├── ipc-e2e.test.ts                  # IPC E2E
-├── ui-e2e.test.ts                   # UI E2E
-├── webview-ui-vrt.test.ts           # Webview VRT
-├── stitch-pages.test.ts             # Stitch 页面
-├── static-export.test.ts            # 静态导出
-├── build-config.test.ts             # 构建配置
-├── prompt-template.test.ts          # 提示模板
-├── vscode-native-features.test.ts   # VS Code 原生功能
-└── ... (45+ 测试文件)
+caiode/opencode-1.4.0/packages/app/src/novel/
+├── providers/
+│   └── fake-agent.test.ts           # FakeAgentProvider 测试（11 场景）
+├── mock-data/
+│   └── mock-data.test.ts            # Mock 数据验证测试（6 项）
 ```
 
-### 9.2 测试命令
+### 8.2 FakeAgentProvider 测试场景
+
+| 场景 | 测试内容 | 验证点 |
+|------|---------|--------|
+| 场景 1 | AI 续写成功 | 任务状态流转、输出非空 |
+| 场景 2 | AI 改写成功 | 任务类型正确、输出存在 |
+| 场景 3 | AI 总结成功 | 输出文本长度 > 0 |
+| 场景 4 | 角色语气改写 | 任务类型为 character-voice |
+| 场景 5 | 任务失败 | 输入包含 "fail" → 状态 failed |
+| 场景 6 | 用户取消 | 调用 cancelTask → 状态 cancelled |
+| 场景 7 | 权限不足 | 输入包含 "sudo admin" → 状态 denied |
+| 场景 8 | 配额不足 | 连续 11 次调用 → 状态 quota |
+| 场景 9 | 长任务处理 | 持续时间 > 0 |
+| 额外 | 状态订阅 | onTaskUpdate 回调触发 |
+| 额外 | 字数统计 | output.wordCount > 0 |
+
+### 8.3 Mock Data 验证测试
+
+| 测试项 | 验证内容 |
+|--------|---------|
+| 项目数据 | id、名称、类型、字数、章节数、角色数、状态 |
+| 章节结构 | id、标题、projectId、字数、状态、大纲 |
+| 章节顺序 | orderIndex 递增 |
+| 角色结构 | id、名称、身份、性格标签、目标、秘密 |
+| 核心主角 | 苏瑶存在且 role 包含"主角" |
+| AI 任务 | id、类型、状态、chapterId、createdAt |
+
+### 8.4 测试命令
 
 ```bash
+cd caiode/opencode-1.4.0/packages/app
+
 # 运行所有测试
-npm run test
+npm run test:unit
 
 # 监听模式
-npm run test:watch
+npm run test:unit:watch
 
-# 覆盖率
-npm run test:coverage
+# E2E 测试
+npm run test:e2e
 ```
 
 ---
 
-## 10. 附录
+## 9. 附录
 
 ### A. 文件命名规范
 
 | 类型 | 规范 | 示例 |
 |------|------|------|
 | TypeScript 文件 | PascalCase.ts | `CreativeQueryEngine.ts` |
-| React 组件 | PascalCase.tsx | `AiChatPanel.tsx` |
-| 类型定义 | `*.types.ts` | `provider.types.ts` |
-| 测试文件 | `*.test.ts` | `provider-factory.test.ts` |
-| 样式文件 | kebab-case.css | `ai-chat-panel.css` |
+| SolidJS 组件 | PascalCase.tsx | `NovelEditor.tsx` |
+| 类型定义 | `*.types.ts` | `ai-task.types.ts` |
+| 测试文件 | `*.test.ts` | `fake-agent.test.ts` |
+| 样式文件 | kebab-case.css | `novel-editor.css` |
 
 ### B. Git 分支规范
 
@@ -1493,20 +1120,15 @@ fix(DEV-1.3.2): 修复 FileMutex 重入检测逻辑
 
 | 模块 | 状态 | 说明 |
 |------|------|------|
-| VS Code Extension | ❌ 已废弃 | 旧版实现，已归档 |
-| Creative Agent Runtime | 📋 规划中 | 11个核心模块定义完成 |
-| Creative Core | 📋 规划中 | 业务抽象层设计完成 |
 | **Novel Editor Core** | **🔄 Mock 开发中** | **SolidJS 实现，FakeAgent 模拟 AI，11 测试覆盖** |
-| Plugin System | 📋 规划中 | 扩展点规范完成 |
-| AI Provider Layer | ❌ 已废弃 | 旧版 VS Code Extension 组件，已归档 |
-| Message Router | ❌ 已废弃 | 旧版 VS Code Extension 组件，已归档 |
-| File Mutex | ❌ 已废弃 | 旧版 VS Code Extension 组件，已归档 |
-| Mock Store | ❌ 已废弃 | 旧版 VS Code Extension 组件，已归档 |
-| Process Guardian | ❌ 已废弃 | 旧版 VS Code Extension 组件，已归档 |
-| Skill Registry | ❌ 已废弃 | 旧版 VS Code Extension 组件，已归档 |
 | Novel Editor UI | 🔄 Mock 开发中 | 三栏布局，7 个核心组件 |
 | Novel Editor Data | 🔄 Mock 开发中 | 5 个 Provider，Mock 数据驱动 |
 | Novel Editor AI | 🔄 Mock 开发中 | FakeAgentProvider，4 种任务类型 |
+| Creative Agent Runtime | 📋 规划中 | 11个核心模块定义完成 |
+| Creative Core | 📋 规划中 | 业务抽象层设计完成 |
+| Plugin System | 📋 规划中 | 扩展点规范完成 |
+| novel-3d | 📋 规划中 | 3D 镜头预览模块 |
+| novel-canvas | 📋 规划中 | 故事画布模块 |
 
 ---
 
