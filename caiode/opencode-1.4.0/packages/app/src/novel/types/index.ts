@@ -6,3 +6,4 @@ export type { AITask, AITaskStatus, AITaskType, AITaskInput, AITaskOutput } from
 export type { AILog } from './ai-log';
 export type { NovelView } from './novel-view';
 export type { ProviderError, ProviderErrorCode } from './provider-error';
+export type { BookshelfFilter, FloatingWidgetData, ToolbarItem } from './bookshelf';

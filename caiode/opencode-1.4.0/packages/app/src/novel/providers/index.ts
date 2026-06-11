@@ -17,6 +17,7 @@ export interface INovelProjectProvider {
   listProjects(): Promise<Project[]>;
   getProject(id: string): Promise<Project | null>;
   getActiveProject(): Promise<Project | null>;
+  searchProjects(keyword: string): Promise<Project[]>;
 }
 
 export interface INovelChapterProvider {
