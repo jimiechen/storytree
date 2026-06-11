@@ -26,3 +26,6 @@ export interface ToolbarItem {
   color: string; // Tailwind 色类
   action?: () => void;
 }
+
+/** 表单校验错误记录 */
+export type FormValidationError = Record<string, string>;

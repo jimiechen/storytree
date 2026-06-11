@@ -9,3 +9,35 @@ export interface Project {
   lastUpdated: Date;
   status: 'active' | 'archived' | 'draft';
 }
+
+/** 创建项目表单输入 */
+export interface CreateProjectInput {
+  name: string;
+  genre: GenreOption;
+  description?: string;
+  protagonist?: ProtagonistInput;
+}
+
+/** 主角设定输入 */
+export interface ProtagonistInput {
+  name: string;
+  gender: 'male' | 'female';
+  age?: number;
+  personality?: string;
+}
+
+/** 小说类型选项 */
+export type GenreOption =
+  | '玄幻'
+  | '都市'
+  | '穿越'
+  | '科幻'
+  | '仙侠'
+  | '悬疑'
+  | '古言'
+  | '其他';
+
+/** 所有可用类型选项（用于下拉列表） */
+export const GENRE_OPTIONS: GenreOption[] = [
+  '玄幻', '都市', '穿越', '科幻', '仙侠', '悬疑', '古言', '其他'
+];

@@ -1,4 +1,4 @@
-import type { Project } from '../types';
+import type { Project, CreateProjectInput } from '../types';
 import type { INovelProjectProvider } from './index';
 import type { ProviderError } from '../types/provider-error';
 import { mockProjects } from '../mock-data';
@@ -40,5 +40,36 @@ export class NovelProjectProvider implements INovelProjectProvider {
         p.genre.toLowerCase().includes(kw)
       )
       .map(p => ({ ...p }));
+  }
+
+  async createProject(input: CreateProjectInput): Promise<Project> {
+    await mockDelay(200);
+
+    // 校验必填字段
+    if (!input.name || !input.name.trim()) {
+      const e: ProviderError = { code: 'INVALID_INPUT', message: '项目名称不能为空' };
+      throw e;
+    }
+    if (!input.genre) {
+      const e: ProviderError = { code: 'INVALID_INPUT', message: '项目类型不能为空' };
+      throw e;
+    }
+
+    const id = `proj-${Date.now()}`;
+    const now = new Date();
+    const project: Project = {
+      id,
+      name: input.name.trim(),
+      genre: input.genre,
+      description: input.description?.trim() || '',
+      totalWordCount: 0,
+      chapterCount: 0,
+      characterCount: input.protagonist ? 1 : 0,
+      lastUpdated: now,
+      status: 'draft',
+    };
+
+    this.projects.set(id, project);
+    return { ...project };
   }
 }

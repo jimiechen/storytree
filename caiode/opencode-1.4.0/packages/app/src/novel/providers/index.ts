@@ -10,6 +10,7 @@ import type {
   AITaskStatus,
   AILog
 } from '../types';
+import type { CreateProjectInput } from '../types';
 
 export type { ProviderError, ProviderErrorCode } from '../types/provider-error';
 
@@ -18,6 +19,7 @@ export interface INovelProjectProvider {
   getProject(id: string): Promise<Project | null>;
   getActiveProject(): Promise<Project | null>;
   searchProjects(keyword: string): Promise<Project[]>;
+  createProject(input: CreateProjectInput): Promise<Project>;
 }
 
 export interface INovelChapterProvider {
