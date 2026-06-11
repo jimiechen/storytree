@@ -1,8 +1,8 @@
 # StoryTree2 Code Wiki
 
-> **项目**: OpenCode Creative Studio (StoryTree2)  
-> **版本**: v1.0  
-> **最后更新**: 2026-05-31  
+> **项目**: OpenCode Creative Studio (StoryTree2)
+> **版本**: v2.0
+> **最后更新**: 2026-06-11
 > **状态**: 持续更新中
 
 ---
@@ -24,7 +24,12 @@
 
 ### 1.1 项目定位
 
-**StoryTree2** 是一个基于 Claude-Code 架构的开放式 AI 创作平台，采用 **clean-room architecture rewrite** 方法论，在借鉴 Claude Code 架构、抽象、流程和模块边界的基础上，进行独立的原创实现。
+**StoryTree2** 是一个基于 **OpenCode 1.4.0** 二次开发的开放式 AI 创作平台，采用 clean-room architecture rewrite 方法论，在借鉴 Claude Code 架构、抽象、流程和模块边界的基础上，进行独立的原创实现。
+
+项目核心定位：
+- **底座**: OpenCode 1.4.0（开源 AI Coding Agent）
+- **业务扩展**: 小说编辑器 / 故事画布 / 3D 镜头等创作工具
+- **集成环境**: VS Code OSS 扩展 + Trae IDE + Ralph 自动化工具链
 
 ### 1.2 核心设计原则
 
@@ -34,31 +39,73 @@
 | **Skill/Plugin/Provider 严格区分** | Skill 是任务说明包，Plugin 是产品模块，Provider 是外部服务适配器 |
 | **Creative Agent Runtime** | 底层执行内核，负责 Agent 的运行机制 |
 | **Creative Core** | 业务抽象层，负责创作项目的管理 |
+| **OpenCode 底座保护** | 默认保护 OpenCode 核心，优先在 `packages/app/src` 内完成业务功能 |
 
 ### 1.3 项目结构
 
 ```
 storytree2/
 ├── caiode/                          # 核心代码目录
-│   ├── claude-code-src/             # Claude Code 源码分析基准（研究材料，非开源）
-│   ├── opencode-1.4.0/              # OpenCode 核心实现
-│   ├── vscode-extension/            # VS Code 扩展实现
+│   ├── opencode-1.4.0/              # OpenCode 底座（二次开发基础）
+│   │   ├── packages/
+│   │   │   ├── opencode/            # CLI / Server 核心
+│   │   │   ├── app/                 # Web 前端 (SolidJS + Vite)
+│   │   │   ├── ui/                  # 全局 UI 组件库
+│   │   │   ├── plugin/              # 插件接口定义
+│   │   │   ├── sdk/                 # SDK 协议
+│   │   │   ├── desktop/             # Tauri 桌面壳
+│   │   │   ├── desktop-electron/    # Electron 桌面壳
+│   │   │   ├── console/             # 控制台应用
+│   │   │   ├── web/                 # Web 端资源
+│   │   │   └── ...
+│   │   ├── github/                  # GitHub Action 集成
+│   │   ├── infra/                   # SST 基础设施
+│   │   └── script/                  # 构建/发布脚本
+│   │
+│   ├── claude-code-src/             # Claude Code 源码分析基准（研究材料）
+│   │   ├── QueryEngine.ts           # 会话引擎
+│   │   ├── query.ts                 # Agent Loop
+│   │   ├── Tool.ts / tools.ts       # 工具抽象与执行
+│   │   ├── Task.ts / tasks.ts       # 任务状态机
+│   │   ├── skills/                  # Skill 加载
+│   │   ├── commands.ts              # 命令注册
+│   │   ├── context.ts               # 上下文构建
+│   │   ├── bridge/                  # 服务桥接
+│   │   └── cost-tracker.ts          # 成本追踪
+│   │
+│   ├── vscode-extension/            # VS Code 扩展实现 (StoryTree IDE)
+│   │   ├── package.json             # 扩展清单
+│   │   └── esbuild.config.mjs       # 构建配置
+│   │
 │   └── Trae-Ralph-main/             # Trae + Ralph 工具链
+│       ├── bin/cli.js               # CLI 入口
+│       ├── src/launcher.js          # CDP 自动化启动器
+│       ├── src/injector.js          # 规则注入器
+│       └── scripts/                 # 初始化脚本
+│
 ├── backups/                         # 备份和历史文件
-│   ├── dreamweaver/                 # Next.js 前端（已废弃）
-│   └── dreamweaver/                # 补丁历史
+│   ├── dreamweaver/                 # Next.js 前端原型（已归档）
+│   └── patches/                     # Git 补丁历史
+│
 ├── docs/                            # 项目文档
 │   ├── planning/                    # 规划文档
 │   ├── roadmap/                     # 路书文档（13份架构文档）
-│   └── task-reports/                # 任务报告
+│   ├── stitch/                      # Stitch 原型 PRD（S01-S21）
+│   ├── task-reports/                # 任务报告
+│   ├── boundary/                    # 边界与协议文档
+│   ├── CODE_WIKI.md                 # 本文档
+│   └── CODE_WIKI_INDEX.md           # 文档索引
+│
+├── stitch/                          # Stitch 原型设计资产
+│   └── stitch_ai_novel_writing_dashboard/
+│
 ├── workspaces/                      # 多模型 AI 工作空间
-│   ├── Claude/
-│   ├── Kimi-K2.5/
-│   ├── MiniMax-M2/
-│   └── Gemini/
+│   ├── Claude/, Kimi-K2.5/, MiniMax-M2/, Gemini/, Doubao/
+│
 └── .trae/                           # Agent 规则和工具
     ├── rules/                       # Ralph 执行规则
-    └── skills/                      # Agent 技能定义
+    ├── skills/                      # Agent 技能定义
+    └── documents/                   # PRD 与决策文档
 ```
 
 ---
@@ -72,6 +119,7 @@ storytree2/
 │                    Presentation Layer (UI)                  │
 │  ┌─────────────┐  ┌─────────────┐  ┌─────────────────────┐ │
 │  │ Novel Editor │  │ Plugin Pages │  │ Settings Panels    │ │
+│  │ (SolidJS)    │  │ (SolidJS)    │  │ (TUI/Web)          │ │
 │  └─────────────┘  └─────────────┘  └─────────────────────┘ │
 ├─────────────────────────────────────────────────────────────┤
 │                    Creative Core (Business)                 │
@@ -85,17 +133,24 @@ storytree2/
 │  │ AgentLoop   │  │ TaskRuntime │  │ ToolRuntime         │ │
 │  │             │  │             │  │                     │ │
 │  └─────────────┘  └─────────────┘  └─────────────────────┘ │
+├─────────────────────────────────────────────────────────────┤
+│                      OpenCode Base (底座)                    │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────────────┐ │
+│  │ CLI Engine   │  │ Server/API  │  │ Session Manager     │ │
+│  │ Provider Reg │  │ Plugin Sys  │  │ Storage (SQLite)    │ │
+│  └─────────────┘  └─────────────┘  └─────────────────────┘ │
 └─────────────────────────────────────────────────────────────┘
 ```
 
-### 2.2 模块分层图
+### 2.2 OpenCode 底座模块分层图
 
 ```mermaid
 graph TB
     subgraph UI[Presentation Layer]
-        UI1[Novel Editor]
-        UI2[Plugin Pages]
-        UI3[Settings Panels]
+        UI1[packages/app - Web App]
+        UI2[packages/desktop - Tauri Desktop]
+        UI3[packages/console - Console UI]
+        UI4[caiode/vscode-extension - VS Code Ext]
     end
 
     subgraph Core[Creative Core]
@@ -121,8 +176,15 @@ graph TB
         RT11[CostTracker]
     end
 
+    subgraph OpenCode[OpenCode Base]
+        OC1[packages/opencode - CLI/Server]
+        OC2[packages/plugin - Plugin API]
+        OC3[packages/sdk - SDK Protocol]
+        OC4[packages/ui - UI Components]
+    end
+
     subgraph External[External Services]
-        Ext1[OpenRouter]
+        Ext1[OpenRouter/Anthropic/OpenAI]
         Ext2[Image Generation]
         Ext3[Video Generation]
         Ext4[TTS/FFmpeg]
@@ -130,19 +192,116 @@ graph TB
 
     UI --> Core
     Core --> Runtime
-    Runtime --> Ext1
-    Runtime --> Ext2
-    Runtime --> Ext3
-    Runtime --> Ext4
+    Runtime --> OpenCode
+    OpenCode --> Ext1
+    OpenCode --> Ext2
+    OpenCode --> Ext3
+    OpenCode --> Ext4
 ```
+
+### 2.3 OpenCode 1.4.0 包结构
+
+| 包路径 | 名称 | 职责 |
+|--------|------|------|
+| `packages/opencode` | `opencode` | CLI 入口、Server、Session、Tool、Provider 核心 |
+| `packages/app` | `@opencode-ai/app` | Web 前端应用 (SolidJS + Vite) |
+| `packages/ui` | `@opencode-ai/ui` | 全局 UI 组件库、主题、图标 |
+| `packages/plugin` | `@opencode-ai/plugin` | 插件接口与 TUI 组件定义 |
+| `packages/sdk` | `@opencode-ai/sdk` | SDK 协议（Client/Server/V2） |
+| `packages/desktop` | `@opencode-ai/desktop` | Tauri 桌面壳 |
+| `packages/desktop-electron` | - | Electron 桌面壳 |
+| `packages/console/*` | - | 控制台应用（app/core/function/mail/resource） |
+| `packages/web` | - | Web 端资源与文档 |
+| `packages/enterprise` | - | 企业版入口 |
+| `packages/storybook` | - | Storybook 组件文档 |
+| `github/` | - | GitHub Action 集成 |
 
 ---
 
 ## 3. 核心模块详解
 
-### 3.1 Creative Agent Runtime（底层执行内核）
+### 3.1 OpenCode 底座核心（packages/opencode/src）
 
-#### 3.1.1 CreativeQueryEngine
+#### 3.1.1 CLI / 入口层
+
+| 模块 | 路径 | 职责 |
+|------|------|------|
+| **CLI Bootstrap** | `cli/bootstrap.ts` | 命令行启动、参数解析、初始化流程 |
+| **CLI UI** | `cli/ui.ts` | TUI 界面渲染与交互 |
+| **CLI Network** | `cli/network.ts` | 网络状态检测与代理配置 |
+| **CLI Upgrade** | `cli/upgrade.ts` | 版本检查与自动更新 |
+
+#### 3.1.2 Agent 与会话层
+
+| 模块 | 路径 | 职责 |
+|------|------|------|
+| **Agent** | `agent/agent.ts` | 核心 Agent 逻辑，行为与任务执行流程 |
+| **Session** | `session/*.ts` | 会话生命周期、消息处理、压缩、重试、状态 |
+| **Session LLM** | `session/llm.ts` | LLM 请求封装与流式处理 |
+| **Session Processor** | `session/processor.ts` | 消息处理器 |
+| **Session Prompt** | `session/prompt.ts` | 系统提示词构建 |
+| **ACP** | `acp/*.ts` | Agent Control Protocol 实现 |
+
+#### 3.1.3 工具层（Tool Runtime）
+
+| 模块 | 路径 | 职责 |
+|------|------|------|
+| **Tool Registry** | `tool/registry.ts` | 工具注册表 |
+| **Bash Tool** | `tool/bash.ts` | Bash 命令执行工具 |
+| **Edit Tool** | `tool/edit.ts` | 代码编辑工具 |
+| **Read Tool** | `tool/read.ts` | 文件读取工具 |
+| **Write Tool** | `tool/write.ts` | 文件写入工具 |
+| **Glob Tool** | `tool/glob.ts` | 文件匹配工具 |
+| **Grep Tool** | `tool/grep.ts` | 文本搜索工具 |
+| **LSP Tool** | `tool/lsp.ts` | LSP 语言服务工具 |
+| **WebFetch** | `tool/webfetch.ts` | 网页抓取工具 |
+| **WebSearch** | `tool/websearch.ts` | 网络搜索工具 |
+| **Task Tool** | `tool/task.ts` | 子任务调用工具 |
+| **Todo Tool** | `tool/todo.ts` | Todo 管理工具 |
+
+#### 3.1.4 Provider 层
+
+| 模块 | 路径 | 职责 |
+|------|------|------|
+| **Provider Core** | `provider/provider.ts` | Provider 抽象与统一接口 |
+| **Provider Auth** | `provider/auth.ts` | Provider 认证管理 |
+| **Provider Models** | `provider/models.ts` | 模型列表与配置 |
+| **Provider Transform** | `provider/transform.ts` | 请求/响应转换 |
+
+支持 Provider：Anthropic、OpenAI、OpenRouter、Ollama、Azure、Google、Groq、Mistral、TogetherAI、AWS Bedrock、GitLab Duo 等。
+
+#### 3.1.5 存储与数据层
+
+| 模块 | 路径 | 职责 |
+|------|------|------|
+| **Storage DB** | `storage/db.ts` | 数据库抽象（Bun/Node 双适配） |
+| **Storage Schema** | `storage/schema.sql.ts` | Drizzle ORM Schema |
+| **Project SQL** | `project/project.sql.ts` | 项目数据表 |
+| **Session SQL** | `session/session.sql.ts` | 会话数据表 |
+| **Account SQL** | `account/account.sql.ts` | 账户数据表 |
+| **Sync Event SQL** | `sync/event.sql.ts` | 同步事件表 |
+
+#### 3.1.6 其他核心模块
+
+| 模块 | 路径 | 职责 |
+|------|------|------|
+| **Bus** | `bus/*.ts` | 全局事件总线 |
+| **Config** | `config/*.ts` | 配置管理、TUI 配置迁移 |
+| **File** | `file/*.ts` | 文件系统操作、忽略规则、Ripgrep |
+| **Git** | `git/*.ts` | Git 操作封装 |
+| **LSP** | `lsp/*.ts` | LSP 客户端管理 |
+| **MCP** | `mcp/*.ts` | Model Context Protocol 支持 |
+| **Permission** | `permission/*.ts` | 权限评估与校验 |
+| **Plugin** | `plugin/*.ts` | 插件加载、安装、元数据 |
+| **Project** | `project/*.ts` | 项目管理、状态、VCS |
+| **Server** | `server/*.ts` | HTTP/WebSocket 服务器 |
+| **Shell** | `shell/*.ts` | Shell 执行封装 |
+| **Skill** | `skill/*.ts` | Skill 发现与加载 |
+| **Sync** | `sync/*.ts` | 数据同步机制 |
+
+### 3.2 Creative Agent Runtime（底层执行内核）
+
+#### 3.2.1 CreativeQueryEngine
 
 | 属性 | 说明 |
 |------|------|
@@ -161,7 +320,7 @@ interface CreativeQueryEngine {
 }
 ```
 
-#### 3.1.2 AgentLoop
+#### 3.2.2 AgentLoop
 
 | 属性 | 说明 |
 |------|------|
@@ -187,7 +346,7 @@ type AgentOutput =
   | { type: 'error'; message: string }
 ```
 
-#### 3.1.3 TaskRuntime
+#### 3.2.3 TaskRuntime
 
 | 属性 | 说明 |
 |------|------|
@@ -235,7 +394,7 @@ interface CreativeTask {
 }
 ```
 
-#### 3.1.4 ToolRuntime
+#### 3.2.4 ToolRuntime
 
 | 属性 | 说明 |
 |------|------|
@@ -270,7 +429,7 @@ interface ToolContext {
 }
 ```
 
-#### 3.1.5 SkillLoader
+#### 3.2.5 SkillLoader
 
 | 属性 | 说明 |
 |------|------|
@@ -310,7 +469,7 @@ interface SkillLoader {
     └── SKILL.md
 ```
 
-#### 3.1.6 PluginRuntime
+#### 3.2.6 PluginRuntime
 
 | 属性 | 说明 |
 |------|------|
@@ -332,14 +491,13 @@ interface PluginRuntime {
 }
 ```
 
-### 3.2 Creative Core（业务抽象层）
+### 3.3 Creative Core（业务抽象层）
 
-#### 3.2.1 Novel Editor Core
+#### 3.3.1 Novel Editor Core
 
 **定位**：Novel Editor Core 不是普通插件，而是 OpenCode Creative Studio 的基础入口和所有下游插件的内容源。
 
 **核心数据模型**：
-
 ```typescript
 interface NovelProject {
   id: string
@@ -398,7 +556,7 @@ interface Beat {
 }
 ```
 
-#### 3.2.2 Asset Library
+#### 3.3.2 Asset Library
 
 | 属性 | 说明 |
 |------|------|
@@ -418,7 +576,7 @@ interface AssetLibrary {
 }
 ```
 
-#### 3.2.3 License Gate
+#### 3.3.3 License Gate
 
 | 属性 | 说明 |
 |------|------|
@@ -438,30 +596,18 @@ type LicenseGateResult = {
 }
 ```
 
----
+### 3.4 Web 前端（packages/app）
 
-## 4. 关键类和函数说明
+| 目录 | 职责 |
+|------|------|
+| `src/app.tsx` | 应用根组件 |
+| `src/entry.tsx` | 入口渲染 |
+| `src/components/` | UI 组件（prompt-input, session, terminal 等） |
+| `src/context/` | 全局上下文（global-sync, models, permission 等） |
+| `src/pages/` | 页面路由（session-layout 等） |
+| `src/utils/` | 工具函数（prompt.ts 等） |
 
-### 4.1 claude-code-src 核心模块映射
-
-| claude-code-src 模块 | Creative Runtime 对应 | 职责说明 |
-|---------------------|----------------------|---------|
-| `QueryEngine.ts` | `CreativeQueryEngine` | 会话生命周期管理 |
-| `query.ts` | `AgentLoop` | 主 Agent Loop，流式响应 |
-| `Tool.ts` / `tools.ts` | `ToolRuntime` | 工具抽象与执行 |
-| `Task.ts` / `tasks.ts` | `TaskRuntime` | 任务状态机管理 |
-| `skills/` | `SkillLoader` | Skill 发现与加载 |
-| `commands.ts` | `CommandRegistry` | 命令注册与分发 |
-| `context.ts` | `CreativeContextBuilder` | 上下文构造与压缩 |
-| `state/` | `StateStore` | 状态持久化管理 |
-| `bridge/` | `ProviderBridge` | 外部服务桥接 |
-| `coordinator/` | `WorkflowOrchestrator` | 工作流编排 |
-| `hooks/` | `HookPipeline` | 生命周期扩展点 |
-| `cost-tracker.ts` | `CostTracker` | 成本追踪统计 |
-
-### 4.2 VS Code Extension 核心模块
-
-位于 `caiode/vscode-extension/src/`：
+### 3.5 VS Code 扩展（caiode/vscode-extension）
 
 | 模块路径 | 核心文件 | 职责 |
 |---------|---------|------|
@@ -488,6 +634,53 @@ type LicenseGateResult = {
 | | `automation-queue.ts` | 自动化队列 |
 | | `cdp-driver.ts` | CDP 驱动 |
 | **skills/** | `skill-registry.ts` | Skill 注册表 |
+
+---
+
+## 4. 关键类和函数说明
+
+### 4.1 claude-code-src 核心模块映射
+
+| claude-code-src 模块 | Creative Runtime 对应 | 职责说明 |
+|---------------------|----------------------|---------|
+| `QueryEngine.ts` | `CreativeQueryEngine` | 会话生命周期管理 |
+| `query.ts` | `AgentLoop` | 主 Agent Loop，流式响应 |
+| `Tool.ts` / `tools.ts` | `ToolRuntime` | 工具抽象与执行 |
+| `Task.ts` / `tasks.ts` | `TaskRuntime` | 任务状态机管理 |
+| `skills/` | `SkillLoader` | Skill 发现与加载 |
+| `commands.ts` | `CommandRegistry` | 命令注册与分发 |
+| `context.ts` | `CreativeContextBuilder` | 上下文构造与压缩 |
+| `state/` | `StateStore` | 状态持久化管理 |
+| `bridge/` | `ProviderBridge` | 外部服务桥接 |
+| `coordinator/` | `WorkflowOrchestrator` | 工作流编排 |
+| `hooks/` | `HookPipeline` | 生命周期扩展点 |
+| `cost-tracker.ts` | `CostTracker` | 成本追踪统计 |
+
+### 4.2 OpenCode 底座关键文件
+
+| 文件路径 | 职责 |
+|---------|------|
+| `packages/opencode/src/index.ts` | CLI 入口，命令注册与分发 |
+| `packages/opencode/src/agent/agent.ts` | Agent 核心逻辑 |
+| `packages/opencode/src/session/index.ts` | 会话管理入口 |
+| `packages/opencode/src/tool/registry.ts` | 工具注册表 |
+| `packages/opencode/src/provider/provider.ts` | Provider 统一接口 |
+| `packages/opencode/src/plugin/loader.ts` | 插件加载器 |
+| `packages/opencode/src/skill/discovery.ts` | Skill 发现机制 |
+| `packages/opencode/src/bus/index.ts` | 全局事件总线 |
+| `packages/opencode/src/storage/db.ts` | 存储抽象层 |
+
+### 4.3 Trae-Ralph 工具链
+
+| 文件路径 | 职责 |
+|---------|------|
+| `bin/cli.js` | CLI 入口 |
+| `src/launcher.js` | CDP 自动化启动器，驱动 Trae IDE |
+| `src/injector.js` | 向 Trae 注入规则与技能 |
+| `src/config.js` | 配置管理 |
+| `scripts/inject-rules.js` | 规则注入脚本 |
+| `scripts/inject-skills.js` | 技能注入脚本 |
+| `scripts/init-planning.js` | 规划初始化 |
 
 ---
 
@@ -528,7 +721,43 @@ graph LR
     A11 --> A10
 ```
 
-### 5.2 插件消费链路
+### 5.2 OpenCode 包依赖关系
+
+```text
+opencode (CLI/Server)
+  ├── @opencode-ai/plugin (workspace)
+  ├── @opencode-ai/sdk (workspace)
+  ├── @opencode-ai/script (workspace)
+  ├── @opencode-ai/util (workspace)
+  ├── ai (Vercel AI SDK)
+  ├── effect (Effect-TS)
+  ├── hono (Web Framework)
+  ├── drizzle-orm (ORM)
+  └── ...
+
+app (Web Frontend)
+  ├── @opencode-ai/sdk (workspace)
+  ├── @opencode-ai/ui (workspace)
+  ├── @opencode-ai/util (workspace)
+  ├── solid-js (UI Framework)
+  ├── @solidjs/router (Router)
+  ├── @tanstack/solid-query (Query)
+  └── ...
+
+ui (Component Library)
+  ├── @opencode-ai/sdk (workspace)
+  ├── @opencode-ai/util (workspace)
+  ├── solid-js
+  ├── @kobalte/core (Headless UI)
+  └── ...
+
+desktop (Tauri)
+  ├── @opencode-ai/app (workspace)
+  ├── @opencode-ai/ui (workspace)
+  └── @tauri-apps/api
+```
+
+### 5.3 插件消费链路
 
 ```text
 Novel Scene
@@ -552,7 +781,7 @@ Timeline Draft：拼接剪辑草稿
 Long Video Manager：管理长项目结构
 ```
 
-### 5.3 外部依赖
+### 5.4 外部依赖
 
 | 依赖类型 | 具体依赖 | 说明 |
 |---------|---------|------|
@@ -560,11 +789,17 @@ Long Video Manager：管理长项目结构
 | | OpenAI | GPT 模型支持 |
 | | OpenRouter | 多模型路由 |
 | | Ollama | 本地模型支持 |
+| | Vercel AI SDK | 统一 AI SDK (`ai`) |
 | **媒体处理** | FFmpeg | 视频处理 |
-| **存储** | SQLite | 本地数据库 |
-| **构建工具** | Next.js | 前端框架 |
+| **存储** | SQLite (Drizzle ORM) | 本地数据库 |
+| **构建工具** | Bun | 运行时与包管理 |
+| | Vite | 前端构建 |
 | | TypeScript | 类型系统 |
 | | esbuild | 代码打包 |
+| | Turbo |  monorepo 构建编排 |
+| **UI 框架** | SolidJS | 响应式 UI |
+| | TailwindCSS | 样式 |
+| | OpenTUI | 终端 UI |
 | **测试** | Vitest | 单元测试 |
 | | Playwright | E2E 测试 |
 
@@ -572,103 +807,122 @@ Long Video Manager：管理长项目结构
 
 ## 6. 项目运行方式
 
-### 6.1 开发环境配置
+### 6.1 环境要求
 
-#### 6.1.1 环境要求
-
-- **Node.js**: >= 18.0.0
-- **npm/yarn/pnpm/bun**: 最新稳定版
-- **VS Code**: 最新版本
+- **Bun**: >= 1.3.11（项目使用 Bun 作为包管理器和运行时）
+- **Node.js**: >= 18.0.0（部分工具兼容）
+- **VS Code**: >= 1.85.0（扩展开发）
 - **Git**: 2.x
 
-#### 6.1.2 安装步骤
+### 6.2 OpenCode 底座运行
 
 ```bash
-# 克隆项目
-git clone https://github.com/storytree/storytree2.git
-cd storytree2
+# 进入 OpenCode 目录
+cd caiode/opencode-1.4.0
 
-# 安装根目录依赖
-npm install
+# 安装依赖（使用 Bun）
+bun install
 
-# 安装 caiode 依赖
-cd caiode/vscode-extension
-npm install
+# 开发模式启动 CLI
+bun dev
+
+# 开发模式启动 Web 前端
+cd packages/app && bun dev
+
+# 开发模式启动桌面端
+cd packages/desktop && bun run tauri dev
+
+# 类型检查
+bun typecheck
+
+# 构建
+bun turbo build
 ```
 
-#### 6.1.3 环境变量配置
-
-创建 `.env` 文件：
-
-```bash
-# API Keys
-ANTHROPIC_API_KEY=your_key_here
-OPENAI_API_KEY=your_key_here
-OPENROUTER_API_KEY=your_key_here
-
-# 数据库配置
-DATABASE_PATH=./data/storytree.db
-
-# 功能开关
-ENABLE_TELEMETRY=true
-ENABLE_AUTO_UPDATE=true
-```
-
-### 6.2 运行命令
-
-#### 6.2.1 VS Code Extension
+### 6.3 VS Code Extension 运行
 
 ```bash
 cd caiode/vscode-extension
 
-# 开发模式运行
+# 安装依赖
+npm install
+
+# 开发模式
 npm run watch
-# 或
-npm run dev
 
-# 构建生产版本
-npm run build
+# 生产构建
+npm run build:prod
 
 # 打包 .vsix
 npm run package
+
+# 测试
+npm run test
 ```
 
-#### 6.2.2 测试
+### 6.4 Trae-Ralph 工具链运行
 
 ```bash
-# 单元测试
+cd caiode/Trae-Ralph-main
+
+# 安装依赖
+npm install
+
+# 启动 Ralph Loop
+npm start
+
+# 中国版启动
+npm run start:cn
+
+# 注入规则
+npm run rules:inject
+
+# 注入技能
+npm run skills:inject
+
+# 初始化规划
+npm run plan
+```
+
+### 6.5 Dreamweaver 前端（已归档）
+
+```bash
+cd backups/dreamweaver
+
+# 安装依赖
+npm install
+
+# 开发模式
+npm run dev
+
+# 构建
+npm run build
+
+# 测试
 npm run test:unit
-
-# 单元测试（监听模式）
-npm run test:unit:watch
-
-# E2E 测试
 npm run test:e2e
+```
 
-# E2E 测试（UI 模式）
-npm run test:e2e:ui
+### 6.6 测试命令
+
+```bash
+# OpenCode 单元测试（不要在 root 运行）
+cd packages/opencode && bun test
+
+# App 单元测试
+cd packages/app && bun run test:unit
+
+# App E2E 测试
+cd packages/app && bun run test:e2e
+
+# VS Code Extension 测试
+cd caiode/vscode-extension && npm run test
 
 # 覆盖率报告
-npm run coverage
+cd packages/opencode && bun test --coverage
 ```
 
-#### 6.2.3 代码质量
-
-```bash
-# 代码检查
-npm run lint
-
-# 自动修复
-npm run lint:fix
-
-# 代码格式化
-npm run format
-
-# 格式化检查
-npm run format:check
-```
-
-### 6.3 项目启动流程
+### 6.7 项目启动流程
 
 ```
 1. 初始化 StateStore
@@ -839,7 +1093,7 @@ interface SkillDefinition {
 | 类型 | 规范 | 示例 |
 |------|------|------|
 | TypeScript 文件 | PascalCase.ts | `CreativeQueryEngine.ts` |
-| React 组件 | PascalCase.tsx | `AiChatPanel.tsx` |
+| React/Solid 组件 | PascalCase.tsx | `AiChatPanel.tsx` |
 | 类型定义 | `*.types.ts` | `provider.types.ts` |
 | 测试文件 | `*.test.ts` | `provider-factory.test.ts` |
 | 样式文件 | kebab-case.css | `ai-chat-panel.css` |
@@ -868,6 +1122,25 @@ feat(DEV-1.2.1): 实现 GlobalModelRequestQueue 串行化调度器
 fix(DEV-1.3.2): 修复 FileMutex 重入检测逻辑
 ```
 
+### D. 技术栈速查
+
+| 层级 | 技术 | 版本 |
+|------|------|------|
+| 运行时 | Bun | 1.3.11 |
+| 语言 | TypeScript | 5.8.2 |
+| UI 框架 | SolidJS | 1.9.10 |
+| 路由 | @solidjs/router | 0.15.4 |
+| 构建 | Vite | 7.1.4 |
+| Monorepo | Turbo | 2.8.13 |
+| ORM | Drizzle ORM | 1.0.0-beta.19 |
+| AI SDK | Vercel AI SDK | 6.0.149 |
+| 函数式 | Effect-TS | 4.0.0-beta.43 |
+| 样式 | TailwindCSS | 4.1.11 |
+| 终端 UI | OpenTUI | 0.1.97 |
+| 桌面壳 | Tauri | v2 |
+| 测试 | Vitest | latest |
+| E2E | Playwright | 1.51.0 |
+
 ---
 
-*本文档由 AI 自动生成，最后更新于 2026-05-31*
+*本文档由 AI 自动生成，最后更新于 2026-06-11*
