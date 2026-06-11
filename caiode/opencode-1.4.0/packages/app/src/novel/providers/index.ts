@@ -11,11 +11,7 @@ import type {
   AILog
 } from '../types';
 
-export interface ProviderError {
-  code: 'NOT_FOUND' | 'PERMISSION_DENIED' | 'QUOTA_EXCEEDED' | 'TIMEOUT' | 'UNKNOWN';
-  message: string;
-  details?: Record<string, unknown>;
-}
+export type { ProviderError, ProviderErrorCode } from '../types/provider-error';
 
 export interface INovelProjectProvider {
   listProjects(): Promise<Project[]>;

@@ -1,5 +1,6 @@
 import type { Chapter, ChapterStatus, AISuggestion } from '../types';
-import type { INovelChapterProvider, ProviderError } from './index';
+import type { INovelChapterProvider } from './index';
+import type { ProviderError } from '../types/provider-error';
 import { mockChapters } from '../mock-data';
 import { mockDelay } from '../utils/mock-delay';
 
