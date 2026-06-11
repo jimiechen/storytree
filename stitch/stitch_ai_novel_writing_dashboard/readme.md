@@ -8,6 +8,10 @@
 |------|------|------|
 | PRD 完整版 | [AI小说创作助手_PRD文档_完整版.md](./AI小说创作助手_PRD文档_完整版.md) | 21个页面的完整产品需求文档 |
 | Stitch 提示词 | [小说编辑器_Google_Stitch_原型图提示词.md](./小说编辑器_Google_Stitch_原型图提示词.md) | 30个页面的 Stitch 生成提示词 |
+| 开发计划 | [PLAN.md](./PLAN.md) | 8个阶段的完整开发计划与阶段划分 |
+| 开发规则 | [STORYTREE_RULES.md](../caicode/opencode-1.4.0/STORYTREE_RULES.md) | STDD + 分层架构 + Mock 规范（完整版） |
+| Agent规则 | [.trae/rules/opencode-storytree.md](../../.trae/rules/opencode-storytree.md) | Agent 消费精简版规则 |
+| 汇报协议 | [.trae/rules/reporting-protocol.md](../../.trae/rules/reporting-protocol.md) | 汇报模板与等级定义 |
 
 ## 设计规范
 
