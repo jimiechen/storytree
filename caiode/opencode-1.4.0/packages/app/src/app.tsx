@@ -51,6 +51,10 @@ const loadSession = () => import("@/pages/session")
 const Session = lazy(loadSession)
 const loadNovel = () => import("@/novel")
 const NovelRoute = lazy(loadNovel)
+const loadBookshelf = () => import("@/novel/pages/bookshelf")
+const BookshelfRoute = lazy(loadBookshelf)
+const loadWorkbench = () => import("@/novel/pages/workbench")
+const WorkbenchRoute = lazy(loadWorkbench)
 const loadCanvas = () => import("@/novel-canvas")
 const CanvasRoute = lazy(loadCanvas)
 const loadShot3D = () => import("@/novel-3d")
@@ -304,6 +308,8 @@ export function AppInterface(props: {
               >
                 <Route path="/" component={HomeRoute} />
                 <Route path="/novel" component={NovelRoute} />
+                <Route path="/novel/bookshelf" component={BookshelfRoute} />
+                <Route path="/novel/workbench/:projectId" component={WorkbenchRoute} />
                 <Route path="/canvas" component={CanvasRoute} />
                 <Route path="/shot3d" component={Shot3DRoute} />
                 <Route path="/:dir" component={DirectoryLayout}>

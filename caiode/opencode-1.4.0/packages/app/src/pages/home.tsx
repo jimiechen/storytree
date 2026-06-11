@@ -87,7 +87,15 @@ export default function Home() {
       </Button>
 
       {/* Novel Editor Entry */}
-      <div class="mt-8 flex justify-center gap-4">
+      <div class="mt-8 flex justify-center gap-4 flex-wrap">
+        <Button
+          size="large"
+          class="px-6 flex items-center gap-2"
+          onClick={() => navigate("/novel/bookshelf")}
+        >
+          <span>📚</span>
+          <span>我的书架</span>
+        </Button>
         <Button
           size="large"
           class="px-6 flex items-center gap-2"
