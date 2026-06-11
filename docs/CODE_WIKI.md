@@ -12,6 +12,9 @@
 1. [项目概述](#1-项目概述)
 2. [项目架构](#2-项目架构)
 3. [核心模块详解](#3-核心模块详解)
+   - 3.1 [VS Code Extension 核心模块](#31-vs-code-extension-核心模块)
+   - 3.2 [Claude-Code-Src 参考架构](#32-claude-code-src-参考架构)
+   - 3.3 [Novel Editor (OpenCode 二次开发)](#33-novel-editor-opencode-二次开发)
 4. [关键类和函数说明](#4-关键类和函数说明)
 5. [依赖关系](#5-依赖关系)
 6. [项目运行方式](#6-项目运行方式)
@@ -444,6 +447,431 @@ export class QueryEngine {
 type TaskType = 'local_bash' | 'local_agent' | 'remote_agent' | 'in_process_teammate' | 'local_workflow' | 'monitor_mcp' | 'dream';
 type TaskStatus = 'pending' | 'running' | 'completed' | 'failed' | 'killed';
 ```
+
+### 3.3 Novel Editor (OpenCode 二次开发)
+
+#### 3.3.1 模块定位
+
+| 属性 | 说明 |
+|------|------|
+| **路径** | `caiode/opencode-1.4.0/packages/app/src/novel/` |
+| **技术栈** | SolidJS + TypeScript + TailwindCSS |
+| **状态** | Mock 模式开发中（基于 FakeAgentProvider） |
+| **路由** | `/novel` (App 路由懒加载) |
+| **定位** | Core Product（免费小说编辑器，非付费插件） |
+
+#### 3.3.2 目录结构
+
+```
+caiode/opencode-1.4.0/packages/app/src/novel/
+├── index.ts                           # 模块入口：导出 NovelEditor 组件
+├── components/
+│   ├── index.ts                       # 组件聚合导出
+│   ├── mock-mode-banner.tsx           # Mock 模式提示横幅
+│   └── novel-editor/
+│       ├── index.tsx                  # NovelEditor 主组件（三栏布局）
+│       ├── chapter-list.tsx           # 左侧：章节列表 + 大纲
+│       ├── chapter-editor.tsx         # 中间：章节编辑器 + AI 续写
+│       ├── character-panel.tsx        # 右侧：角色面板
+│       ├── ai-task-panel.tsx          # AI 任务面板（续写/改写/总结/配音）
+│       ├── ai-result-card.tsx         # AI 结果卡片（接受/拒绝/重新生成）
+│       └── ai-log-drawer.tsx          # AI 日志抽屉（任务历史）
+├── hooks/
+│   ├── use-novel-project.ts           # 项目数据 Hook（Provider 聚合）
+│   ├── use-ai-task.ts                 # AI 任务 Hook（FakeAgent）
+│   └── use-ai-log.ts                  # AI 日志 Hook（本地状态）
+├── providers/
+│   ├── index.ts                       # Provider 聚合导出
+│   ├── providers-index.ts             # Provider 索引文件
+│   ├── fake-agent.ts                  # FakeAgentProvider（Mock AI 服务）
+│   ├── fake-agent.test.ts             # FakeAgent 测试（9 个场景）
+│   ├── novel-project.ts               # NovelProjectProvider（项目 CRUD）
+│   ├── novel-chapter.ts               # NovelChapterProvider（章节 CRUD）
+│   ├── novel-character.ts             # NovelCharacterProvider（角色 CRUD）
+│   └── ai-log.ts                      # AILogProvider（日志管理）
+├── types/
+│   ├── index.ts                       # 类型聚合导出
+│   ├── project.ts                     # 项目类型定义
+│   ├── chapter.ts                     # 章节类型定义
+│   ├── character.ts                   # 角色类型定义
+│   ├── ai-task.ts                     # AI 任务类型定义
+│   ├── ai-log.ts                      # AI 日志类型定义
+│   └── sandbox.ts                     # 沙箱类型定义
+├── mock-data/
+│   ├── index.ts                       # Mock 数据聚合导出
+│   ├── projects.ts                    # 项目 Mock 数据（《星辰之海》）
+│   ├── chapters.ts                    # 章节 Mock 数据（5 章）
+│   ├── characters.ts                  # 角色 Mock 数据（4 人）
+│   ├── ai-tasks.ts                    # AI 任务 Mock 数据（2 个）
+│   └── mock-data.test.ts              # Mock 数据验证测试
+└── utils/
+    └── mock-delay.ts                  # Mock 延迟工具函数
+```
+
+#### 3.3.3 核心组件详解
+
+**NovelEditor (`novel-editor/index.tsx`)**
+
+| 属性 | 说明 |
+|------|------|
+| **职责** | 小说编辑器主页面，三栏布局容器 |
+| **布局** | 左侧章节列表(280px) + 中间编辑器(flex-1) + 右侧角色面板(280px) |
+| **状态** | `activeChapterId`（当前选中章节） |
+| **子组件** | ChapterList, ChapterEditor, CharacterPanel |
+
+**ChapterList (`novel-editor/chapter-list.tsx`)**
+
+| 属性 | 说明 |
+|------|------|
+| **职责** | 展示章节列表、大纲信息、字数统计 |
+| **Props** | `chapters`, `activeChapterId`, `onSelectChapter` |
+| **功能** | 按 orderIndex 排序显示，高亮当前章节，显示每章字数 |
+
+**ChapterEditor (`novel-editor/chapter-editor.tsx`)**
+
+| 属性 | 说明 |
+|------|------|
+| **职责** | 章节内容编辑 + AI 续写交互 |
+| **Props** | `chapter`, `onUpdateContent`, `onAITask` |
+| **功能** | 文本编辑、AI 续写按钮、字数统计、状态显示 |
+| **AI 集成** | 点击 AI 续写 → 调用 `useAITask().continueWriting()` → 显示 AITaskPanel |
+
+**CharacterPanel (`novel-editor/character-panel.tsx`)**
+
+| 属性 | 说明 |
+|------|------|
+| **职责** | 展示角色列表、性格标签、目标、秘密 |
+| **Props** | `characters` |
+| **功能** | 角色卡片列表、性格标签展示、目标/秘密折叠显示 |
+
+**AITaskPanel (`novel-editor/ai-task-panel.tsx`)**
+
+| 属性 | 说明 |
+|------|------|
+| **职责** | AI 任务操作面板（续写/改写/总结/配音） |
+| **Props** | `chapter`, `onTaskComplete` |
+| **任务类型** | `continue-writing`, `rewrite-selection`, `summarize-chapter`, `character-voice` |
+| **状态** | `isProcessing`, `taskType`, `result` |
+
+**AIResultCard (`novel-editor/ai-result-card.tsx`)**
+
+| 属性 | 说明 |
+|------|------|
+| **职责** | 展示 AI 生成结果，提供接受/拒绝/重新生成操作 |
+| **Props** | `result`, `onAccept`, `onReject`, `onRegenerate` |
+| **功能** | 文本预览、字数统计、操作按钮 |
+
+**AILogDrawer (`novel-editor/ai-log-drawer.tsx`)**
+
+| 属性 | 说明 |
+|------|------|
+| **职责** | AI 任务历史日志抽屉 |
+| **Props** | `logs`, `isOpen`, `onClose` |
+| **功能** | 按时间倒序显示任务历史、状态标签、结果预览 |
+
+**MockModeBanner (`mock-mode-banner.tsx`)**
+
+| 属性 | 说明 |
+|------|------|
+| **职责** | Mock 模式提示横幅 |
+| **显示条件** | `import.meta.env.DEV` 或 `import.meta.env.VITE_MOCK_MODE` |
+| **内容** | "当前处于 Mock 模式，AI 功能由 FakeAgent 模拟" |
+
+#### 3.3.4 核心 Hooks 详解
+
+**useNovelProject (`hooks/use-novel-project.ts`)**
+
+| 属性 | 说明 |
+|------|------|
+| **职责** | 聚合所有 Novel Provider，提供统一的项目数据接口 |
+| **返回值** | `{ project, chapters, characters, createChapter, updateChapter, deleteChapter, createCharacter, updateCharacter, deleteCharacter }` |
+| **依赖** | NovelProjectProvider, NovelChapterProvider, NovelCharacterProvider |
+
+**useAITask (`hooks/use-ai-task.ts`)**
+
+| 属性 | 说明 |
+|------|------|
+| **职责** | 封装 AI 任务操作，对接 FakeAgentProvider |
+| **返回值** | `{ isProcessing, task, result, error, continueWriting, rewriteSelection, summarizeChapter, characterVoice, cancelTask }` |
+| **核心方法** | `continueWriting(chapterId, text)`, `rewriteSelection(chapterId, text, selectedText)` |
+| **状态流转** | `idle` → `submitting` → `processing` → `completed`/`failed`/`cancelled` |
+
+**useAILog (`hooks/use-ai-log.ts`)**
+
+| 属性 | 说明 |
+|------|------|
+| **职责** | 管理 AI 任务日志的本地状态 |
+| **返回值** | `{ logs, addLog, clearLogs }` |
+| **存储** | 内存数组（非持久化） |
+
+#### 3.3.5 Provider 层详解
+
+**FakeAgentProvider (`providers/fake-agent.ts`)**
+
+| 属性 | 说明 |
+|------|------|
+| **职责** | Mock AI 服务，模拟异步任务执行 |
+| **核心方法** | `submitTask(input)`, `getTask(id)`, `cancelTask(id)`, `onTaskUpdate(callback)` |
+| **任务状态** | `pending` → `running` → `success`/`failed`/`cancelled`/`denied`/`quota` |
+| **模拟延迟** | 1.5s - 2.5s 随机延迟 |
+| **错误模拟** | 文本包含 "fail" → 失败，"sudo admin" → 权限不足，连续 10 次 → 配额不足 |
+| **输出格式** | `{ text, wordCount, confidence }` |
+
+**NovelProjectProvider (`providers/novel-project.ts`)**
+
+| 属性 | 说明 |
+|------|------|
+| **职责** | 项目数据 CRUD 操作 |
+| **接口** | `getProject()`, `updateProject(project)`, `getProjects()` |
+| **数据** | 基于 `mockProject`（《星辰之海》） |
+
+**NovelChapterProvider (`providers/novel-chapter.ts`)**
+
+| 属性 | 说明 |
+|------|------|
+| **职责** | 章节数据 CRUD 操作 |
+| **接口** | `getChapters()`, `getChapter(id)`, `createChapter(chapter)`, `updateChapter(chapter)`, `deleteChapter(id)` |
+| **数据** | 基于 `mockChapters`（5 章） |
+
+**NovelCharacterProvider (`providers/novel-character.ts`)**
+
+| 属性 | 说明 |
+|------|------|
+| **职责** | 角色数据 CRUD 操作 |
+| **接口** | `getCharacters()`, `getCharacter(id)`, `createCharacter(character)`, `updateCharacter(character)`, `deleteCharacter(id)` |
+| **数据** | 基于 `mockCharacters`（4 人：苏瑶、顾沉舟、林小满、沈墨白） |
+
+**AILogProvider (`providers/ai-log.ts`)**
+
+| 属性 | 说明 |
+|------|------|
+| **职责** | AI 任务日志管理 |
+| **接口** | `getLogs()`, `addLog(log)`, `clearLogs()` |
+| **数据** | 基于 `mockAITasks`（2 个历史任务） |
+
+#### 3.3.6 类型定义
+
+**Project (`types/project.ts`)**
+
+```typescript
+interface Project {
+  id: string;
+  name: string;
+  genre: string;
+  description: string;
+  targetAudience: string;
+  totalWordCount: number;
+  chapterCount: number;
+  characterCount: number;
+  status: 'active' | 'archived' | 'draft';
+  createdAt: Date;
+  updatedAt: Date;
+}
+```
+
+**Chapter (`types/chapter.ts`)**
+
+```typescript
+interface Chapter {
+  id: string;
+  projectId: string;
+  title: string;
+  content: string;
+  orderIndex: number;
+  wordCount: number;
+  status: 'draft' | 'writing' | 'review' | 'completed';
+  outline: ChapterOutline;
+  aiSuggestions: AISuggestion[];
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+interface ChapterOutline {
+  goal: string;
+  conflict: string;
+  resolution: string;
+  keyScenes: string[];
+}
+
+interface AISuggestion {
+  id: string;
+  type: 'continuation' | 'rewrite' | 'summary' | 'character_voice';
+  content: string;
+  accepted: boolean;
+  createdAt: Date;
+}
+```
+
+**Character (`types/character.ts`)**
+
+```typescript
+interface Character {
+  id: string;
+  projectId: string;
+  name: string;
+  role: string;
+  description: string;
+  personalityTags: string[];
+  goal: string;
+  secret: string;
+  relationships: CharacterRelationship[];
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+interface CharacterRelationship {
+  characterId: string;
+  type: 'ally' | 'enemy' | 'neutral' | 'family' | 'romantic';
+  description: string;
+}
+```
+
+**AITask (`types/ai-task.ts`)**
+
+```typescript
+type AITaskType = 'continue-writing' | 'rewrite-selection' | 'summarize-chapter' | 'character-voice';
+type AITaskStatus = 'pending' | 'running' | 'success' | 'failed' | 'cancelled' | 'denied' | 'quota';
+
+interface AITask {
+  id: string;
+  type: AITaskType;
+  status: AITaskStatus;
+  chapterId: string;
+  input: AITaskInput;
+  output?: AITaskOutput;
+  error?: string;
+  duration?: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+interface AITaskInput {
+  text: string;
+  selectedText?: string;
+  characterId?: string;
+}
+
+interface AITaskOutput {
+  text: string;
+  wordCount: number;
+  confidence: number;
+}
+```
+
+**Sandbox (`types/sandbox.ts`)**
+
+```typescript
+interface Sandbox {
+  id: string;
+  name: string;
+  type: 'code' | 'writing' | 'design' | 'analysis';
+  status: 'active' | 'paused' | 'completed';
+  files: SandboxFile[];
+  createdAt: Date;
+  updatedAt: Date;
+}
+```
+
+#### 3.3.7 Mock 数据
+
+**项目数据 (`mock-data/projects.ts`)**
+
+| 字段 | 值 |
+|------|-----|
+| 名称 | 《星辰之海》 |
+| 类型 | 科幻/太空歌剧 |
+| 描述 | 在遥远的未来，人类已经殖民了银河系... |
+| 字数 | 45,000 |
+| 章节数 | 5 |
+| 角色数 | 4 |
+| 状态 | active |
+
+**章节数据 (`mock-data/chapters.ts`)**
+
+| 章节 | 标题 | 字数 | 状态 |
+|------|------|------|------|
+| 1 | 觉醒 | 8,500 | completed |
+| 2 | 星际联盟 | 9,200 | writing |
+| 3 | 暗流涌动 | 7,800 | draft |
+| 4 | 真相大白 | 10,500 | draft |
+| 5 | 最终决战 | 9,000 | draft |
+
+**角色数据 (`mock-data/characters.ts`)**
+
+| 角色 | 身份 | 性格标签 | 目标 | 秘密 |
+|------|------|---------|------|------|
+| 苏瑶 | 主角 | 勇敢、好奇、坚韧 | 寻找失踪的父亲 | 拥有古老的星际导航基因 |
+| 顾沉舟 | 导师 | 睿智、沉稳、神秘 | 引导苏瑶完成使命 | 曾是星际联盟的高级指挥官 |
+| 林小满 | 伙伴 | 活泼、机智、忠诚 | 保护苏瑶 | 拥有预知未来的能力 |
+| 沈墨白 | 对手 | 冷酷、野心、聪明 | 控制星际联盟 | 其实是苏瑶的失散多年的哥哥 |
+
+#### 3.3.8 测试覆盖
+
+**FakeAgentProvider 测试 (`providers/fake-agent.test.ts`)**
+
+| 场景 | 测试内容 | 验证点 |
+|------|---------|--------|
+| 场景 1 | AI 续写成功 | 任务状态流转、输出非空 |
+| 场景 2 | AI 改写成功 | 任务类型正确、输出存在 |
+| 场景 3 | AI 总结成功 | 输出文本长度 > 0 |
+| 场景 4 | 角色语气改写 | 任务类型为 character-voice |
+| 场景 5 | 任务失败 | 输入包含 "fail" → 状态 failed |
+| 场景 6 | 用户取消 | 调用 cancelTask → 状态 cancelled |
+| 场景 7 | 权限不足 | 输入包含 "sudo admin" → 状态 denied |
+| 场景 8 | 配额不足 | 连续 11 次调用 → 状态 quota |
+| 场景 9 | 长任务处理 | 持续时间 > 0 |
+| 额外 | 状态订阅 | onTaskUpdate 回调触发 |
+| 额外 | 字数统计 | output.wordCount > 0 |
+
+**Mock Data 测试 (`mock-data/mock-data.test.ts`)**
+
+| 测试项 | 验证内容 |
+|--------|---------|
+| 项目数据 | id、名称、类型、字数、章节数、角色数、状态 |
+| 章节结构 | id、标题、projectId、字数、状态、大纲 |
+| 章节顺序 | orderIndex 递增 |
+| 角色结构 | id、名称、身份、性格标签、目标、秘密 |
+| 核心主角 | 苏瑶存在且 role 包含"主角" |
+| AI 任务 | id、类型、状态、chapterId、createdAt |
+
+#### 3.3.9 与 App 的集成
+
+**路由配置 (`app.tsx`)**
+
+```typescript
+const loadNovel = () => import("@/novel");
+const NovelRoute = lazy(loadNovel);
+
+// 在 Router 中注册
+<Route path="/novel" component={NovelRoute} />
+```
+
+**入口导航 (`pages/home.tsx`)**
+
+```typescript
+<Button onClick={() => navigate("/novel")}>
+  <span>📖</span>
+  <span>AI 小说编辑器 (Mock)</span>
+</Button>
+```
+
+**懒加载优势**：Novel 模块代码在访问 `/novel` 路由时才加载，减少首屏 bundle 体积。
+
+#### 3.3.10 与 VS Code Extension 的关系
+
+| 层面 | OpenCode Novel | VS Code Extension |
+|------|---------------|-------------------|
+| **技术栈** | SolidJS + Vite | TypeScript + VS Code API |
+| **运行环境** | 浏览器 (Webview) | VS Code Extension Host |
+| **数据层** | Mock Provider（内存） | MockStore（内存） |
+| **AI 服务** | FakeAgentProvider | AI Provider Factory |
+| **通信** | 直接函数调用 | JSON-RPC IPC |
+| **目标** | 独立 Web 应用 | VS Code 插件 |
+
+**未来集成方向**：
+- Novel Editor 的数据层可从 Mock Provider 迁移到 VS Code Extension 的 MockStore
+- AI 服务可从 FakeAgentProvider 迁移到 GlobalModelRequestQueue
+- 通过 IPC 协议实现 Webview 与 Extension Host 的数据同步
 
 ---
 
@@ -1030,7 +1458,7 @@ fix(DEV-1.3.2): 修复 FileMutex 重入检测逻辑
 | VS Code Extension | 🔄 开发中 | 核心功能已实现，45+ 测试覆盖 |
 | Creative Agent Runtime | 📋 规划中 | 11个核心模块定义完成 |
 | Creative Core | 📋 规划中 | 业务抽象层设计完成 |
-| Novel Editor Core | 📋 规划中 | 数据模型定义完成 |
+| **Novel Editor Core** | **🔄 Mock 开发中** | **SolidJS 实现，FakeAgent 模拟 AI，11 测试覆盖** |
 | Plugin System | 📋 规划中 | 扩展点规范完成 |
 | AI Provider Layer | ✅ 已完成 | 支持 OpenAI/Anthropic/Ollama |
 | Message Router | ✅ 已完成 | JSON-RPC 路由实现 |
@@ -1038,6 +1466,9 @@ fix(DEV-1.3.2): 修复 FileMutex 重入检测逻辑
 | Mock Store | ✅ 已完成 | 内存数据存储 |
 | Process Guardian | ✅ 已完成 | 进程守护实现 |
 | Skill Registry | ✅ 已完成 | 4个内置 Skill |
+| Novel Editor UI | 🔄 Mock 开发中 | 三栏布局，7 个核心组件 |
+| Novel Editor Data | 🔄 Mock 开发中 | 5 个 Provider，Mock 数据驱动 |
+| Novel Editor AI | 🔄 Mock 开发中 | FakeAgentProvider，4 种任务类型 |
 
 ---
 

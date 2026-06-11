@@ -61,23 +61,32 @@
 ### 2. 想了解 VS Code Extension 核心模块？
 → 阅读 [Code Wiki 第3.1节](CODE_WIKI.md#31-vs-code-extension-核心模块) - 9个核心模块详解
 
-### 3. 想查找关键类和函数？
+### 3. 想了解 Novel Editor（小说编辑器）？
+→ 阅读 [Code Wiki 第3.3节](CODE_WIKI.md#33-novel-editor-opencode-二次开发) - OpenCode 二次开发的完整 Novel Editor 模块文档
+
+### 4. 想查找关键类和函数？
 → 阅读 [Code Wiki 第4章](CODE_WIKI.md#4-关键类和函数说明) - 类映射和函数说明
 
-### 4. 想了解模块依赖关系？
+### 5. 想了解模块依赖关系？
 → 阅读 [Code Wiki 第5章](CODE_WIKI.md#5-依赖关系) - 依赖矩阵和消费链路
 
-### 5. 想了解如何运行项目？
+### 6. 想了解如何运行项目？
 → 阅读 [Code Wiki 第6章](CODE_WIKI.md#6-项目运行方式) - 环境配置和运行命令
 
-### 6. 想查看数据类型定义？
-→ 阅读 [Code Wiki 第7章](CODE_WIKI.md#7-数据类型定义) - IPC/Provider/Skill 类型
+### 7. 想查看数据类型定义？
+→ 阅读 [Code Wiki 第7章](CODE_WIKI.md#7-数据类型定义) - IPC/Provider/Skill/Novel 类型
 
-### 7. 想了解扩展点和接口？
+### 8. 想了解扩展点和接口？
 → 阅读 [Code Wiki 第8章](CODE_WIKI.md#8-扩展点与接口) - 10个扩展点和权限边界
 
-### 8. 想了解测试体系？
+### 9. 想了解测试体系？
 → 阅读 [Code Wiki 第9章](CODE_WIKI.md#9-测试体系) - 45+ 测试文件说明
+
+### 10. 想了解 Novel Editor 的 Mock 数据？
+→ 阅读 [Code Wiki 第3.3.7节](CODE_WIKI.md#337-mock-数据) - 《星辰之海》项目数据
+
+### 11. 想了解 Novel Editor 的测试覆盖？
+→ 阅读 [Code Wiki 第3.3.8节](CODE_WIKI.md#338-测试覆盖) - FakeAgent 11 场景测试
 
 ---
 
@@ -129,6 +138,53 @@ caiode/vscode-extension/src/
 └── __tests__/                      # 测试目录（45+ 测试文件）
 ```
 
+### Novel Editor (OpenCode 二次开发)
+
+```
+caiode/opencode-1.4.0/packages/app/src/novel/
+├── index.ts                           # 模块入口：导出 NovelEditor
+├── components/
+│   ├── index.ts                       # 组件聚合导出
+│   ├── mock-mode-banner.tsx           # Mock 模式提示横幅
+│   └── novel-editor/
+│       ├── index.tsx                  # NovelEditor 主组件（三栏布局）
+│       ├── chapter-list.tsx           # 左侧：章节列表 + 大纲
+│       ├── chapter-editor.tsx         # 中间：章节编辑器 + AI 续写
+│       ├── character-panel.tsx        # 右侧：角色面板
+│       ├── ai-task-panel.tsx          # AI 任务面板
+│       ├── ai-result-card.tsx         # AI 结果卡片
+│       └── ai-log-drawer.tsx          # AI 日志抽屉
+├── hooks/
+│   ├── use-novel-project.ts           # 项目数据 Hook
+│   ├── use-ai-task.ts                 # AI 任务 Hook
+│   └── use-ai-log.ts                  # AI 日志 Hook
+├── providers/
+│   ├── index.ts                       # Provider 聚合导出
+│   ├── fake-agent.ts                  # FakeAgentProvider（Mock AI）
+│   ├── fake-agent.test.ts             # FakeAgent 测试（9 场景）
+│   ├── novel-project.ts               # NovelProjectProvider
+│   ├── novel-chapter.ts               # NovelChapterProvider
+│   ├── novel-character.ts             # NovelCharacterProvider
+│   └── ai-log.ts                      # AILogProvider
+├── types/
+│   ├── index.ts                       # 类型聚合导出
+│   ├── project.ts                     # 项目类型
+│   ├── chapter.ts                     # 章节类型
+│   ├── character.ts                   # 角色类型
+│   ├── ai-task.ts                     # AI 任务类型
+│   ├── ai-log.ts                      # AI 日志类型
+│   └── sandbox.ts                     # 沙箱类型
+├── mock-data/
+│   ├── index.ts                       # Mock 数据聚合导出
+│   ├── projects.ts                    # 项目 Mock 数据
+│   ├── chapters.ts                    # 章节 Mock 数据
+│   ├── characters.ts                  # 角色 Mock 数据
+│   ├── ai-tasks.ts                    # AI 任务 Mock 数据
+│   └── mock-data.test.ts              # Mock 数据验证测试
+└── utils/
+    └── mock-delay.ts                  # Mock 延迟工具
+```
+
 ### Claude Code Src（参考架构）
 
 ```
@@ -150,7 +206,7 @@ caiode/claude-code-src/
 
 ## 常用命令
 
-### 开发
+### VS Code Extension 开发
 
 ```bash
 cd caiode/vscode-extension
@@ -168,14 +224,40 @@ npm run build:prod
 npm run package
 ```
 
+### OpenCode App 开发
+
+```bash
+cd caiode/opencode-1.4.0/packages/app
+
+# 安装依赖
+npm install
+
+# 开发模式
+npm run dev
+
+# 生产构建
+npm run build
+
+# 运行测试
+npm run test
+
+# 运行测试（监听模式）
+npm run test:unit:watch
+
+# E2E 测试
+npm run test:e2e
+```
+
 ### 测试
 
 ```bash
-# 运行所有测试
+# VS Code Extension 测试
+cd caiode/vscode-extension
 npm run test
 
-# 监听模式
-npm run test:watch
+# OpenCode App 测试
+cd caiode/opencode-1.4.0/packages/app
+npm run test:unit
 
 # 覆盖率报告
 npm run test:coverage
@@ -204,16 +286,19 @@ npm run typecheck
 | 模块 | 状态 | 说明 |
 |------|------|------|
 | VS Code Extension | 🔄 开发中 | 核心功能已实现，45+ 测试覆盖 |
+| **Novel Editor Core** | **🔄 Mock 开发中** | **SolidJS 实现，FakeAgent 模拟 AI，11 测试覆盖** |
+| Novel Editor UI | 🔄 Mock 开发中 | 三栏布局，7 个核心组件 |
+| Novel Editor Data | 🔄 Mock 开发中 | 5 个 Provider，Mock 数据驱动 |
+| Novel Editor AI | 🔄 Mock 开发中 | FakeAgentProvider，4 种任务类型 |
+| Creative Agent Runtime | 📋 规划中 | 11个核心模块定义完成 |
+| Creative Core | 📋 规划中 | 业务抽象层设计完成 |
+| Plugin System | 📋 规划中 | 扩展点规范完成 |
 | AI Provider Layer | ✅ 已完成 | 支持 OpenAI/Anthropic/Ollama |
 | Message Router | ✅ 已完成 | JSON-RPC 路由实现 |
 | File Mutex | ✅ 已完成 | 基于 proper-lockfile |
 | Mock Store | ✅ 已完成 | 内存数据存储 |
 | Process Guardian | ✅ 已完成 | 进程守护实现 |
 | Skill Registry | ✅ 已完成 | 4个内置 Skill |
-| Creative Agent Runtime | 📋 规划中 | 11个核心模块定义完成 |
-| Creative Core | 📋 规划中 | 业务抽象层设计完成 |
-| Novel Editor Core | 📋 规划中 | 数据模型定义完成 |
-| Plugin System | 📋 规划中 | 扩展点规范完成 |
 
 ---
 
@@ -221,6 +306,7 @@ npm run typecheck
 
 - **架构问题** → 查看 [docs/roadmap/](../roadmap/)
 - **代码问题** → 查看 [docs/CODE_WIKI.md](CODE_WIKI.md)
+- **Novel Editor 问题** → 查看 [Code Wiki 第3.3节](CODE_WIKI.md#33-novel-editor-opencode-二次开发)
 - **规划问题** → 查看 [docs/planning/](../planning/)
 - **边界规范** → 查看 [docs/boundary/](../boundary/)
 - **Agent 规则** → 查看 [.trae/rules/](../../.trae/rules/)
