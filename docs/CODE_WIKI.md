@@ -5,6 +5,10 @@
 > **最后更新**: 2026-06-10
 > **状态**: 持续更新中
 
+## 废弃模块说明
+
+本文档中标注为 **(已废弃 / 归档)** 或 **[已废弃]** 的内容均为旧版 `caiode/vscode-extension` 模块的文档。该模块已不再维护，仅作为历史参考保留。当前唯一活跃的开发模块为 `caiode/opencode-1.4.0/packages/app/src/novel/`（Novel Editor）和 `caiode/claude-code-src/`（源码分析基准）。
+
 ---
 
 ## 目录
@@ -12,7 +16,7 @@
 1. [项目概述](#1-项目概述)
 2. [项目架构](#2-项目架构)
 3. [核心模块详解](#3-核心模块详解)
-   - 3.1 [VS Code Extension 核心模块](#31-vs-code-extension-核心模块)
+   - 3.1 [VS Code Extension 核心模块 (已废弃)](#31-vs-code-extension-核心模块)
    - 3.2 [Claude-Code-Src 参考架构](#32-claude-code-src-参考架构)
    - 3.3 [Novel Editor (OpenCode 二次开发)](#33-novel-editor-opencode-二次开发)
 4. [关键类和函数说明](#4-关键类和函数说明)
@@ -58,7 +62,7 @@ storytree2/
 │   │   ├── hooks/                   # 生命周期扩展点
 │   │   └── cost-tracker.ts          # 成本追踪统计
 │   │
-│   ├── vscode-extension/            # VS Code 扩展实现
+│   ├── vscode-extension/            # [已废弃] VS Code 扩展实现（旧版，已归档）
 │   │   ├── src/
 │   │   │   ├── extension.ts         # 扩展主入口
 │   │   │   ├── core/                # 核心服务层
@@ -101,11 +105,11 @@ storytree2/
 │   │   │       └── ipc-protocol.ts        # IPC 通信协议
 │   │   └── __tests__/                 # 测试目录（45+ 测试文件）
 │   │
-│   ├── opencode-1.4.0/              # OpenCode 核心实现（参考）
+│   ├── opencode-1.4.0/              # [当前活跃] OpenCode 核心实现（Novel Editor 所在）
 │   └── Trae-Ralph-main/             # Trae + Ralph 工具链
 │
 ├── backups/                         # 备份和历史文件
-│   ├── dreamweaver/                 # Next.js 前端（已废弃）
+│   ├── dreamweaver/                 # [已废弃] Next.js 前端
 │   └── patches/                     # Git 补丁历史
 │
 ├── docs/                            # 项目文档
@@ -153,7 +157,9 @@ storytree2/
 └─────────────────────────────────────────────────────────────┘
 ```
 
-### 2.2 VS Code Extension 运行时架构
+### 2.2 VS Code Extension 运行时架构 (已废弃 / 归档)
+
+> **说明**：此架构为旧版 VS Code Extension 实现，已废弃，仅供参考。
 
 ```text
 ┌─────────────────────────────────────────────────────────────┐
@@ -190,9 +196,11 @@ storytree2/
 
 ## 3. 核心模块详解
 
-### 3.1 VS Code Extension 核心模块
+### 3.1 VS Code Extension 核心模块 (已废弃 / 归档)
 
-#### 3.1.1 extension.ts - 扩展主入口
+> **说明**：以下为旧版 VS Code Extension 实现，已废弃，仅供参考。
+
+#### 3.1.1 [已废弃] extension.ts - 扩展主入口
 
 | 属性 | 说明 |
 |------|------|
@@ -212,7 +220,7 @@ export function activate(context: vscode.ExtensionContext): void {
 }
 ```
 
-#### 3.1.2 MessageRouter - JSON-RPC 消息路由
+#### 3.1.2 [已废弃] MessageRouter - JSON-RPC 消息路由
 
 | 属性 | 说明 |
 |------|------|
@@ -239,7 +247,7 @@ export class MessageRouter {
 接收消息 → 解析请求 → Before 中间件 → 路由匹配 → 执行 Handler → After 中间件 → 返回响应
 ```
 
-#### 3.1.3 GlobalModelRequestQueue - LLM 请求队列
+#### 3.1.3 [已废弃] GlobalModelRequestQueue - LLM 请求队列
 
 | 属性 | 说明 |
 |------|------|
@@ -275,7 +283,7 @@ interface QueueStatus {
 }
 ```
 
-#### 3.1.4 FileMutex - 文件互斥锁
+#### 3.1.4 [已废弃] FileMutex - 文件互斥锁
 
 | 属性 | 说明 |
 |------|------|
@@ -294,7 +302,7 @@ export class FileMutex extends EventEmitter {
 }
 ```
 
-#### 3.1.5 WebviewPanelManager - Webview 面板管理
+#### 3.1.5 [已废弃] WebviewPanelManager - Webview 面板管理
 
 | 属性 | 说明 |
 |------|------|
@@ -313,7 +321,7 @@ export class WebviewPanelManager implements vscode.Disposable {
 }
 ```
 
-#### 3.1.6 AI Provider 层
+#### 3.1.6 [已废弃] AI Provider 层
 
 | 属性 | 说明 |
 |------|------|
@@ -347,7 +355,7 @@ export function createLLMProvider(config: AIConfig): LLMProvider;
 | Ollama | `ollama-provider.ts` | qwen2.5:7b |
 | Noop (fallback) | `provider-factory.ts` | - |
 
-#### 3.1.7 MockStore - Mock 数据存储
+#### 3.1.7 [已废弃] MockStore - Mock 数据存储
 
 | 属性 | 说明 |
 |------|------|
@@ -363,7 +371,7 @@ interface WorldSetting extends MockEntity { projectId, category, name, descripti
 interface OutlineNode extends MockEntity { projectId, chapterId, type, title, synopsis }
 ```
 
-#### 3.1.8 ProcessGuardian - 进程守护
+#### 3.1.8 [已废弃] ProcessGuardian - 进程守护
 
 | 属性 | 说明 |
 |------|------|
@@ -395,7 +403,7 @@ interface ProcessStatus {
 }
 ```
 
-#### 3.1.9 SkillRegistry - Skill 注册表
+#### 3.1.9 [已废弃] SkillRegistry - Skill 注册表
 
 | 属性 | 说明 |
 |------|------|
@@ -877,7 +885,9 @@ const NovelRoute = lazy(loadNovel);
 
 ## 4. 关键类和函数说明
 
-### 4.1 VS Code Extension 核心模块映射
+### 4.1 VS Code Extension 核心模块映射 (已废弃 / 归档)
+
+> **说明**：以下模块映射为旧版 VS Code Extension 实现，已废弃，仅供参考。
 
 | 模块路径 | 核心文件 | 职责 | 关键类/函数 |
 |---------|---------|------|-----------|
@@ -930,7 +940,7 @@ const NovelRoute = lazy(loadNovel);
 
 ## 5. 依赖关系
 
-### 5.1 VS Code Extension 模块依赖矩阵
+### 5.1 VS Code Extension 模块依赖矩阵 (已废弃 / 归档)
 
 ```mermaid
 graph LR
@@ -1048,7 +1058,9 @@ ENABLE_AUTO_UPDATE=true
 
 ### 6.2 运行命令
 
-#### 6.2.1 VS Code Extension
+#### 6.2.1 VS Code Extension (已废弃 / 归档)
+
+> **说明**：以下命令为旧版 VS Code Extension 的运行命令，已废弃。
 
 ```bash
 cd caiode/vscode-extension
@@ -1061,6 +1073,24 @@ npm run build:prod
 
 # 打包 .vsix 文件
 npm run package
+```
+
+#### 6.2.1 OpenCode App 运行命令
+
+```bash
+cd caiode/opencode-1.4.0/packages/app
+
+# 开发模式
+npm run dev
+
+# 生产构建
+npm run build
+
+# 运行测试
+npm run test:unit
+
+# E2E 测试
+npm run test:e2e
 ```
 
 #### 6.2.2 测试
@@ -1095,7 +1125,9 @@ npm run format:check
 npm run typecheck
 ```
 
-### 6.3 扩展启动流程
+### 6.3 扩展启动流程 (已废弃 / 归档)
+
+> **说明**：这是旧版 VS Code Extension 的启动流程，已废弃。
 
 ```
 1. VS Code 加载 extension.ts
@@ -1117,7 +1149,9 @@ npm run typecheck
 9. 监听用户交互
 ```
 
-### 6.4 消息处理流程
+### 6.4 消息处理流程 (已废弃 / 归档)
+
+> **说明**：这是旧版 VS Code Extension 的消息处理流程，已废弃。
 
 ```
 用户操作（Webview UI）
@@ -1143,7 +1177,9 @@ Webview 更新 UI
 
 ## 7. 数据类型定义
 
-### 7.1 IPC 通信协议
+### 7.1 IPC 通信协议 (已废弃 / 归档)
+
+> **说明**：这是旧版 VS Code Extension 的 IPC 通信协议，已废弃。
 
 ```typescript
 // 请求
@@ -1353,8 +1389,10 @@ type CreativePluginManifest = {
 
 ### 9.1 测试目录结构
 
+> **说明**：以下测试目录为旧版 VS Code Extension 的测试结构，已废弃。
+
 ```
-caiode/vscode-extension/src/__tests__/
+caiode/vscode-extension/src/__tests__/ [已废弃]
 ├── extension-lifecycle.test.ts      # 扩展生命周期
 ├── extension-skeleton.test.ts       # 扩展骨架
 ├── message-router.test.ts           # 消息路由
@@ -1455,17 +1493,17 @@ fix(DEV-1.3.2): 修复 FileMutex 重入检测逻辑
 
 | 模块 | 状态 | 说明 |
 |------|------|------|
-| VS Code Extension | 🔄 开发中 | 核心功能已实现，45+ 测试覆盖 |
+| VS Code Extension | ❌ 已废弃 | 旧版实现，已归档 |
 | Creative Agent Runtime | 📋 规划中 | 11个核心模块定义完成 |
 | Creative Core | 📋 规划中 | 业务抽象层设计完成 |
 | **Novel Editor Core** | **🔄 Mock 开发中** | **SolidJS 实现，FakeAgent 模拟 AI，11 测试覆盖** |
 | Plugin System | 📋 规划中 | 扩展点规范完成 |
-| AI Provider Layer | ✅ 已完成 | 支持 OpenAI/Anthropic/Ollama |
-| Message Router | ✅ 已完成 | JSON-RPC 路由实现 |
-| File Mutex | ✅ 已完成 | 基于 proper-lockfile |
-| Mock Store | ✅ 已完成 | 内存数据存储 |
-| Process Guardian | ✅ 已完成 | 进程守护实现 |
-| Skill Registry | ✅ 已完成 | 4个内置 Skill |
+| AI Provider Layer | ❌ 已废弃 | 旧版 VS Code Extension 组件，已归档 |
+| Message Router | ❌ 已废弃 | 旧版 VS Code Extension 组件，已归档 |
+| File Mutex | ❌ 已废弃 | 旧版 VS Code Extension 组件，已归档 |
+| Mock Store | ❌ 已废弃 | 旧版 VS Code Extension 组件，已归档 |
+| Process Guardian | ❌ 已废弃 | 旧版 VS Code Extension 组件，已归档 |
+| Skill Registry | ❌ 已废弃 | 旧版 VS Code Extension 组件，已归档 |
 | Novel Editor UI | 🔄 Mock 开发中 | 三栏布局，7 个核心组件 |
 | Novel Editor Data | 🔄 Mock 开发中 | 5 个 Provider，Mock 数据驱动 |
 | Novel Editor AI | 🔄 Mock 开发中 | FakeAgentProvider，4 种任务类型 |

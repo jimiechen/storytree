@@ -4,6 +4,10 @@
 > **版本**: v2.0
 > **最后更新**: 2026-06-10
 
+## 废弃模块说明
+
+本文档中标注为 **(已废弃 / 归档)** 的内容均为旧版 `caiode/vscode-extension` 模块的文档。该模块已不再维护，仅作为历史参考保留。当前唯一活跃的开发模块为 `caiode/opencode-1.4.0/packages/app/src/novel/`（Novel Editor）。
+
 ---
 
 ## 文档导航
@@ -58,8 +62,8 @@
 ### 1. 想了解项目整体架构？
 → 阅读 [Code Wiki 第1-2章](CODE_WIKI.md#1-项目概述) - 项目概述和三层架构
 
-### 2. 想了解 VS Code Extension 核心模块？
-→ 阅读 [Code Wiki 第3.1节](CODE_WIKI.md#31-vs-code-extension-核心模块) - 9个核心模块详解
+### 2. 想了解 VS Code Extension 核心模块 (已废弃)？
+→ 阅读 [Code Wiki 第3.1节](CODE_WIKI.md#31-vs-code-extension-核心模块) - 9个核心模块详解（旧版实现，已归档）
 
 ### 3. 想了解 Novel Editor（小说编辑器）？
 → 阅读 [Code Wiki 第3.3节](CODE_WIKI.md#33-novel-editor-opencode-二次开发) - OpenCode 二次开发的完整 Novel Editor 模块文档
@@ -92,7 +96,9 @@
 
 ## 核心代码路径
 
-### VS Code Extension
+### VS Code Extension (已废弃 / 归档)
+
+> **说明**：以下为旧版 VS Code Extension 的代码结构，已废弃，仅供参考。
 
 ```
 caiode/vscode-extension/src/
@@ -206,7 +212,9 @@ caiode/claude-code-src/
 
 ## 常用命令
 
-### VS Code Extension 开发
+### VS Code Extension 开发 (已废弃 / 归档)
+
+> **说明**：以下命令为旧版 VS Code Extension 的开发和构建命令，已废弃。
 
 ```bash
 cd caiode/vscode-extension
@@ -251,7 +259,7 @@ npm run test:e2e
 ### 测试
 
 ```bash
-# VS Code Extension 测试
+# VS Code Extension 测试 [已废弃]
 cd caiode/vscode-extension
 npm run test
 
@@ -285,7 +293,7 @@ npm run typecheck
 
 | 模块 | 状态 | 说明 |
 |------|------|------|
-| VS Code Extension | 🔄 开发中 | 核心功能已实现，45+ 测试覆盖 |
+| VS Code Extension | ❌ 已废弃 | 旧版 VS Code Extension 组件，已归档 |
 | **Novel Editor Core** | **🔄 Mock 开发中** | **SolidJS 实现，FakeAgent 模拟 AI，11 测试覆盖** |
 | Novel Editor UI | 🔄 Mock 开发中 | 三栏布局，7 个核心组件 |
 | Novel Editor Data | 🔄 Mock 开发中 | 5 个 Provider，Mock 数据驱动 |
@@ -293,12 +301,12 @@ npm run typecheck
 | Creative Agent Runtime | 📋 规划中 | 11个核心模块定义完成 |
 | Creative Core | 📋 规划中 | 业务抽象层设计完成 |
 | Plugin System | 📋 规划中 | 扩展点规范完成 |
-| AI Provider Layer | ✅ 已完成 | 支持 OpenAI/Anthropic/Ollama |
-| Message Router | ✅ 已完成 | JSON-RPC 路由实现 |
-| File Mutex | ✅ 已完成 | 基于 proper-lockfile |
-| Mock Store | ✅ 已完成 | 内存数据存储 |
-| Process Guardian | ✅ 已完成 | 进程守护实现 |
-| Skill Registry | ✅ 已完成 | 4个内置 Skill |
+| AI Provider Layer | ❌ 已废弃 | 旧版 VS Code Extension 组件，已归档 |
+| Message Router | ❌ 已废弃 | 旧版 VS Code Extension 组件，已归档 |
+| File Mutex | ❌ 已废弃 | 旧版 VS Code Extension 组件，已归档 |
+| Mock Store | ❌ 已废弃 | 旧版 VS Code Extension 组件，已归档 |
+| Process Guardian | ❌ 已废弃 | 旧版 VS Code Extension 组件，已归档 |
+| Skill Registry | ❌ 已废弃 | 旧版 VS Code Extension 组件，已归档 |
 
 ---
 
