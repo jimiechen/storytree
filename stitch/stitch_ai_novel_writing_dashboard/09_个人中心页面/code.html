@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+
+<html class="light" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>个人中心 - ProseFlow AI</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;family=Work+Sans:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "inverse-on-surface": "#ebf1ff",
+                        "on-tertiary-container": "#fefcff",
+                        "on-surface-variant": "#494454",
+                        "primary": "#6b38d4",
+                        "on-secondary-fixed": "#341100",
+                        "surface-tint": "#6d3bd7",
+                        "surface": "#f8f9ff",
+                        "error-container": "#ffdad6",
+                        "surface-variant": "#d5e3fd",
+                        "on-primary": "#ffffff",
+                        "surface-container-low": "#eff4ff",
+                        "on-background": "#0d1c2f",
+                        "secondary-container": "#fd761a",
+                        "error": "#ba1a1a",
+                        "secondary": "#9d4300",
+                        "tertiary-fixed-dim": "#adc6ff",
+                        "surface-dim": "#ccdbf4",
+                        "primary-fixed-dim": "#d0bcff",
+                        "surface-container": "#e6eeff",
+                        "tertiary": "#0058be",
+                        "tertiary-fixed": "#d8e2ff",
+                        "secondary-fixed": "#ffdbca",
+                        "secondary-fixed-dim": "#ffb690",
+                        "inverse-primary": "#d0bcff",
+                        "outline": "#7b7486",
+                        "on-error": "#ffffff",
+                        "tertiary-container": "#2170e4",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-container-high": "#dde9ff",
+                        "surface-bright": "#f8f9ff",
+                        "on-surface": "#0d1c2f",
+                        "background": "#f8f9ff",
+                        "outline-variant": "#cbc3d7",
+                        "on-primary-fixed-variant": "#5516be",
+                        "on-primary-fixed": "#23005c",
+                        "on-secondary-fixed-variant": "#783200",
+                        "on-error-container": "#93000a",
+                        "on-tertiary-fixed-variant": "#004395",
+                        "inverse-surface": "#233144",
+                        "on-secondary-container": "#5c2400",
+                        "on-primary-container": "#fffbff",
+                        "on-secondary": "#ffffff",
+                        "primary-fixed": "#e9ddff",
+                        "primary-container": "#8455ef",
+                        "surface-container-highest": "#d5e3fd",
+                        "on-tertiary-fixed": "#001a42",
+                        "on-tertiary": "#ffffff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "gutter": "20px",
+                        "md": "16px",
+                        "xl": "32px",
+                        "margin-desktop": "40px",
+                        "lg": "24px",
+                        "margin-mobile": "16px",
+                        "sm": "8px",
+                        "base": "4px",
+                        "xs": "4px"
+                    },
+                    "fontFamily": {
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "label-md": ["Work Sans"],
+                        "label-sm": ["Work Sans"],
+                        "headline-sm": ["Plus Jakarta Sans"],
+                        "body-md": ["Work Sans"],
+                        "body-lg": ["Work Sans"],
+                        "headline-lg": ["Plus Jakarta Sans"]
+                    },
+                    "fontSize": {
+                        "headline-md": ["24px", { "lineHeight": "1.3", "fontWeight": "600" }],
+                        "label-md": ["14px", { "lineHeight": "1.5", "fontWeight": "500" }],
+                        "label-sm": ["12px", { "lineHeight": "1.5", "fontWeight": "500" }],
+                        "headline-sm": ["20px", { "lineHeight": "1.4", "fontWeight": "600" }],
+                        "body-md": ["16px", { "lineHeight": "1.7", "fontWeight": "400" }],
+                        "body-lg": ["18px", { "lineHeight": "1.8", "fontWeight": "400" }],
+                        "headline-lg": ["32px", { "lineHeight": "1.2", "fontWeight": "700" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { font-family: 'Work Sans', sans-serif; background-color: theme('colors.background'); color: theme('colors.on-surface'); }
+        h1, h2, h3, h4, h5, h6, .font-headline-md, .font-headline-sm, .font-headline-lg { font-family: 'Plus Jakarta Sans', sans-serif; }
+        
+        /* Tab switching logic */
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        
+        .tab-button.active {
+            color: theme('colors.primary');
+            border-bottom: 2px solid theme('colors.primary');
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface flex min-h-screen font-body-md text-body-md overflow-x-hidden">
+<!-- TopNavBar (Hidden on desktop, replaces sidebar structure on mobile if needed, but per prompt we use both contextually. We'll build the desktop layout primary, responsive mobile) -->
+<header class="fixed top-0 w-full z-50 flex items-center justify-between px-margin-desktop h-16 bg-surface-container-lowest dark:bg-inverse-surface border-b border-outline-variant dark:border-outline shadow-sm dark:shadow-none hidden md:flex transition-colors">
+<div class="flex items-center gap-md">
+<span class="font-headline-md text-headline-md font-bold text-primary dark:text-primary-fixed-dim">墨语 AI (InkVerse)</span>
+<nav class="ml-lg flex gap-md">
+<a class="text-on-surface-variant dark:text-on-surface-variant hover:text-primary font-label-md text-label-md active:scale-95 transition-transform duration-200 py-2" href="#">Explore</a>
+<a class="text-on-surface-variant dark:text-on-surface-variant hover:text-primary font-label-md text-label-md active:scale-95 transition-transform duration-200 py-2" href="#">Community</a>
+</nav>
+</div>
+<div class="flex items-center gap-lg">
+<div class="flex items-center gap-sm text-on-surface-variant">
+<button aria-label="notifications" class="hover:bg-surface-container-low dark:hover:bg-surface-container-highest transition-colors p-sm rounded-full active:scale-95 duration-200">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button aria-label="help" class="hover:bg-surface-container-low dark:hover:bg-surface-container-highest transition-colors p-sm rounded-full active:scale-95 duration-200">
+<span class="material-symbols-outlined">help</span>
+</button>
+</div>
+<button class="bg-primary text-on-primary hover:bg-surface-tint font-label-md text-label-md px-md py-sm rounded-lg active:scale-95 transition-all duration-200">
+                New Story
+            </button>
+<div class="w-8 h-8 rounded-full bg-surface-variant overflow-hidden border border-outline-variant">
+<img alt="User Avatar" class="w-full h-full object-cover" data-alt="A close-up portrait of a professional individual in a well-lit, modern office environment. The lighting is soft and natural, creating a bright, welcoming light-mode aesthetic. The color palette features warm skin tones against a crisp, minimalist white background with subtle cool gray shadows. The mood is confident, approachable, and corporate." src="https://lh3.googleusercontent.com/aida-public/AB6AXuByTy5OgduBz--bQ2A7OMzWV5yh37OkxnXLx-o5SizWx8cQw4YvRoZUiNesqBOnDmI8cUDFd6qZyPk3DgsuBFI-RrLl-_wseiZmggqUMUYnZjAnf7W59ih2ghU7CLh2HmtF_gXbXyVrnd88ZJERO6S_I2PDLYFLR3GDnrYFtfefk7HsWHhJT4k6pyRAmJKt_gnOt97cz_uKnvPsH_1gz3DowQX0AMDLgJzpYIHcwbMhuHov5tv8dZFFain1cWFikuvPjR7WNkwG-s-R"/>
+</div>
+</div>
+</header>
+<!-- SideNavBar (Desktop) -->
+<aside class="fixed left-0 top-16 bottom-0 w-[260px] flex flex-col py-lg bg-surface-container-lowest dark:bg-inverse-surface border-r border-outline-variant dark:border-outline transition-all duration-200 ease-in-out hidden md:flex z-40">
+<div class="px-lg mb-xl flex items-center gap-sm">
+<div class="w-10 h-10 rounded-lg bg-primary flex items-center justify-center text-on-primary font-bold">
+                P
+            </div>
+<div>
+<h2 class="font-headline-sm text-headline-sm font-bold text-primary">ProseFlow</h2>
+<p class="font-label-sm text-label-sm text-on-surface-variant">AI Writer</p>
+</div>
+</div>
+<nav class="flex-1 flex flex-col gap-sm px-sm">
+<a class="flex items-center gap-md px-md py-sm rounded-lg text-on-surface-variant dark:text-on-surface-variant hover:bg-surface-container-low dark:hover:bg-surface-container-highest font-label-md text-label-md transition-all duration-200" href="#">
+<span class="material-symbols-outlined">edit_note</span>
+                Workspace
+            </a>
+<a class="flex items-center gap-md px-md py-sm rounded-lg text-on-surface-variant dark:text-on-surface-variant hover:bg-surface-container-low dark:hover:bg-surface-container-highest font-label-md text-label-md transition-all duration-200" href="#">
+<span class="material-symbols-outlined">inventory_2</span>
+                Materials
+            </a>
+<a class="flex items-center gap-md px-md py-sm rounded-lg text-on-surface-variant dark:text-on-surface-variant hover:bg-surface-container-low dark:hover:bg-surface-container-highest font-label-md text-label-md transition-all duration-200" href="#">
+<span class="material-symbols-outlined">lightbulb</span>
+                Inspiration
+            </a>
+</nav>
+<div class="px-lg mt-auto mb-md">
+<button class="w-full bg-surface-variant text-primary font-label-md text-label-md py-sm rounded-lg border border-primary hover:bg-surface-container-high transition-colors">
+                Upgrade to Pro
+            </button>
+</div>
+<nav class="px-sm pb-lg">
+<a class="flex items-center gap-md px-md py-sm rounded-lg text-primary dark:text-primary-fixed-dim bg-primary-fixed dark:bg-on-primary-fixed-variant relative before:absolute before:left-0 before:top-0 before:h-full before:w-1 before:bg-primary font-label-md text-label-md transition-all duration-200" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">settings</span>
+                Settings
+            </a>
+</nav>
+</aside>
+<!-- Main Content Area -->
+<main class="flex-1 md:ml-[260px] md:mt-16 p-margin-mobile md:p-margin-desktop bg-background min-h-screen">
+<!-- Page Header -->
+<div class="flex items-center justify-between mb-xl">
+<h1 class="font-headline-lg text-headline-lg text-on-surface">个人中心</h1>
+<button aria-label="Settings" class="p-sm text-on-surface-variant hover:bg-surface-container-low rounded-full transition-colors">
+<span class="material-symbols-outlined">settings</span>
+</button>
+</div>
+<!-- User Profile Card -->
+<section class="bg-surface-container-lowest rounded-xl border border-outline-variant shadow-sm p-lg mb-xl relative overflow-hidden flex flex-col md:flex-row items-center md:items-start gap-lg">
+<!-- Decorative background blob -->
+<div class="absolute -top-24 -right-24 w-64 h-64 bg-primary-fixed opacity-50 rounded-full blur-3xl pointer-events-none"></div>
+<div class="w-24 h-24 rounded-full bg-primary flex items-center justify-center text-on-primary font-headline-lg text-headline-lg shrink-0 border-4 border-surface-container-lowest shadow-sm z-10">
+                明
+            </div>
+<div class="flex-1 z-10 text-center md:text-left">
+<div class="flex flex-col md:flex-row md:items-center gap-sm md:gap-md mb-xs">
+<h2 class="font-headline-md text-headline-md text-on-surface">创作者小明</h2>
+<span class="inline-flex items-center gap-xs px-2 py-1 rounded-full bg-[#fef08a] text-[#854d0e] font-label-sm text-label-sm border border-[#fde047]">
+<span class="material-symbols-outlined text-[14px]">stars</span>
+                        VIP会员
+                    </span>
+</div>
+<div class="flex flex-col md:flex-row gap-xs md:gap-lg text-on-surface-variant font-body-md text-body-md mt-sm">
+<p>到期时间：2026-08-24</p>
+<p>注册时间：2026-03-15</p>
+</div>
+</div>
+<div class="z-10 mt-md md:mt-0">
+<button class="bg-primary text-on-primary font-label-md text-label-md px-lg py-sm rounded-lg hover:bg-surface-tint transition-colors shadow-sm">
+                    编辑资料
+                </button>
+</div>
+</section>
+<!-- Stats Row -->
+<section class="grid grid-cols-1 md:grid-cols-3 gap-md mb-xl">
+<div class="bg-surface-container-lowest rounded-xl border border-outline-variant shadow-sm p-md flex items-center gap-md hover:shadow-md transition-shadow duration-200">
+<div class="w-12 h-12 rounded-lg bg-surface-variant text-primary flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">edit_document</span>
+</div>
+<div>
+<p class="font-label-sm text-label-sm text-on-surface-variant mb-xs">创作字数</p>
+<p class="font-headline-sm text-headline-sm text-on-surface">156,800 <span class="font-body-md text-body-md text-on-surface-variant">字</span></p>
+</div>
+</div>
+<div class="bg-surface-container-lowest rounded-xl border border-outline-variant shadow-sm p-md flex items-center gap-md hover:shadow-md transition-shadow duration-200">
+<div class="w-12 h-12 rounded-lg bg-surface-variant text-primary flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">book</span>
+</div>
+<div>
+<p class="font-label-sm text-label-sm text-on-surface-variant mb-xs">小说数量</p>
+<p class="font-headline-sm text-headline-sm text-on-surface">3 <span class="font-body-md text-body-md text-on-surface-variant">本</span></p>
+</div>
+</div>
+<div class="bg-surface-container-lowest rounded-xl border border-outline-variant shadow-sm p-md flex items-center gap-md hover:shadow-md transition-shadow duration-200">
+<div class="w-12 h-12 rounded-lg bg-surface-variant text-primary flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">format_list_numbered</span>
+</div>
+<div>
+<p class="font-label-sm text-label-sm text-on-surface-variant mb-xs">章节数量</p>
+<p class="font-headline-sm text-headline-sm text-on-surface">52 <span class="font-body-md text-body-md text-on-surface-variant">章</span></p>
+</div>
+</div>
+</section>
+<!-- Tabs & Dynamic Content Section -->
+<section class="bg-surface-container-lowest rounded-xl border border-outline-variant shadow-sm min-h-[400px]">
+<!-- Tab Navigation -->
+<div class="flex border-b border-outline-variant px-md overflow-x-auto hide-scrollbar">
+<button class="tab-button active px-md py-sm font-label-md text-label-md text-on-surface-variant hover:text-primary transition-colors whitespace-nowrap" onclick="switchTab('points')">积分</button>
+<button class="tab-button px-md py-sm font-label-md text-label-md text-on-surface-variant hover:text-primary transition-colors whitespace-nowrap" onclick="switchTab('topup')">充值</button>
+<button class="tab-button px-md py-sm font-label-md text-label-md text-on-surface-variant hover:text-primary transition-colors whitespace-nowrap" onclick="switchTab('export')">导出</button>
+<button class="tab-button px-md py-sm font-label-md text-label-md text-on-surface-variant hover:text-primary transition-colors whitespace-nowrap" onclick="switchTab('import')">导入</button>
+</div>
+<div class="p-lg">
+<!-- Points Tab Content -->
+<div class="tab-content active" id="points">
+<div class="mb-lg flex items-baseline gap-sm">
+<h3 class="font-body-lg text-body-lg text-on-surface-variant">当前积分：</h3>
+<span class="font-headline-lg text-headline-lg text-primary">850</span>
+</div>
+<div class="border border-outline-variant rounded-lg overflow-hidden">
+<div class="bg-surface-container-low px-md py-sm border-b border-outline-variant grid grid-cols-12 gap-sm font-label-sm text-label-sm text-on-surface-variant">
+<div class="col-span-3">变动</div>
+<div class="col-span-6">事由</div>
+<div class="col-span-3 text-right">日期</div>
+</div>
+<ul class="divide-y divide-outline-variant">
+<li class="px-md py-sm grid grid-cols-12 gap-sm items-center font-body-md text-body-md hover:bg-surface-container-lowest transition-colors">
+<div class="col-span-3 text-[#16a34a] font-medium">+100</div>
+<div class="col-span-6 text-on-surface">注册奖励</div>
+<div class="col-span-3 text-right text-on-surface-variant font-label-sm text-label-sm">2026-03-15</div>
+</li>
+<li class="px-md py-sm grid grid-cols-12 gap-sm items-center font-body-md text-body-md hover:bg-surface-container-lowest transition-colors">
+<div class="col-span-3 text-error font-medium">-5</div>
+<div class="col-span-6 text-on-surface">生成大纲（5章）</div>
+<div class="col-span-3 text-right text-on-surface-variant font-label-sm text-label-sm">2026-05-20</div>
+</li>
+<li class="px-md py-sm grid grid-cols-12 gap-sm items-center font-body-md text-body-md hover:bg-surface-container-lowest transition-colors">
+<div class="col-span-3 text-error font-medium">-20</div>
+<div class="col-span-6 text-on-surface">生成正文（2章）</div>
+<div class="col-span-3 text-right text-on-surface-variant font-label-sm text-label-sm">2026-05-21</div>
+</li>
+<li class="px-md py-sm grid grid-cols-12 gap-sm items-center font-body-md text-body-md hover:bg-surface-container-lowest transition-colors">
+<div class="col-span-3 text-[#16a34a] font-medium">+10</div>
+<div class="col-span-6 text-on-surface">每日签到</div>
+<div class="col-span-3 text-right text-on-surface-variant font-label-sm text-label-sm">2026-05-24</div>
+</li>
+<li class="px-md py-sm grid grid-cols-12 gap-sm items-center font-body-md text-body-md hover:bg-surface-container-lowest transition-colors">
+<div class="col-span-3 text-error font-medium">-3</div>
+<div class="col-span-6 text-on-surface">生成细纲（3章）</div>
+<div class="col-span-3 text-right text-on-surface-variant font-label-sm text-label-sm">2026-05-24</div>
+</li>
+</ul>
+</div>
+</div>
+<!-- Top-up Tab Content -->
+<div class="tab-content" id="topup">
+<p class="font-body-md text-body-md text-on-surface-variant mb-lg flex items-center gap-xs">
+<span class="material-symbols-outlined text-primary text-[18px]">info</span>
+                        充值任意金额即可获得30天VIP
+                    </p>
+<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-md mb-xl">
+<!-- Package 1 -->
+<button class="relative border border-outline-variant rounded-xl p-md flex flex-col items-center justify-center gap-xs hover:border-primary hover:bg-surface-container-low transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent group">
+<span class="font-headline-sm text-headline-sm text-on-surface group-hover:text-primary transition-colors">100积分</span>
+<span class="font-body-lg text-body-lg text-on-surface-variant">¥10</span>
+</button>
+<!-- Package 2 (Recommended) -->
+<button class="relative border-2 border-primary rounded-xl p-md flex flex-col items-center justify-center gap-xs bg-surface-container-low transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent group overflow-hidden">
+<div class="absolute top-0 right-0 bg-primary text-on-primary font-label-sm text-label-sm px-2 py-0.5 rounded-bl-lg">推荐</div>
+<span class="font-headline-sm text-headline-sm text-primary">300积分</span>
+<span class="font-body-lg text-body-lg text-on-surface-variant">¥25</span>
+</button>
+<!-- Package 3 -->
+<button class="relative border border-outline-variant rounded-xl p-md flex flex-col items-center justify-center gap-xs hover:border-primary hover:bg-surface-container-low transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent group">
+<span class="font-headline-sm text-headline-sm text-on-surface group-hover:text-primary transition-colors">500积分</span>
+<span class="font-body-lg text-body-lg text-on-surface-variant">¥40</span>
+</button>
+<!-- Package 4 -->
+<button class="relative border border-outline-variant rounded-xl p-md flex flex-col items-center justify-center gap-xs hover:border-primary hover:bg-surface-container-low transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent group">
+<span class="font-headline-sm text-headline-sm text-on-surface group-hover:text-primary transition-colors">1000积分</span>
+<span class="font-body-lg text-body-lg text-on-surface-variant">¥70</span>
+</button>
+</div>
+<div class="border-t border-outline-variant pt-lg flex flex-col md:flex-row md:items-center justify-between gap-md">
+<div class="flex items-center gap-sm">
+<span class="font-body-md text-body-md text-on-surface-variant">支付方式：</span>
+<button class="flex items-center gap-xs border border-primary bg-surface-container-low text-primary px-sm py-xs rounded-md font-label-md text-label-md">
+<span class="material-symbols-outlined text-[18px]">account_balance_wallet</span>
+                                支付宝
+                            </button>
+</div>
+<button class="bg-primary text-on-primary font-label-md text-label-md px-xl py-sm rounded-lg hover:bg-surface-tint transition-colors shadow-sm self-start md:self-auto">
+                            立即支付
+                        </button>
+</div>
+</div>
+<!-- Export Tab Content (Placeholder for aesthetic) -->
+<div class="tab-content" id="export">
+<div class="flex flex-col items-center justify-center py-xl text-on-surface-variant">
+<span class="material-symbols-outlined text-[48px] mb-sm opacity-50">file_download</span>
+<p class="font-body-md text-body-md">选择要导出的小说项目...</p>
+</div>
+</div>
+<!-- Import Tab Content (Placeholder for aesthetic) -->
+<div class="tab-content" id="import">
+<div class="flex flex-col items-center justify-center py-xl text-on-surface-variant">
+<span class="material-symbols-outlined text-[48px] mb-sm opacity-50">file_upload</span>
+<p class="font-body-md text-body-md">拖拽文件到此处或点击上传...</p>
+</div>
+</div>
+</div>
+</section>
+</main>
+<script>
+        function switchTab(tabId) {
+            // Hide all contents
+            document.querySelectorAll('.tab-content').forEach(el => {
+                el.classList.remove('active');
+            });
+            // Remove active class from all buttons
+            document.querySelectorAll('.tab-button').forEach(el => {
+                el.classList.remove('active');
+            });
+
+            // Show selected content
+            document.getElementById(tabId).classList.add('active');
+            // Add active class to clicked button (find it by its onclick attribute for simplicity in this demo)
+            const btn = document.querySelector(`button[onclick="switchTab('${tabId}')"]`);
+            if(btn) btn.classList.add('active');
+        }
+    </script>
+</body></html>

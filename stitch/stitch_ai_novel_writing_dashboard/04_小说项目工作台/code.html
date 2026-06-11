@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>ProseFlow AI - 墨语写作平台</title>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@100..900&family=Work+Sans:wght@100..900&display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-family: 'Material Symbols Outlined';
+            font-weight: normal;
+            font-style: normal;
+            font-size: 24px;
+            line-height: 1;
+            letter-spacing: normal;
+            text-transform: none;
+            display: inline-block;
+            white-space: nowrap;
+            word-wrap: normal;
+            direction: ltr;
+            -webkit-font-feature-settings: 'liga';
+            -webkit-font-smoothing: antialiased;
+        }
+    </style>
+<!-- Tailwind CSS with Forms and Container Queries -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Theme Configuration -->
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-tertiary-fixed-variant": "#004395",
+                    "on-secondary-container": "#5c2400",
+                    "background": "#f8f9ff",
+                    "surface-container": "#e6eeff",
+                    "on-background": "#0d1c2f",
+                    "on-tertiary-container": "#fefcff",
+                    "on-primary-fixed-variant": "#5516be",
+                    "on-secondary-fixed-variant": "#783200",
+                    "on-secondary-fixed": "#341100",
+                    "error": "#ba1a1a",
+                    "on-surface-variant": "#494454",
+                    "secondary-container": "#fd761a",
+                    "surface-container-lowest": "#ffffff",
+                    "primary-container": "#8455ef",
+                    "on-error": "#ffffff",
+                    "tertiary-fixed": "#d8e2ff",
+                    "on-primary": "#ffffff",
+                    "tertiary-fixed-dim": "#adc6ff",
+                    "error-container": "#ffdad6",
+                    "surface-bright": "#f8f9ff",
+                    "on-primary-container": "#fffbff",
+                    "inverse-primary": "#d0bcff",
+                    "primary-fixed-dim": "#d0bcff",
+                    "inverse-surface": "#233144",
+                    "tertiary": "#0058be",
+                    "on-primary-fixed": "#23005c",
+                    "surface-tint": "#6d3bd7",
+                    "surface-variant": "#d5e3fd",
+                    "tertiary-container": "#2170e4",
+                    "surface-dim": "#ccdbf4",
+                    "surface": "#f8f9ff",
+                    "on-secondary": "#ffffff",
+                    "secondary-fixed-dim": "#ffb690",
+                    "secondary-fixed": "#ffdbca",
+                    "outline-variant": "#cbc3d7",
+                    "surface-container-low": "#eff4ff",
+                    "on-error-container": "#93000a",
+                    "primary": "#6b38d4",
+                    "outline": "#7b7486",
+                    "inverse-on-surface": "#ebf1ff",
+                    "on-tertiary-fixed": "#001a42",
+                    "on-surface": "#0d1c2f",
+                    "surface-container-high": "#dde9ff",
+                    "secondary": "#9d4300",
+                    "primary-fixed": "#e9ddff",
+                    "surface-container-highest": "#d5e3fd",
+                    "on-tertiary": "#ffffff"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "margin-mobile": "16px",
+                    "md": "16px",
+                    "sm": "8px",
+                    "base": "4px",
+                    "gutter": "20px",
+                    "xl": "32px",
+                    "margin-desktop": "40px",
+                    "xs": "4px",
+                    "lg": "24px"
+            },
+            "fontFamily": {
+                    "headline-sm": ["Plus Jakarta Sans"],
+                    "headline-md": ["Plus Jakarta Sans"],
+                    "body-md": ["Work Sans"],
+                    "label-md": ["Work Sans"],
+                    "headline-lg": ["Plus Jakarta Sans"],
+                    "label-sm": ["Work Sans"],
+                    "body-lg": ["Work Sans"]
+            },
+            "fontSize": {
+                    "headline-sm": ["20px", { "lineHeight": "1.4", "fontWeight": "600" }],
+                    "headline-md": ["24px", { "lineHeight": "1.3", "fontWeight": "600" }],
+                    "body-md": ["16px", { "lineHeight": "1.7", "fontWeight": "400" }],
+                    "label-md": ["14px", { "lineHeight": "1.5", "fontWeight": "500" }],
+                    "headline-lg": ["32px", { "lineHeight": "1.2", "fontWeight": "700" }],
+                    "label-sm": ["12px", { "lineHeight": "1.5", "fontWeight": "500" }],
+                    "body-lg": ["18px", { "lineHeight": "1.8", "fontWeight": "400" }]
+            }
+          }
+        }
+      }
+    </script>
+</head>
+<body class="bg-background text-on-background font-body-md text-body-md h-screen flex flex-col overflow-hidden">
+<!-- TopAppBar (from JSON) -->
+<header class="bg-surface dark:bg-surface-dim border-b border-outline-variant dark:border-outline flex justify-between items-center w-full px-lg h-16 shrink-0 z-20">
+<!-- Brand Logo -->
+<div class="text-headline-md font-headline-md font-bold text-primary dark:text-primary-fixed-dim">
+            墨语 AI (InkVerse)
+        </div>
+<!-- Navigation Links -->
+<nav class="flex h-full">
+<a class="h-full flex items-center px-lg text-primary dark:text-primary-fixed-dim border-b-2 border-primary font-bold font-label-md text-label-md hover:bg-surface-container dark:hover:bg-surface-container-high transition-colors active:scale-95 duration-150" href="#">工作台</a>
+<a class="h-full flex items-center px-lg text-on-surface-variant dark:text-outline font-label-md text-label-md hover:bg-surface-container dark:hover:bg-surface-container-high transition-colors active:scale-95 duration-150" href="#">素材库</a>
+<a class="h-full flex items-center px-lg text-on-surface-variant dark:text-outline font-label-md text-label-md hover:bg-surface-container dark:hover:bg-surface-container-high transition-colors active:scale-95 duration-150" href="#">灵感区</a>
+</nav>
+<!-- Actions -->
+<div class="flex items-center space-x-md">
+<button class="bg-primary text-on-primary font-label-md text-label-md px-md py-sm rounded-lg hover:bg-surface-tint transition-colors active:scale-95 duration-150">
+                发布章节
+            </button>
+<button class="text-on-surface-variant hover:text-primary transition-colors p-sm rounded-full hover:bg-surface-container active:scale-95 duration-150">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button class="text-on-surface-variant hover:text-primary transition-colors p-sm rounded-full hover:bg-surface-container active:scale-95 duration-150">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+</button>
+<img alt="用户头像" class="w-10 h-10 rounded-full object-cover border border-outline-variant cursor-pointer" data-alt="A professional, modern headshot of a young creative writer against a soft, bright minimalist studio background. The lighting is high-key and clean, matching a sophisticated light-mode software interface. The person exudes focus and artistic elegance, with subtle cool-toned shadows." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDimz0okh0F0ILLlwN_zWJMwhn2K_4VgFG5b9zW_IxiaLNTXNHFcyq1s61WCICWHLsaheA6CgB6irRWyUDklzW_B2jQzxplDmSw5LHkCZP76qqqXS9N6TOBCq9UmVRXidozthzLexT8QrQ7uVGt8XMysVKE9qViCitYJ4PRoXpwnvEoPbpucyhIXREXlq4Z-UvUGhNc35siv2-5HP6PIEP-PXcc5o7Qts8CLuPxYViZGN-kDA7RCtgttnq_Osyp-W2H-o95W_n-MwOF"/>
+</div>
+</header>
+<!-- Main Workspace -->
+<main class="flex flex-1 overflow-hidden relative">
+<!-- Left Panel: SideNavBar (from JSON + Prompt requirements) -->
+<aside class="bg-surface-container-lowest dark:bg-surface-container-low border-r border-outline-variant dark:border-outline shadow-sm dark:shadow-none docked h-full w-[260px] flex flex-col py-lg space-y-md shrink-0 z-10">
+<!-- Header -->
+<div class="px-md flex items-center space-x-sm mb-sm">
+<div class="w-10 h-10 bg-primary-container text-on-primary-container rounded-lg flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined">menu_book</span>
+</div>
+<div class="overflow-hidden">
+<h2 class="font-headline-sm text-headline-sm font-bold text-primary truncate">长篇小说项目</h2>
+<p class="font-label-sm text-label-sm text-on-surface-variant truncate">最后编辑于 2小时前</p>
+</div>
+</div>
+<!-- Tab Navigation (JSON Authority) -->
+<nav class="px-sm space-y-1">
+<a class="flex items-center px-3 py-2.5 rounded-md text-primary dark:text-primary-fixed-dim border-l-4 border-primary bg-primary-container/10 font-label-md text-label-md hover:bg-surface-container-high dark:hover:bg-surface-container-highest transition-all active:translate-x-1 duration-200" href="#">
+<span class="material-symbols-outlined mr-3 text-[20px]" data-icon="auto_stories">auto_stories</span> 大纲
+                </a>
+<a class="flex items-center px-3 py-2 rounded-md text-on-surface-variant dark:text-outline font-label-md text-label-md hover:bg-surface-container-high dark:hover:bg-surface-container-highest transition-all active:translate-x-1 duration-200 border-l-4 border-transparent" href="#">
+<span class="material-symbols-outlined mr-3 text-[20px]" data-icon="format_list_bulleted">format_list_bulleted</span> 章节
+                </a>
+<a class="flex items-center px-3 py-2 rounded-md text-on-surface-variant dark:text-outline font-label-md text-label-md hover:bg-surface-container-high dark:hover:bg-surface-container-highest transition-all active:translate-x-1 duration-200 border-l-4 border-transparent" href="#">
+<span class="material-symbols-outlined mr-3 text-[20px]" data-icon="groups">groups</span> 人物
+                </a>
+<a class="flex items-center px-3 py-2 rounded-md text-on-surface-variant dark:text-outline font-label-md text-label-md hover:bg-surface-container-high dark:hover:bg-surface-container-highest transition-all active:translate-x-1 duration-200 border-l-4 border-transparent" href="#">
+<span class="material-symbols-outlined mr-3 text-[20px]" data-icon="psychology">psychology</span> 设定
+                </a>
+<a class="flex items-center px-3 py-2 rounded-md text-on-surface-variant dark:text-outline font-label-md text-label-md hover:bg-surface-container-high dark:hover:bg-surface-container-highest transition-all active:translate-x-1 duration-200 border-l-4 border-transparent" href="#">
+<span class="material-symbols-outlined mr-3 text-[20px]" data-icon="import_export">import_export</span> 导出
+                </a>
+</nav>
+<hr class="border-outline-variant mx-md"/>
+<!-- Sub-section: Outline Items (Prompt Specific) -->
+<div class="flex-1 overflow-y-auto px-sm space-y-1">
+<!-- Item 1 -->
+<div class="group flex items-center justify-between px-2 py-2 rounded-md hover:bg-surface-container cursor-pointer transition-colors">
+<div class="flex items-center space-x-2 overflow-hidden">
+<span class="material-symbols-outlined text-[18px] text-on-surface-variant group-hover:text-primary transition-colors">arrow_drop_down</span>
+<input class="form-checkbox h-4 w-4 text-primary rounded border-outline-variant focus:ring-primary focus:ring-offset-0 bg-transparent" type="checkbox"/>
+<span class="font-label-md text-label-md text-on-surface truncate">第1章 初入江湖</span>
+</div>
+<span class="material-symbols-outlined text-[18px] text-outline hover:text-primary transition-colors" data-weight="fill" style="font-variation-settings: 'FILL' 1;">star</span>
+</div>
+<!-- Item 2 -->
+<div class="group flex items-center justify-between px-2 py-2 rounded-md hover:bg-surface-container cursor-pointer transition-colors">
+<div class="flex items-center space-x-2 overflow-hidden">
+<span class="material-symbols-outlined text-[18px] text-on-surface-variant group-hover:text-primary transition-colors -rotate-90">arrow_drop_down</span>
+<input class="form-checkbox h-4 w-4 text-primary rounded border-outline-variant focus:ring-primary focus:ring-offset-0 bg-transparent" type="checkbox"/>
+<span class="font-label-md text-label-md text-on-surface truncate">第2章 命悬一线</span>
+</div>
+<span class="material-symbols-outlined text-[18px] text-outline hover:text-primary transition-colors">star</span>
+</div>
+<!-- Item 3 -->
+<div class="group flex items-center justify-between px-2 py-2 rounded-md hover:bg-surface-container cursor-pointer transition-colors">
+<div class="flex items-center space-x-2 overflow-hidden">
+<span class="material-symbols-outlined text-[18px] text-on-surface-variant group-hover:text-primary transition-colors -rotate-90">arrow_drop_down</span>
+<input class="form-checkbox h-4 w-4 text-primary rounded border-outline-variant focus:ring-primary focus:ring-offset-0 bg-transparent" type="checkbox"/>
+<span class="font-label-md text-label-md text-on-surface truncate">第3章 绝处逢生</span>
+</div>
+<span class="material-symbols-outlined text-[18px] text-outline hover:text-primary transition-colors">star</span>
+</div>
+</div>
+<!-- Action Buttons -->
+<div class="px-md space-y-sm">
+<button class="w-full bg-gradient-to-r from-primary to-surface-tint text-on-primary py-2.5 rounded-lg font-label-md text-label-md shadow-sm hover:shadow transition-all flex items-center justify-center space-x-2">
+<span class="material-symbols-outlined text-[18px]">magic_button</span>
+<span>AI生成大纲</span>
+</button>
+<button class="w-full bg-surface-container-lowest border border-outline-variant text-primary py-2.5 rounded-lg font-label-md text-label-md hover:bg-surface-container-low transition-colors">
+                    生成细纲
+                </button>
+</div>
+<!-- Footer Tabs (JSON Authority) -->
+<div class="mt-auto pt-md px-sm border-t border-outline-variant space-y-1">
+<a class="flex items-center px-3 py-2 rounded-md text-on-surface-variant dark:text-outline font-label-md text-label-md hover:bg-surface-container-high transition-all" href="#">
+<span class="material-symbols-outlined mr-3 text-[20px]" data-icon="help">help</span> 帮助中心
+                </a>
+<a class="flex items-center px-3 py-2 rounded-md text-on-surface-variant dark:text-outline font-label-md text-label-md hover:bg-surface-container-high transition-all" href="#">
+<span class="material-symbols-outlined mr-3 text-[20px]" data-icon="feedback">feedback</span> 反馈
+                </a>
+</div>
+</aside>
+<!-- Center Panel: Editor -->
+<section class="flex-1 flex flex-col bg-surface-bright relative min-w-0">
+<!-- Editor Header -->
+<header class="px-margin-desktop py-lg border-b border-outline-variant bg-surface-container-lowest shrink-0 flex items-center justify-between shadow-[0_2px_12px_rgba(0,0,0,0.02)]">
+<h1 class="font-headline-lg text-headline-lg text-on-surface tracking-tight">第1章 初入江湖</h1>
+<div class="flex space-x-sm">
+<button class="text-on-surface-variant hover:text-primary p-2 rounded-md hover:bg-surface-container transition-colors" title="历史版本">
+<span class="material-symbols-outlined">history</span>
+</button>
+<button class="text-on-surface-variant hover:text-primary p-2 rounded-md hover:bg-surface-container transition-colors" title="全屏">
+<span class="material-symbols-outlined">fullscreen</span>
+</button>
+</div>
+</header>
+<!-- Text Area -->
+<div class="flex-1 overflow-y-auto p-margin-desktop bg-surface-container-lowest">
+<div class="max-w-3xl mx-auto">
+<p class="font-body-lg text-body-lg text-on-surface leading-loose mb-6">
+                        夜色如墨，厚重的云层遮挡了最后一丝月光。破旧的古刹在狂风中摇摇欲坠，发黑的木门发出令人牙酸的吱呀声。
+                    </p>
+<p class="font-body-lg text-body-lg text-on-surface leading-loose mb-6">
+                        林青衫紧了紧手中的长剑，剑柄上的纹路因为常年握持已经有些平滑。他深吸一口气，空气中弥漫着淡淡的血腥味和陈年沉香的混合气息。这是他第一次独自执行师门任务，目标就在这扇门后。
+                    </p>
+<p class="font-body-lg text-body-lg text-on-surface leading-loose mb-6">
+                        "既然来了，何必在门外吹冷风？" 一个沙哑低沉的声音突然从古刹内传出，仿佛就在耳边响起，震得林青衫耳膜微痛。
+                    </p>
+<p class="font-body-lg text-body-lg text-on-surface-variant leading-loose mb-6 italic opacity-70">
+                        ... (后续内容待生成) ...
+                    </p>
+</div>
+</div>
+<!-- AI Floating Toolbar / Progress Dock -->
+<div class="absolute bottom-xl left-1/2 transform -translate-x-1/2 w-[85%] max-w-3xl bg-surface-container-lowest/90 backdrop-blur-md rounded-xl p-lg shadow-[0_8px_24px_rgba(0,0,0,0.08)] border border-outline-variant flex flex-col space-y-md z-30 transition-all">
+<!-- Status Header -->
+<div class="flex justify-between items-center font-label-md text-label-md">
+<div class="flex items-center space-x-3 text-primary">
+<span class="material-symbols-outlined animate-spin text-[20px]">sync</span>
+<span class="font-bold">正在生成第3章...</span>
+</div>
+<span class="text-on-surface font-medium bg-surface-container px-3 py-1 rounded-full">67%</span>
+</div>
+<!-- Progress Bar -->
+<div class="w-full bg-surface-variant rounded-full h-1.5 overflow-hidden">
+<div class="bg-gradient-to-r from-primary to-surface-tint h-full rounded-full transition-all duration-500 ease-out" style="width: 67%"></div>
+</div>
+<!-- Preview Area -->
+<div class="bg-surface-bright p-md rounded-lg border border-outline-variant font-body-md text-body-md text-on-surface-variant max-h-32 overflow-y-auto relative">
+<p class="italic">"林青衫剑走偏锋，堪堪避过那致命一击。他眼前一黑，只觉一股巨力从剑身传来，震得他虎口崩裂。‘这就是绝处逢生吗？’他咬紧牙关，眼中闪过一丝不屈的光芒..."</p>
+<!-- Gradient fade for text -->
+<div class="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-surface-bright to-transparent"></div>
+</div>
+<!-- Actions -->
+<div class="flex justify-end pt-2">
+<button class="bg-surface-container-lowest border border-outline-variant text-on-surface px-6 py-2 rounded-md font-label-md text-label-md hover:bg-surface-container hover:text-primary transition-colors flex items-center space-x-2">
+<span class="material-symbols-outlined text-[18px]">pause</span>
+<span>暂停</span>
+</button>
+</div>
+</div>
+</section>
+<!-- Right Panel: Settings -->
+<aside class="w-[300px] border-l border-outline-variant bg-surface-container-lowest flex flex-col shrink-0 z-10 shadow-[-2px_0_12px_rgba(0,0,0,0.02)]">
+<header class="p-lg border-b border-outline-variant bg-surface-container-lowest">
+<h3 class="font-headline-sm text-headline-sm text-on-surface font-bold flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">tune</span> 生成设置
+                </h3>
+</header>
+<div class="flex-1 p-lg overflow-y-auto space-y-xl">
+<!-- Section 1: Parameters -->
+<div class="space-y-md">
+<div class="flex flex-col space-y-sm">
+<label class="font-label-md text-label-md text-on-surface-variant flex justify-between">
+                            目标字数
+                            <span class="text-primary font-bold">3000</span>
+</label>
+<div class="flex items-center space-x-2">
+<button class="w-8 h-8 rounded border border-outline-variant flex items-center justify-center text-on-surface hover:bg-surface-container transition-colors"><span class="material-symbols-outlined text-[18px]">remove</span></button>
+<input class="flex-1 bg-surface-bright border border-outline-variant rounded-md text-center font-body-md text-body-md text-on-surface focus:ring-1 focus:ring-primary focus:border-primary h-8" readonly="" type="text" value="3000"/>
+<button class="w-8 h-8 rounded border border-outline-variant flex items-center justify-center text-on-surface hover:bg-surface-container transition-colors"><span class="material-symbols-outlined text-[18px]">add</span></button>
+</div>
+</div>
+<div class="flex flex-col space-y-sm">
+<label class="font-label-md text-label-md text-on-surface-variant">字数容差</label>
+<div class="relative">
+<select class="w-full bg-surface-bright border border-outline-variant rounded-md font-body-md text-body-md text-on-surface pl-3 pr-10 py-2 appearance-none focus:ring-1 focus:ring-primary focus:border-primary">
+<option>±300</option>
+<option>±500</option>
+<option>精准匹配</option>
+</select>
+<span class="material-symbols-outlined absolute right-3 top-1/2 transform -translate-y-1/2 text-on-surface-variant pointer-events-none">expand_more</span>
+</div>
+</div>
+<div class="flex flex-col space-y-sm">
+<label class="font-label-md text-label-md text-on-surface-variant">参考章节数</label>
+<div class="relative">
+<select class="w-full bg-surface-bright border border-outline-variant rounded-md font-body-md text-body-md text-on-surface pl-3 pr-10 py-2 appearance-none focus:ring-1 focus:ring-primary focus:border-primary">
+<option>3</option>
+<option>5</option>
+<option>全部前序</option>
+</select>
+<span class="material-symbols-outlined absolute right-3 top-1/2 transform -translate-y-1/2 text-on-surface-variant pointer-events-none">expand_more</span>
+</div>
+</div>
+<div class="flex flex-col space-y-sm">
+<label class="font-label-md text-label-md text-on-surface-variant">AI模型</label>
+<div class="relative">
+<select class="w-full bg-surface-bright border border-outline-variant rounded-md font-body-md text-body-md text-on-surface pl-3 pr-10 py-2 appearance-none focus:ring-1 focus:ring-primary focus:border-primary">
+<option>豆包</option>
+<option>GPT-4</option>
+<option>Claude 3</option>
+</select>
+<span class="material-symbols-outlined absolute right-3 top-1/2 transform -translate-y-1/2 text-on-surface-variant pointer-events-none">expand_more</span>
+</div>
+</div>
+</div>
+<hr class="border-outline-variant"/>
+<!-- Section 2: Context Inclusion -->
+<div class="space-y-sm">
+<label class="font-label-md text-label-md text-on-surface-variant font-bold block mb-4">参考上下文</label>
+<label class="flex items-center space-x-3 cursor-pointer group">
+<input checked="" class="form-checkbox h-4 w-4 text-primary rounded border-outline-variant focus:ring-primary focus:ring-offset-0 transition-colors" type="checkbox"/>
+<span class="font-body-md text-body-md text-on-surface group-hover:text-primary transition-colors">大纲和细纲</span>
+</label>
+<label class="flex items-center space-x-3 cursor-pointer group">
+<input checked="" class="form-checkbox h-4 w-4 text-primary rounded border-outline-variant focus:ring-primary focus:ring-offset-0 transition-colors" type="checkbox"/>
+<span class="font-body-md text-body-md text-on-surface group-hover:text-primary transition-colors">已有正文摘要</span>
+</label>
+<label class="flex items-center space-x-3 cursor-pointer group">
+<input checked="" class="form-checkbox h-4 w-4 text-primary rounded border-outline-variant focus:ring-primary focus:ring-offset-0 transition-colors" type="checkbox"/>
+<span class="font-body-md text-body-md text-on-surface group-hover:text-primary transition-colors">主角状态追踪</span>
+</label>
+<label class="flex items-center space-x-3 cursor-pointer group">
+<input checked="" class="form-checkbox h-4 w-4 text-primary rounded border-outline-variant focus:ring-primary focus:ring-offset-0 transition-colors" type="checkbox"/>
+<span class="font-body-md text-body-md text-on-surface group-hover:text-primary transition-colors">角色关系</span>
+</label>
+<label class="flex items-center space-x-3 cursor-pointer group">
+<input checked="" class="form-checkbox h-4 w-4 text-primary rounded border-outline-variant focus:ring-primary focus:ring-offset-0 transition-colors" type="checkbox"/>
+<span class="font-body-md text-body-md text-on-surface group-hover:text-primary transition-colors">技能和道具状态</span>
+</label>
+<label class="flex items-center space-x-3 cursor-pointer group">
+<input class="form-checkbox h-4 w-4 text-primary rounded border-outline-variant focus:ring-primary focus:ring-offset-0 transition-colors" type="checkbox"/>
+<span class="font-body-md text-body-md text-on-surface group-hover:text-primary transition-colors">重要事件</span>
+</label>
+</div>
+</div>
+<!-- Bottom Actions -->
+<div class="p-lg border-t border-outline-variant bg-surface-bright space-y-md shrink-0">
+<button class="w-full bg-gradient-to-r from-primary to-surface-tint text-on-primary py-3 rounded-lg font-label-md text-label-md shadow-[0_2px_8px_rgba(107,56,212,0.3)] hover:shadow-[0_4px_12px_rgba(107,56,212,0.4)] transition-all flex items-center justify-center space-x-2">
+<span class="material-symbols-outlined">play_arrow</span>
+<span class="font-bold">开始生成</span>
+</button>
+<button class="w-full bg-surface-container-lowest border-2 border-outline-variant text-on-surface py-2.5 rounded-lg font-label-md text-label-md hover:border-primary hover:text-primary transition-colors">
+                    批量生成
+                </button>
+</div>
+</aside>
+</main>
+</body></html>
