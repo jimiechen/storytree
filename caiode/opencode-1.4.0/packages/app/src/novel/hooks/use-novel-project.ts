@@ -1,8 +1,8 @@
 import { createSignal, createResource } from 'solid-js';
 import type { Project } from '../types';
-import { NovelProjectProvider } from '../providers/providers-index';
+import { createNovelProjectProvider } from '../providers/novel-project';
 
-const projectProvider = new NovelProjectProvider();
+const projectProvider = createNovelProjectProvider();
 
 export function useNovelProject() {
   const [projectId, setProjectId] = createSignal<string>('proj-001');

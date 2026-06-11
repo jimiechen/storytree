@@ -14,7 +14,13 @@ export default function WorkbenchPage() {
   // STDD 骨架：加载项目
   const loadProject = async () => {
     setLoading(true);
-    const data = await provider.getProject(params.projectId);
+    const projectId = params.projectId;
+    if (!projectId) {
+      setProject(null);
+      setLoading(false);
+      return;
+    }
+    const data = await provider.getProject(projectId);
     setProject(data);
     setLoading(false);
   };
