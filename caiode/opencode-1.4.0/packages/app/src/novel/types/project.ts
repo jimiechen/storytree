@@ -10,12 +10,50 @@ export interface Project {
   status: 'active' | 'archived' | 'draft';
 }
 
+/** 目标读者选项 */
+export type TargetAudience = 'general' | 'male' | 'female';
+
+/** 写作风格选项 */
+export type WritingStyle =
+  | 'default'
+  | 'humorous'
+  | 'dark'
+  | 'decisive'
+  | 'literary'
+  | 'fast-paced'
+  | 'slow-paced'
+  | 'mystery'
+  | 'passionate'
+  | 'light'
+  | 'heartbreaking'
+  | 'custom';
+
+/** 故事主题选项 */
+export type StoryTheme =
+  | 'default'
+  | 'revenge'
+  | 'growth'
+  | 'love'
+  | 'adventure'
+  | 'redemption'
+  | 'power'
+  | 'friendship'
+  | 'survival'
+  | 'exploration'
+  | 'competition'
+  | 'family'
+  | 'custom';
+
 /** 创建项目表单输入 */
 export interface CreateProjectInput {
   name: string;
   genre: GenreOption;
   description?: string;
   protagonist?: ProtagonistInput;
+  targetAudience?: TargetAudience;
+  writingStyle?: WritingStyle;
+  storyTheme?: StoryTheme;
+  customSettings?: string;
 }
 
 /** 主角设定输入 */

@@ -1,113 +1,125 @@
 import { Show, For } from 'solid-js';
 import type { Component } from 'solid-js';
 import type { OutlineViewMode, OutlineNode } from '../../types';
-import type { Chapter, ChapterOutline } from '../../types';
+import type { Chapter } from '../../types';
 import { ChapterList } from '../novel-editor/chapter-list';
+import { NovelIcon } from '../layout/novel-icon';
 
 interface OutlineSidebarProps {
-  /** 章节列表（用于章节视图和细纲视图） */
+  projectName: string;
+  lastEdited: string;
   chapters: Chapter[];
-  /** 当前选中的章节ID */
   selectedId: string;
-  /** 选择章节回调 */
   onSelect: (id: string) => void;
-  /** 当前视图模式 */
   viewMode: () => OutlineViewMode;
-  /** 切换视图模式 */
   onSwitchView: (mode: OutlineViewMode) => void;
-  /** 大纲树数据 */
   outlines: OutlineNode[] | undefined;
-  /** 是否加载中 */
   loading: boolean;
-  /** AI生成大纲 */
   onGenerateOutline?: () => void;
-  /** 生成细纲 */
   onGenerateDetail?: () => void;
 }
 
-/** Tab 配置 */
-const VIEW_TABS: { mode: OutlineViewMode; label: string }[] = [
-  { mode: 'outline', label: '大纲' },
-  { mode: 'detail', label: '细纲' },
-  { mode: 'chapter', label: '章节' },
+const NAV_ITEMS: { mode: OutlineViewMode; label: string; icon: string }[] = [
+  { mode: 'outline', label: '大纲', icon: 'auto_stories' },
+  { mode: 'chapter', label: '章节', icon: 'format_list_bulleted' },
+  { mode: 'detail', label: '细纲', icon: 'description' },
 ];
 
-/**
- * OutlineSidebar — 左侧三视图面板
- *
- * 替代 Workspace 中纯 ChapterList 的左侧区域，
- * 提供大纲/细纲/章节三种视图切换。
- *
- * 数据来源：useNovelOutline Hook（不直接 import mock-data）
- */
+/** SideNav — 左侧导航面板，按 Stitch 04 code.html 还原 */
 export const OutlineSidebar: Component<OutlineSidebarProps> = (props) => {
+  const isActive = (mode: OutlineViewMode) => props.viewMode() === mode;
+
   return (
-    <div class="w-64 bg-white border-r border-gray-200 h-full flex flex-col">
-      {/* Tab 切换器 */}
-      <div class="flex border-b border-gray-200">
-        <For each={VIEW_TABS}>
-          {(tab) => {
-            const isActive = props.viewMode() === tab.mode;
-            return (
-              <button
-                class={`flex-1 py-2.5 text-xs font-medium transition-colors ${
-                  isActive
-                    ? 'text-indigo-700 border-b-2 border-indigo-500 bg-indigo-50'
-                    : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
-                }`}
-                onClick={() => props.onSwitchView(tab.mode)}
-              >
-                {tab.label}
-              </button>
-            );
-          }}
-        </For>
+    <aside class="bg-white border-r border-[#cbc3d7] shadow-sm h-full w-[260px] flex flex-col py-6 shrink-0 z-10">
+      {/* 项目信息 */}
+      <div class="px-4 flex items-center gap-3 mb-4">
+        <div class="w-10 h-10 bg-[#8455ef] text-white rounded-lg flex items-center justify-center shrink-0">
+          <NovelIcon name="menu_book" size={20} />
+        </div>
+        <div class="overflow-hidden">
+          <h2
+            class="text-base font-bold text-[#6b38d4] truncate"
+            style={{ 'font-family': "'Plus Jakarta Sans', 'PingFang SC', sans-serif" }}
+          >
+            {props.projectName}
+          </h2>
+          <p class="text-xs text-[#494454] truncate">{props.lastEdited}</p>
+        </div>
       </div>
 
+      {/* 导航项 */}
+      <nav class="px-2 space-y-1">
+        <For each={NAV_ITEMS}>
+          {(item) => (
+            <button
+              class={`w-full flex items-center px-3 py-2.5 rounded-md text-left transition-all ${
+                isActive(item.mode)
+                  ? 'text-[#6b38d4] border-l-4 border-[#6b38d4] bg-[#eff4ff] font-bold'
+                  : 'text-[#494454] hover:bg-[#e6eeff] border-l-4 border-transparent'
+              }`}
+              onClick={() => props.onSwitchView(item.mode)}
+            >
+              <NovelIcon name={item.icon} size={20} class="mr-3" fill={isActive(item.mode)} />
+              <span class="text-sm">{item.label}</span>
+            </button>
+          )}
+        </For>
+      </nav>
+
+      <hr class="border-[#cbc3d7] mx-4 my-4" />
+
       {/* 内容区 */}
-      <div class="flex-1 overflow-y-auto">
+      <div class="flex-1 overflow-y-auto px-2">
         <Show when={!props.loading} fallback={<SidebarEmpty text="加载中..." />}>
-          {/* 大纲视图 */}
-          <Show when={props.viewMode() === 'outline'}>
+          <Show when={isActive('outline')}>
             <OutlineTreeView
               outlines={props.outlines}
               selectedId={props.selectedId}
               onSelect={props.onSelect}
             />
           </Show>
-
-          {/* 细纲视图 */}
-          <Show when={props.viewMode() === 'detail'}>
-            <DetailView chapters={props.chapters} selectedId={props.selectedId} onSelect={props.onSelect} />
-          </Show>
-
-          {/* 章节视图 */}
-          <Show when={props.viewMode() === 'chapter'}>
+          <Show when={isActive('chapter')}>
             <ChapterList
               chapters={props.chapters}
               selectedId={props.selectedId}
               onSelect={props.onSelect}
             />
           </Show>
+          <Show when={isActive('detail')}>
+            <DetailView chapters={props.chapters} selectedId={props.selectedId} onSelect={props.onSelect} />
+          </Show>
         </Show>
       </div>
 
-      {/* 底部操作栏 */}
-      <div class="p-3 border-t border-gray-200 space-y-2">
+      {/* AI 操作按钮 */}
+      <div class="px-4 space-y-2 mt-2">
         <button
-          class="w-full py-2 px-3 text-xs font-medium text-white bg-gradient-to-r from-purple-500 to-pink-500 rounded-md hover:from-purple-600 hover:to-pink-600 transition-all"
+          class="w-full bg-gradient-to-r from-[#6b38d4] to-[#6d3bd7] text-white py-2.5 rounded-lg text-sm font-medium shadow-sm hover:shadow transition-all flex items-center justify-center gap-2"
           onClick={props.onGenerateOutline}
         >
-          AI 生成大纲
+          <NovelIcon name="magic_button" size={18} />
+          <span>AI生成大纲</span>
         </button>
         <button
-          class="w-full py-2 px-3 text-xs font-medium text-indigo-600 bg-white border border-indigo-200 rounded-md hover:bg-indigo-50 transition-colors"
+          class="w-full bg-white border border-[#cbc3d7] text-[#6b38d4] py-2.5 rounded-lg text-sm font-medium hover:bg-[#eff4ff] transition-colors"
           onClick={props.onGenerateDetail}
         >
           生成细纲
         </button>
       </div>
-    </div>
+
+      {/* 底部帮助/反馈 */}
+      <div class="mt-auto pt-4 px-2 border-t border-[#cbc3d7] space-y-1">
+        <button class="w-full flex items-center px-3 py-2 rounded-md text-[#494454] hover:bg-[#e6eeff] transition-all text-left">
+          <NovelIcon name="help" size={20} class="mr-3" />
+          <span class="text-sm">帮助中心</span>
+        </button>
+        <button class="w-full flex items-center px-3 py-2 rounded-md text-[#494454] hover:bg-[#e6eeff] transition-all text-left">
+          <NovelIcon name="feedback" size={20} class="mr-3" />
+          <span class="text-sm">反馈</span>
+        </button>
+      </div>
+    </aside>
   );
 };
 
@@ -119,13 +131,12 @@ interface SidebarEmptyProps {
 
 function SidebarEmpty(props: SidebarEmptyProps) {
   return (
-    <div class="flex items-center justify-center h-full text-gray-400 text-sm">
+    <div class="flex items-center justify-center h-full text-[#7b7486] text-sm">
       {props.text}
     </div>
   );
 }
 
-/** 大纲树视图（卷 > 章） */
 interface OutlineTreeViewProps {
   outlines: OutlineNode[] | undefined;
   selectedId: string;
@@ -134,7 +145,7 @@ interface OutlineTreeViewProps {
 
 function OutlineTreeView(props: OutlineTreeViewProps) {
   return (
-    <div class="py-2">
+    <div class="py-1">
       <Show
         when={props.outlines && props.outlines.length > 0}
         fallback={<SidebarEmpty text="暂无大纲" />}
@@ -142,31 +153,26 @@ function OutlineTreeView(props: OutlineTreeViewProps) {
         <For each={props.outlines}>
           {(volume) => (
             <div class="mb-1">
-              {/* 卷标题 */}
-              <div class="px-4 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider flex items-center gap-1.5">
-                <span class="w-1.5 h-1.5 rounded-full bg-indigo-400"></span>
+              <div class="px-3 py-2 text-xs font-semibold text-[#7b7486] uppercase tracking-wider flex items-center gap-1.5">
+                <span class="w-1.5 h-1.5 rounded-full bg-[#6b38d4]"></span>
                 {volume.title}
               </div>
-              {/* 章节列表 */}
               <For each={volume.children}>
                 {(chapter) => {
-                  const isSelected = chapter.chapterId === props.selectedId;
+                  const isSel = chapter.chapterId === props.selectedId;
                   return (
                     <button
-                      class={`w-full text-left px-6 py-2.5 transition-colors ${
-                        isSelected
-                          ? 'bg-blue-50 border-r-2 border-r-blue-500 text-blue-900'
-                          : 'hover:bg-gray-50 text-gray-700'
+                      class={`w-full text-left px-5 py-2 transition-colors flex items-center gap-2 ${
+                        isSel
+                          ? 'bg-[#eff4ff] border-r-2 border-r-[#6b38d4] text-[#6b38d4]'
+                          : 'hover:bg-[#f8f9ff] text-[#0d1c2f]'
                       }`}
                       onClick={() => chapter.chapterId && props.onSelect(chapter.chapterId)}
                     >
-                      <div class="flex items-center gap-2">
-                        {chapter.starred && (
-                          <span class="text-yellow-400 text-xs" title="星标">&#9733;</span>
-                        )}
-                        {!chapter.starred && <span class="w-3"></span>}
-                        <span class="text-sm">{chapter.title}</span>
-                      </div>
+                      <Show when={chapter.starred} fallback={<span class="w-4"></span>}>
+                        <NovelIcon name="star" size={14} class="text-[#fd761a]" fill />
+                      </Show>
+                      <span class="text-sm truncate">{chapter.title}</span>
                     </button>
                   );
                 }}
@@ -179,7 +185,6 @@ function OutlineTreeView(props: OutlineTreeViewProps) {
   );
 }
 
-/** 细纲视图（每章的 goal / conflict / keyPlot） */
 interface DetailViewProps {
   chapters: Chapter[];
   selectedId: string;
@@ -188,22 +193,19 @@ interface DetailViewProps {
 
 function DetailView(props: DetailViewProps) {
   return (
-    <div class="py-2">
-      <Show
-        when={props.chapters.length > 0}
-        fallback={<SidebarEmpty text="暂无章节" />}
-      >
+    <div class="py-1">
+      <Show when={props.chapters.length > 0} fallback={<SidebarEmpty text="暂无章节" />}>
         <For each={props.chapters}>
           {(chapter) => {
-            const isSelected = chapter.id === props.selectedId;
+            const isSel = chapter.id === props.selectedId;
             return (
               <button
-                class={`w-full text-left px-4 py-3 border-b border-gray-100 transition-colors ${
-                  isSelected ? 'bg-blue-50' : 'hover:bg-gray-50'
+                class={`w-full text-left px-4 py-3 border-b border-[#e6eeff] transition-colors ${
+                  isSel ? 'bg-[#eff4ff]' : 'hover:bg-[#f8f9ff]'
                 }`}
                 onClick={() => props.onSelect(chapter.id)}
               >
-                <div class="text-sm font-medium text-gray-800 mb-1.5">{chapter.title}</div>
+                <div class="text-sm font-medium text-[#0d1c2f] mb-1">{chapter.title}</div>
                 <DetailField label="目标" value={chapter.outline.goal} />
                 <DetailField label="冲突" value={chapter.outline.conflict} />
                 <DetailField label="关键情节" value={chapter.outline.keyPlot} />
@@ -216,17 +218,11 @@ function DetailView(props: DetailViewProps) {
   );
 }
 
-/** 细纲字段行 */
-interface DetailFieldProps {
-  label: string;
-  value: string;
-}
-
-function DetailField(props: DetailFieldProps) {
+function DetailField(props: { label: string; value: string }) {
   return (
-    <div class="mb-1 ml-2">
-      <span class="text-[10px] text-gray-400">{props.label}</span>
-      <p class="text-xs text-gray-600 line-clamp-2">{props.value}</p>
+    <div class="mb-0.5 ml-2">
+      <span class="text-[10px] text-[#7b7486]">{props.label}</span>
+      <p class="text-xs text-[#494454] line-clamp-2">{props.value}</p>
     </div>
   );
 }

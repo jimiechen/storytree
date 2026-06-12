@@ -32,7 +32,10 @@ export function NovelShell(props: NovelShellProps) {
           </div>
         }
       >
-        {(Comp) => <Comp />}
+        {(Comp) => {
+          const C = Comp as unknown as Component;
+          return <C />;
+        }}
       </Show>
     </div>
   );

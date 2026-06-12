@@ -32,7 +32,8 @@ export function NovelViewProvider(props: { children: JSX.Element }) {
   /** 从 URL 读取初始视图，默认 bookshelf */
   const initialView = () => {
     const v = searchParams.view;
-    return isValidView(v) ? v : 'bookshelf';
+    const viewStr = Array.isArray(v) ? v[0] : v;
+    return viewStr && isValidView(viewStr) ? viewStr : 'bookshelf';
   };
 
   const [currentView, setCurrentView] = createSignal<NovelView>(initialView());

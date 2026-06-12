@@ -1,5 +1,5 @@
 export type { Project } from './project';
-export type { CreateProjectInput, ProtagonistInput, GenreOption } from './project';
+export type { CreateProjectInput, ProtagonistInput, GenreOption, TargetAudience, WritingStyle, StoryTheme } from './project';
 export { GENRE_OPTIONS } from './project';
 export type { Chapter, ChapterStatus, ChapterOutline, AISuggestion } from './chapter';
 export type { Character, CharacterRelationship } from './character';
