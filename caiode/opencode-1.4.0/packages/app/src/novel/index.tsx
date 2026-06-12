@@ -4,6 +4,7 @@ import { NovelViewProvider, useNovelView } from './hooks/use-novel-view';
 import { BookshelfPage } from './components/bookshelf';
 import { CreateProjectModal } from './components/create-project-modal';
 import { Workspace } from './components/novel-workspace';
+import { NovelEditor } from './components/novel-editor';
 import type { NovelView } from './types/novel-view';
 
 /**
@@ -52,9 +53,8 @@ const NovelRouter: Component = () => {
         {/* 创建项目弹窗（覆盖层） */}
         <Match when={currentView() === 'create-project'}>
           <CreateProjectModal
-            open={true}
-            onClose={() => setView('bookshelf')}
             onSubmit={async () => setView('workspace')}
+            onCancel={() => setView('bookshelf')}
           />
           {/* 弹窗背景层保留书架视觉 */}
           <div class="flex-1 opacity-30 pointer-events-none">
@@ -67,21 +67,9 @@ const NovelRouter: Component = () => {
           <Workspace projectId={projectId} />
         </Match>
 
-        {/* 章节编辑器详情页 (Phase 2.1) */}
+        {/* 章节编辑器详情页 (Stitch 05) */}
         <Match when={currentView() === 'editor'}>
-          <div class="flex flex-col items-center justify-center h-full gap-3">
-            <span class="text-4xl">📝</span>
-            <h2 class="text-lg font-semibold text-[#0d1c2f]" style={{ 'font-family': "'Plus Jakarta Sans', sans-serif" }}>
-              章节编辑器
-            </h2>
-            <p class="text-sm text-[#7b7486]">Phase 2.1 按 Stitch 05 原型实现</p>
-            <button
-              onClick={() => setView('workspace')}
-              class="mt-4 px-4 py-2 rounded-lg text-sm font-medium bg-[#eff4ff] text-[#6b38d4] hover:bg-[#e9ddff] transition-colors"
-            >
-              ← 返回工作台
-            </button>
-          </div>
+          <NovelEditor />
         </Match>
 
         {/* 25道题引导 (Phase 5.2) */}
