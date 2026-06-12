@@ -82,6 +82,9 @@ caiode/Trae-Ralph-main/
 # Agent workspace files (auto-generated)
 workspaces/
 
+# Local backup directories
+_backup/
+
 # VS Code extension build artifacts
 caiode/vscode-extension/node_modules/
 caiode/vscode-extension/dist/
