@@ -1,25 +1,56 @@
-import { createContext, useContext, createSignal, type JSX } from 'solid-js';
+import { createContext, useContext, createSignal, onMount, type JSX } from 'solid-js';
+import { useSearchParams } from '@solidjs/router';
 import type { NovelView } from '../types/novel-view';
 
+/** 合法的 NovelView 值列表 */
+const VALID_VIEWS: NovelView[] = ['bookshelf', 'create-project', 'workspace', 'editor', 'guide'];
+
+function isValidView(v: string): v is NovelView {
+  return VALID_VIEWS.includes(v as NovelView);
+}
+
 /**
- * 小说视图状态 Context
+ * 小说视图状态 Context — 与 URL query param 同步
  *
- * 在 NovelApp 顶层提供，所有子组件通过 useNovelView() 消费
- * 确保书架→创建项目→工作台的视图切换共享同一个信号
+ * URL 模式: /novel?view=workspace
+ * 默认: /novel → view=bookshelf
  */
 interface NovelViewContextValue {
   currentView: () => NovelView;
   setView: (view: NovelView) => void;
+  /** 当前选中的项目 ID（书架→工作台传递用） */
+  projectId: () => string;
+  selectProject: (id: string) => void;
 }
 
 const NovelViewContext = createContext<NovelViewContextValue>();
 
 export function NovelViewProvider(props: { children: JSX.Element }) {
-  const [currentView, setCurrentView] = createSignal<NovelView>('bookshelf');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [projectId, setProjectId] = createSignal<string>('proj-001');
+
+  /** 从 URL 读取初始视图，默认 bookshelf */
+  const initialView = () => {
+    const v = searchParams.view;
+    return isValidView(v) ? v : 'bookshelf';
+  };
+
+  const [currentView, setCurrentView] = createSignal<NovelView>(initialView());
+
+  /** setView 时同步更新 URL */
+  const setView = (view: NovelView) => {
+    setCurrentView(view);
+    setSearchParams({ view }, { replace: true });
+  };
 
   const value: NovelViewContextValue = {
     get currentView() { return currentView; },
-    setView: (view: NovelView) => setCurrentView(view),
+    setView,
+    get projectId() { return projectId; },
+    selectProject: (id: string) => {
+      setProjectId(id);
+      setView('workspace');
+    },
   };
 
   return (
@@ -31,8 +62,6 @@ export function NovelViewProvider(props: { children: JSX.Element }) {
 
 /**
  * 消费视图状态的 Hook
- *
- * 所有需要切换视图的子组件（BookshelfPage、Workspace 等）都通过此 Hook 获取 setView
  */
 export function useNovelView(): NovelViewContextValue {
   const ctx = useContext(NovelViewContext);

@@ -22,7 +22,7 @@ import { FloatingWidgets } from './floating-widgets';
  */
 export const BookshelfPage: Component = () => {
   const { filteredProjects, searchKeyword, setSearchKeyword, isLoadingList, refetchProjects } = useNovelProject();
-  const { setView } = useNovelView();
+  const { setView, selectProject } = useNovelView();
 
   const projects = filteredProjects;
   const isEmpty = () => projects().length === 0;
@@ -54,7 +54,7 @@ export const BookshelfPage: Component = () => {
   };
 
   const handleSelectProject = (id: string) => {
-    setView('workspace');
+    selectProject(id);
   };
 
   return (
@@ -85,7 +85,7 @@ export const BookshelfPage: Component = () => {
           <EmptyState
             onCreateQuick={() => setView('create-project')}
             onCreateProject={() => setView('create-project')}
-            onGuide={() => console.log('[Phase 1.1] 25道题引导 → Phase 5.2')}
+            onGuide={() => setView('guide')}
           />
         }
       >
