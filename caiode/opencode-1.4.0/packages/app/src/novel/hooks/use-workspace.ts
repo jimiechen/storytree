@@ -21,7 +21,7 @@ export function useWorkspace(projectId: () => string) {
   } = useNovelChapters(projectId);
 
   const [visiblePanels, setVisiblePanels] = createSignal<Set<WorkspacePanelId>>(
-    new Set(['character', 'ai-task'])
+    new Set(['character', 'ai-task', 'generation'])
   );
 
   const [isLogDrawerOpen, setIsLogDrawerOpen] = createSignal(false);

@@ -39,6 +39,7 @@ export const WorkspaceHeader: Component<WorkspaceHeaderProps> = (props) => {
       <div class="flex items-center gap-2">
         {panelBtn('character', '角色面板')}
         {panelBtn('ai-task', 'AI 任务')}
+        {panelBtn('generation', '生成设置')}
         <button
           class="px-3 py-1.5 text-xs rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors"
           onClick={props.onOpenLog}

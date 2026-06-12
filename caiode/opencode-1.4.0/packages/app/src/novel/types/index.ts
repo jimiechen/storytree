@@ -12,3 +12,5 @@ export type { BookshelfFilter, FloatingWidgetData, ToolbarItem } from './bookshe
 export type { FormValidationError } from './bookshelf';
 export type { WorkspacePanelId, WorkspaceState } from './workspace';
 export type { OutlineViewMode, OutlineNodeType, OutlineNode } from './outline';
+export type { GenerationConfig, ContextReference, AIModelOption } from './generation-config';
+export { AI_MODEL_OPTIONS, DEFAULT_CONTEXT_REFS, DEFAULT_GENERATION_CONFIG } from './generation-config';

@@ -3,9 +3,11 @@ import type { Component } from 'solid-js';
 import { useWorkspace } from '../../hooks/use-workspace';
 import { useNovelOutline } from '../../hooks/use-novel-outline';
 import type { WorkspacePanelId } from '../../types/workspace';
+import type { GenerationConfig } from '../../types';
 import { MockModeBanner } from '../mock-mode-banner';
 import { WorkspaceHeader } from './workspace-header';
 import { OutlineSidebar } from './outline-sidebar';
+import { GenerationSettings } from './generation-settings';
 import { ChapterEditor } from '../novel-editor/chapter-editor';
 import { CharacterPanel } from '../novel-editor/character-panel';
 import { AITaskPanel } from '../novel-editor/ai-task-panel';
@@ -91,6 +93,17 @@ export const Workspace: Component<WorkspaceProps> = (props) => {
     });
   };
 
+  /** AI 生成：通过生成配置面板提交 */
+  const handleGenerate = async (config: GenerationConfig) => {
+    const ch = ws.selectedChapter();
+    if (!ch) return;
+    await submitTask({
+      type: 'continue-writing',
+      chapterId: ch.id,
+      text: ch.content.substring(0, Math.min(ch.content.length, 500)),
+    });
+  };
+
   return (
     <div class="flex flex-col h-screen bg-gray-100">
       <MockModeBanner />
@@ -165,6 +178,14 @@ export const Workspace: Component<WorkspaceProps> = (props) => {
               onRetryTask={handleRetryTask}
             />
           </div>
+        </Show>
+
+        <Show when={ws.isPanelVisible('generation')}>
+          <GenerationSettings
+            hasSelectedChapter={!!ws.selectedChapterId()}
+            isRunning={tasks().some(t => t.status === 'running')}
+            onGenerate={handleGenerate}
+          />
         </Show>
       </div>
 

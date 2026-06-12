@@ -3,7 +3,7 @@
  */
 
 /** 可切换的右侧面板 ID */
-export type WorkspacePanelId = 'character' | 'ai-task';
+export type WorkspacePanelId = 'character' | 'ai-task' | 'generation';
 
 /** Workspace 面板状态 */
 export interface WorkspaceState {
