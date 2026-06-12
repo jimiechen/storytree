@@ -8,7 +8,8 @@ import type {
   AITask,
   AITaskInput,
   AITaskStatus,
-  AILog
+  AILog,
+  OutlineNode
 } from '../types';
 import type { CreateProjectInput } from '../types';
 
@@ -48,4 +49,13 @@ export interface IAILogProvider {
   logTask(task: AITask): Promise<void>;
   listLogs(options?: { status?: AITaskStatus; limit?: number }): Promise<AILog[]>;
   getLog(taskId: string): Promise<AILog | null>;
+}
+
+export interface INovelOutlineProvider {
+  /** 列出项目的大纲树（按 orderIndex 排序，返回副本） */
+  listOutlines(projectId: string): Promise<OutlineNode[]>;
+  /** 获取某章节的细纲（复用 ChapterOutline） */
+  getDetailOutline(chapterId: string): Promise<import('../types').ChapterOutline | null>;
+  /** AI 生成/刷新大纲（Mock 返回预设数据） */
+  generateOutline(projectId: string): Promise<OutlineNode[]>;
 }

@@ -11,3 +11,4 @@ export type { ProviderError, ProviderErrorCode } from './provider-error';
 export type { BookshelfFilter, FloatingWidgetData, ToolbarItem } from './bookshelf';
 export type { FormValidationError } from './bookshelf';
 export type { WorkspacePanelId, WorkspaceState } from './workspace';
+export type { OutlineViewMode, OutlineNodeType, OutlineNode } from './outline';

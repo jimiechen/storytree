@@ -1,10 +1,11 @@
 import { Show, For, onMount } from 'solid-js';
 import type { Component } from 'solid-js';
 import { useWorkspace } from '../../hooks/use-workspace';
+import { useNovelOutline } from '../../hooks/use-novel-outline';
 import type { WorkspacePanelId } from '../../types/workspace';
 import { MockModeBanner } from '../mock-mode-banner';
 import { WorkspaceHeader } from './workspace-header';
-import { ChapterList } from '../novel-editor/chapter-list';
+import { OutlineSidebar } from './outline-sidebar';
 import { ChapterEditor } from '../novel-editor/chapter-editor';
 import { CharacterPanel } from '../novel-editor/character-panel';
 import { AITaskPanel } from '../novel-editor/ai-task-panel';
@@ -25,6 +26,7 @@ interface WorkspaceProps {
  */
 export const Workspace: Component<WorkspaceProps> = (props) => {
   const ws = useWorkspace(props.projectId);
+  const outline = useNovelOutline(props.projectId);
   const { tasks, submitTask, cancelTask } = useAITask();
   const { logs, refetch: refetchLogs } = useAILog();
 
@@ -104,23 +106,18 @@ export const Workspace: Component<WorkspaceProps> = (props) => {
 
       {/* 三栏主内容区 */}
       <div class="flex-1 flex overflow-hidden">
-        {/* 左侧面板：章节列表 ~256px */}
-        <div class="w-64 shrink-0 border-r border-gray-200 bg-white">
-          <Show
-            when={ws.chapters()}
-            fallback={
-              <div class="flex items-center justify-center h-full text-gray-400 text-sm">
-                {ws.loading() ? '加载中...' : '暂无章节'}
-              </div>
-            }
-          >
-            <ChapterList
-              chapters={ws.chapters() ?? []}
-              selectedId={ws.selectedChapterId()}
-              onSelect={ws.selectChapter}
-            />
-          </Show>
-        </div>
+        {/* 左侧面板：大纲/细纲/章节三视图 ~256px */}
+        <OutlineSidebar
+          chapters={ws.chapters() ?? []}
+          selectedId={ws.selectedChapterId()}
+          onSelect={ws.selectChapter}
+          viewMode={outline.viewMode}
+          onSwitchView={outline.setViewMode}
+          outlines={outline.outlines()}
+          loading={outline.loading}
+          onGenerateOutline={outline.generateOutline}
+          onGenerateDetail={() => {}}
+        />
 
         {/* 中间面板：编辑器 flex-1 */}
         <div class="flex-1 min-w-0 flex flex-col overflow-hidden bg-white">
