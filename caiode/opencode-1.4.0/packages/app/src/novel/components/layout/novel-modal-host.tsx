@@ -1,0 +1,61 @@
+import type { Component } from 'solid-js';
+import { useNovelNavigation } from '../../hooks/use-novel-navigation';
+import { NovelIcon } from './novel-icon';
+
+const MODAL_TITLES: Record<string, string> = {
+  export: '导出设置',
+  feedback: '意见反馈',
+  'generation-settings': '生成设置',
+  'chapter-history': '历史版本',
+  notifications: '通知中心',
+  'batch-generation': '批量生成',
+};
+
+/**
+ * NovelModalHost — 全局弹框容器
+ *
+ * 批次 4 引入，根据 useNovelNavigation.currentModal 渲染对应占位弹框。
+ * 点击遮罩或关闭按钮可关闭弹框。
+ */
+export const NovelModalHost: Component = () => {
+  const nav = useNovelNavigation();
+
+  if (!nav.isModalOpen()) return null;
+
+  const modal = nav.currentModal();
+  const title = modal ? (MODAL_TITLES[modal] ?? '弹框') : '';
+
+  return (
+    <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+      <div class="bg-white rounded-xl max-w-lg w-full mx-4 shadow-[0_8px_32px_rgba(0,0,0,0.12)] flex flex-col max-h-[80vh]">
+        {/* Header */}
+        <header class="flex justify-between items-center px-6 py-4 border-b border-[#cbc3d7]">
+          <h2 class="text-lg font-bold text-[#0d1c2f]">{title}</h2>
+          <button
+            type="button"
+            onClick={nav.closeModal}
+            class="text-[#7b7486] hover:text-[#0d1c2f] transition-colors p-1 rounded-full hover:bg-[#eff4ff]"
+          >
+            <NovelIcon name="close" size={20} />
+          </button>
+        </header>
+
+        {/* Content */}
+        <div class="p-6 text-sm text-[#7b7486] flex items-center justify-center min-h-[120px]">
+          <p>「{title}」功能正在开发中，敬请期待。</p>
+        </div>
+
+        {/* Footer */}
+        <footer class="px-6 py-4 border-t border-[#cbc3d7] flex justify-end">
+          <button
+            type="button"
+            onClick={nav.closeModal}
+            class="px-4 py-2 rounded-lg text-sm font-medium bg-[#eff4ff] text-[#6b38d4] hover:bg-[#e9ddff] transition-colors"
+          >
+            关闭
+          </button>
+        </footer>
+      </div>
+    </div>
+  );
+};

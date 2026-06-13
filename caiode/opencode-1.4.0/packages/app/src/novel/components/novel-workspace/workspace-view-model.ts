@@ -1,7 +1,7 @@
 import { createSignal, createEffect } from 'solid-js';
 import { useWorkspace } from '../../hooks/use-workspace';
 import { useAITask } from '../../hooks/use-ai-task';
-import { useNovelView } from '../../hooks/use-novel-view';
+import { useNovelNavigation } from '../../hooks/use-novel-navigation';
 import { DEFAULT_GENERATION_CONFIG } from '../../types/generation-config';
 
 // ---------------------------------------------------------------------------
@@ -73,14 +73,14 @@ function splitContentToParagraphs(content: string): string[] {
 export function createWorkspaceViewModel(projectId: () => string) {
   const ws = useWorkspace(projectId);
   const ai = useAITask();
-  const nav = useNovelView();
+  const nav = useNovelNavigation();
 
   // === 本地 UI 状态：章节展开/收藏（Hook 数据无这些字段，由 ViewModel fallback） ===
   const [chapterUiState, setChapterUiState] = createSignal<
     Record<string, { expanded?: boolean; starred?: boolean }>
   >({});
 
-  // === 本地 UI 状态：生成参数（后续替换为 Hook 数据） ===
+  // === 本地 UI 状态：生成参数（后续替换为 Hook）===
   const [generationConfig, setGenerationConfig] = createSignal<WorkspaceGenerationConfigView>({
     targetWords: DEFAULT_GENERATION_CONFIG.targetWordCount,
     tolerance: `±${DEFAULT_GENERATION_CONFIG.wordCountTolerance}`,
@@ -234,7 +234,8 @@ export function createWorkspaceViewModel(projectId: () => string) {
     submitChapterGenerationTask,
     cancelRunningTask,
 
-    // 导航（临时桥接，批次 4 替换为 NovelNavigation）
-    setView: nav.setView,
+    // 导航（批次 4 使用 NovelNavigation）
+    openView: nav.openView,
+    openModal: nav.openModal,
   };
 }

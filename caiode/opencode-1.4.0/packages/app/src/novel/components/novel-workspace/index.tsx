@@ -26,45 +26,39 @@ function noop(action: string) {
 /**
  * 小说项目工作台 — Stitch 04 三栏布局组装件
  *
- * 结构:
- *   WorkspaceLayout
- *   ├── topAppBar    → WorkspaceTopAppBar
- *   ├── sideNav      → WorkspaceSideNav + WorkspaceOutlineList
- *   ├── editor       → WorkspaceEditorHeader + WorkspaceChapterContent + WorkspaceAiProgressDock
- *   └── generationPanel → 生成设置 Header + WorkspaceGenerationForm + WorkspaceContextOptions + WorkspaceActions
- *
- * 数据流：
- *   Provider → Hook → workspace-view-model.ts → UI props
+ * 批次 4 改造：
+ * - 使用 NovelNavigation 的 openView / openModal 替代临时 setView / noop
+ * - TopAppBar「工作台」按钮进入 workspace，Logo 回到书架
  */
 export const Workspace: Component<WorkspaceProps> = (props) => {
   const vm = createWorkspaceViewModel(props.projectId);
 
   const actions = {
-    openBookshelf: () => vm.setView('bookshelf'),
-    openEditor: () => vm.setView('editor'),
-    openGuide: () => vm.setView('guide'),
-    openMaterials: () => noop('materials'),
-    openInspiration: () => noop('inspiration'),
-    openCharacterPanel: () => noop('character-panel'),
-    openWorldSetting: () => noop('world-setting'),
-    openExport: () => noop('export'),
-    openHistory: () => noop('chapter-history'),
+    openWorkspace: () => vm.openView('workspace'),
+    openBookshelf: () => vm.openView('bookshelf'),
+    openEditor: () => vm.openView('editor'),
+    openGuide: () => vm.openView('guide'),
+    openCharacterPanel: () => vm.openView('character-panel'),
+    openWorldSetting: () => vm.openView('world-setting'),
+    openProfile: () => vm.openView('profile'),
+    openTutorial: () => vm.openView('tutorial'),
+    openExport: () => vm.openModal('export'),
+    openHistory: () => vm.openModal('chapter-history'),
+    openBatchGeneration: () => vm.openModal('batch-generation'),
+    openNotifications: () => vm.openModal('notifications'),
+    openSettings: () => vm.openModal('generation-settings'),
+    openFeedback: () => vm.openModal('feedback'),
     toggleFullscreen: () => noop('fullscreen'),
-    openBatchGeneration: () => noop('batch-generation'),
-    openNotifications: () => noop('notifications'),
-    openSettings: () => noop('settings'),
-    openProfile: () => noop('profile'),
-    openHelp: () => noop('help'),
-    openFeedback: () => noop('feedback'),
   };
 
   return (
     <WorkspaceLayout
       topAppBar={
         <WorkspaceTopAppBar
-          onOpenWorkspace={actions.openBookshelf}
-          onOpenMaterials={actions.openMaterials}
-          onOpenInspiration={actions.openInspiration}
+          onLogoClick={actions.openBookshelf}
+          onOpenWorkspace={actions.openWorkspace}
+          onOpenMaterials={actions.openWorldSetting}
+          onOpenInspiration={actions.openTutorial}
           onPublishChapter={actions.openEditor}
           onOpenNotifications={actions.openNotifications}
           onOpenSettings={actions.openSettings}
@@ -81,7 +75,7 @@ export const Workspace: Component<WorkspaceProps> = (props) => {
             onOpenCharacters={actions.openCharacterPanel}
             onOpenWorldSetting={actions.openWorldSetting}
             onOpenExport={actions.openExport}
-            onOpenHelp={actions.openHelp}
+            onOpenHelp={actions.openTutorial}
             onOpenFeedback={actions.openFeedback}
             onGenerateOutline={vm.submitOutlineTask}
             onGenerateDetail={vm.submitDetailOutlineTask}

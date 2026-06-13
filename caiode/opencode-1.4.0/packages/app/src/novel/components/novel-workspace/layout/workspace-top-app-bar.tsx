@@ -2,6 +2,7 @@ import type { Component } from 'solid-js';
 import { NovelIcon } from '../../layout/novel-icon';
 
 export interface WorkspaceTopAppBarActions {
+  onLogoClick?: () => void;
   onOpenWorkspace?: () => void;
   onOpenMaterials?: () => void;
   onOpenInspiration?: () => void;
@@ -19,7 +20,7 @@ export const WorkspaceTopAppBar: Component<WorkspaceTopAppBarProps> = (props) =>
     <header class="bg-white border-b border-[#cbc3d7] flex justify-between items-center w-full px-6 h-16 shrink-0 z-20">
       {/* Brand Logo */}
       <button
-        onClick={props.onOpenWorkspace}
+        onClick={props.onLogoClick}
         class="text-xl font-bold text-[#6b38d4] hover:opacity-80 transition-opacity"
         style={{ 'font-family': "'Plus Jakarta Sans', 'PingFang SC', sans-serif" }}
       >
