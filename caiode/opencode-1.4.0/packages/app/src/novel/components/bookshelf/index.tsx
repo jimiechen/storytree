@@ -2,6 +2,7 @@ import { Show, For } from 'solid-js';
 import type { Component } from 'solid-js';
 import { useNovelProject } from '../../hooks/use-novel-project';
 import { useNovelView } from '../../hooks/use-novel-view';
+import { useNovelNavigation } from '../../hooks/use-novel-navigation';
 import type { Project } from '../../types';
 import { NovelAppLayout } from '../layout/novel-app-layout';
 import { NovelIcon } from '../layout/novel-icon';
@@ -21,16 +22,22 @@ import { FloatingWidgets } from './floating-widgets';
 export const BookshelfPage: Component = () => {
   const { filteredProjects, searchKeyword, setSearchKeyword, isLoadingList, refetchProjects } = useNovelProject();
   const { setView, selectProject } = useNovelView();
+  const nav = useNovelNavigation();
 
   const projects = filteredProjects;
   const isEmpty = () => projects().length === 0;
 
+  const handleSelectProject = (projectId: string) => {
+    selectProject(projectId);
+    nav.openView('workspace');
+  };
+
   const navItems = [
     { id: 'home', label: '首页', icon: 'home', onClick: () => {} },
     { id: 'bookshelf', label: '书架', icon: 'library_books', active: true, onClick: () => {} },
-    { id: 'create', label: '创作', icon: 'edit_note', onClick: () => setView('workspace') },
+    { id: 'create', label: '创作', icon: 'edit_note', onClick: () => nav.openView('workspace') },
     { id: 'community', label: '社区', icon: 'groups', onClick: () => {} },
-    { id: 'settings', label: '设置', icon: 'settings', onClick: () => {} },
+    { id: 'settings', label: '设置', icon: 'settings', onClick: () => nav.openModal('settings') },
   ];
 
   return (
@@ -75,7 +82,7 @@ export const BookshelfPage: Component = () => {
 
           {/* 新建按钮 */}
           <button
-            onClick={() => setView('create-project')}
+            onClick={() => nav.openView('create-project')}
             class="bg-white border border-[#cbc3d7] text-[#6b38d4] rounded-full px-5 py-2 flex items-center gap-2 shadow-sm hover:shadow-md hover:border-[#6b38d4] transition-all text-sm font-medium ml-2 mr-2"
           >
             <NovelIcon name="add" size={16} />
@@ -99,16 +106,16 @@ export const BookshelfPage: Component = () => {
         when={!isEmpty()}
         fallback={
           <EmptyState
-            onCreateQuick={() => setView('create-project')}
-            onCreateProject={() => setView('create-project')}
-            onGuide={() => setView('guide')}
+            onCreateQuick={() => nav.openView('create-project')}
+            onCreateProject={() => nav.openView('create-project')}
+            onGuide={() => nav.openView('guide')}
           />
         }
       >
         {/* 2 列卡片网格 */}
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 max-w-5xl mx-auto pb-24">
           <For each={projects()}>
-            {(project) => <ProjectCard project={project} onSelect={() => selectProject(project.id)} />}
+            {(project) => <ProjectCard project={project} onSelect={() => handleSelectProject(project.id)} />}
           </For>
         </div>
       </Show>

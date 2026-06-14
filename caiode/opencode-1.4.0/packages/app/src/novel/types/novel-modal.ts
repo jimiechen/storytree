@@ -10,4 +10,5 @@ export type NovelModal =
   | 'generation-settings'
   | 'chapter-history'
   | 'notifications'
-  | 'batch-generation';
+  | 'batch-generation'
+  | 'settings';

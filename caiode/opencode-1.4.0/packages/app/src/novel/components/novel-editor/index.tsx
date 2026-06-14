@@ -128,7 +128,7 @@ export function NovelEditor() {
           </button>
           <button
             class="flex items-center gap-1.5 px-4 py-2 rounded-lg text-[#494454] hover:bg-[#eff4ff] transition-colors text-sm font-medium border border-transparent"
-            onClick={() => alert('备注功能即将推出')}
+            onClick={() => { /* 备注功能 Phase 5.2 实现 */ }}
           >
             <NovelIcon name="notes" size={18} />
             备注
