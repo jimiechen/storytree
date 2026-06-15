@@ -1,5 +1,6 @@
 import { createContext, useContext, createSignal, onMount, type JSX } from 'solid-js';
 import { useNovelView } from './use-novel-view';
+import { useSearchParams } from '@solidjs/router';
 import type { NovelView } from '../types/novel-view';
 import type { NovelModal } from '../types/novel-modal';
 
@@ -30,6 +31,7 @@ const NovelNavigationContext = createContext<NovelNavigationState>();
  */
 export function NovelNavigationProvider(props: { children: JSX.Element }) {
   const novelView = useNovelView();
+  const [, setSearchParams] = useSearchParams();
   const [currentModal, setCurrentModal] = createSignal<NovelModal | null>(null);
   const [extendedView, setExtendedView] = createSignal<ExtendedView | null>(null);
 
@@ -40,14 +42,17 @@ export function NovelNavigationProvider(props: { children: JSX.Element }) {
       setExtendedView(null);
     } else {
       setExtendedView(view);
+      setSearchParams({ view }, { replace: true });
     }
   };
 
   const currentView = () => extendedView() ?? novelView.currentView();
 
   // /novel 默认进入 workspace（不修改 useNovelView 的默认值）
+  // 只有在 URL 没有明确 view 参数时才重定向
   onMount(() => {
-    if (novelView.currentView() === 'bookshelf') {
+    const hasExplicitView = new URLSearchParams(window.location.search).has('view');
+    if (!hasExplicitView && novelView.currentView() === 'bookshelf') {
       openView('workspace');
     }
   });

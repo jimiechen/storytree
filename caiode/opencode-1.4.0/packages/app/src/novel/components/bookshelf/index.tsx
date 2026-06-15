@@ -194,6 +194,7 @@ function ProjectCard(props: { project: Project; onSelect: () => void }) {
 
   return (
     <button
+      data-testid="bookshelf-project-card"
       onClick={props.onSelect}
       class="bg-white rounded-xl border border-[#cbc3d7] shadow-sm hover:shadow-lg transition-all duration-300 p-4 flex gap-4 group text-left w-full"
     >

@@ -20,10 +20,7 @@ test.describe("novel-static-flow - 静态页面流转", () => {
 
   test("应默认进入 workspace 工作台", async ({ page }) => {
     await page.goto("/novel")
-
-    // 等待页面加载
     await page.waitForLoadState("load")
-    await page.waitForTimeout(800)
 
     // 验证工作台核心元素可见（生成设置、大纲 等）
     const workspaceIndicator = page.getByText(/生成设置|大纲|工作台/).first()
@@ -31,27 +28,13 @@ test.describe("novel-static-flow - 静态页面流转", () => {
   })
 
   test("书架项目卡片点击应进入工作台", async ({ page }) => {
-    await page.goto("/novel")
+    // 直接导航到书架，绕过默认重定向
+    await page.goto("/novel?view=bookshelf")
     await page.waitForLoadState("load")
-    await page.waitForTimeout(800)
-
-    // 如果已经在 workspace（默认），先导航到书架
-    // 通过 Logo 点击回到书架
-    const logo = page.getByText("墨语 AI").first()
-    if (await logo.isVisible().catch(() => false)) {
-      await logo.click()
-      await page.waitForTimeout(500)
-    }
 
     // 等待书架页面出现
     const bookshelfTitle = page.getByText("我的书架")
-    const isBookshelf = await bookshelfTitle.isVisible().catch(() => false)
-
-    if (!isBookshelf) {
-      // 可能已经是工作台，跳过此测试的前提条件检查
-      test.skip(true, "无法确认当前在书架页面")
-      return
-    }
+    await expect(bookshelfTitle).toBeVisible({ timeout: 10_000 })
 
     // 查找项目卡片并点击
     const cards = page.locator("[data-testid='bookshelf-project-card']")
@@ -64,7 +47,7 @@ test.describe("novel-static-flow - 静态页面流转", () => {
 
     const firstCard = cards.first()
     await firstCard.click()
-    await page.waitForTimeout(500)
+    await page.waitForURL(/view=workspace/, { timeout: 10_000 })
 
     // 点击后应显示工作台元素
     const workspaceIndicator = page.getByText(/生成设置/).first()
@@ -74,66 +57,42 @@ test.describe("novel-static-flow - 静态页面流转", () => {
   test("工作台发布章节应进入编辑器", async ({ page }) => {
     await page.goto("/novel")
     await page.waitForLoadState("load")
-    await page.waitForTimeout(800)
 
-    // 确保在工作台
-    const workspaceIndicator = page.getByText(/生成设置/).first()
-    try {
-      await expect(workspaceIndicator).toBeVisible({ timeout: 10_000 })
-    } catch {
-      test.skip(true, "工作台未渲染")
-      return
-    }
+    const publishBtn = page.getByRole("button", { name: /发布章节/ }).first()
+    await expect(publishBtn).toBeVisible({ timeout: 10_000 })
 
-    // 点击发布章节按钮
-    const publishBtn = page.getByRole("button", { name: /发布章节/ })
-    if (await publishBtn.isVisible().catch(() => false)) {
-      await publishBtn.click()
-      await page.waitForTimeout(500)
+    await publishBtn.click()
+    await page.waitForURL(/view=editor/, { timeout: 10_000 })
 
-      // 验证编辑器相关元素出现（历史版本按钮、AI续写按钮或加载中）
-      const editorIndicator = page.getByText(/历史版本|AI续写|加载中/).first()
-      await expect(editorIndicator).toBeVisible({ timeout: 10_000 })
-    } else {
-      test.skip(true, "发布章节按钮不可见")
-    }
+    const editorIndicator = page.getByText(/历史版本|AI续写|加载中/).first()
+    await expect(editorIndicator).toBeVisible({ timeout: 10_000 })
   })
 
   test("工作台人物按钮应进入占位页", async ({ page }) => {
     await page.goto("/novel")
     await page.waitForLoadState("load")
-    await page.waitForTimeout(800)
 
-    // 点击人物按钮
-    const characterBtn = page.getByRole("button", { name: /人物/ }).first()
-    if (await characterBtn.isVisible().catch(() => false)) {
-      await characterBtn.click()
-      await page.waitForTimeout(500)
+    const characterBtn = page.getByRole('button', { name: '人物' }).first()
+    await expect(characterBtn).toBeVisible({ timeout: 10_000 })
 
-      // 验证占位页出现
-      const placeholder = page.getByText(/人物面板/).first()
-      await expect(placeholder).toBeVisible({ timeout: 10_000 })
-    } else {
-      test.skip(true, "人物按钮不可见")
-    }
+    await characterBtn.click()
+    await page.waitForURL(/view=character-panel/, { timeout: 10_000 })
+
+    const placeholder = page.getByText(/人物面板/).first()
+    await expect(placeholder).toBeVisible({ timeout: 10_000 })
   })
 
   test("工作台设定按钮应进入占位页", async ({ page }) => {
     await page.goto("/novel")
     await page.waitForLoadState("load")
-    await page.waitForTimeout(800)
 
-    // 点击设定按钮
-    const settingBtn = page.getByRole("button", { name: /设定/ }).first()
-    if (await settingBtn.isVisible().catch(() => false)) {
-      await settingBtn.click()
-      await page.waitForTimeout(500)
+    const settingBtn = page.getByRole('button', { name: '设定' }).first()
+    await expect(settingBtn).toBeVisible({ timeout: 10_000 })
 
-      // 验证占位页出现
-      const placeholder = page.getByText(/世界设定/).first()
-      await expect(placeholder).toBeVisible({ timeout: 10_000 })
-    } else {
-      test.skip(true, "设定按钮不可见")
-    }
+    await settingBtn.click()
+    await page.waitForURL(/view=world-setting/, { timeout: 10_000 })
+
+    const placeholder = page.getByText(/世界设定/).first()
+    await expect(placeholder).toBeVisible({ timeout: 10_000 })
   })
 })

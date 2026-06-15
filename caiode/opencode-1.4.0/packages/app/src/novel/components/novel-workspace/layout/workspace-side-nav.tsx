@@ -84,7 +84,7 @@ function NavItem(props: { icon: string; label: string; active?: boolean; onClick
       onClick={props.onClick}
       class={`w-full flex items-center px-3 py-2 rounded-md transition-all text-left ${
         props.active
-          ? 'text-[#6b38d4] border-l-4 border-[#6b38d4] bg-[#eff4ff] font-medium'
+          ? 'text-[#6b38d4] border-l-4 border-[#6b38d4] bg-[#8455ef]/10 font-medium'
           : 'text-[#494454] hover:bg-[#e6eeff] border-l-4 border-transparent'
       }`}
     >

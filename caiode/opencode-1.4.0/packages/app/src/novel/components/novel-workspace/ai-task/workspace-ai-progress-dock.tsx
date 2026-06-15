@@ -23,7 +23,7 @@ export const WorkspaceAiProgressDock: Component<WorkspaceAiProgressDockProps> = 
   const task = props.task;
 
   return (
-    <div class="absolute bottom-8 left-1/2 -translate-x-1/2 w-[85%] max-w-3xl bg-white/90 backdrop-blur-md rounded-xl p-6 shadow-[0_8px_24px_rgba(0,0,0,0.08)] border border-[#cbc3d7] flex flex-col gap-4 z-30 transition-all">
+    <div class="absolute bottom-8 left-1/2 -translate-x-1/2 w-[85%] max-w-3xl bg-[#f8f9ff]/90 backdrop-blur-md rounded-xl p-6 shadow-[0_8px_24px_rgba(0,0,0,0.08)] border border-[#cbc3d7] flex flex-col gap-4 z-30 transition-all">
       {/* Status Header */}
       <div class="flex justify-between items-center text-sm">
         <div class="flex items-center gap-3 text-[#6b38d4]">

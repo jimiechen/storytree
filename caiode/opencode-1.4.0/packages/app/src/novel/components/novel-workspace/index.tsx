@@ -106,7 +106,7 @@ export const Workspace: Component<WorkspaceProps> = (props) => {
       }
       generationPanel={
         <div class="flex flex-col h-full">
-          <header class="p-6 border-b border-[#cbc3d7] bg-white shrink-0">
+          <header class="p-6 border-b border-[#cbc3d7] bg-[#f8f9ff] shrink-0">
             <h3 class="text-lg font-bold text-[#0d1c2f] flex items-center gap-2">
               <NovelIcon name="tune" size={20} class="text-[#6b38d4]" />
               <span>生成设置</span>
