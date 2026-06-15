@@ -49,11 +49,21 @@ export function NovelNavigationProvider(props: { children: JSX.Element }) {
   const currentView = () => extendedView() ?? novelView.currentView();
 
   // /novel 默认进入 workspace（不修改 useNovelView 的默认值）
-  // 只有在 URL 没有明确 view 参数时才重定向
+  // 处理 URL 初始状态：无参数则重定向到 workspace；扩展视图则同步 extendedView
   onMount(() => {
-    const hasExplicitView = new URLSearchParams(window.location.search).has('view');
-    if (!hasExplicitView && novelView.currentView() === 'bookshelf') {
-      openView('workspace');
+    const params = new URLSearchParams(window.location.search);
+    const viewParam = params.get('view');
+
+    if (!viewParam) {
+      if (novelView.currentView() === 'bookshelf') {
+        openView('workspace');
+      }
+      return;
+    }
+
+    const extendedViews: ExtendedView[] = ['character-panel', 'world-setting', 'profile', 'tutorial'];
+    if (extendedViews.includes(viewParam as ExtendedView)) {
+      setExtendedView(viewParam as ExtendedView);
     }
   });
 
