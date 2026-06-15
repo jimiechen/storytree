@@ -21,8 +21,10 @@ if (!fs.existsSync(SCREENSHOT_DIR)) {
 test.describe("novel-screenshot — 关键页面截图", () => {
 
   test("工作台 /novel 截图", async ({ page }) => {
-    await page.goto("/novel")
+    // 直接访问 workspace，避免 onMount 重定向的中间状态
+    await page.goto("/novel?view=workspace")
     await page.waitForLoadState("load")
+    await page.waitForSelector("[data-testid='workspace-logo']", { timeout: 10_000 })
     await page.waitForTimeout(1500)
 
     await page.screenshot({
