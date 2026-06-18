@@ -11,4 +11,6 @@ export type NovelModal =
   | 'chapter-history'
   | 'notifications'
   | 'batch-generation'
-  | 'settings';
+  | 'settings'
+  | 'guide-create'
+  | 'achievement-detail';

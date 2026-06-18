@@ -1,10 +1,10 @@
-import { createContext, useContext, createSignal, onMount, type JSX } from 'solid-js';
+import { createContext, useContext, createSignal, createEffect, onMount, type JSX } from 'solid-js';
 import { useNovelView } from './use-novel-view';
 import { useSearchParams } from '@solidjs/router';
 import type { NovelView } from '../types/novel-view';
 import type { NovelModal } from '../types/novel-modal';
 
-/** 扩展视图：NovelView + 批次 4 占位页面 */
+/** 扩展视图：NovelView + 占位页面 */
 type ExtendedView = NovelView | 'character-panel' | 'world-setting' | 'profile' | 'tutorial';
 
 interface NovelNavigationState {
@@ -19,25 +19,55 @@ interface NovelNavigationState {
 
 const NovelNavigationContext = createContext<NovelNavigationState>();
 
-/**
- * NovelNavigationProvider — 全局导航状态管理
- *
- * 职责：
- * - 管理当前视图（支持 NovelView + 扩展占位视图）
- * - 管理当前弹框（NovelModal）
- * - 底层代理 useNovelView 的 URL 同步和 projectId
- *
- * 必须包裹在 NovelViewProvider 内部使用。
- */
+/** 所有扩展视图值（用于 URL 参数检测） */
+const EXTENDED_VIEW_VALUES: ExtendedView[] = [
+  'character-panel', 'world-setting', 'profile', 'tutorial',
+];
+
+function isExtendedViewValue(v: string): v is ExtendedView {
+  return EXTENDED_VIEW_VALUES.includes(v as ExtendedView);
+}
+
 export function NovelNavigationProvider(props: { children: JSX.Element }) {
   const novelView = useNovelView();
   const [, setSearchParams] = useSearchParams();
   const [currentModal, setCurrentModal] = createSignal<NovelModal | null>(null);
   const [extendedView, setExtendedView] = createSignal<ExtendedView | null>(null);
 
+  /** 核心视图列表（NovelView 类型中的所有值） */
+  const coreViews: NovelView[] = ['bookshelf', 'create-project', 'workspace', 'editor', 'guide', 'achievements', 'novel-guide'];
+
+  /** 从 URL 解析目标视图（同步执行，确保首次渲染前完成） */
+  function resolveInitialView(): ExtendedView | null {
+    const raw = novelView.rawViewParam();
+
+    // 无参数：默认行为
+    if (!raw) {
+      if (novelView.currentView() === 'bookshelf') {
+        // /novel 无参数 → 默认进入工作台
+        return 'workspace';
+      }
+      return null; // 已有有效核心视图，不覆盖
+    }
+
+    // 扩展视图
+    if (isExtendedViewValue(raw)) {
+      return raw;
+    }
+
+    // 核心视图已在 useNovelView 中处理
+    return null;
+  }
+
+  // 同步初始化：在首次渲染前解析 URL 参数
+  const initialExtended = resolveInitialView();
+  if (initialExtended) {
+    setExtendedView(initialExtended);
+  }
+
   const openView = (view: ExtendedView) => {
     setCurrentModal(null);
-    if (['bookshelf', 'create-project', 'workspace', 'editor', 'guide'].includes(view)) {
+    if (coreViews.includes(view as NovelView)) {
       novelView.setView(view as NovelView);
       setExtendedView(null);
     } else {
@@ -48,22 +78,26 @@ export function NovelNavigationProvider(props: { children: JSX.Element }) {
 
   const currentView = () => extendedView() ?? novelView.currentView();
 
-  // /novel 默认进入 workspace（不修改 useNovelView 的默认值）
-  // 处理 URL 初始状态：无参数则重定向到 workspace；扩展视图则同步 extendedView
-  onMount(() => {
-    const params = new URLSearchParams(window.location.search);
-    const viewParam = params.get('view');
+  // createEffect: 响应 URL 变化（用户点击浏览器前进/后退按钮时）
+  createEffect(() => {
+    const raw = novelView.rawViewParam();
+    if (!raw) return;
 
-    if (!viewParam) {
-      if (novelView.currentView() === 'bookshelf') {
-        openView('workspace');
+    if (isExtendedViewValue(raw) && extendedView() !== raw) {
+      setExtendedView(raw);
+    } else if (!isExtendedViewValue(raw) && coreViews.includes(raw as NovelView)) {
+      // 核心视图变化（如 bookshelf ↔ workspace），清除 extendedView
+      if (extendedView()) {
+        setExtendedView(null);
       }
-      return;
     }
+  });
 
-    const extendedViews: ExtendedView[] = ['character-panel', 'world-setting', 'profile', 'tutorial'];
-    if (extendedViews.includes(viewParam as ExtendedView)) {
-      setExtendedView(viewParam as ExtendedView);
+  // onMount: 双重保障，处理边缘情况
+  onMount(() => {
+    const raw = novelView.rawViewParam();
+    if (raw && isExtendedViewValue(raw) && !extendedView()) {
+      setExtendedView(raw);
     }
   });
 

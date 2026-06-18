@@ -7,16 +7,12 @@ import { Workspace } from '../novel-workspace';
 import { NovelEditor } from '../novel-editor';
 import { NovelModalHost } from './novel-modal-host';
 import { PlaceholderPage } from './placeholder-page';
+import { CharacterPanelPage } from '../character-panel';
+import { WorldSettingPage } from '../world-setting';
+import { ProfilePage } from '../profile';
+import { AchievementsPage } from '../achievements';
+import { NovelGuidePage } from '../novel-guide';
 
-/**
- * NovelAppShell — 小说模块应用壳层
- *
- * 批次 4 引入，替代原 NovelRouter。
- * 职责：
- * - 根据 currentView 路由到对应页面
- * - 挂载全局 NovelModalHost
- * - /novel 默认进入 workspace（由 NovelNavigationProvider onMount 处理）
- */
 export const NovelAppShell: Component = () => {
   const nav = useNovelNavigation();
 
@@ -32,12 +28,10 @@ export const NovelAppShell: Component = () => {
           </div>
         }
       >
-        {/* 书架页面 */}
         <Match when={nav.currentView() === 'bookshelf'}>
           <BookshelfPage />
         </Match>
 
-        {/* 创建项目弹窗（覆盖层） */}
         <Match when={nav.currentView() === 'create-project'}>
           <CreateProjectModal
             onSubmit={async () => nav.openView('workspace')}
@@ -48,17 +42,14 @@ export const NovelAppShell: Component = () => {
           </div>
         </Match>
 
-        {/* 三栏工作台 */}
         <Match when={nav.currentView() === 'workspace'}>
           <Workspace projectId={nav.projectId} />
         </Match>
 
-        {/* 章节编辑器 */}
         <Match when={nav.currentView() === 'editor'}>
           <NovelEditor />
         </Match>
 
-        {/* 引导页 */}
         <Match when={nav.currentView() === 'guide'}>
           <PlaceholderPage
             title="AI 创作引导"
@@ -67,18 +58,28 @@ export const NovelAppShell: Component = () => {
           />
         </Match>
 
-        {/* 批次 4 占位页面 */}
         <Match when={nav.currentView() === 'character-panel'}>
-          <PlaceholderPage title="人物面板" icon="groups" />
+          <CharacterPanelPage />
         </Match>
+
         <Match when={nav.currentView() === 'world-setting'}>
-          <PlaceholderPage title="世界设定" icon="psychology" />
+          <WorldSettingPage />
         </Match>
+
         <Match when={nav.currentView() === 'profile'}>
-          <PlaceholderPage title="个人中心" icon="person" />
+          <ProfilePage />
         </Match>
+
         <Match when={nav.currentView() === 'tutorial'}>
-          <PlaceholderPage title="帮助中心" icon="help" />
+          <NovelGuidePage />
+        </Match>
+
+        <Match when={nav.currentView() === 'achievements'}>
+          <AchievementsPage />
+        </Match>
+
+        <Match when={nav.currentView() === 'novel-guide'}>
+          <NovelGuidePage />
         </Match>
       </Switch>
 

@@ -11,6 +11,7 @@ const STATUS_MAP: Record<ChapterStatus, { label: string; bg: string; text: strin
   draft: { label: '草稿', bg: 'bg-[#fff8e1]', text: 'text-[#8c6d1f]' },
   revising: { label: '修订中', bg: 'bg-[#e8f0fe]', text: 'text-[#1967d2]' },
   completed: { label: '已完成', bg: 'bg-[#e6f4ea]', text: 'text-[#137333]' },
+  published: { label: '已发布', bg: 'bg-green-50', text: 'text-green-700' },
 };
 
 /** AI 提取信息 Mock（Phase 2.2 接入真实 Provider） */

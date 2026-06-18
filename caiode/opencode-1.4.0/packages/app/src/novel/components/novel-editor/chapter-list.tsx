@@ -10,7 +10,8 @@ interface ChapterListProps {
 const statusConfig = {
   completed: { dot: 'bg-green-500', label: '已完成', textClass: 'text-green-700' },
   revising: { dot: 'bg-blue-500', label: '修订中', textClass: 'text-blue-700' },
-  draft: { dot: 'bg-gray-400', label: '草稿', textClass: 'text-gray-600' }
+  draft: { dot: 'bg-gray-400', label: '草稿', textClass: 'text-gray-600' },
+  published: { dot: 'bg-green-600', label: '已发布', textClass: 'text-green-800' }
 };
 
 export function ChapterList(props: ChapterListProps) {

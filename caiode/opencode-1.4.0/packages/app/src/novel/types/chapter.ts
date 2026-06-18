@@ -1,4 +1,4 @@
-export type ChapterStatus = 'draft' | 'revising' | 'completed';
+export type ChapterStatus = 'draft' | 'revising' | 'completed' | 'published';
 
 export interface ChapterOutline {
   goal: string;

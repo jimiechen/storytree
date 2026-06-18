@@ -11,14 +11,10 @@ const MODAL_TITLES: Record<string, string> = {
   notifications: '通知中心',
   'batch-generation': '批量生成',
   settings: '系统设置',
+  'guide-create': '新建引导项目',
+  'achievement-detail': '成就详情',
 };
 
-/**
- * NovelModalHost — 全局弹框容器
- *
- * 批次 4 引入，根据 useNovelNavigation.currentModal 渲染对应占位弹框。
- * 点击遮罩或关闭按钮可关闭弹框。
- */
 export const NovelModalHost: Component = () => {
   const nav = useNovelNavigation();
 
@@ -31,7 +27,6 @@ export const NovelModalHost: Component = () => {
     <Show when={nav.isModalOpen()}>
       <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
         <div class="bg-white rounded-xl max-w-lg w-full mx-4 shadow-[0_8px_32px_rgba(0,0,0,0.12)] flex flex-col max-h-[80vh]">
-          {/* Header */}
           <header class="flex justify-between items-center px-6 py-4 border-b border-[#cbc3d7]">
             <h2 class="text-lg font-bold text-[#0d1c2f]">{title()}</h2>
             <button
@@ -43,12 +38,10 @@ export const NovelModalHost: Component = () => {
             </button>
           </header>
 
-          {/* Content */}
           <div class="p-6 text-sm text-[#7b7486] flex items-center justify-center min-h-[120px]">
             <p>「{title()}」功能正在开发中，敬请期待。</p>
           </div>
 
-          {/* Footer */}
           <footer class="px-6 py-4 border-t border-[#cbc3d7] flex justify-end">
             <button
               type="button"
