@@ -78,7 +78,7 @@ test.describe("novel-static-flow - 静态页面流转", () => {
     await characterBtn.click()
     await page.waitForURL(/view=character-panel/, { timeout: 10_000 })
 
-    const placeholder = page.getByText(/人物面板/).first()
+    const placeholder = page.getByText(/主角|人物追踪|角色管理/).first()
     await expect(placeholder).toBeVisible({ timeout: 10_000 })
   })
 

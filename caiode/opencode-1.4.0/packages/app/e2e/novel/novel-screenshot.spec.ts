@@ -45,13 +45,15 @@ test.describe("novel-screenshot — 关键页面截图", () => {
   })
 
   test("编辑器 /novel?view=editor 截图", async ({ page }) => {
+    await page.setViewportSize({ width: 1920, height: 1080 })
     await page.goto("/novel?view=editor")
     await page.waitForLoadState("load")
+    await page.waitForSelector('[contenteditable]', { timeout: 10_000 })
     await page.waitForTimeout(1500)
 
     await page.screenshot({
       path: path.join(SCREENSHOT_DIR, "03-editor.png"),
-      fullPage: false,
+      fullPage: true,
     })
   })
 
@@ -102,12 +104,28 @@ test.describe("novel-screenshot — 关键页面截图", () => {
   test("弹框 — 导出设置截图", async ({ page }) => {
     await page.goto("/novel")
     await page.waitForLoadState("load")
+    await page.waitForSelector("[data-testid='workspace-logo']", { timeout: 10_000 })
     await page.waitForTimeout(1000)
 
-    // 点击导出按钮打开弹框
-    const exportBtn = page.getByRole("button", { name: "导出" }).first()
+    // 点击 SideNav 中的导出按钮打开弹框
+    const exportBtn = page.locator("button:text-is('导出')").first()
     if (await exportBtn.isVisible().catch(() => false)) {
       await exportBtn.click()
+      // 等待模态框出现（遮罩层 + 标题）
+      await page.waitForSelector("text=导出设置", { timeout: 5_000 })
+      await page.waitForTimeout(500)
+      await page.screenshot({
+        path: path.join(SCREENSHOT_DIR, "08-modal-export.png"),
+        fullPage: false,
+      })
+    } else {
+      // 备用：直接通过导航触发
+      await page.evaluate(() => {
+        // 尝试找到并点击包含"导出"文本的可点击元素
+        const btns = Array.from(document.querySelectorAll('button'))
+        const exportBtn = btns.find(b => b.textContent?.includes('导出'))
+        if (exportBtn) exportBtn.click()
+      })
       await page.waitForTimeout(1000)
       await page.screenshot({
         path: path.join(SCREENSHOT_DIR, "08-modal-export.png"),

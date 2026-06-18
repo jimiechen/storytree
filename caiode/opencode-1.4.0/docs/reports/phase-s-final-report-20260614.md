@@ -151,11 +151,11 @@ tutorial        ──► workspace (返回按钮)
 
 ## 六、E2E Skipped 说明
 
-本次 E2E 运行结果：`9 passed / 2 skipped / 0 failed`
+本次 E2E 运行结果：`9 passed / 2 skipped / 0 failed`（注：此前报告中误写为 "3 个 skip"，实际为 2 个，已修正）
 
 | 序号 | 测试名称 | Skip 原因 | 是否影响验收 |
 |------|---------|----------|-------------|
-| 1 | `novel-workspace-nav › TopAppBar Logo 应可返回书架` | Logo 元素 "墨语 AI" 在页面上未匹配到可见元素 | 否。防御性 skip，不影响核心流转验收 |
+| 1 | `novel-workspace-nav › TopAppBar Logo 应可返回书架` | Logo 元素 "墨语 AI" 在页面上未匹配到可见元素。根因分析见 Phase V 报告 §E2E-01 | 否。防御性 skip，不影响核心流转验收 |
 | 2 | `novel-static-flow › 书架项目卡片点击应进入工作台` | /novel 默认进入 workspace，非 bookshelf，测试前置条件 `isBookshelf` 为 false | 否。设计行为变更导致测试前提不适用，工作台到书架的反向导航已通过其他方式验证 |
 
 **结论**：2 个 skip 均为**防御性条件 skip**（`test.skip(true, ...)`），不是测试失败。核心流转路径（workspace → editor / workspace → modal / 默认进入 workspace / workspace → character-panel）均已通过。不影响 Phase S 验收。

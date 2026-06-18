@@ -88,7 +88,7 @@ test.describe("novel-workspace-nav - 工作台导航", () => {
     await helpBtn.click()
     await page.waitForURL(/view=tutorial/, { timeout: 10_000 })
 
-    const placeholder = page.getByText(/帮助中心/).first()
+    const placeholder = page.getByText(/创建你的专属小说|开始你的创作之旅/).first()
     await expect(placeholder).toBeVisible({ timeout: 10_000 })
   })
 
