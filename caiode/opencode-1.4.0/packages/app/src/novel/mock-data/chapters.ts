@@ -14,7 +14,9 @@ export const mockChapters: Chapter[] = [
       goal: '苏瑶在雪岭中遭遇第一只异兽，觉醒卡牌之力',
       conflict: '异兽的攻击让苏瑶陷入绝境',
       keyPlot: '危急时刻，苏瑶体内的卡牌碎片产生共鸣'
-    }
+    },
+    createdAt: '2026-06-10T08:00:00Z',
+    updatedAt: '2026-06-15T14:30:00Z'
   },
   {
     id: 'ch-002',
@@ -28,7 +30,9 @@ export const mockChapters: Chapter[] = [
       goal: '苏瑶在流萤镇寻找关于符牌的线索',
       conflict: '镇民对异兽的恐惧转化为对苏瑶的敌意',
       keyPlot: '陆长风首次现身，暗示符牌与王室有关'
-    }
+    },
+    createdAt: '2026-06-11T10:00:00Z',
+    updatedAt: '2026-06-14T16:20:00Z'
   },
   {
     id: 'ch-003',
@@ -42,7 +46,9 @@ export const mockChapters: Chapter[] = [
       goal: '苏瑶需要在废墟中找到失落的符牌碎片，以证明自己的血脉',
       conflict: '遭遇遗迹守护者的阻拦，同时暗长风暗中施加压力',
       keyPlot: '符牌碎片产生共鸣，揭示了一段被掩盖的历史记忆'
-    }
+    },
+    createdAt: '2026-06-12T09:00:00Z',
+    updatedAt: '2026-06-13T11:45:00Z'
   }
 ];
 

@@ -24,8 +24,9 @@ test.describe("novel-screenshot — 关键页面截图", () => {
     // 直接访问 workspace，避免 onMount 重定向的中间状态
     await page.goto("/novel?view=workspace")
     await page.waitForLoadState("load")
-    await page.waitForSelector("[data-testid='workspace-logo']", { timeout: 10_000 })
-    await page.waitForTimeout(1500)
+    // 工作台冷启动编译较慢，给足等待时间
+    await page.waitForSelector("[data-testid='workspace-logo']", { timeout: 20_000 })
+    await page.waitForTimeout(1000)
 
     await page.screenshot({
       path: path.join(SCREENSHOT_DIR, "01-workspace.png"),

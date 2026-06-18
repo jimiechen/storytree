@@ -24,5 +24,7 @@ export interface Chapter {
   content: string;
   outline: ChapterOutline;
   aiSuggestions?: AISuggestion[];
+  createdAt: string;
+  updatedAt: string;
   lastEditedAt?: Date;
 }

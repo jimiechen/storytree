@@ -16,7 +16,7 @@ import { AILogDrawer } from './ai-log-drawer';
 export function NovelEditor() {
   const nav = useNovelNavigation();
   const { project } = useNovelProject();
-  const chaptersHook = useNovelChapters(() => 'proj-001');
+  const chaptersHook = useNovelChapters(() => nav.projectId() ?? 'proj-001');
   const { tasks, submitTask } = useAITask();
   const { logs, refetch: refetchLogs } = useAILog();
   const editor = useChapterEditor(
@@ -82,6 +82,18 @@ export function NovelEditor() {
 
   const chapterTasks = () =>
     tasks().filter((t) => t.chapterId === chaptersHook.selectedChapter()?.id);
+
+  /** 格式化相对时间 */
+  function formatRelativeTime(dateStr: string): string {
+    const now = Date.now();
+    const diff = now - new Date(dateStr).getTime();
+    const hours = Math.floor(diff / (1000 * 60 * 60));
+    if (hours < 1) return '刚刚';
+    if (hours < 24) return `${hours}小时前`;
+    const days = Math.floor(hours / 24);
+    if (days < 30) return `${days}天前`;
+    return new Date(dateStr).toLocaleDateString('zh-CN');
+  }
 
   return (
     <div class="flex flex-col h-screen bg-[#f8f9ff] overflow-hidden text-[#0d1c2f]">
@@ -157,8 +169,8 @@ export function NovelEditor() {
                 chapterNumber={`#${String(ch().orderIndex + 1).padStart(2, '0')}`}
                 status={editor.chapterStatus()}
                 wordCount={wordCount()}
-                createdAt="2026-06-15"
-                lastModified="2小时前"
+                createdAt={ch().createdAt ? new Date(ch().createdAt).toLocaleDateString('zh-CN') : '—'}
+                lastModified={ch().updatedAt ? formatRelativeTime(ch().updatedAt) : '—'}
                 aiExtract={editor.aiExtract()}
                 onStatusChange={editor.setChapterStatus}
                 onRefreshAI={() =>

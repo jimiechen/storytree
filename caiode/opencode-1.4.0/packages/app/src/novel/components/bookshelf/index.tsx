@@ -21,7 +21,7 @@ import { FloatingWidgets } from './floating-widgets';
  */
 export const BookshelfPage: Component = () => {
   const { filteredProjects, searchKeyword, setSearchKeyword, isLoadingList, refetchProjects } = useNovelProject();
-  const { setView, selectProject } = useNovelView();
+  const { selectProject } = useNovelView();
   const nav = useNovelNavigation();
 
   const projects = filteredProjects;
@@ -49,7 +49,7 @@ export const BookshelfPage: Component = () => {
         badge: `${projects().length}本`,
         onRefresh: () => refetchProjects(),
       }}
-      onWriteNow={() => setView('create-project')}
+      onWriteNow={() => nav.openView('create-project')}
     >
       {/* 搜索栏 */}
       <div class="mb-6 space-y-4">
