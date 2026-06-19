@@ -12,6 +12,7 @@ export interface WorkspaceTopAppBarActions {
   onOpenNotifications?: () => void;
   onOpenSettings?: () => void;
   onOpenProfile?: () => void;
+  onOpenAchievements?: () => void;
 }
 
 interface WorkspaceTopAppBarProps extends WorkspaceTopAppBarActions {}
@@ -25,7 +26,6 @@ export const WorkspaceTopAppBar: Component<WorkspaceTopAppBarProps> = (props) =>
         data-testid="workspace-logo"
         onClick={props.onLogoClick}
         class="text-xl font-bold text-[#6b38d4] hover:opacity-80 transition-opacity"
-        style={{ 'font-family': "'Plus Jakarta Sans', 'PingFang SC', sans-serif" }}
       >
         墨语 AI (InkVerse)
       </button>
@@ -67,17 +67,30 @@ export const WorkspaceTopAppBar: Component<WorkspaceTopAppBarProps> = (props) =>
           <NovelIcon name="notifications" size={20} />
         </button>
         <button
+          data-testid="workspace-settings-btn"
           onClick={props.onOpenSettings}
           class="text-[#494454] hover:text-[#6b38d4] transition-colors p-2 rounded-full hover:bg-[#eff4ff] active:scale-95 transition-transform duration-150"
         >
           <NovelIcon name="settings" size={20} />
         </button>
-        <img
-          src={DEFAULT_AVATAR}
-          alt="用户头像"
+        <button
+          data-testid="workspace-achievements-btn"
+          onClick={props.onOpenAchievements}
+          class="text-[#494454] hover:text-[#6b38d4] transition-colors p-2 rounded-full hover:bg-[#eff4ff] active:scale-95 transition-transform duration-150"
+        >
+          <NovelIcon name="star" size={20} />
+        </button>
+        <button
+          data-testid="workspace-avatar-btn"
           onClick={props.onOpenProfile}
-          class="w-10 h-10 rounded-full object-cover border border-[#cbc3d7] cursor-pointer hover:opacity-90 transition-opacity"
-        />
+          class="rounded-full cursor-pointer hover:opacity-90 transition-opacity"
+        >
+          <img
+            src={DEFAULT_AVATAR}
+            alt="用户头像"
+            class="w-10 h-10 rounded-full object-cover border border-[#cbc3d7]"
+          />
+        </button>
       </div>
     </header>
   );

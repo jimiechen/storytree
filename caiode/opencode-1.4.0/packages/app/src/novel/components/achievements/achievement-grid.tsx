@@ -11,6 +11,7 @@ export const AchievementGrid: Component<Props> = (props) => {
     <div class="grid grid-cols-3 gap-4 px-10 pb-8">
       {props.achievements.map((ach) => (
         <div
+          data-testid="achievement-card"
           class={`rounded-xl p-4 text-center space-y-2 ${
             ach.isUnlocked
               ? 'bg-gradient-to-br from-[#e9ddff]/30 to-transparent border border-[#e9ddff]'

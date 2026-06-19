@@ -4,9 +4,10 @@ import type {
   AIWritingCommand,
   AIExtractedInfo,
 } from '../types/editor';
+import type { WorkflowMutations } from '../workflows/workflow-events';
 import { mockAIExtractedInfo } from '../mock-data/chapters';
 
-export function useChapterEditor(chapterId: string) {
+export function useChapterEditor(chapterId: string, mutations?: WorkflowMutations) {
   const [content, setContent] = createSignal('');
   const [chapterStatus, setChapterStatus] =
     createSignal<ChapterStatus>('draft');
@@ -34,12 +35,18 @@ export function useChapterEditor(chapterId: string) {
     setAiToolbarVisible(true);
   }
 
-  function handleAICommand(_cmd: AIWritingCommand) {
+  /**
+   * 处理 AI 写作命令。
+   * P1-B: 通过 mutations 回调写回（如有注入），否则仅隐藏工具栏。
+   */
+  function handleAICommand(cmd: AIWritingCommand) {
     setAiToolbarVisible(false);
+    // P1-B 阶段：命令由外部 useNovelWorkflow 驱动
+    // 此处保留接口，后续接入 runAIWritingCommand
   }
 
   function saveDraft() {
-    /* Mock: no-op */
+    /* Mock: no-op — P1-B 由 applyWorkflowEvents 统一写回 */
   }
 
   function markComplete() {

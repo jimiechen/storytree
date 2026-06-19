@@ -13,7 +13,7 @@ export const CharacterPanelPage: Component = () => {
   const antagonists = () => mockCharacters.filter(c => c.roleType === 'antagonist');
 
   return (
-    <div class="flex flex-col h-screen bg-[#f8f9ff] overflow-hidden">
+    <div data-testid="character-panel-page" class="flex flex-col h-screen bg-[#f8f9ff] overflow-hidden">
       <CharacterPageHeader onBack={() => nav.openView('workspace')} />
       <div class="flex-1 overflow-y-auto px-10 py-8 space-y-8">
         {protagonists().length > 0 && (

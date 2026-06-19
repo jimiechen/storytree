@@ -2,7 +2,16 @@ import { createSignal, createEffect } from 'solid-js';
 import { useWorkspace } from '../../hooks/use-workspace';
 import { useAITask } from '../../hooks/use-ai-task';
 import { useNovelNavigation } from '../../hooks/use-novel-navigation';
+import type { WorkflowMutations } from '../../workflows/workflow-events';
 import { DEFAULT_GENERATION_CONFIG } from '../../types/generation-config';
+// 返修#3: 延迟导入避免循环依赖
+let _useNovelWorkflow: typeof import('../../hooks/use-novel-workflow').useNovelWorkflow | null = null;
+function getUseNovelWorkflow() {
+  if (!_useNovelWorkflow) {
+    _useNovelWorkflow = require('../../hooks/use-novel-workflow').useNovelWorkflow;
+  }
+  return _useNovelWorkflow;
+}
 
 // ---------------------------------------------------------------------------
 // 集中 UI 类型定义 — 所有子组件的 Props 类型从这里导入，避免重复定义
@@ -70,10 +79,18 @@ function splitContentToParagraphs(content: string): string[] {
 // ViewModel
 // ---------------------------------------------------------------------------
 
-export function createWorkspaceViewModel(projectId: () => string) {
+export function createWorkspaceViewModel(
+  projectId: () => string,
+  workflowMutations?: WorkflowMutations,
+) {
   const ws = useWorkspace(projectId);
   const ai = useAITask();
   const nav = useNovelNavigation();
+
+  // 返修#1+#3: 当提供 workflowMutations 时，初始化 useNovelWorkflow
+  const wf = workflowMutations
+    ? getUseNovelWorkflow()!(workflowMutations)
+    : null;
 
   // === 本地 UI 状态：章节展开/收藏（Hook 数据无这些字段，由 ViewModel fallback） ===
   const [chapterUiState, setChapterUiState] = createSignal<
@@ -131,17 +148,39 @@ export function createWorkspaceViewModel(projectId: () => string) {
   };
 
   // === 派生数据：AI 任务视图 ===
+  // 返修#1 VB05: 使用真实 workflow 状态，不再硬编码 67/33%
   const aiTaskView = (): WorkspaceAiTaskView | undefined => {
-    if (!ai.isRunning()) return undefined;
-    const task = ai.currentTask();
-    if (!task) return undefined;
-    const previewText = task.output?.text?.slice(0, 120) ?? '';
-    return {
-      running: true,
-      title: 'AI 正在生成...',
-      progress: previewText.length > 0 ? 67 : 33,
-      preview: previewText || '正在构思中...',
-    };
+    // 优先使用 useNovelWorkflow 状态
+    if (wf && wf.isRunning()) {
+      const task = wf.currentTask();
+      if (task) {
+        return {
+          running: true,
+          title: 'AI 正在生成...',
+          progress: task.result.wordCount > 0
+            ? Math.min(95, 30 + (task.result.wordCount % 70))
+            : 15,
+          preview: task.result.text.slice(0, 120) || '正在构思中...',
+        };
+      }
+      // workflow is running but no task yet
+      return { running: true, title: 'AI 正在初始化...', progress: 5, preview: '' };
+    }
+
+    // Fallback to old useAITask state (when no workflowMutations provided)
+    if (!wf && ai.isRunning()) {
+      const task = ai.currentTask();
+      if (!task) return undefined;
+      const previewText = task.output?.text?.slice(0, 120) ?? '';
+      return {
+        running: true,
+        title: 'AI 正在生成...',
+        progress: previewText.length > 0 ? 67 : 33,
+        preview: previewText || '正在构思中...',
+      };
+    }
+
+    return undefined;
   };
 
   // === 交互方法：章节 ===
@@ -172,39 +211,93 @@ export function createWorkspaceViewModel(projectId: () => string) {
   };
 
   // === 语义方法：AI 任务（封装底层 Hook 参数差异） ===
+  // 返修#3 M07: 当 workflowMutations 可用时，走 useNovelWorkflow 主链路
   const submitOutlineTask = async () => {
     const chapter = ws.selectedChapter();
     if (!chapter) return;
-    await ai.submitTask({
-      type: 'continue-writing',
-      chapterId: chapter.id,
-      text: `请为章节「${chapter.title}」生成大纲`,
-    });
+
+    if (wf) {
+      // P1-B 主链路：通过 useNovelWorkflow 执行
+      await wf.runAIWritingCommand({
+        chapterId: chapter.id,
+        projectId: ws.projectId?.() ?? 'proj-001',
+        chapterIndex: chapter.orderIndex,
+        genre: generationConfig().model || '玄幻',
+        command: 'summarize',
+        text: `请为章节「${chapter.title}」生成大纲`,
+        contextRefs: contextOptions()
+          .filter((o) => o.enabled)
+          .map((o) => o.id),
+      });
+    } else {
+      // Fallback: 旧 useAITask 路径（无 mutations 时）
+      await ai.submitTask({
+        type: 'continue-writing',
+        chapterId: chapter.id,
+        text: `请为章节「${chapter.title}」生成大纲`,
+      });
+    }
   };
 
   const submitDetailOutlineTask = async () => {
     const chapter = ws.selectedChapter();
     if (!chapter) return;
-    await ai.submitTask({
-      type: 'summarize-chapter',
-      chapterId: chapter.id,
-      text: `请为章节「${chapter.title}」生成细纲`,
-    });
+
+    if (wf) {
+      await wf.runAIWritingCommand({
+        chapterId: chapter.id,
+        projectId: ws.projectId?.() ?? 'proj-001',
+        chapterIndex: chapter.orderIndex,
+        genre: generationConfig().model || '玄幻',
+        command: 'summarize',
+        text: `请为章节「${chapter.title}」生成细纲`,
+        contextRefs: contextOptions()
+          .filter((o) => o.enabled)
+          .map((o) => o.id),
+      });
+    } else {
+      await ai.submitTask({
+        type: 'summarize-chapter',
+        chapterId: chapter.id,
+        text: `请为章节「${chapter.title}」生成细纲`,
+      });
+    }
   };
 
   const submitChapterGenerationTask = async () => {
     const chapter = ws.selectedChapter();
     if (!chapter) return;
-    await ai.submitTask({
-      type: 'continue-writing',
-      chapterId: chapter.id,
-      text: chapter.content || `请生成章节「${chapter.title}」的正文内容`,
-    });
+
+    if (wf) {
+      await wf.runChapterGeneration({
+        chapterId: chapter.id,
+        projectId: ws.projectId?.() ?? 'proj-001',
+        chapterIndex: chapter.orderIndex,
+        genre: generationConfig().model || '玄幻',
+        text: chapter.content || `请生成章节「${chapter.title}」的正文内容`,
+        targetWordCount: generationConfig().targetWords,
+        contextRefs: contextOptions()
+          .filter((o) => o.enabled)
+          .map((o) => o.id),
+      });
+    } else {
+      await ai.submitTask({
+        type: 'continue-writing',
+        chapterId: chapter.id,
+        text: chapter.content || `请生成章节「${chapter.title}」的正文内容`,
+      });
+    }
   };
 
   const cancelRunningTask = async () => {
-    const task = ai.currentTask();
-    if (task) await ai.cancelTask(task.id);
+    if (wf) {
+      // P1-B 主链路：通过 useNovelWorkflow 取消（产出 cancelled 结果）
+      wf.cancelCurrentTask();
+    } else {
+      // Fallback: 旧路径
+      const task = ai.currentTask();
+      if (task) await ai.cancelTask(task.id);
+    }
   };
 
   return {

@@ -43,9 +43,9 @@ export const WorkspaceSideNav: Component<WorkspaceSideNavProps> = (props) => {
       {/* Tab Navigation */}
       <nav class="px-2 space-y-1">
         <NavItem icon="auto_stories" label="大纲" active onClick={props.onOpenOutline} />
-        <NavItem icon="format_list_bulleted" label="章节" onClick={props.onOpenChapters} />
-        <NavItem icon="groups" label="人物" onClick={props.onOpenCharacters} />
-        <NavItem icon="psychology" label="设定" onClick={props.onOpenWorldSetting} />
+        <NavItem icon="format_list_bulleted" label="章节" onClick={props.onOpenChapters} testid="sidenav-chapters" />
+        <NavItem icon="groups" label="人物" onClick={props.onOpenCharacters} testid="sidenav-characters" />
+        <NavItem icon="psychology" label="设定" onClick={props.onOpenWorldSetting} testid="sidenav-world-setting" />
         <NavItem icon="import_export" label="导出" onClick={props.onOpenExport} />
       </nav>
 
@@ -78,9 +78,10 @@ export const WorkspaceSideNav: Component<WorkspaceSideNavProps> = (props) => {
 };
 
 /** SideNav 单项 */
-function NavItem(props: { icon: string; label: string; active?: boolean; onClick?: () => void }) {
+function NavItem(props: { icon: string; label: string; active?: boolean; onClick?: () => void; testid?: string }) {
   return (
     <button
+      data-testid={props.testid}
       onClick={props.onClick}
       class={`w-full flex items-center px-3 py-2 rounded-md transition-all text-left ${
         props.active

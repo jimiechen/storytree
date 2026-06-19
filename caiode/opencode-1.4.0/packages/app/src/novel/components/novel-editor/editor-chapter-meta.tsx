@@ -23,7 +23,7 @@ export const EditorChapterMeta: Component<EditorChapterMetaProps> = (props) => {
     <div class="px-6 py-4 space-y-3">
       <div class="flex justify-between items-center">
         <span class="text-xs text-[#494454]">章节编号</span>
-        <span class="text-sm text-[#0d1c2f]">{props.chapterNumber}</span>
+        <span data-testid="editor-right-panel-chapter-number" class="text-sm text-[#0d1c2f]">{props.chapterNumber}</span>
       </div>
       <div class="flex justify-between items-center">
         <span class="text-xs text-[#494454]">状态</span>

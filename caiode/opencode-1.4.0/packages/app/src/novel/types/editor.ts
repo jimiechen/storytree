@@ -5,6 +5,8 @@
 
 export type { ChapterStatus } from './chapter'
 
+import type { ChapterInformationState } from './information-flow';
+
 export interface AIExtractedInfo {
   chapterId: string
   summary: string
@@ -13,6 +15,8 @@ export interface AIExtractedInfo {
   acquiredItems: string[]
   keyEvents: string
   extractedAt: string
+  /** Info-Lite 信息审计状态 */
+  informationState?: ChapterInformationState
 }
 
 export type AIWritingCommand = 'continue' | 'rewrite' | 'expand' | 'polish' | 'summarize'

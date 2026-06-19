@@ -17,7 +17,7 @@ const taskTypeLabels: Record<AITaskType, string> = {
 const statusConfig: Record<AITaskStatus, { label: string; color: string; bg: string; icon: string }> = {
   pending: { label: '等待中', color: 'text-yellow-600', bg: 'bg-yellow-50', icon: '⏳' },
   running: { label: '运行中', color: 'text-blue-600', bg: 'bg-blue-50', icon: '⚡' },
-  success: { label: '成功', color: 'text-green-600', bg: 'bg-green-50', icon: '✓' },
+  completed: { label: '完成', color: 'text-green-600', bg: 'bg-green-50', icon: '✓' },
   failed: { label: '失败', color: 'text-red-600', bg: 'bg-red-50', icon: '✗' },
   cancelled: { label: '已取消', color: 'text-gray-600', bg: 'bg-gray-50', icon: '⊘' },
   denied: { label: '被拒绝', color: 'text-orange-600', bg: 'bg-orange-50', icon: '⛔' },
@@ -28,7 +28,7 @@ export function AITaskPanel(props: AITaskPanelProps) {
   const [expandedTaskId, setExpandedTaskId] = createSignal<string | null>(null);
 
   const runningTasks = () => props.tasks.filter(t => t.status === 'running');
-  const completedTasks = () => props.tasks.filter(t => ['success', 'failed', 'cancelled', 'denied', 'quota'].includes(t.status));
+  const completedTasks = () => props.tasks.filter(t => ['completed', 'failed', 'cancelled', 'denied', 'quota'].includes(t.status));
 
   const toggleExpand = (taskId: string) => {
     setExpandedTaskId(prev => prev === taskId ? null : taskId);

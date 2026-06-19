@@ -47,6 +47,7 @@ export const Workspace: Component<WorkspaceProps> = (props) => {
     openBatchGeneration: () => vm.openModal('batch-generation'),
     openNotifications: () => vm.openModal('notifications'),
     openSettings: () => vm.openModal('generation-settings'),
+    openAchievements: () => vm.openView('achievements'),
     openFeedback: () => vm.openModal('feedback'),
     toggleFullscreen: () => noop('fullscreen'),
   };
@@ -63,6 +64,7 @@ export const Workspace: Component<WorkspaceProps> = (props) => {
           onOpenNotifications={actions.openNotifications}
           onOpenSettings={actions.openSettings}
           onOpenProfile={actions.openProfile}
+          onOpenAchievements={actions.openAchievements}
         />
       }
       sideNav={

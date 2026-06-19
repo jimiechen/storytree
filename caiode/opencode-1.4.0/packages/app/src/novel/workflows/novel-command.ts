@@ -1,0 +1,91 @@
+/**
+ * @file workflows/novel-command.ts
+ * @description 小说编辑器命令类型 — P1-A 基础层
+ *
+ * 修正项: #5(contextRefs 使用 string[])
+ */
+
+import type { AIWritingCommand } from '../types/editor';
+
+// ─── 命令类型枚举 ───────────────────────────────────────────────────────
+
+export type NovelCommandType =
+  | 'chapter.generate'
+  | 'chapter.rewrite'
+  | 'chapter.expand'
+  | 'chapter.polish'
+  | 'chapter.summarize'
+  | 'chapter.extract-info';
+
+// ─── NovelCommand ────────────────────────────────────────────────────────
+
+/**
+ * 小说编辑器命令。
+ * 由 UI 操作（按钮点击）构建，传入 AgentAdapter 执行。
+ */
+export interface NovelCommand {
+  /** 命令类型 */
+  type: NovelCommandType;
+  /** 关联章节 ID */
+  chapterId: string;
+  /** 关联项目 ID */
+  projectId: string;
+  /** 章节序号（用于确定性 ID 生成） */
+  chapterIndex: number;
+  /** 小说类型（用于确定性评分/ID 生成） */
+  genre: string;
+  /** AI 写作命令子类型 */
+  command?: AIWritingCommand;
+  /** 待处理文本（续写时的已有正文 / 改写时的选中文本） */
+  text: string;
+  /** 选中的文本片段（改写/扩写场景） */
+  selectedText?: string;
+  /** 目标字数 */
+  targetWordCount?: number;
+  /** 上下文引用 ID 列表（修正#5: string[] 而非 Set<string>） */
+  contextRefs?: string[];
+  /** 命令创建时间 */
+  createdAt: Date;
+}
+
+// ─── 工厂函数 ───────────────────────────────────────────────────────────
+
+/**
+ * 构建章节生成命令。
+ */
+export function createChapterGenerateCommand(params: {
+  chapterId: string;
+  projectId: string;
+  chapterIndex: number;
+  genre: string;
+  text: string;
+  targetWordCount?: number;
+  contextRefs?: string[];
+}): NovelCommand {
+  return {
+    type: 'chapter.generate',
+    ...params,
+    createdAt: new Date(),
+  };
+}
+
+/**
+ * 构建 AI 写作命令（continue/rewrite/expand/polish/summarize）。
+ */
+export function createAIWritingCommand(params: {
+  chapterId: string;
+  projectId: string;
+  chapterIndex: number;
+  genre: string;
+  command: AIWritingCommand;
+  text: string;
+  selectedText?: string;
+  targetWordCount?: number;
+  contextRefs?: string[];
+}): NovelCommand {
+  return {
+    type: 'chapter.rewrite',
+    ...params,
+    createdAt: new Date(),
+  };
+}

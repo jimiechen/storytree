@@ -12,6 +12,10 @@ import { EditorRightPanel } from './editor-right-panel';
 import { EditorAIFloatingToolbar } from './editor-ai-floating-toolbar';
 import { AIResultCard } from './ai-result-card';
 import { AILogDrawer } from './ai-log-drawer';
+import { ChapterInfoPanel } from './chapter-info-panel';
+import { mockAgentAdapter } from '../../adapters/mock-agent-adapter';
+import { createChapterGenerateCommand } from '../../workflows/novel-command';
+import type { ChapterInformationState } from '../../types/information-flow';
 
 export function NovelEditor() {
   const nav = useNovelNavigation();
@@ -28,11 +32,33 @@ export function NovelEditor() {
   const [localTitle, setLocalTitle] = createSignal('');
   const [localContent, setLocalContent] = createSignal('');
   const [wordCount, setWordCount] = createSignal(0);
+  const [mockInfoState, setMockInfoState] = createSignal<ChapterInformationState | undefined>(undefined);
 
   createEffect(() => {
     const loaded = chaptersHook.chapters();
     if (loaded && loaded.length > 0 && !chaptersHook.selectedChapterId()) {
       chaptersHook.selectChapter(loaded[0].id);
+    }
+  });
+
+  /** P1-A 视觉验收：注入 mock informationState */
+  const injectMockInfoState = async (chapterIndex: number, genre: string) => {
+    const cmd = createChapterGenerateCommand({
+      chapterId: chaptersHook.selectedChapter()?.id ?? 'ch-001',
+      projectId: nav.projectId() ?? 'proj-001',
+      chapterIndex,
+      genre,
+      text: localContent() || '测试正文',
+    });
+    const result = await mockAgentAdapter.run(cmd);
+    setMockInfoState(result.informationState);
+  };
+
+  // 自动注入 mock 数据（P1-A 验收用）
+  createEffect(() => {
+    const ch = chaptersHook.selectedChapter();
+    if (ch) {
+      injectMockInfoState(ch.orderIndex, '玄幻').catch(() => {});
     }
   });
 
@@ -58,8 +84,8 @@ export function NovelEditor() {
     const ch = chaptersHook.selectedChapter();
     if (!ch) return;
     const suggestion = {
-      id: `suggestion-${Date.now()}`,
-      taskId: `task-${Date.now()}`,
+      id: `suggestion-`,
+      taskId: `task-`,
       text,
       status: 'accepted' as const,
       createdAt: new Date(),
@@ -72,8 +98,8 @@ export function NovelEditor() {
     const ch = chaptersHook.selectedChapter();
     if (!ch) return;
     await chaptersHook.addAISuggestion(ch.id, {
-      id: `suggestion-${Date.now()}`,
-      taskId: `task-${Date.now()}`,
+      id: `suggestion-`,
+      taskId: `task-`,
       text,
       status: 'saved' as const,
       createdAt: new Date(),
@@ -89,9 +115,9 @@ export function NovelEditor() {
     const diff = now - new Date(dateStr).getTime();
     const hours = Math.floor(diff / (1000 * 60 * 60));
     if (hours < 1) return '刚刚';
-    if (hours < 24) return `${hours}小时前`;
+    if (hours < 24) return `小时前`;
     const days = Math.floor(hours / 24);
-    if (days < 30) return `${days}天前`;
+    if (days < 30) return `天前`;
     return new Date(dateStr).toLocaleDateString('zh-CN');
   }
 
@@ -166,7 +192,7 @@ export function NovelEditor() {
               </div>
 
               <EditorRightPanel
-                chapterNumber={`#${String(ch().orderIndex + 1).padStart(2, '0')}`}
+                chapterNumber={`#${ch().orderIndex + 1}`}
                 status={editor.chapterStatus()}
                 wordCount={wordCount()}
                 createdAt={ch().createdAt ? new Date(ch().createdAt).toLocaleDateString('zh-CN') : '—'}
@@ -178,6 +204,13 @@ export function NovelEditor() {
                 }
                 onSaveDraft={editor.saveDraft}
                 onMarkComplete={editor.markComplete}
+              />
+
+              {/* P1-A 视觉验收：信息审计块 */}
+              <ChapterInfoPanel
+                chapter={ch()}
+                informationState={mockInfoState()}
+                onReExtract={() => injectMockInfoState(ch().orderIndex, '玄幻')}
               />
             </div>
           </>

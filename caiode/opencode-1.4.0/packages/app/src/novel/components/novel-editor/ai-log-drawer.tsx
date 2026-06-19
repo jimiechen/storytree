@@ -1,12 +1,15 @@
 import { createSignal, For, Show } from 'solid-js';
 import type { AILog } from '../../types/ai-log';
 import type { AITaskStatus, AITaskType } from '../../types/ai-task';
+import type { NovelWorkflowEvent } from '../../workflows/workflow-events';
 
 interface AILogDrawerProps {
   logs: AILog[];
   isOpen: boolean;
   onClose: () => void;
   onClearLogs: () => void;
+  /** 返修#2 VB15: 工作流事件日志（与旧 logs 并行展示） */
+  workflowEvents?: readonly NovelWorkflowEvent[];
 }
 
 const taskTypeLabels: Record<AITaskType, string> = {
@@ -16,10 +19,21 @@ const taskTypeLabels: Record<AITaskType, string> = {
   'character-voice': '角色配音'
 };
 
+// 返修#2 VB15: 工作流事件类型中文标签
+const wfEventTypeLabels: Record<string, string> = {
+  'chapter.generated': '章节生成',
+  'chapter.extracted': '信息提取',
+  'character.updated': '角色更新',
+  'world.referenced': '世界引用',
+  'achievement.progressed': '成就进度',
+  'profile.stats.updated': '统计更新',
+  'information.assessed': '信息审计',
+};
+
 const statusConfig: Record<AITaskStatus, { label: string; color: string }> = {
   pending: { label: '等待中', color: 'text-yellow-600' },
   running: { label: '运行中', color: 'text-blue-600' },
-  success: { label: '成功', color: 'text-green-600' },
+  completed: { label: '完成', color: 'text-green-600' },
   failed: { label: '失败', color: 'text-red-600' },
   cancelled: { label: '已取消', color: 'text-gray-600' },
   denied: { label: '被拒绝', color: 'text-orange-600' },
@@ -68,7 +82,12 @@ export function AILogDrawer(props: AILogDrawerProps) {
           <div class="px-5 py-4 border-b border-gray-200 flex items-center justify-between bg-gray-50">
             <div>
               <h2 class="text-base font-semibold text-gray-900">AI 运行日志</h2>
-              <p class="text-xs text-gray-500 mt-0.5">共 {props.logs.length} 条记录</p>
+              <p class="text-xs text-gray-500 mt-0.5">
+                共 {props.logs.length + (props.workflowEvents?.length ?? 0)} 条记录
+                {props.workflowEvents && props.workflowEvents.length > 0
+                  ? `（含 ${props.workflowEvents.length} 条工作流事件）`
+                  : ''}
+              </p>
             </div>
             <div class="flex items-center gap-2">
               <button
@@ -186,6 +205,66 @@ export function AILogDrawer(props: AILogDrawerProps) {
               }}
             </For>
           </div>
+
+          {/* 返修#2 VB15: 工作流事件日志列表 */}
+          <Show when={props.workflowEvents && props.workflowEvents.length > 0}>
+            <For each={props.workflowEvents}>
+              {(event) => {
+                const typeLabel = wfEventTypeLabels[event.type] || event.type;
+
+                return (
+                  <div class="px-5 py-3 border-b border-gray-100 hover:bg-indigo-50/30 transition-colors">
+                    <div class="flex items-center justify-between">
+                      <div class="flex items-center gap-2">
+                        <span class="text-xs font-medium text-indigo-600 bg-indigo-50 px-1.5 py-0.5 rounded">
+                          WF
+                        </span>
+                        <span class="text-xs font-medium text-gray-700">{typeLabel}</span>
+                      </div>
+                      <span class="text-xs text-gray-400">
+                        {new Date(event.timestamp).toLocaleTimeString('zh-CN')}
+                      </span>
+                    </div>
+
+                    {/* 事件详情（按类型差异化显示） */}
+                    <div class="mt-2 space-y-1">
+                      {'content' in event && (
+                        <div class="text-xs text-gray-600">
+                          <span class="font-medium">内容:</span>{' '}
+                          {(event as any).content?.slice(0, 80)}
+                          {((event as any).content?.length ?? 0) > 80 ? '...' : ''}
+                        </div>
+                      )}
+                      {'summary' in event && (event as any).summary && (
+                        <div class="text-xs text-gray-600">
+                          <span class="font-medium">摘要:</span> {(event as any).summary}
+                        </div>
+                      )}
+                      {'wordCount' in event && (event as any).wordCount > 0 && (
+                        <div class="text-xs text-gray-500">
+                          字数: {(event as any).wordCount}
+                        </div>
+                      )}
+                      {'auditScore' in event && (event as any).auditScore != null && (
+                        <div class="text-xs text-gray-500">
+                          审计评分: {(event as any).auditScore}/100
+                        </div>
+                      )}
+                      {'entropyDelta' in event && (event as any).entropyDelta != null && (
+                        <div class="text-xs text-gray-500">
+                          熵变化: +{(event as any).entropyDelta} bit
+                        </div>
+                      )}
+                    </div>
+
+                    <div class="mt-1 text-[10px] text-gray-300">
+                      workflowId: {event.workflowId}
+                    </div>
+                  </div>
+                );
+              }}
+            </For>
+          </Show>
         </div>
       </div>
     </Show>

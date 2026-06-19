@@ -79,7 +79,7 @@ export class FakeAgentProvider implements INovelAgentProvider {
       task.status = 'quota';
       task.error = '今日 Mock 调用次数已达上限（测试场景）';
     } else {
-      task.status = 'success';
+      task.status = 'completed';
       task.output = this.generateMockOutput(task);
     }
 

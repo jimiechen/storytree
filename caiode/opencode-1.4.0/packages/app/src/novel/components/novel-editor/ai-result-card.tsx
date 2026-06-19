@@ -11,7 +11,7 @@ interface AIResultCardProps {
 const statusConfig: Record<AITaskStatus, { label: string; color: string; bg: string; icon: string }> = {
   pending: { label: '等待中', color: 'text-yellow-600', bg: 'bg-yellow-50', icon: '⏳' },
   running: { label: '生成中', color: 'text-blue-600', bg: 'bg-blue-50', icon: '⚡' },
-  success: { label: '生成完成', color: 'text-green-600', bg: 'bg-green-50', icon: '✓' },
+  completed: { label: '生成完成', color: 'text-green-600', bg: 'bg-green-50', icon: '✓' },
   failed: { label: '生成失败', color: 'text-red-600', bg: 'bg-red-50', icon: '✗' },
   cancelled: { label: '已取消', color: 'text-gray-600', bg: 'bg-gray-50', icon: '⊘' },
   denied: { label: '权限不足', color: 'text-orange-600', bg: 'bg-orange-50', icon: '⛔' },
@@ -29,7 +29,7 @@ export function AIResultCard(props: AIResultCardProps) {
   const [isExpanded, setIsExpanded] = createSignal(true);
 
   const status = () => statusConfig[props.task.status];
-  const isSuccess = () => props.task.status === 'success';
+  const isSuccess = () => props.task.status === 'completed';
   const isError = () => ['failed', 'cancelled', 'denied', 'quota'].includes(props.task.status);
 
   const handleAccept = () => {

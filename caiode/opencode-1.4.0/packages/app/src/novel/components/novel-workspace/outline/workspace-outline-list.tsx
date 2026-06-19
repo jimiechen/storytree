@@ -29,6 +29,7 @@ export const WorkspaceOutlineList: Component<WorkspaceOutlineListProps> = (props
       <For each={props.chapters}>
         {(chapter) => (
           <div
+            data-testid="outline-chapter-item"
             class={`group flex items-center justify-between px-2 py-2 rounded-md cursor-pointer transition-colors ${
               chapter.id === props.selectedId ? 'bg-[#eff4ff]' : 'hover:bg-[#e6eeff]'
             }`}

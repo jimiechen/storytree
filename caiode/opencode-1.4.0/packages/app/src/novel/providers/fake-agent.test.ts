@@ -19,7 +19,7 @@ describe("FakeAgentProvider", () => {
     await new Promise((resolve) => setTimeout(resolve, 2500));
 
     const updated = provider.getTask(task.id);
-    expect(updated?.status).toBe("success");
+    expect(updated?.status).toBe("completed"); // 修正#6: 'success' → 'completed'
     expect(updated?.output).toBeDefined();
     expect(updated?.output?.text.length).toBeGreaterThan(0);
   });
@@ -39,7 +39,7 @@ describe("FakeAgentProvider", () => {
     await new Promise((resolve) => setTimeout(resolve, 2500));
 
     const updated = provider.getTask(task.id);
-    expect(updated?.status).toBe("success");
+    expect(updated?.status).toBe("completed"); // 修正#6
     expect(updated?.output).toBeDefined();
   });
 
@@ -57,7 +57,7 @@ describe("FakeAgentProvider", () => {
     await new Promise((resolve) => setTimeout(resolve, 2500));
 
     const updated = provider.getTask(task.id);
-    expect(updated?.status).toBe("success");
+    expect(updated?.status).toBe("completed"); // 修正#6
     expect(updated?.output?.text.length).toBeGreaterThan(0);
   });
 
@@ -76,7 +76,7 @@ describe("FakeAgentProvider", () => {
     await new Promise((resolve) => setTimeout(resolve, 2500));
 
     const updated = provider.getTask(task.id);
-    expect(updated?.status).toBe("success");
+    expect(updated?.status).toBe("completed"); // 修正#6
     expect(updated?.output).toBeDefined();
   });
 
@@ -166,7 +166,7 @@ describe("FakeAgentProvider", () => {
     await new Promise((resolve) => setTimeout(resolve, 2000));
 
     const updated = provider.getTask(task.id);
-    expect(updated?.status).toBe("success");
+    expect(updated?.status).toBe("completed"); // 修正#6
     expect(updated?.duration).toBeGreaterThan(0);
   });
 
@@ -189,7 +189,7 @@ describe("FakeAgentProvider", () => {
 
     expect(statusChanges.length).toBeGreaterThanOrEqual(2);
     expect(statusChanges).toContain("running");
-    expect(statusChanges).toContain("success");
+    expect(statusChanges).toContain("completed"); // 修正#6: 'success' → 'completed'
   });
 
   // 额外测试: 字数统计

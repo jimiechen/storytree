@@ -15,7 +15,7 @@ const BENTO_ITEMS = [
 
 export const WorldOverviewBento: Component<Props> = (props) => {
   return (
-    <div class="grid grid-cols-2 gap-4">
+    <div data-testid="world-overview-bento" class="grid grid-cols-2 gap-4">
       {BENTO_ITEMS.map((item) => (
         <div class="bg-white rounded-xl border border-[#cbc3d7] p-5">
           <div class="flex items-center gap-2 mb-3">

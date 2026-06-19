@@ -19,9 +19,11 @@ interface WorkspaceGenerationFormProps extends WorkspaceGenerationFormActions {
   data: GenerationFormData;
 }
 
+import { AI_MODEL_OPTIONS } from '../../../types/generation-config';
+
 const TOLERANCE_OPTIONS = ['±300', '±500', '精准匹配'];
 const REFERENCE_OPTIONS = [1, 3, 5];
-const MODEL_OPTIONS = ['豆包', 'GPT-4', 'Claude 3'];
+const MODEL_OPTIONS = [...AI_MODEL_OPTIONS] as readonly string[];
 
 /** 生成参数表单 — Stitch 04 code.html */
 export const WorkspaceGenerationForm: Component<WorkspaceGenerationFormProps> = (props) => {

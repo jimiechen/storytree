@@ -14,6 +14,8 @@ export interface AISuggestion {
   createdAt: Date;
 }
 
+import type { ChapterInformationState } from './information-flow';
+
 export interface Chapter {
   id: string;
   projectId: string;
@@ -24,6 +26,8 @@ export interface Chapter {
   content: string;
   outline: ChapterOutline;
   aiSuggestions?: AISuggestion[];
+  /** Info-Lite 信息审计状态（AI 操作后填充） */
+  informationState?: ChapterInformationState;
   createdAt: string;
   updatedAt: string;
   lastEditedAt?: Date;

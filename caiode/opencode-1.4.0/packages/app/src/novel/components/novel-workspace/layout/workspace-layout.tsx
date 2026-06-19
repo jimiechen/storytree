@@ -20,7 +20,7 @@ interface WorkspaceLayoutProps {
  */
 export const WorkspaceLayout: Component<WorkspaceLayoutProps> = (props) => {
   return (
-    <div class="flex flex-col h-screen overflow-hidden bg-[#f8f9ff]">
+    <div data-testid="workspace-layout" class="flex flex-col h-screen overflow-hidden bg-[#f8f9ff]">
       {props.topAppBar}
 
       <main class="flex flex-1 overflow-hidden relative">

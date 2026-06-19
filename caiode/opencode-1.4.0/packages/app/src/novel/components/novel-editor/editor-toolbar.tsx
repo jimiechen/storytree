@@ -20,7 +20,7 @@ export const EditorToolbar: Component<EditorToolbarProps> = (props) => {
   return (
     <header class="flex items-center justify-between h-16 px-6 bg-white border-b border-[#cbc3d7] shadow-[0_2px_12px_rgba(0,0,0,0.02)] shrink-0">
       {/* Left */}
-      <div class="flex items-center gap-3">
+      <div data-testid="editor-back-btn" class="flex items-center gap-3">
         <NovelButton variant="icon" onClick={props.onBack}>
           <NovelIcon name="arrow_back" size={20} />
         </NovelButton>
@@ -30,7 +30,7 @@ export const EditorToolbar: Component<EditorToolbarProps> = (props) => {
       </div>
 
       {/* Center */}
-      <div class="hidden md:flex items-center gap-1 text-sm">
+      <div data-testid="editor-word-count" class="hidden md:flex items-center gap-1 text-sm">
         <span class="font-bold text-[#6b38d4]">
           {props.wordCount.toLocaleString()}
         </span>
