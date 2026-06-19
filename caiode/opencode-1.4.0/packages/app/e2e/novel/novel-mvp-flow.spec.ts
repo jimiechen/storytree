@@ -81,7 +81,7 @@ test.describe('Novel MVP 主链路', () => {
   test('E2E-08: 人物按钮进入角色面板', async ({ page }) => {
     await page.locator('[data-testid="sidenav-characters"]').click();
     await expect(page.locator('[data-testid="character-panel-page"]')).toBeVisible({ timeout: 10_000 });
-    await expect(page.getByText('主角')).toBeVisible();
+    await expect(page.getByRole('heading', { name: '主角' }).first()).toBeVisible();
   });
 
   // ─── E2E-09: 设定按钮进入世界设定 ───────────────────────────
@@ -104,7 +104,7 @@ test.describe('Novel MVP 主链路', () => {
   // ─── E2E-11: 成就按钮进入成就页 ─────────────────────────────
   test('E2E-11: 成就按钮进入成就页', async ({ page }) => {
     await page.locator('[data-testid="workspace-achievements-btn"]').click();
-    await expect(page.getByText(/成就系统|成就/)).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByRole('heading', { name: '成就系统' }).first()).toBeVisible({ timeout: 10_000 });
     // 至少应有 5 张成就卡片
     const cards = page.locator('[data-testid="achievement-card"]');
     await expect(cards.first()).toBeVisible({ timeout: 5000 });
@@ -118,7 +118,7 @@ test.describe('Novel MVP 主链路', () => {
     // Modal 对话框应可见
     await expect(page.locator('[data-testid="generation-settings-modal"][role="dialog"]')).toBeVisible({ timeout: 10_000 });
     // "目标字数" 标签应可见
-    await expect(page.getByText('目标字数')).toBeVisible();
+    await expect(page.locator('[data-testid="generation-settings-modal"]').getByText('目标字数')).toBeVisible();
     // 点击关闭按钮（modal header 内的 X）
     await page
       .locator('[data-testid="generation-settings-modal"]')

@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { NovelChapterProvider } from '../providers/novel-chapter';
-import type { Chapter, AISuggestion } from '../types';
+import type { Chapter, AISuggestion, ChapterExtractedInfo } from '../types';
 
 const mockSeedChapters: Chapter[] = [
   {
@@ -85,6 +85,43 @@ describe('useNovelChapters - Provider 层验证', () => {
       } catch (e) {
         expect((e as { code: string }).code).toBe('NOT_FOUND');
       }
+    });
+  });
+
+  describe('saveChapterSummary', () => {
+    it('保存后 summary 应更新', async () => {
+      const provider = getProvider();
+      await provider.saveChapterSummary('ch-001', '新的摘要');
+      const saved = await provider.getChapter('ch-001');
+      expect(saved).not.toBeNull();
+      expect(saved!.summary).toBe('新的摘要');
+    });
+  });
+
+  describe('saveChapterWordCount', () => {
+    it('保存后 wordCount 应更新', async () => {
+      const provider = getProvider();
+      await provider.saveChapterWordCount('ch-001', 999);
+      const saved = await provider.getChapter('ch-001');
+      expect(saved).not.toBeNull();
+      expect(saved!.wordCount).toBe(999);
+    });
+  });
+
+  describe('saveChapterExtractedInfo', () => {
+    it('保存后 extractedInfo 应更新', async () => {
+      const provider = getProvider();
+      const info: ChapterExtractedInfo = {
+        summary: '提取摘要',
+        characters: ['角色A', '角色B'],
+        worldItems: ['道具A'],
+        keyEvents: '事件发生',
+        protagonistState: '主角状态',
+      };
+      await provider.saveChapterExtractedInfo('ch-001', info);
+      const saved = await provider.getChapter('ch-001');
+      expect(saved).not.toBeNull();
+      expect(saved!.extractedInfo).toEqual(info);
     });
   });
 

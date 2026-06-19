@@ -9,9 +9,11 @@ import type {
   AITaskInput,
   AITaskStatus,
   AILog,
-  OutlineNode
+  OutlineNode,
+  ChapterExtractedInfo,
 } from '../types';
 import type { CreateProjectInput } from '../types';
+import type { ChapterInformationState } from '../types/information-flow';
 
 export type { ProviderError, ProviderErrorCode } from '../types/provider-error';
 
@@ -27,6 +29,10 @@ export interface INovelChapterProvider {
   listChapters(projectId: string): Promise<Chapter[]>;
   getChapter(id: string): Promise<Chapter | null>;
   saveChapter(id: string, content: string): Promise<void>;
+  saveChapterSummary(id: string, summary: string): Promise<void>;
+  saveChapterWordCount(id: string, wordCount: number): Promise<void>;
+  saveChapterInformationState(id: string, state: ChapterInformationState): Promise<void>;
+  saveChapterExtractedInfo(id: string, info: ChapterExtractedInfo): Promise<void>;
   updateChapterStatus(id: string, status: ChapterStatus): Promise<void>;
   addAISuggestion(chapterId: string, suggestion: AISuggestion): Promise<void>;
   acceptSuggestion(chapterId: string, suggestionId: string): Promise<void>;

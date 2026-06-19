@@ -32,10 +32,10 @@ function makeTestCommand(overrides?: Partial<NovelCommand>): NovelCommand {
   });
 }
 
-// ─── 测试套件 ──────────────────────────────────────────────────────────
+// ─── 测试套件 ──────────────────────────────────────────
 
 describe('MockAgentAdapter', () => {
-  const adapter = new MockAgentAdapter();
+  const adapter = new MockAgentAdapter({ delayMultiplier: 0, silent: true });
 
   // ── VA06: status 为 'completed' ──
 

@@ -1,6 +1,7 @@
-import type { Chapter, ChapterStatus, AISuggestion } from '../types';
+import type { Chapter, ChapterStatus, AISuggestion, ChapterExtractedInfo } from '../types';
 import type { INovelChapterProvider } from './index';
 import type { ProviderError } from '../types/provider-error';
+import type { ChapterInformationState } from '../types/information-flow';
 import { mockChapters } from '../mock-data';
 import { mockDelay } from '../utils/mock-delay';
 
@@ -35,6 +36,42 @@ export class NovelChapterProvider implements INovelChapterProvider {
       chapter.status = 'revising';
     }
     await mockDelay(200);
+  }
+
+  async saveChapterSummary(id: string, summary: string): Promise<void> {
+    const chapter = this.chapters.get(id);
+    if (!chapter) {
+      throw { code: 'NOT_FOUND', message: `Chapter ${id} not found` } as ProviderError;
+    }
+    chapter.summary = summary;
+    await mockDelay(100);
+  }
+
+  async saveChapterWordCount(id: string, wordCount: number): Promise<void> {
+    const chapter = this.chapters.get(id);
+    if (!chapter) {
+      throw { code: 'NOT_FOUND', message: `Chapter ${id} not found` } as ProviderError;
+    }
+    chapter.wordCount = wordCount;
+    await mockDelay(100);
+  }
+
+  async saveChapterInformationState(id: string, state: ChapterInformationState): Promise<void> {
+    const chapter = this.chapters.get(id);
+    if (!chapter) {
+      throw { code: 'NOT_FOUND', message: `Chapter ${id} not found` } as ProviderError;
+    }
+    chapter.informationState = state;
+    await mockDelay(100);
+  }
+
+  async saveChapterExtractedInfo(id: string, info: ChapterExtractedInfo): Promise<void> {
+    const chapter = this.chapters.get(id);
+    if (!chapter) {
+      throw { code: 'NOT_FOUND', message: `Chapter ${id} not found` } as ProviderError;
+    }
+    chapter.extractedInfo = info;
+    await mockDelay(100);
   }
 
   async updateChapterStatus(id: string, status: ChapterStatus): Promise<void> {

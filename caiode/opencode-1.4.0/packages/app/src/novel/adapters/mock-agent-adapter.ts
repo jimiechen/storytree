@@ -24,6 +24,7 @@ import type {
   InformationLinkRelationType,
 } from '../types/information-flow';
 import { uid } from '../types/information-flow';
+import { mockDelay } from '../utils/mock-delay';
 
 // ─── 确定性评分函数 ────────────────────────────────────────────────────
 
@@ -157,14 +158,49 @@ function buildMockText(genre: string, commandType: string): string {
  * Mock Agent 适配器。
  * 不调用真实 LLM，基于输入参数生成确定性的 Mock 数据。
  */
+export interface MockAgentAdapterOptions {
+  /** 延迟倍数：默认 1（生产/E2E 真实延迟），测试可设为 0 跳过等待 */
+  delayMultiplier?: number;
+  /** 是否静默日志：测试设为 true 可减少输出噪音 */
+  silent?: boolean;
+}
+
 export class MockAgentAdapter implements NovelAgentAdapter {
   readonly name = 'MockAgentAdapter';
 
   /** 全局执行尝试计数器（每次 run() 自增 1，retry 必不同） */
   private static _attemptCounter = 0;
 
+  /** 延迟倍数，控制模拟异步延迟的时长 */
+  private delayMultiplier: number;
+
+  /** 是否静默日志 */
+  private silent: boolean;
+
+  constructor(options?: MockAgentAdapterOptions) {
+    this.delayMultiplier = options?.delayMultiplier ?? 1;
+    this.silent = options?.silent ?? false;
+  }
+
+  /** 运行时调整延迟倍数（供测试或 E2E 使用） */
+  setDelayMultiplier(multiplier: number): void {
+    this.delayMultiplier = multiplier;
+  }
+
+  /** 运行时调整日志开关（供测试或 E2E 使用） */
+  setSilent(silent: boolean): void {
+    this.silent = silent;
+  }
+
+  private log(...args: unknown[]): void {
+    if (!this.silent) {
+      console.info(...args);
+    }
+  }
+
   async run(command: NovelCommand): Promise<NovelAgentResult> {
-    const { chapterIndex, genre, chapterId, projectId, type: cmdType } = command;
+    const startTime = Date.now();
+    const { chapterIndex, genre, chapterId, projectId, type: cmdType, targetWordCount } = command;
     const g = genre || '玄幻';
 
     // ── 确定性 ID ──
@@ -172,6 +208,34 @@ export class MockAgentAdapter implements NovelAgentAdapter {
 
     // ── 执行尝试 ID（全局递增，每次调用唯一）──
     const attemptId = ++MockAgentAdapter._attemptCounter;
+
+    // ── 模拟阶梯式异步延迟（P1 Mock 真实感）──
+    // 总延迟 3s-8s：Context(1000ms) + Reasoning(基于字数 500-5500ms) + Audit(800ms) + Formatting(700ms)
+    const wordCountTarget = targetWordCount || 2000;
+    const reasoningMsRaw = Math.min(5500, Math.max(500, wordCountTarget));
+    const baseMs = 1000 + 800 + 700; // Context + Audit + Formatting
+    const totalMsRaw = Math.max(3000, Math.min(8000, baseMs + reasoningMsRaw));
+    const totalMs = Math.round(totalMsRaw * this.delayMultiplier);
+
+    // 按阶段比例分配延迟
+    const phase1Ms = Math.round((1000 / (baseMs + reasoningMsRaw)) * totalMs);
+    const phase2Ms = Math.round((reasoningMsRaw / (baseMs + reasoningMsRaw)) * totalMs);
+    const phase3Ms = Math.round((800 / (baseMs + reasoningMsRaw)) * totalMs);
+    const phase4Ms = Math.max(0, totalMs - phase1Ms - phase2Ms - phase3Ms);
+
+    this.log(`[MockAgent] Start generation for ${chapterId} (target ~${wordCountTarget} words, total delay ${totalMs}ms)`);
+
+    await mockDelay(phase1Ms);
+    this.log(`[MockAgent] Phase 1/4 - Context Analysis completed for ${chapterId}`);
+
+    await mockDelay(phase2Ms);
+    this.log(`[MockAgent] Phase 2/4 - Model Reasoning completed for ${chapterId}`);
+
+    await mockDelay(phase3Ms);
+    this.log(`[MockAgent] Phase 3/4 - Information Audit completed for ${chapterId}`);
+
+    await mockDelay(phase4Ms);
+    this.log(`[MockAgent] Phase 4/4 - Result Formatting completed for ${chapterId}`);
 
     // ── Info-Lite 信息审计数据（确定性） ──
     const infoState = this.buildInformationState(chapterId, projectId, chapterIndex, g);
@@ -190,7 +254,7 @@ export class MockAgentAdapter implements NovelAgentAdapter {
       text,
       wordCount,
       summary,
-      durationMs: 120 + (chapterIndex % 5) * 30,
+      durationMs: Date.now() - startTime,
       informationState: infoState,
     };
   }

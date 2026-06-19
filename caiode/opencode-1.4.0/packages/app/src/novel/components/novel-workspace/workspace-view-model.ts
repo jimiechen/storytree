@@ -1,17 +1,9 @@
-import { createSignal, createEffect } from 'solid-js';
-import { useWorkspace } from '../../hooks/use-workspace';
+import { createSignal, createEffect, createMemo } from 'solid-js';
 import { useAITask } from '../../hooks/use-ai-task';
 import { useNovelNavigation } from '../../hooks/use-novel-navigation';
-import type { WorkflowMutations } from '../../workflows/workflow-events';
+import type { UseNovelWorkflowReturn } from '../../hooks/use-novel-workflow';
+import type { useWorkspace } from '../../hooks/use-workspace';
 import { DEFAULT_GENERATION_CONFIG } from '../../types/generation-config';
-// 返修#3: 延迟导入避免循环依赖
-let _useNovelWorkflow: typeof import('../../hooks/use-novel-workflow').useNovelWorkflow | null = null;
-function getUseNovelWorkflow() {
-  if (!_useNovelWorkflow) {
-    _useNovelWorkflow = require('../../hooks/use-novel-workflow').useNovelWorkflow;
-  }
-  return _useNovelWorkflow;
-}
 
 // ---------------------------------------------------------------------------
 // 集中 UI 类型定义 — 所有子组件的 Props 类型从这里导入，避免重复定义
@@ -80,17 +72,17 @@ function splitContentToParagraphs(content: string): string[] {
 // ---------------------------------------------------------------------------
 
 export function createWorkspaceViewModel(
-  projectId: () => string,
-  workflowMutations?: WorkflowMutations,
+  ws: ReturnType<typeof useWorkspace>,
+  workflow?: UseNovelWorkflowReturn,
 ) {
-  const ws = useWorkspace(projectId);
   const ai = useAITask();
   const nav = useNovelNavigation();
 
-  // 返修#1+#3: 当提供 workflowMutations 时，初始化 useNovelWorkflow
-  const wf = workflowMutations
-    ? getUseNovelWorkflow()!(workflowMutations)
-    : null;
+  // 返修#1+#3: workflow 由 Workspace 组件通过 useNovelWorkflow hook 创建后传入
+  // 避免在工厂函数内部条件调用 hook，确保 SolidJS 状态稳定
+  const wf = () => workflow ?? null;
+
+
 
   // === 本地 UI 状态：章节展开/收藏（Hook 数据无这些字段，由 ViewModel fallback） ===
   const [chapterUiState, setChapterUiState] = createSignal<
@@ -140,19 +132,24 @@ export function createWorkspaceViewModel(
 
   // === 派生数据：当前章节 ===
   const currentChapterTitle = () => ws.selectedChapter()?.title ?? '未命名章节';
+  const currentChapterWordCount = () => ws.selectedChapter()?.wordCount ?? 0;
+  const currentChapterSummary = () => ws.selectedChapter()?.summary ?? '';
+  const currentChapterInformationState = () => ws.selectedChapter()?.informationState;
+  const currentChapterExtractedInfo = () => ws.selectedChapter()?.extractedInfo;
 
-  const currentParagraphs = (): string[] => {
+  // 返修#3: 必须用 createMemo 包裹，确保 selectedChapter.content 变化时 UI 重新渲染
+  const currentParagraphs = createMemo((): string[] => {
     const content = ws.selectedChapter()?.content ?? '';
     const paragraphs = splitContentToParagraphs(content);
     return paragraphs.length > 0 ? paragraphs : FALLBACK_PARAGRAPHS;
-  };
+  });
 
   // === 派生数据：AI 任务视图 ===
   // 返修#1 VB05: 使用真实 workflow 状态，不再硬编码 67/33%
-  const aiTaskView = (): WorkspaceAiTaskView | undefined => {
-    // 优先使用 useNovelWorkflow 状态
-    if (wf && wf.isRunning()) {
-      const task = wf.currentTask();
+  const aiTaskView = createMemo((): WorkspaceAiTaskView | undefined => {
+    const workflow = wf();
+    if (workflow && workflow.isRunning()) {
+      const task = workflow.currentTask();
       if (task) {
         return {
           running: true,
@@ -163,12 +160,10 @@ export function createWorkspaceViewModel(
           preview: task.result.text.slice(0, 120) || '正在构思中...',
         };
       }
-      // workflow is running but no task yet
       return { running: true, title: 'AI 正在初始化...', progress: 5, preview: '' };
     }
 
-    // Fallback to old useAITask state (when no workflowMutations provided)
-    if (!wf && ai.isRunning()) {
+    if (!wf() && ai.isRunning()) {
       const task = ai.currentTask();
       if (!task) return undefined;
       const previewText = task.output?.text?.slice(0, 120) ?? '';
@@ -181,7 +176,7 @@ export function createWorkspaceViewModel(
     }
 
     return undefined;
-  };
+  });
 
   // === 交互方法：章节 ===
   const selectChapter = (id: string) => ws.selectChapter(id);
@@ -216,9 +211,10 @@ export function createWorkspaceViewModel(
     const chapter = ws.selectedChapter();
     if (!chapter) return;
 
-    if (wf) {
+    const workflow = wf();
+    if (workflow) {
       // P1-B 主链路：通过 useNovelWorkflow 执行
-      await wf.runAIWritingCommand({
+      await workflow.runAIWritingCommand({
         chapterId: chapter.id,
         projectId: ws.projectId?.() ?? 'proj-001',
         chapterIndex: chapter.orderIndex,
@@ -243,8 +239,9 @@ export function createWorkspaceViewModel(
     const chapter = ws.selectedChapter();
     if (!chapter) return;
 
-    if (wf) {
-      await wf.runAIWritingCommand({
+    const workflow = wf();
+    if (workflow) {
+      await workflow.runAIWritingCommand({
         chapterId: chapter.id,
         projectId: ws.projectId?.() ?? 'proj-001',
         chapterIndex: chapter.orderIndex,
@@ -265,11 +262,19 @@ export function createWorkspaceViewModel(
   };
 
   const submitChapterGenerationTask = async () => {
+    console.info('[Workspace-VM] submitChapterGenerationTask called');
     const chapter = ws.selectedChapter();
-    if (!chapter) return;
+    if (!chapter) {
+      console.warn('[Workspace-VM] no chapter selected, aborting');
+      return;
+    }
+    console.info('[Workspace-VM] chapter:', chapter.id, chapter.title);
 
-    if (wf) {
-      await wf.runChapterGeneration({
+    const workflow = wf();
+    console.info('[Workspace-VM] workflow instance:', workflow ? 'EXISTS' : 'NULL (fallback to useAITask)');
+    if (workflow) {
+      console.info('[Workspace-VM] → calling workflow.runChapterGeneration...');
+      await workflow.runChapterGeneration({
         chapterId: chapter.id,
         projectId: ws.projectId?.() ?? 'proj-001',
         chapterIndex: chapter.orderIndex,
@@ -280,6 +285,7 @@ export function createWorkspaceViewModel(
           .filter((o) => o.enabled)
           .map((o) => o.id),
       });
+      console.info('[Workspace-VM] ← runChapterGeneration completed');
     } else {
       await ai.submitTask({
         type: 'continue-writing',
@@ -290,9 +296,10 @@ export function createWorkspaceViewModel(
   };
 
   const cancelRunningTask = async () => {
-    if (wf) {
+    const workflow = wf();
+    if (workflow) {
       // P1-B 主链路：通过 useNovelWorkflow 取消（产出 cancelled 结果）
-      wf.cancelCurrentTask();
+      workflow.cancelCurrentTask();
     } else {
       // Fallback: 旧路径
       const task = ai.currentTask();
@@ -307,6 +314,10 @@ export function createWorkspaceViewModel(
     outlineChapters,
     selectedChapterId: ws.selectedChapterId,
     currentChapterTitle,
+    currentChapterWordCount,
+    currentChapterSummary,
+    currentChapterInformationState,
+    currentChapterExtractedInfo,
     currentParagraphs,
     generationConfig,
     contextOptions,

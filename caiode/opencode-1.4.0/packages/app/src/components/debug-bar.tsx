@@ -80,7 +80,7 @@ export function DebugBar() {
   const language = useLanguage()
   const location = useLocation()
   const routing = useIsRouting()
-  const [visible, setVisible] = createSignal(true)
+  const [visible, setVisible] = createSignal(false)
   const [state, setState] = createStore({
     cls: undefined as number | undefined,
     delay: undefined as number | undefined,

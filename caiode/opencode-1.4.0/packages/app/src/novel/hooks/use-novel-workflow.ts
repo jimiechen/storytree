@@ -126,7 +126,7 @@ export function useNovelWorkflow(mutations: WorkflowMutations): UseNovelWorkflow
       const { result, events, durationMs } = await runMockGeneration(command);
 
       // 显式写回（修正#9：mutations 作为参数注入）
-      applyWorkflowEvents(events, mutations);
+      await applyWorkflowEvents(events, mutations);
 
       // 更新内部状态
       setCurrentTask({ result, events, durationMs });
@@ -175,7 +175,7 @@ export function useNovelWorkflow(mutations: WorkflowMutations): UseNovelWorkflow
       lastCommand = command;
 
       const { result, events, durationMs } = await runMockGeneration(command);
-      applyWorkflowEvents(events, mutations);
+      await applyWorkflowEvents(events, mutations);
 
       setCurrentTask({ result, events, durationMs });
       setCurrentInfoState(result.informationState);
@@ -230,7 +230,7 @@ export function useNovelWorkflow(mutations: WorkflowMutations): UseNovelWorkflow
 
     try {
       const { result, events, durationMs } = await runMockGeneration(lastCommand);
-      applyWorkflowEvents(events, mutations);
+      await applyWorkflowEvents(events, mutations);
 
       setCurrentTask({ result, events, durationMs });
       setCurrentInfoState(result.informationState);

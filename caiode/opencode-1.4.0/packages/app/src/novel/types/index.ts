@@ -1,7 +1,7 @@
 export type { Project } from './project';
 export type { CreateProjectInput, ProtagonistInput, GenreOption, TargetAudience, WritingStyle, StoryTheme } from './project';
 export { GENRE_OPTIONS } from './project';
-export type { Chapter, ChapterOutline, AISuggestion } from './chapter';
+export type { Chapter, ChapterOutline, AISuggestion, ChapterExtractedInfo } from './chapter';
 export type { ChapterStatus } from './editor';
 export type { Character, CharacterRelationship } from './character';
 export type { Sandbox } from './sandbox';

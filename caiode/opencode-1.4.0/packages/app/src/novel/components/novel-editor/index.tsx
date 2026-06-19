@@ -84,8 +84,8 @@ export function NovelEditor() {
     const ch = chaptersHook.selectedChapter();
     if (!ch) return;
     const suggestion = {
-      id: `suggestion-`,
-      taskId: `task-`,
+      id: `suggestion-${Date.now()}`,
+      taskId: tasks().at(-1)?.id ?? `task-${Date.now()}`,
       text,
       status: 'accepted' as const,
       createdAt: new Date(),
@@ -98,8 +98,8 @@ export function NovelEditor() {
     const ch = chaptersHook.selectedChapter();
     if (!ch) return;
     await chaptersHook.addAISuggestion(ch.id, {
-      id: `suggestion-`,
-      taskId: `task-`,
+      id: `suggestion-save-${Date.now()}`,
+      taskId: tasks().at(-1)?.id ?? `task-${Date.now()}`,
       text,
       status: 'saved' as const,
       createdAt: new Date(),
@@ -115,9 +115,9 @@ export function NovelEditor() {
     const diff = now - new Date(dateStr).getTime();
     const hours = Math.floor(diff / (1000 * 60 * 60));
     if (hours < 1) return '刚刚';
-    if (hours < 24) return `小时前`;
+    if (hours < 24) return `${hours}小时前`;
     const days = Math.floor(hours / 24);
-    if (days < 30) return `天前`;
+    if (days < 30) return `${days}天前`;
     return new Date(dateStr).toLocaleDateString('zh-CN');
   }
 

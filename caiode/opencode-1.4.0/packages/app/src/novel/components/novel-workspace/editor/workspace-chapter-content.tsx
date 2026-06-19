@@ -1,20 +1,20 @@
 import { For } from 'solid-js';
-import type { Component } from 'solid-js';
+import type { Component, Accessor } from 'solid-js';
 
 interface WorkspaceChapterContentProps {
-  paragraphs: string[];
+  paragraphs: Accessor<string[]>;
 }
 
 /** 章节正文内容 — Stitch 04 code.html */
 export const WorkspaceChapterContent: Component<WorkspaceChapterContentProps> = (props) => {
   return (
-    <div class="flex-1 overflow-y-auto px-10 py-6 bg-white">
+    <div data-testid="chapter-content" class="flex-1 overflow-y-auto px-10 py-6 bg-white">
       <div class="max-w-3xl mx-auto">
-        <For each={props.paragraphs}>
+        <For each={props.paragraphs()}>
           {(paragraph, index) => (
             <p
               class={`font-body-lg text-body-lg leading-loose mb-6 ${
-                index() === props.paragraphs.length - 1 && paragraph.startsWith('...')
+                index() === props.paragraphs().length - 1 && paragraph.startsWith('...')
                   ? 'text-[#7b7486] italic opacity-70'
                   : 'text-[#0d1c2f]'
               }`}

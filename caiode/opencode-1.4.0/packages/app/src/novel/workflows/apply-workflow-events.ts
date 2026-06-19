@@ -42,25 +42,25 @@ export function clearWorkflowEventLog(): void {
  * // 在测试中注入 mock mutations：
  * applyWorkflowEvents(events, mockMutations);
  */
-export function applyWorkflowEvents(
+export async function applyWorkflowEvents(
   events: NovelWorkflowEvent[],
   mutations: WorkflowMutations,
-): void {
+): Promise<void> {
   for (const event of events) {
     eventLog.push(event);
 
     switch (event.type) {
       case 'chapter.generated':
-        mutations.updateChapterContent(event.chapterId, event.content);
-        mutations.updateChapterSummary(event.chapterId, event.summary);
-        mutations.updateChapterWordCount(event.chapterId, event.wordCount);
+        await mutations.updateChapterContent(event.chapterId, event.content);
+        await mutations.updateChapterSummary(event.chapterId, event.summary);
+        await mutations.updateChapterWordCount(event.chapterId, event.wordCount);
         if (event.informationState) {
-          mutations.updateChapterInfoState(event.chapterId, event.informationState);
+          await mutations.updateChapterInfoState(event.chapterId, event.informationState);
         }
         break;
 
       case 'chapter.extracted':
-        mutations.updateChapterExtractedInfo(event.chapterId, {
+        await mutations.updateChapterExtractedInfo(event.chapterId, {
           summary: event.summary,
           characters: event.characters,
           worldItems: event.worldItems,
@@ -71,19 +71,19 @@ export function applyWorkflowEvents(
         break;
 
       case 'character.updated':
-        mutations.updateCharacterAppearance(event.characterIds, event.chapterId);
+        await mutations.updateCharacterAppearance(event.characterIds, event.chapterId);
         break;
 
       case 'world.referenced':
-        mutations.incrementWorldReference(event.worldItemIds, event.chapterId);
+        await mutations.incrementWorldReference(event.worldItemIds, event.chapterId);
         break;
 
       case 'achievement.progressed':
-        mutations.addAchievementProgress(event.achievementId, event.delta);
+        await mutations.addAchievementProgress(event.achievementId, event.delta);
         break;
 
       case 'profile.stats.updated':
-        mutations.updateProfileStats(event.projectId, {
+        await mutations.updateProfileStats(event.projectId, {
           words: event.wordCountDelta,
           generations: event.generationCountDelta,
           credits: event.creditDelta,

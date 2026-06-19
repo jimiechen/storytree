@@ -16,11 +16,22 @@
  */
 
 import { describe, it, expect, beforeEach } from 'vitest';
-import { runMockGeneration } from './mock-generation-workflow';
+import { runMockGeneration as runMockGenerationImpl } from './mock-generation-workflow';
 import { applyWorkflowEvents, clearWorkflowEventLog, getWorkflowEventLog } from './apply-workflow-events';
-import { createChapterGenerateCommand, createAIWritingCommand } from './novel-command';
+import {
+  createChapterGenerateCommand,
+  createAIWritingCommand,
+  type NovelCommand,
+} from './novel-command';
 import type { WorkflowMutations } from './workflow-events';
 import type { ChapterInformationState } from '../types/information-flow';
+import { MockAgentAdapter } from '../adapters/mock-agent-adapter';
+
+// 测试专用 fast adapter，避免修改全局单例的 delayMultiplier，并静默日志减少噪音
+const testAdapter = new MockAgentAdapter({ delayMultiplier: 0, silent: true });
+function runMockGeneration(command: NovelCommand) {
+  return runMockGenerationImpl(command, testAdapter);
+}
 
 // ─── 测试用 Mock Mutations ─────────────────────────────────────────────
 
@@ -86,12 +97,25 @@ describe('P1-B MockGenerationWorkflow E2E', () => {
     const mutations = createMockMutations();
     const { result, events } = await runMockGeneration(makeGenParams());
 
-    applyWorkflowEvents(events, mutations);
+    await applyWorkflowEvents(events, mutations);
 
     // 验证内容被写入
     const contentLogs = mutations._log.filter((l) => l.startsWith('updateContent:'));
     expect(contentLogs.length).toBeGreaterThan(0);
     expect(contentLogs[0]).toContain(result.text.slice(0, 30));
+  });
+
+  // ── VB06b: 写回 summary / wordCount / extractedInfo ──
+
+  it('VB06b: applyWorkflowEvents 触发 summary、wordCount、extractedInfo 写回', async () => {
+    const mutations = createMockMutations();
+    const { result, events } = await runMockGeneration(makeGenParams());
+
+    await applyWorkflowEvents(events, mutations);
+
+    expect(mutations._log).toContainEqual(`updateSummary:${result.summary}`);
+    expect(mutations._log).toContainEqual(`updateWordCount:${result.wordCount}`);
+    expect(mutations._log).toContainEqual('updateExtractedInfo');
   });
 
   // ── VB07: 信息审计状态写回 ──
@@ -100,7 +124,7 @@ describe('P1-B MockGenerationWorkflow E2E', () => {
     const mutations = createMockMutations();
     const { result, events } = await runMockGeneration(makeGenParams());
 
-    applyWorkflowEvents(events, mutations);
+    await applyWorkflowEvents(events, mutations);
 
     const infoLogs = mutations._log.filter((l) => l.startsWith('updateInfoState:'));
     expect(infoLogs.length).toBeGreaterThan(0);
@@ -114,7 +138,7 @@ describe('P1-B MockGenerationWorkflow E2E', () => {
     const mutations = createMockMutations();
     const { events } = await runMockGeneration(makeGenParams({ genre: '玄幻' }));
 
-    applyWorkflowEvents(events, mutations);
+    await applyWorkflowEvents(events, mutations);
 
     const charLogs = mutations._log.filter((l) => l.startsWith('updateChar:'));
     // 玄幻模板含 character-state 类型原子
@@ -127,7 +151,7 @@ describe('P1-B MockGenerationWorkflow E2E', () => {
     const mutations = createMockMutations();
     const { events } = await runMockGeneration(makeGenParams({ genre: '玄幻' }));
 
-    applyWorkflowEvents(events, mutations);
+    await applyWorkflowEvents(events, mutations);
 
     const worldLogs = mutations._log.filter((l) => l.startsWith('incWorldRef:'));
     // 玄幻模板含 item 类型原子
@@ -140,7 +164,7 @@ describe('P1-B MockGenerationWorkflow E2E', () => {
     const mutations = createMockMutations();
     const { events } = await runMockGeneration(makeGenParams());
 
-    applyWorkflowEvents(events, mutations);
+    await applyWorkflowEvents(events, mutations);
 
     const achLogs = mutations._log.filter((l) => l.startsWith('achievement:'));
     expect(achLogs).toContainEqual('achievement:ai-generation-count:1');
@@ -152,7 +176,7 @@ describe('P1-B MockGenerationWorkflow E2E', () => {
     const mutations = createMockMutations();
     const { events } = await runMockGeneration(makeGenParams());
 
-    applyWorkflowEvents(events, mutations);
+    await applyWorkflowEvents(events, mutations);
 
     const profileLogs = mutations._log.filter((l) => l.startsWith('profileStats:'));
     expect(profileLogs.length).toBeGreaterThan(0);
@@ -175,7 +199,7 @@ describe('P1-B MockGenerationWorkflow E2E', () => {
     });
 
     const { result, events } = await runMockGeneration(cmd);
-    applyWorkflowEvents(events, mutations);
+    await applyWorkflowEvents(events, mutations);
 
     expect(result.status).toBe('completed');
     expect(result.text).toBeTruthy();
@@ -191,7 +215,7 @@ describe('P1-B MockGenerationWorkflow E2E', () => {
   it('VB13: cancelCurrentTask 产生 status=cancelled 的结果（非仅清空状态）', async () => {
     const mutations = createMockMutations();
     const { result, events } = await runMockGeneration(makeGenParams());
-    applyWorkflowEvents(events, mutations);
+    await applyWorkflowEvents(events, mutations);
 
     // 模拟 cancelCurrentTask 行为（返修#4: 必须产出 cancelled 结果）
     const taskResult: { result: NovelAgentResult; events: NovelWorkflowEvent[]; durationMs: number } = {
@@ -275,7 +299,7 @@ describe('P1-B MockGenerationWorkflow E2E', () => {
 
     // Step 2: 模拟用户在 ResultCard 上点击"采纳"（onAccept 回调）
     // onAccept 内部调用 mutations.updateChapterContent(chapterId, appendedContent)
-    applyWorkflowEvents(events, mutations);
+    await applyWorkflowEvents(events, mutations);
 
     // Step 3: 验证 updateChapterContent 被调用
     const contentLogs = mutations._log.filter((l) => l.startsWith('updateContent:'));
@@ -311,7 +335,7 @@ describe('P1-B MockGenerationWorkflow E2E', () => {
 
     // 显式调用 applyWorkflowEvents 后才写回
     const { events } = await runMockGeneration(makeGenParams());
-    applyWorkflowEvents(events, mutations);
+    await applyWorkflowEvents(events, mutations);
     expect(mutations._log.length).toBeGreaterThan(0);
   });
 
@@ -323,7 +347,7 @@ describe('P1-B MockGenerationWorkflow E2E', () => {
     // 不传 mutations 时 TypeScript 编译应报错（运行时不会崩溃）
     // 这里验证传入了正确的 mutations 对象
     const mutations = createMockMutations();
-    expect(() => applyWorkflowEvents(events, mutations)).not.toThrow();
+    await applyWorkflowEvents(events, mutations);
   });
 
   // ── 事件类型完整性 ──
@@ -378,7 +402,7 @@ describe('P1-B MockGenerationWorkflow E2E', () => {
 
     // Phase 3: 执行完成 → isRunning=false, task=result
     const { result, events } = await genPromise;
-    applyWorkflowEvents(events, mutations);
+    await applyWorkflowEvents(events, mutations);
 
     isRunning = false;
     currentTaskResult = { result };
@@ -426,7 +450,7 @@ describe('P1-B MockGenerationWorkflow E2E', () => {
 
     // 阶段2: 生成后日志非空（模拟 drawer 收到 workflowEvents prop）
     const { events } = await runMockGeneration(makeGenParams({ genre: '悬疑' }));
-    applyWorkflowEvents(events, mutations);
+    await applyWorkflowEvents(events, mutations);
 
     // getWorkflowEventLog() 就是 drawer 的 workflowEvents 数据源
     const allEvents = getWorkflowEventLog();

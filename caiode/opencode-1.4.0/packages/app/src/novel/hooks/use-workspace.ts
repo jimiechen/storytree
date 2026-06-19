@@ -16,6 +16,10 @@ export function useWorkspace(projectId: () => string) {
     loading,
     selectChapter,
     saveChapter,
+    saveChapterSummary,
+    saveChapterWordCount,
+    saveChapterInformationState,
+    saveChapterExtractedInfo,
     acceptSuggestion,
     addAISuggestion
   } = useNovelChapters(projectId);
@@ -52,6 +56,10 @@ export function useWorkspace(projectId: () => string) {
     // 章节操作
     selectChapter,
     saveChapter,
+    saveChapterSummary,
+    saveChapterWordCount,
+    saveChapterInformationState,
+    saveChapterExtractedInfo,
     acceptSuggestion,
     addAISuggestion,
 

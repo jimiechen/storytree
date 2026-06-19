@@ -8,18 +8,24 @@ export interface WorkspaceEditorHeaderActions {
 
 interface WorkspaceEditorHeaderProps extends WorkspaceEditorHeaderActions {
   chapterTitle: string;
+  wordCount?: number;
 }
 
 /** 编辑器头部 — Stitch 04 code.html */
 export const WorkspaceEditorHeader: Component<WorkspaceEditorHeaderProps> = (props) => {
   return (
     <header class="px-10 py-6 border-b border-[#cbc3d7] bg-white shrink-0 flex items-center justify-between shadow-[0_2px_12px_rgba(0,0,0,0.02)]">
-      <h1
-        class="text-[32px] leading-[1.2] tracking-tight font-bold text-[#0d1c2f]"
-        style={{ 'font-family': "'Plus Jakarta Sans', 'PingFang SC', sans-serif" }}
-      >
-        {props.chapterTitle}
-      </h1>
+      <div class="flex items-baseline gap-4">
+        <h1
+          class="text-[32px] leading-[1.2] tracking-tight font-bold text-[#0d1c2f]"
+          style={{ 'font-family': "'Plus Jakarta Sans', 'PingFang SC', sans-serif" }}
+        >
+          {props.chapterTitle}
+        </h1>
+        <span class="text-sm text-[#7b7486]">
+          {props.wordCount ?? 0} 字
+        </span>
+      </div>
       <div class="flex gap-2">
         <button
           onClick={props.onOpenHistory}

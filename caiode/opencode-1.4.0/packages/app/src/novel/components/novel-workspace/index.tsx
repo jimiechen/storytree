@@ -11,6 +11,9 @@ import { WorkspaceContextOptions } from './generation/workspace-context-options'
 import { WorkspaceActions } from './generation/workspace-actions';
 import { NovelIcon } from '../layout/novel-icon';
 import { createWorkspaceViewModel } from './workspace-view-model';
+import { useWorkspace } from '../../hooks/use-workspace';
+import { useNovelWorkflow } from '../../hooks/use-novel-workflow';
+import type { WorkflowMutations } from '../../workflows/workflow-events';
 
 interface WorkspaceProps {
   projectId: () => string;
@@ -24,6 +27,83 @@ function noop(action: string) {
 }
 
 /**
+ * 创建连接到真实数据层的 WorkflowMutations
+ *
+ * 将 workflow 事件写回映射到 useWorkspace / useNovelChapters 的 Provider 方法。
+ * 未实现的后端（character/world/achievement/profile）使用 console.log 占位，
+ * 待 P2 接入真实 Provider 时替换为实际调用。
+ */
+function createWorkspaceMutations(ws: ReturnType<typeof useWorkspace>): WorkflowMutations {
+  return {
+    updateChapterContent: async (chapterId, content) => {
+      console.info('[workflow-mutations] updateChapterContent:', chapterId, 'length=', content.length);
+      try {
+        await ws.saveChapter(chapterId, content);
+        console.info('[workflow-mutations] updateChapterContent SAVED:', chapterId);
+      } catch (err) {
+        console.error('[workflow-mutations] updateChapterContent FAILED:', chapterId, err);
+        throw err;
+      }
+    },
+    updateChapterSummary: async (chapterId, summary) => {
+      console.info('[workflow-mutations] updateChapterSummary:', chapterId, 'length=', summary.length);
+      try {
+        await ws.saveChapterSummary(chapterId, summary);
+        console.info('[workflow-mutations] updateChapterSummary SAVED:', chapterId);
+      } catch (err) {
+        console.error('[workflow-mutations] updateChapterSummary FAILED:', chapterId, err);
+        throw err;
+      }
+    },
+    updateChapterWordCount: async (chapterId, wordCount) => {
+      console.info('[workflow-mutations] updateChapterWordCount:', chapterId, 'wordCount=', wordCount);
+      try {
+        await ws.saveChapterWordCount(chapterId, wordCount);
+        console.info('[workflow-mutations] updateChapterWordCount SAVED:', chapterId);
+      } catch (err) {
+        console.error('[workflow-mutations] updateChapterWordCount FAILED:', chapterId, err);
+        throw err;
+      }
+    },
+    updateChapterInfoState: async (chapterId, state) => {
+      console.info('[workflow-mutations] updateChapterInfoState:', chapterId);
+      try {
+        await ws.saveChapterInformationState(chapterId, state);
+        console.info('[workflow-mutations] updateChapterInfoState SAVED:', chapterId);
+      } catch (err) {
+        console.error('[workflow-mutations] updateChapterInfoState FAILED:', chapterId, err);
+        throw err;
+      }
+    },
+    updateChapterExtractedInfo: async (chapterId, info) => {
+      console.info('[workflow-mutations] updateChapterExtractedInfo:', chapterId);
+      try {
+        await ws.saveChapterExtractedInfo(chapterId, info);
+        console.info('[workflow-mutations] updateChapterExtractedInfo SAVED:', chapterId);
+      } catch (err) {
+        console.error('[workflow-mutations] updateChapterExtractedInfo FAILED:', chapterId, err);
+        throw err;
+      }
+    },
+    updateCharacterAppearance: (_charIds, _chapterId) => {
+      console.info('[workflow-mutations] updateCharacterAppearance:', _charIds);
+    },
+    incrementWorldReference: (_itemIds, _chapterId) => {
+      console.info('[workflow-mutations] incrementWorldReference:', _itemIds);
+    },
+    addAchievementProgress: (_achievementId, _delta) => {
+      console.info('[workflow-mutations] addAchievementProgress:', _achievementId, '+', _delta);
+    },
+    updateProfileStats: (_projectId, _delta) => {
+      console.info('[workflow-mutations] updateProfileStats:', _delta);
+    },
+    logDiscardedTask: (taskId) => {
+      console.info('[workflow-mutations] logDiscardedTask:', taskId);
+    },
+  };
+}
+
+/**
  * 小说项目工作台 — Stitch 04 三栏布局组装件
  *
  * 批次 4 改造：
@@ -31,7 +111,10 @@ function noop(action: string) {
  * - TopAppBar「工作台」按钮进入 workspace，Logo 回到书架
  */
 export const Workspace: Component<WorkspaceProps> = (props) => {
-  const vm = createWorkspaceViewModel(props.projectId);
+  const ws = useWorkspace(props.projectId);
+  const mutations = createWorkspaceMutations(ws);
+  const workflow = useNovelWorkflow(mutations);
+  const vm = createWorkspaceViewModel(ws, workflow);
 
   const actions = {
     openWorkspace: () => vm.openView('workspace'),
@@ -96,10 +179,11 @@ export const Workspace: Component<WorkspaceProps> = (props) => {
         <div class="flex flex-col h-full relative">
           <WorkspaceEditorHeader
             chapterTitle={vm.currentChapterTitle()}
+            wordCount={vm.currentChapterWordCount()}
             onOpenHistory={actions.openHistory}
             onToggleFullscreen={actions.toggleFullscreen}
           />
-          <WorkspaceChapterContent paragraphs={vm.currentParagraphs()} />
+          <WorkspaceChapterContent paragraphs={vm.currentParagraphs} />
           <WorkspaceAiProgressDock
             task={vm.aiTaskView()}
             onPause={vm.cancelRunningTask}

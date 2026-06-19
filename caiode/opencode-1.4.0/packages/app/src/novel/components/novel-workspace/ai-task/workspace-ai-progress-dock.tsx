@@ -23,14 +23,14 @@ export const WorkspaceAiProgressDock: Component<WorkspaceAiProgressDockProps> = 
   const task = props.task;
 
   return (
-    <div class="absolute bottom-8 left-1/2 -translate-x-1/2 w-[85%] max-w-3xl bg-[#f8f9ff]/90 backdrop-blur-md rounded-xl p-6 shadow-[0_8px_24px_rgba(0,0,0,0.08)] border border-[#cbc3d7] flex flex-col gap-4 z-30 transition-all">
+    <div data-testid="ai-progress-dock" class="absolute bottom-8 left-1/2 -translate-x-1/2 w-[85%] max-w-3xl bg-[#f8f9ff]/90 backdrop-blur-md rounded-xl p-6 shadow-[0_8px_24px_rgba(0,0,0,0.08)] border border-[#cbc3d7] flex flex-col gap-4 z-30 transition-all">
       {/* Status Header */}
       <div class="flex justify-between items-center text-sm">
         <div class="flex items-center gap-3 text-[#6b38d4]">
           <NovelIcon name="sync" size={20} class="animate-spin" />
-          <span class="font-bold">{task.title}</span>
+          <span data-testid="ai-progress-title" class="font-bold">{task.title}</span>
         </div>
-        <span class="text-[#0d1c2f] font-medium bg-[#eff4ff] px-3 py-1 rounded-full">
+        <span data-testid="ai-progress-percent" class="text-[#0d1c2f] font-medium bg-[#eff4ff] px-3 py-1 rounded-full">
           {task.progress}%
         </span>
       </div>

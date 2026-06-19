@@ -7,6 +7,7 @@
  * 写回由调用方显式调用 applyWorkflowEvents(events, mutations)。
  */
 
+import type { NovelAgentAdapter } from '../adapters/novel-agent-adapter';
 import type { NovelCommand } from './novel-command';
 import type { NovelAgentResult } from '../types/ai-task';
 import type { ChapterInformationState } from '../types/information-flow';
@@ -35,12 +36,13 @@ import { mockAgentAdapter } from '../adapters/mock-agent-adapter';
  */
 export async function runMockGeneration(
   command: NovelCommand,
+  adapter: NovelAgentAdapter = mockAgentAdapter,
 ): Promise<{ result: NovelAgentResult; events: NovelWorkflowEvent[]; durationMs: number }> {
   const startTime = Date.now();
   const workflowId = `wf-${command.chapterIndex}-${command.type.replace('.', '-')}`;
 
   // 1. 调用 Adapter 获取结果
-  const result = await mockAgentAdapter.run(command);
+  const result = await adapter.run(command);
 
   // 2. 根据结果构建事件列表
   const events = buildEventsForCommand(command, result, workflowId);

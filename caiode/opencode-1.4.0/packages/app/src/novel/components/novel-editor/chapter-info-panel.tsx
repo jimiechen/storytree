@@ -1,5 +1,5 @@
 import { createSignal, Show } from 'solid-js';
-import type { Chapter, ChapterStatus, ChapterInformationState } from '../../types';
+import type { Chapter, ChapterStatus, ChapterInformationState, ChapterExtractedInfo } from '../../types';
 import { NovelIcon } from '../layout/novel-icon';
 
 interface ChapterInfoPanelProps {
@@ -16,22 +16,13 @@ const STATUS_MAP: Record<ChapterStatus, { label: string; bg: string; text: strin
   published: { label: '已发布', bg: 'bg-green-50', text: 'text-green-700' },
 };
 
-/** AI 提取信息 Mock（Phase 2.2 接入真实 Provider） */
-const MOCK_EXTRACTED = {
+/** AI 提取信息 Mock（仅当 chapter.extractedInfo 不存在时兜底显示） */
+const MOCK_EXTRACTED: ChapterExtractedInfo = {
   summary: '主角参加门派比武大会，在决赛中与宿敌交锋，最终凭借惊人的悟性领悟了剑意...',
-  characters: [
-    { name: '李云轩 (主角)', style: 'bg-[#e8f0fe]/50 text-[#0058be] border-[#adc6ff]/40' },
-    { name: '林清风 (对手)', style: 'bg-[#ffdad6]/40 text-[#ba1a1a] border-[#ffdad6]/50' },
-    { name: '执事长老', style: 'bg-[#d5e3fd]/50 text-[#494454] border-[#cbc3d7]/40' },
-    { name: '赵雷', style: 'bg-[#d5e3fd]/50 text-[#494454] border-[#cbc3d7]/40' },
-  ],
-  protagonistState: [
-    { label: '位置', value: '比武场' },
-    { label: '情绪', value: '紧张、坚定' },
-    { label: '实力', value: '金丹期' },
-  ],
-  items: '霜寒剑 (林清风)、普通铁剑 (李云轩)',
-  prediction: '主角获胜，获得进入秘境资格',
+  characters: ['李云轩 (主角)', '林清风 (对手)', '执事长老', '赵雷'],
+  worldItems: ['霜寒剑 (林清风)', '普通铁剑 (李云轩)'],
+  keyEvents: '主角获胜，获得进入秘境资格',
+  protagonistState: '位置：比武场，情绪：紧张、坚定，实力：金丹期',
 };
 
 export function ChapterInfoPanel(props: ChapterInfoPanelProps) {
@@ -39,7 +30,18 @@ export function ChapterInfoPanel(props: ChapterInfoPanelProps) {
   const [auditExpanded, setAuditExpanded] = createSignal(false);
   const ch = () => props.chapter;
   const status = () => STATUS_MAP[ch().status];
-  const infoState = () => props.informationState;
+  const infoState = () => props.informationState ?? ch().informationState;
+  const extracted = () => ch().extractedInfo ?? MOCK_EXTRACTED;
+  const protagonistStateItems = () => {
+    const state = extracted().protagonistState;
+    if (!state) return [];
+    // 支持字符串或数组格式
+    if (Array.isArray(state)) return state as { label: string; value: string }[];
+    return state.split(/[,，、]/).map((s) => {
+      const [label, value] = s.split(/[:：]/);
+      return { label: label?.trim() || '状态', value: value?.trim() || s.trim() };
+    });
+  };
 
   const handleReExtract = async () => {
     setReExtracting(true);
@@ -105,16 +107,16 @@ export function ChapterInfoPanel(props: ChapterInfoPanelProps) {
             {/* Summary */}
             <div class="bg-[#f8f9ff] rounded-lg border border-[#cbc3d7] p-3">
               <span class="text-xs text-[#7b7486] block mb-1">章节摘要</span>
-              <p class="text-xs text-[#0d1c2f] leading-relaxed">{MOCK_EXTRACTED.summary}</p>
+              <p class="text-xs text-[#0d1c2f] leading-relaxed">{extracted().summary}</p>
             </div>
 
             {/* Characters */}
             <div class="bg-[#f8f9ff] rounded-lg border border-[#cbc3d7] p-3">
               <span class="text-xs text-[#7b7486] block mb-2">登场角色</span>
               <div class="flex flex-wrap gap-1.5">
-                {MOCK_EXTRACTED.characters.map((c) => (
-                  <span class={`inline-flex items-center px-2 py-1 rounded text-xs font-medium border ${c.style}`}>
-                    {c.name}
+                {extracted().characters.map((name) => (
+                  <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium border bg-[#e8f0fe]/50 text-[#0058be] border-[#adc6ff]/40">
+                    {name}
                   </span>
                 ))}
               </div>
@@ -124,7 +126,7 @@ export function ChapterInfoPanel(props: ChapterInfoPanelProps) {
             <div class="bg-[#f8f9ff] rounded-lg border border-[#cbc3d7] p-3">
               <span class="text-xs text-[#7b7486] block mb-2">主角当前状态</span>
               <ul class="text-xs text-[#0d1c2f] space-y-1">
-                {MOCK_EXTRACTED.protagonistState.map((s) => (
+                {protagonistStateItems().map((s) => (
                   <li class="flex items-start">
                     <span class="w-[40px] text-[#7b7486] shrink-0">{s.label}:</span>
                     <span>{s.value}</span>
@@ -136,13 +138,13 @@ export function ChapterInfoPanel(props: ChapterInfoPanelProps) {
             {/* Items */}
             <div class="bg-[#f8f9ff] rounded-lg border border-[#cbc3d7] p-3">
               <span class="text-xs text-[#7b7486] block mb-1">涉及道具</span>
-              <p class="text-xs text-[#0d1c2f]">{MOCK_EXTRACTED.items}</p>
+              <p class="text-xs text-[#0d1c2f]">{extracted().worldItems.join('、') || '—'}</p>
             </div>
 
             {/* Prediction */}
             <div class="bg-[#f8f9ff] rounded-lg border border-[#cbc3d7] p-3">
               <span class="text-xs text-[#7b7486] block mb-1">重要事件预测</span>
-              <p class="text-xs text-[#0d1c2f]">{MOCK_EXTRACTED.prediction}</p>
+              <p class="text-xs text-[#0d1c2f]">{extracted().keyEvents || '—'}</p>
             </div>
           </div>
         </div>
