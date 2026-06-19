@@ -2,7 +2,7 @@
 
 > **项目**: OpenCode Creative Studio (StoryTree2)  
 > **版本**: v1.0  
-> **最后更新**: 2026-05-31
+> **最后更新**: 2026-06-19
 
 ---
 
@@ -14,6 +14,7 @@
 |------|------|------|
 | **Code Wiki** | 项目结构化代码文档（完整版） | [docs/CODE_WIKI.md](CODE_WIKI.md) |
 | **快速导航** | 本文档，快速定位关键信息 | [docs/CODE_WIKI_INDEX.md](CODE_WIKI_INDEX.md) |
+| **Novel Editor Code Wiki** | OpenCode 1.4.0 小说编辑器模块文档 | [docs/NOVEL_EDITOR_CODE_WIKI.md](NOVEL_EDITOR_CODE_WIKI.md) |
 
 ### 架构文档
 
@@ -61,6 +62,9 @@
 
 ### 7. 想了解扩展点和接口？
 → 阅读 [Code Wiki 第8章](CODE_WIKI.md#8-扩展点与接口) - 10个扩展点和权限边界
+
+### 8. 想了解小说编辑器模块？
+→ 阅读 [Novel Editor Code Wiki](NOVEL_EDITOR_CODE_WIKI.md) - 模块架构、Provider、Hook、AI 工作流
 
 ---
 
