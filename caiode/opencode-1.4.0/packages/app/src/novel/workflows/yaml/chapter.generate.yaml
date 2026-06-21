@@ -1,0 +1,17 @@
+id: chapter.generate
+version: 1
+commandType: chapter.generate
+description: Generate a chapter using the current mock workflow wrapper.
+steps:
+  - id: mock-wrapper
+    name: Mock Chapter Generation Wrapper
+    tool: mock-generation-wrapper
+    adapter: mock
+    inputs:
+      projectId: "{{projectId}}"
+      chapterId: "{{chapterId}}"
+      branchId: "{{branchId}}"
+      modelProfileId: "{{modelProfileId}}"
+    outputs:
+      result: result
+      events: events

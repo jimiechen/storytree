@@ -1,0 +1,17 @@
+id: info.extract
+version: 1
+commandType: info.extract
+description: Extract and audit chapter information using deterministic information-theory heuristics.
+steps:
+  - id: info-theory-audit
+    name: Info Theory Audit
+    tool: info-theory-audit
+    adapter: mock
+    inputs:
+      projectId: "{{projectId}}"
+      chapterId: "{{chapterId}}"
+      text: "{{text}}"
+    outputs:
+      state: state
+      score: score
+      events: events

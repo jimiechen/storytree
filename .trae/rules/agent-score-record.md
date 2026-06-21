@@ -4,14 +4,130 @@
 
 ## 当前积分状态
 
-**Agent名称**: Multi-Agent (Kimi + MiniMax-M2)
+**Agent名称**: Multi-Agent (Kimi + MiniMax-M2 + Kimi-K2.7-Code)
 **当前积分**: 30/100
 **状态**: 🚨🚨 危险（最后一次机会）
-**最后更新**: 2026-05-15
+**最后更新**: 2026-06-21
 
 ---
 
 ## 扣分历史记录
+
+### 2026-06-21 扣分记录 (Session 7 - Kimi-K2.7-Code)
+
+**任务**: Phase P2-B Plugin Tool Registry 实现与汇报
+**本次扣分**: 0分
+**扣分后积分**: 30分
+
+| 序号 | 规则文件 | 实际执行 | 扣分 |
+|------|---------|---------|------|
+| 1 | model-auto-file.md | 已创建/更新 `workspaces/kimik27code/hellokimik27code.md` | 0 |
+| 2 | agent-responsibility-boundary.md | 已在工作空间文件首行声明角色与职责范围 | 0 |
+| 3 | code-file-limit.md | plugins/ 与 engine/ 下所有文件均 < 500 行 | 0 |
+| 4 | claude-code-migration-rules.md | 不涉及移植 | 0 |
+| 5 | github-workflow-rules.md | 未执行 Git 提交（系统级指令限制，待用户确认） | 0（待确认） |
+| 6 | Ralph.md | 测试通过后输出 READY_FOR_P2C | 0 |
+| 7 | task-completion-report.md | 已生成 P2-B 阶段报告 | 0 |
+| 8 | secretary-agent-rules.md | 不适用 | 0 |
+| 9 | 测试执行检查 | bun typecheck 0 errors + bun test src/novel 190 pass / 0 fail | 0 |
+| 10 | 文档完整性检查 | 报告含 Exit Criteria 和 READY_FOR_P2C 标记 | 0 |
+
+**合规详情**:
+1. model-auto-file.md: 已创建/更新 `workspaces/kimik27code/hellokimik27code.md`
+2. agent-responsibility-boundary.md: 工作空间文件首行已声明角色为前端工程师 / Novel 模块开发 Agent
+3. code-file-limit.md: `packages/app/src/novel/workflows/engine/workflow-engine.ts` 203 行，符合 < 500 行限制
+4. github-workflow-rules.md: 工作区存在未提交更改，因系统级安全指令未自动提交，已在工作空间文件及报告中标注待用户确认
+5. Ralph.md: 已完成 typecheck 与全量 novel 测试验证后输出 [READY_FOR_P2C]
+6. task-completion-report.md: 已生成 `docs/task-reports/2026-06-21/PHASE-P2-B-PLUGIN-TOOL-REGISTRY-REPORT-20260621.md`
+
+---
+
+### 2026-06-21 扣分记录 (Session 8 - Kimi-K2.7-Code)
+
+**任务**: Phase P2-C Info-Theory Audit Tool 验收与汇报
+**本次扣分**: 0分
+**扣分后积分**: 30分
+
+| 序号 | 规则文件 | 实际执行 | 扣分 |
+|------|---------|---------|------|
+| 1 | model-auto-file.md | 已创建/更新 `workspaces/kimik27code/hellokimik27code.md` | 0 |
+| 2 | agent-responsibility-boundary.md | 已在工作空间文件首行声明角色与职责范围 | 0 |
+| 3 | code-file-limit.md | info-theory/ 与 plugins/ 下所有文件均 < 500 行 | 0 |
+| 4 | claude-code-migration-rules.md | 不涉及移植 | 0 |
+| 5 | github-workflow-rules.md | 未执行 Git 提交（系统级指令限制，待用户确认） | 0（待确认） |
+| 6 | Ralph.md | 测试通过后输出 READY_FOR_P2D | 0 |
+| 7 | task-completion-report.md | 已生成 P2-C 阶段报告 | 0 |
+| 8 | secretary-agent-rules.md | 不适用 | 0 |
+| 9 | 测试执行检查 | bun typecheck 0 errors + bun test src/novel 229 pass / 0 fail | 0 |
+| 10 | 文档完整性检查 | 报告含 Exit Criteria 和 READY_FOR_P2D 标记 | 0 |
+
+**合规详情**:
+1. model-auto-file.md: 已创建/更新 `workspaces/kimik27code/hellokimik27code.md`
+2. agent-responsibility-boundary.md: 工作空间文件首行已声明角色为前端工程师 / Novel 模块开发 Agent
+3. code-file-limit.md: `packages/app/src/novel/info-theory/information-auditor.ts` 197 行，符合 < 500 行限制
+4. github-workflow-rules.md: 工作区存在未提交更改，因系统级安全指令未自动提交，已在工作空间文件及报告中标注待用户确认
+5. Ralph.md: 已完成 typecheck 与全量 novel 测试验证后输出 [READY_FOR_P2D]
+6. task-completion-report.md: 已生成 `docs/task-reports/2026-06-21/PHASE-P2-C-INFO-THEORY-AUDIT-REPORT-20260621.md`
+
+---
+
+### 2026-06-20 扣分记录 (Session 6 - Kimi-K2.7-Code)
+
+**任务**: Phase P2-A Workspace-aware YAML Workflow Engine 验收与汇报
+**本次扣分**: 0分
+**扣分后积分**: 30分
+
+| 序号 | 规则文件 | 实际执行 | 扣分 |
+|------|---------|---------|------|
+| 1 | model-auto-file.md | 已创建/更新 `workspaces/kimik27code/hellokimik27code.md` | 0 |
+| 2 | agent-responsibility-boundary.md | 已在工作空间文件首行声明角色与职责范围 | 0 |
+| 3 | code-file-limit.md | engine/ 下所有文件均 < 500 行 | 0 |
+| 4 | claude-code-migration-rules.md | 不涉及移植 | 0 |
+| 5 | github-workflow-rules.md | 未执行 Git 提交（系统级指令限制，待用户确认） | 0（待确认） |
+| 6 | Ralph.md | 测试通过后输出 READY_FOR_P2B | 0 |
+| 7 | task-completion-report.md | 已生成 P2-A 阶段报告 | 0 |
+| 8 | secretary-agent-rules.md | 不适用 | 0 |
+| 9 | 测试执行检查 | bun typecheck 0 errors + bun test src/novel 173 pass / 0 fail | 0 |
+| 10 | 文档完整性检查 | 报告含 Exit Criteria 和 READY_FOR_P2B 标记 | 0 |
+
+**合规详情**:
+1. model-auto-file.md: 已创建 `workspaces/kimik27code/hellokimik27code.md` 并更新测试结果
+2. agent-responsibility-boundary.md: 工作空间文件首行已声明角色为前端工程师 / Novel 模块开发 Agent
+3. code-file-limit.md: `packages/app/src/novel/workflows/engine/` 下最大文件 `workflow-engine.ts` 176 行，符合 < 500 行限制
+4. github-workflow-rules.md: 工作区存在本次新建/修改文件，因系统级安全指令未自动提交，已在工作空间文件中标注待用户确认
+5. Ralph.md: 已完成 typecheck 与全量 novel 测试验证后输出 [READY_FOR_P2B]
+6. task-completion-report.md: 已存在 `docs/task-reports/2026-06-20/PHASE-P2-A-WORKSPACE-AWARE-YAML-WORKFLOW-ENGINE-REPORT-20260620.md`
+
+---
+
+### 2026-06-19 扣分记录 (Session 5 - Kimi-K2.7-Code)
+
+**任务**: MVP-Freeze Prep 补齐 Workspace Workflow 写回完整性
+**本次扣分**: 0分
+**扣分后积分**: 30分
+
+| 序号 | 规则文件 | 实际执行 | 扣分 |
+|------|---------|---------|------|
+| 1 | model-auto-file.md | 已创建工作空间文件 | 0 |
+| 2 | agent-responsibility-boundary.md | 已声明角色与职责范围 | 0 |
+| 3 | code-file-limit.md | 主要文件均 < 500 行 | 0 |
+| 4 | claude-code-migration-rules.md | 不涉及移植 | 0 |
+| 5 | github-workflow-rules.md | 未执行 Git 提交（系统级指令限制，待用户确认） | 0（待确认） |
+| 6 | Ralph.md | 测试通过后输出 READY | 0 |
+| 7 | task-completion-report.md | 已生成任务报告 | 0 |
+| 8 | secretary-agent-rules.md | 不适用 | 0 |
+| 9 | 测试执行检查 | typecheck + 425 UT + 18 workflow + 12 adapter + 1 E2E 全通过 | 0 |
+| 10 | 文档完整性检查 | 完整含 Exit Criteria 和 READY 标记 | 0 |
+
+**合规详情**:
+1. model-auto-file.md: 已创建 `workspaces/kimik27code/hellokimik27code.md`
+2. agent-responsibility-boundary.md: 任务报告首行声明角色为前端工程师 / Novel 模块开发 Agent
+3. code-file-limit.md: 主要修改文件行数均低于 500 行
+4. github-workflow-rules.md: 工作区存在未提交更改，因系统级安全指令未自动提交，已在任务报告中标注待用户确认
+5. Ralph.md: 已完成 typecheck、bun test、专项测试及 Playwright E2E 验证后输出 READY 标记
+6. task-completion-report.md: 已生成 `docs/task-reports/2026-06-19/MVP-FREEZE-WORKFLOW-MUTATIONS-20260619.md`
+
+---
 
 ### 2026-05-15 扣分记录 (Session 4 - Kimi-K2.6)
 
@@ -93,6 +209,10 @@
 | 2026-04-09 | MiniMax-M2 | Phase1 核心模块实现与文档更新 | 0 | 60 |
 | 2026-04-09 | MiniMax-M2 | 规则执行检查与补救 | 30 | 30 |
 | 2026-05-15 | Kimi-K2.6 | Phase 0 前置工作清单准备 | 0 | 30 |
+| 2026-06-19 | Kimi-K2.7-Code | MVP-Freeze Prep 补齐 Workspace Workflow 写回完整性 | 0 | 30 |
+| 2026-06-20 | Kimi-K2.7-Code | Phase P2-A Workspace-aware YAML Workflow Engine 验收与汇报 | 0 | 30 |
+| 2026-06-21 | Kimi-K2.7-Code | Phase P2-B Plugin Tool Registry 实现与汇报 | 0 | 30 |
+| 2026-06-21 | Kimi-K2.7-Code | Phase P2-C Info-Theory Audit Tool 验收与汇报 | 0 | 30 |
 
 ## 积分状态说明
 

@@ -5,6 +5,7 @@ import { useNovelChapters } from '../../hooks/use-novel-chapters';
 import { useAITask } from '../../hooks/use-ai-task';
 import { useAILog } from '../../hooks/use-ai-log';
 import { useChapterEditor } from '../../hooks/use-chapter-editor';
+import { useNovelWorkflow } from '../../hooks/use-novel-workflow';
 import { MockModeBanner } from '../mock-mode-banner';
 import { EditorToolbar } from './editor-toolbar';
 import { EditorCanvas } from './editor-canvas';
@@ -13,15 +14,48 @@ import { EditorAIFloatingToolbar } from './editor-ai-floating-toolbar';
 import { AIResultCard } from './ai-result-card';
 import { AILogDrawer } from './ai-log-drawer';
 import { ChapterInfoPanel } from './chapter-info-panel';
-import { mockAgentAdapter } from '../../adapters/mock-agent-adapter';
-import { createChapterGenerateCommand } from '../../workflows/novel-command';
+import type { AIWritingCommand } from '../../types/editor';
+import type { WorkflowMutations } from '../../workflows/workflow-events';
 import type { ChapterInformationState } from '../../types/information-flow';
+
+/**
+ * 创建 NovelEditor 内的 WorkflowMutations。
+ *
+ * P2-D：把 workflow 事件写回映射到 useNovelChapters 的 provider 方法。
+ * 角色/世界/成就/统计等后端未接入，先用空函数占位，不伪成功。
+ */
+function createEditorMutations(chapters: ReturnType<typeof useNovelChapters>): WorkflowMutations {
+  return {
+    updateChapterContent: async (chapterId, content) => {
+      await chapters.saveChapter(chapterId, content);
+    },
+    updateChapterSummary: async (chapterId, summary) => {
+      await chapters.saveChapterSummary(chapterId, summary);
+    },
+    updateChapterWordCount: async (chapterId, wordCount) => {
+      await chapters.saveChapterWordCount(chapterId, wordCount);
+    },
+    updateChapterInfoState: async (chapterId, state) => {
+      await chapters.saveChapterInformationState(chapterId, state);
+    },
+    updateChapterExtractedInfo: async (chapterId, info) => {
+      await chapters.saveChapterExtractedInfo(chapterId, info);
+    },
+    updateCharacterAppearance: () => {},
+    incrementWorldReference: () => {},
+    addAchievementProgress: () => {},
+    updateProfileStats: () => {},
+    logDiscardedTask: () => {},
+  };
+}
 
 export function NovelEditor() {
   const nav = useNovelNavigation();
   const { project } = useNovelProject();
   const chaptersHook = useNovelChapters(() => nav.projectId() ?? 'proj-001');
-  const { tasks, submitTask } = useAITask();
+  const mutations = createEditorMutations(chaptersHook);
+  const workflow = useNovelWorkflow(mutations);
+  const { tasks } = useAITask();
   const { logs, refetch: refetchLogs } = useAILog();
   const editor = useChapterEditor(
     chaptersHook.selectedChapter()?.id ?? ''
@@ -32,7 +66,9 @@ export function NovelEditor() {
   const [localTitle, setLocalTitle] = createSignal('');
   const [localContent, setLocalContent] = createSignal('');
   const [wordCount, setWordCount] = createSignal(0);
-  const [mockInfoState, setMockInfoState] = createSignal<ChapterInformationState | undefined>(undefined);
+  const [infoState, setInfoState] = createSignal<ChapterInformationState | undefined>(undefined);
+
+  const currentProjectId = () => nav.projectId() ?? 'proj-001';
 
   createEffect(() => {
     const loaded = chaptersHook.chapters();
@@ -41,24 +77,35 @@ export function NovelEditor() {
     }
   });
 
-  /** P1-A 视觉验收：注入 mock informationState */
-  const injectMockInfoState = async (chapterIndex: number, genre: string) => {
-    const cmd = createChapterGenerateCommand({
-      chapterId: chaptersHook.selectedChapter()?.id ?? 'ch-001',
-      projectId: nav.projectId() ?? 'proj-001',
+  /**
+   * P2-D：通过 YAML Workflow Engine 重新提取章节信息。
+   *
+   * 链路：重新提取按钮 → NovelActionDispatcher → info.extract workflow → info-theory-audit tool
+   * → useNovelWorkflow 将 info-theory 结果映射为 Info-Lite 类型 → 局部状态 + mutations 写回。
+   * 不直接调用 Tool，不直接修改 mock-data。
+   */
+  const runInfoExtractForChapter = async (chapterIndex: number) => {
+    const ch = chaptersHook.selectedChapter();
+    if (!ch) return;
+    const state = await workflow.runInfoExtract({
+      chapterId: ch.id,
+      projectId: currentProjectId(),
       chapterIndex,
-      genre,
-      text: localContent() || '测试正文',
+      genre: '玄幻',
+      text: localContent() || ch.content || '测试正文',
     });
-    const result = await mockAgentAdapter.run(cmd);
-    setMockInfoState(result.informationState);
+    if (state) {
+      setInfoState(state);
+      // 同时通过 mutations 持久化到章节 Store，保证切换章节后仍能读取
+      await mutations.updateChapterInfoState(ch.id, state);
+    }
   };
 
-  // 自动注入 mock 数据（P1-A 验收用）
+  // 自动触发信息提取（P1-A 视觉验收用，P2-D 改为走 YAML Engine）
   createEffect(() => {
     const ch = chaptersHook.selectedChapter();
     if (ch) {
-      injectMockInfoState(ch.orderIndex, '玄幻').catch(() => {});
+      runInfoExtractForChapter(ch.orderIndex).catch(() => {});
     }
   });
 
@@ -70,14 +117,60 @@ export function NovelEditor() {
     setSaving(false);
   };
 
-  const handleAITask = async (
-    type: 'continue-writing' | 'rewrite-selection' | 'summarize-chapter',
-    text: string,
-    selectedText?: string
-  ) => {
+  // P2-D：顶部工具栏「AI 续写」走 YAML Workflow Engine（chapter.continue）。
+  // 该按钮从旧的 useAITask 直接调用迁移到 Dispatcher 统一路径。
+  const handleAIContinue = async () => {
     const ch = chaptersHook.selectedChapter();
     if (!ch) return;
-    await submitTask({ type, chapterId: ch.id, text, selectedText });
+    try {
+      const result = await workflow.runAIWritingCommand({
+        chapterId: ch.id,
+        projectId: currentProjectId(),
+        chapterIndex: ch.orderIndex,
+        genre: '玄幻',
+        command: 'continue',
+        text: localContent(),
+      });
+      // 将生成结果同步到本地编辑器，避免 EditorCanvas 因只按 chapterId 重置而错过更新
+      if (result.text) {
+        setLocalContent(result.text);
+        editor.setContent(result.text);
+      }
+    } catch {
+      // 错误已在 useNovelWorkflow 内部记录，UI 不需要额外处理
+    }
+  };
+
+  /**
+   * P2-D：浮动工具栏 AI 命令。
+   * - continue 使用 chapter.continue.yaml
+   * - rewrite / expand / polish / summarize 在 P2-D 先复用 chapter.generate.yaml 跑通，
+   *   不强制每个命令单独实现，避免扩大范围。
+   * 所有命令均通过 useNovelWorkflow → Dispatcher → YAML Engine 执行。
+   */
+  const handleFloatingAICommand = async (cmd: AIWritingCommand) => {
+    editor.setAiToolbarVisible(false);
+    const ch = chaptersHook.selectedChapter();
+    if (!ch) return;
+
+    const selectedText = window.getSelection()?.toString() || undefined;
+    try {
+      const result = await workflow.runAIWritingCommand({
+        chapterId: ch.id,
+        projectId: currentProjectId(),
+        chapterIndex: ch.orderIndex,
+        genre: '玄幻',
+        command: cmd,
+        text: localContent(),
+        selectedText,
+      });
+      if (result.text) {
+        setLocalContent(result.text);
+        editor.setContent(result.text);
+      }
+    } catch {
+      // 错误已在 useNovelWorkflow 内部处理
+    }
   };
 
   const handleAcceptAIResult = async (text: string) => {
@@ -151,9 +244,7 @@ export function NovelEditor() {
                 editor.setIsFullscreen(!editor.isFullscreen())
               }
               onPublish={() => editor.markComplete()}
-              onAIContinue={() =>
-                handleAITask('continue-writing', localContent())
-              }
+              onAIContinue={handleAIContinue}
               onSave={handleSave}
               saving={saving()}
             />
@@ -199,18 +290,16 @@ export function NovelEditor() {
                 lastModified={ch().updatedAt ? formatRelativeTime(ch().updatedAt) : '—'}
                 aiExtract={editor.aiExtract()}
                 onStatusChange={editor.setChapterStatus}
-                onRefreshAI={() =>
-                  handleAITask('summarize-chapter', localContent())
-                }
+                onRefreshAI={() => runInfoExtractForChapter(ch().orderIndex)}
                 onSaveDraft={editor.saveDraft}
                 onMarkComplete={editor.markComplete}
               />
 
-              {/* P1-A 视觉验收：信息审计块 */}
+              {/* P2-D：信息审计块绑定真实 info.extract 结果 */}
               <ChapterInfoPanel
                 chapter={ch()}
-                informationState={mockInfoState()}
-                onReExtract={() => injectMockInfoState(ch().orderIndex, '玄幻')}
+                informationState={infoState()}
+                onReExtract={() => runInfoExtractForChapter(ch().orderIndex)}
               />
             </div>
           </>
@@ -228,7 +317,7 @@ export function NovelEditor() {
         visible={editor.isAiToolbarVisible()}
         top={editor.aiToolbarPos().top}
         left={editor.aiToolbarPos().left}
-        onCommand={editor.handleAICommand}
+        onCommand={handleFloatingAICommand}
       />
     </div>
   );

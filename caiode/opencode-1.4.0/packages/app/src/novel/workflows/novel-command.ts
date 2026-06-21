@@ -46,6 +46,17 @@ export interface NovelCommand {
   contextRefs?: string[];
   /** 命令创建时间 */
   createdAt: Date;
+
+  /**
+   * P2-0B 扩展字段：workspace / branch / worktree / model / skill / workflow。
+   * P2-D 由 NovelActionDispatcher 从 UI 透传，不执行真实 Git Worktree 或多模型路由。
+   */
+  workspaceId?: string;
+  branchId?: string;
+  worktreeId?: string;
+  modelProfileId?: string;
+  skillId?: string;
+  workflowId?: string;
 }
 
 // ─── 工厂函数 ───────────────────────────────────────────────────────────

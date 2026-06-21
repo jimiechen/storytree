@@ -1,0 +1,17 @@
+id: chapter.continue
+version: 1
+commandType: chapter.continue
+description: Continue chapter writing using the current mock workflow wrapper.
+steps:
+  - id: mock-wrapper
+    name: Mock Continue Writing Wrapper
+    tool: mock-generation-wrapper
+    adapter: mock
+    inputs:
+      projectId: "{{projectId}}"
+      chapterId: "{{chapterId}}"
+      branchId: "{{branchId}}"
+      modelProfileId: "{{modelProfileId}}"
+    outputs:
+      result: result
+      events: events

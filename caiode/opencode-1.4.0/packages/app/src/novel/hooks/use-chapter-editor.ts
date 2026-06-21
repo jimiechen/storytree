@@ -63,6 +63,7 @@ export function useChapterEditor(chapterId: string, mutations?: WorkflowMutation
     isFullscreen,
     setIsFullscreen,
     isAiToolbarVisible,
+    setAiToolbarVisible,
     aiToolbarPos,
     aiExtract,
     onTextSelect,
