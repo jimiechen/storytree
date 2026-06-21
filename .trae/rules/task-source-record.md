@@ -67,6 +67,7 @@
      - `e0a80e72` docs(rules): update task source and score records for Phase P3-A
      - `55f9e11b` docs(P3-A): fill commit hashes in report and rules records
      - `090ae779` docs(P3-A): fill final commit hashes in report and records
+     - `360246dd` docs(rules): fill final P3-A commit hashes in records
 
 3. **Phase P2 总体验收**
    - 来源: `caiode/docs/tabbit/06/P3P4P5阶段目标.md#L882-892`

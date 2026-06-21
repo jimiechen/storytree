@@ -152,7 +152,7 @@
 1. model-auto-file.md: 已创建/更新 `workspaces/kimik27code/hellokimik27code.md`
 2. agent-responsibility-boundary.md: 工作空间文件首行已声明角色为前端工程师 / Novel 模块开发 Agent
 3. code-file-limit.md: `packages/app/src/novel/llm/deepseek-transport.ts` 197 行等，符合 < 500 行限制
-4. github-workflow-rules.md: 已提交五笔 commit（`92db2690` 代码 + `988254c8` 报告 + `e0a80e72` 规则更新 + `55f9e11b`/`090ae779` 报告回填）
+4. github-workflow-rules.md: 已提交六笔 commit（`92db2690` 代码 + `988254c8` 报告 + `e0a80e72` 规则更新 + `55f9e11b`/`090ae779`/`360246dd` 报告回填）
 5. Ralph.md: 已完成 typecheck、novel:precommit、全量 novel 测试验证后输出 [READY_FOR_P3B]
 6. task-completion-report.md: 已生成 `docs/task-reports/2026-06-21/PHASE-P3-A-REAL-LLM-ADAPTER-PILOT-REPORT-20260621.md`
 
