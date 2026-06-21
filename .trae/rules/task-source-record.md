@@ -53,6 +53,8 @@
      - `5662a4ab` docs(rules): update task source record for Phase P3-0
      - `c6d6419c` docs(rules): update agent score record for Phase P3-0
      - `66c99ddc` docs(novel): refine Phase P3-0 plan and P2 acceptance doc numbering
+     - `3dd770af` docs(rules): fill Phase P3-0 commit hashes in task source record
+     - `44148f69` docs(novel): fill all Phase P3-0 commit hashes in report
 
 2. **Phase P2 总体验收**
    - 来源: `caiode/docs/tabbit/06/P3P4P5阶段目标.md#L882-892`
