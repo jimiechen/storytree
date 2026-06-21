@@ -50,6 +50,9 @@
    - 关键提交:
      - `4e7ddf07` chore(novel): prepare real llm adapter readiness
      - `1d62b0c6` docs(novel): update Phase P3-0 report with commit hash
+     - `5662a4ab` docs(rules): update task source record for Phase P3-0
+     - `c6d6419c` docs(rules): update agent score record for Phase P3-0
+     - `66c99ddc` docs(novel): refine Phase P3-0 plan and P2 acceptance doc numbering
 
 2. **Phase P2 总体验收**
    - 来源: `caiode/docs/tabbit/06/P3P4P5阶段目标.md#L882-892`
