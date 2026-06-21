@@ -21,8 +21,9 @@ describe('WorkflowLoader', () => {
   it('loads chapter.continue.yaml from file', async () => {
     const def = await loadWorkflowDefinition(getBuiltinWorkflowPath('chapter.continue'));
     expect(def.id).toBe('chapter.continue');
+    expect(def.version).toBe(2);
     expect(def.commandType).toBe('chapter.continue');
-    expect(def.steps[0].tool).toBe('mock-generation-wrapper');
+    expect(def.steps[0].tool).toBe('agent-run');
   });
 
   it('loads info.extract.yaml from file', async () => {

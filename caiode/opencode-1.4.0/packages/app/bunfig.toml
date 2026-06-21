@@ -1,3 +1,7 @@
+[jsx]
+jsx = "solid"
+jsxImportSource = "solid-js"
+
 [test]
 root = "./src"
 preload = ["./happydom.ts"]

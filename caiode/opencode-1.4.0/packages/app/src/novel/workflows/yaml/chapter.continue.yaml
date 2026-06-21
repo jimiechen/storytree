@@ -1,17 +1,21 @@
 id: chapter.continue
-version: 1
+version: 2
 commandType: chapter.continue
-description: Continue chapter writing using the current mock workflow wrapper.
+description: Continue chapter writing through agent-run tool, route to real-llm when gate enabled.
 steps:
-  - id: mock-wrapper
-    name: Mock Continue Writing Wrapper
-    tool: mock-generation-wrapper
-    adapter: mock
+  - id: agent-run-continue
+    name: Agent Run Continue Writing
+    tool: agent-run
     inputs:
+      adapter: "{{adapter}}"
+      stream: "{{stream}}"
       projectId: "{{projectId}}"
       chapterId: "{{chapterId}}"
       branchId: "{{branchId}}"
+      worktreeId: "{{worktreeId}}"
       modelProfileId: "{{modelProfileId}}"
+      selectedText: "{{selectedText}}"
+      targetWordCount: "{{targetWordCount}}"
     outputs:
       result: result
       events: events

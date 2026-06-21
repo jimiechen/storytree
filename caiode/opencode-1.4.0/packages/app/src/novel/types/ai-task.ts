@@ -38,6 +38,8 @@ export interface AITask {
     selectedText?: string;
     characterId?: string;
   };
+  /** P3-B：流式生成过程中的实时预览文本，不超过 200 字符 */
+  preview?: string;
   output?: AITaskOutput;
   error?: string;
   duration?: number;

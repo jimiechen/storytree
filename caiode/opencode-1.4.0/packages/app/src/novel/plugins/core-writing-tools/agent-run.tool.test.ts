@@ -119,4 +119,88 @@ describe('agent-run Tool', () => {
     const result = await tool.execute({ adapter: 'mock' }, context);
     expect(result.success).toBe(true);
   });
+
+  it('gate 关闭时默认选择 mock adapter', async () => {
+    const tool = createAgentRunTool();
+    const context = makeContext();
+    const result = await tool.execute(
+      {
+        gates: {
+          realLLMEnabled: false,
+          targetLLMAdapterEnabled: false,
+          openCodeAdapterEnabled: false,
+          claudeCodeAdapterEnabled: false,
+        },
+      },
+      context,
+    );
+
+    expect(result.success).toBe(true);
+  });
+
+  it('gate 开启时默认选择 real-llm（stub transport 返回执行错误，但不是 ADAPTER_DISABLED）', async () => {
+    const tool = createAgentRunTool();
+    const context = makeContext();
+    const result = await tool.execute(
+      {
+        gates: {
+          realLLMEnabled: true,
+          targetLLMAdapterEnabled: true,
+          openCodeAdapterEnabled: false,
+          claudeCodeAdapterEnabled: false,
+        },
+      },
+      context,
+    );
+
+    expect(result.success).toBe(false);
+    expect(result.errorCode).not.toBe('ADAPTER_DISABLED');
+  });
+
+  it('显式 real-llm 且 gate 关闭返回 ADAPTER_DISABLED', async () => {
+    const tool = createAgentRunTool();
+    const context = makeContext();
+    const result = await tool.execute(
+      {
+        adapter: 'real-llm',
+        gates: {
+          realLLMEnabled: false,
+          targetLLMAdapterEnabled: false,
+          openCodeAdapterEnabled: false,
+          claudeCodeAdapterEnabled: false,
+        },
+      },
+      context,
+    );
+
+    expect(result.success).toBe(false);
+    expect(result.errorCode).toBe('ADAPTER_DISABLED');
+  });
+
+  it('stream 字符串 "true" 被解析为 true 且不破坏 mock 执行', async () => {
+    const tool = createAgentRunTool();
+    const context = makeContext();
+    const result = await tool.execute({ adapter: 'mock', stream: 'true' as unknown as boolean }, context);
+
+    expect(result.success).toBe(true);
+  });
+
+  it('adapter 占位符 "{{adapter}}" 视为未指定并按 gate 选择', async () => {
+    const tool = createAgentRunTool();
+    const context = makeContext();
+    const result = await tool.execute(
+      {
+        adapter: '{{adapter}}' as unknown as 'mock',
+        gates: {
+          realLLMEnabled: false,
+          targetLLMAdapterEnabled: false,
+          openCodeAdapterEnabled: false,
+          claudeCodeAdapterEnabled: false,
+        },
+      },
+      context,
+    );
+
+    expect(result.success).toBe(true);
+  });
 });

@@ -12,25 +12,18 @@
 
 import { createSignal } from 'solid-js';
 import { useNovelActionDispatcher } from './use-novel-action-dispatcher';
+import { useNovelLLMTask } from './use-novel-llm-task';
+import { mapInfoTheoryToInfoFlow } from './use-novel-info-theory-mapper';
 import type { NovelActionInput, NovelActionResult } from '../actions/novel-action-types';
-import type { NovelAgentResult } from '../types/ai-task';
+import type { AITask, NovelAgentResult } from '../types/ai-task';
+import type { LLMStreamEvent } from '../llm/llm-stream-events';
 import type {
   ChapterInformationState as InfoTheoryChapterState,
   InformationScore,
-  InformationAtom as InfoTheoryAtom,
-  InformationLink as InfoTheoryLink,
-  InformationAtomType as InfoTheoryAtomType,
-  InformationLinkRelationType as InfoTheoryLinkType,
 } from '../info-theory/information-types';
-import type {
-  ChapterInformationState as InfoFlowChapterState,
-  InformationAtomType as InfoFlowAtomType,
-  InformationLinkRelationType as InfoFlowLinkType,
-} from '../types/information-flow';
-import type {
-  WorkflowMutations,
-  NovelWorkflowEvent,
-} from '../workflows/workflow-events';
+import type { ChapterInformationState as InfoFlowChapterState } from '../types/information-flow';
+import type { WorkflowMutations, NovelWorkflowEvent } from '../workflows/workflow-events';
+import type { NovelWorkflowEngine } from '../workflows/engine/workflow-engine';
 import { clearWorkflowEventLog } from '../workflows/apply-workflow-events';
 
 // ─── Hook 返回类型 ───────────────────────────────────────────────────
@@ -47,6 +40,9 @@ export interface UseNovelWorkflowReturn {
   // 信息审计状态（P2-D：对外统一为 Info-Lite 类型，便于 ChapterInfoPanel 直接消费）
   currentInfoState: () => InfoFlowChapterState | undefined;
   setCurrentInfoState: (v: InfoFlowChapterState | undefined) => void;
+
+  // P3-B：流式 LLM 任务状态（AI Task Panel / Progress Dock / Result Card 消费）
+  streamingTask: () => AITask | null;
 
   // 操作方法
   runChapterGeneration: (params: RunGenerationParams) => Promise<NovelAgentResult>;
@@ -107,97 +103,19 @@ export interface RunInfoExtractParams {
   text: string;
 }
 
-// ─── Info-Theory → Info-Lite 映射 ──────────────────────────────────────
-
-/**
- * 把 P2-C info-theory 审计结果映射为 P1-A Info-Lite 类型。
- *
- * 原因：
- * - info-theory 模块内部使用扩展字段（atoms/links/selfInformationTotal），
- *   而 UI 的 ChapterInfoPanel 与 WorkflowEvents 仍消费 Info-Lite 结构（newAtoms/newLinks）。
- * - P2-D 不在 UI 层同时维护两套类型，而是在 Hook 边界做一次性转换。
- *
- * 映射规则：
- * - 信息原子：title/content 直接复用；relevanceScore 映射为 importance；
- *   selfInformation 映射为 selfInformationScore；visibility 默认 public。
- * - 信息链接：info-theory 只保存 atomId，需要查表得到 sourceTitle / targetTitle；
- *   relationType 按语义做保守映射，避免引入 Info-Lite 不支持的关系。
- * - auditScore 由 0-1 的 score.auditScore 缩放到 0-100，与 ChapterInfoPanel 显示一致。
- */
-function mapInfoTheoryToInfoFlow(
-  state: InfoTheoryChapterState,
-  score: InformationScore,
-  chapterIndex: number,
-): InfoFlowChapterState {
-  const atomTitleMap = new Map<string, string>();
-  for (const atom of state.atoms) {
-    atomTitleMap.set(atom.id, atom.title);
-  }
-
-  const newAtoms: InfoFlowChapterState['newAtoms'] = state.atoms.map((atom) => ({
-    id: atom.id,
-    projectId: atom.projectId,
-    chapterId: atom.chapterId ?? state.chapterId,
-    type: mapInfoTheoryAtomType(atom.type),
-    title: atom.title,
-    description: atom.content,
-    importance: Math.max(1, Math.min(10, Math.round(atom.relevanceScore * 10))),
-    visibility: atom.type === 'clue' ? 'author-only' : 'public',
-    selfInformationScore: atom.selfInformation,
-    plantedIn: chapterIndex,
-  }));
-
-  const newLinks: InfoFlowChapterState['newLinks'] = state.links.map((link) => ({
-    id: link.id,
-    projectId: state.projectId,
-    sourceTitle: atomTitleMap.get(link.sourceAtomId) || link.sourceAtomId,
-    targetTitle: atomTitleMap.get(link.targetAtomId) || link.targetAtomId,
-    relationType: mapInfoTheoryLinkType(link.relationType),
-    strength: link.strength,
-    plantedIn: chapterIndex,
-  }));
-
-  return {
-    chapterId: state.chapterId,
-    projectId: state.projectId,
-    entropyBefore: state.entropyBefore,
-    entropyAfter: state.entropyAfter,
-    entropyDelta: state.entropyDelta,
-    selfInformationScore: state.selfInformationTotal,
-    newAtoms,
-    newLinks,
-    auditScore: Math.round(score.auditScore * 100),
-  };
-}
-
-const INFO_THEORY_ATOM_TYPE_MAP: Record<InfoTheoryAtomType, InfoFlowAtomType> = {
-  character: 'character-state',
-  event: 'event',
-  location: 'world-rule',
-  item: 'item',
-  relationship: 'relationship',
-  conflict: 'event',
-  clue: 'foreshadow',
-  emotion: 'emotion',
-  'world-rule': 'world-rule',
-  theme: 'theme',
-};
-
-function mapInfoTheoryAtomType(type: InfoTheoryAtomType): InfoFlowAtomType {
-  return INFO_THEORY_ATOM_TYPE_MAP[type] ?? 'fact';
-}
-
-const INFO_THEORY_LINK_TYPE_MAP: Record<InfoTheoryLinkType, InfoFlowLinkType> = {
-  supports: 'plot-cause',
-  contradicts: 'mystery',
-  foreshadows: 'foreshadow',
-  resolves: 'plot-cause',
-  'depends-on': 'character',
-  echoes: 'emotional-echo',
-};
-
-function mapInfoTheoryLinkType(type: InfoTheoryLinkType): InfoFlowLinkType {
-  return INFO_THEORY_LINK_TYPE_MAP[type] ?? 'theme';
+/** LLMStreamEvent 类型守卫。Workflow 返回的事件数组可能同时包含 NovelWorkflowEvent 与 LLMStreamEvent。 */
+function isLLMStreamEvent(event: unknown): event is LLMStreamEvent {
+  if (typeof event !== 'object' || event === null) return false;
+  const type = (event as { type?: unknown }).type;
+  if (typeof type !== 'string') return false;
+  return [
+    'llm.request.started',
+    'llm.token.delta',
+    'llm.reasoning.delta',
+    'llm.request.completed',
+    'llm.request.failed',
+    'llm.request.cancelled',
+  ].includes(type);
 }
 
 // ─── Hook 实现 ─────────────────────────────────────────────────────────
@@ -211,17 +129,25 @@ function mapInfoTheoryLinkType(type: InfoTheoryLinkType): InfoFlowLinkType {
  *   3. 对生成类动作调用 applyWorkflowEvents（通过 mutations 注入）
  *   4. 更新内部状态信号
  */
-export function useNovelWorkflow(mutations: WorkflowMutations): UseNovelWorkflowReturn {
+export function useNovelWorkflow(
+  mutations: WorkflowMutations,
+  engine?: NovelWorkflowEngine,
+): UseNovelWorkflowReturn {
   const [getCurrentTask, setCurrentTask] = createSignal<WorkflowTaskResult | null>(null);
   const [getIsRunning, setIsRunning] = createSignal(false);
   const [getError, setError] = createSignal<string | null>(null);
   const [getCurrentInfoState, setCurrentInfoState] = createSignal<InfoFlowChapterState | undefined>(undefined);
 
-  // P2-D: 使用 Dispatcher 统一接入 YAML Engine
-  const { dispatch } = useNovelActionDispatcher({ mutations });
+  // P2-D: 使用 Dispatcher 统一接入 YAML Engine；测试可注入 fake engine
+  const { dispatch } = useNovelActionDispatcher({ mutations, engine });
+
+  // P3-B: 聚合 LLMStreamEvent 为 AITask，供 UI 实时展示
+  const llmTask = useNovelLLMTask();
 
   // 返修#5: 保存上次执行的 NovelActionInput，用于重试
   let lastActionInput: NovelActionInput | null = null;
+  // P3-B: 保存上次流式任务输入，用于取消/重试
+  let lastLLMTaskInput: AITask['input'] | null = null;
 
   /**
    * 执行章节生成工作流。
@@ -273,6 +199,12 @@ export function useNovelWorkflow(mutations: WorkflowMutations): UseNovelWorkflow
 
   /**
    * 执行 AI 写作命令工作流（续写/改写/扩写/润色/总结）。
+   *
+   * P3-B 改造：
+   * - continue 命令默认请求流式执行（stream=true），Workflow Engine 通过 agent-run Tool
+   *   可能返回 LLMStreamEvent 数组；本 Hook 将这些事件交给 useNovelLLMTask 聚合成 AITask。
+   * - 非 continue 命令保持原有非流式路径，不引入额外状态。
+   * - 无论流式与否，最终 NovelAgentResult 仍进入 currentTask，保证调用方不回归。
    */
   const runAIWritingCommand = async (
     params: RunAICommandParams,
@@ -281,10 +213,9 @@ export function useNovelWorkflow(mutations: WorkflowMutations): UseNovelWorkflow
     setError(null);
     clearWorkflowEventLog();
 
-    // P2-D 只把 continue 接入 YAML Engine；其余命令继续按 generate 路径跑通
-    // 因为 chapter.continue.yaml 内部使用 mock-generation-wrapper，能处理 continue
+    const isContinue = params.command === 'continue';
     const input: NovelActionInput = {
-      type: params.command === 'continue' ? 'chapter.continue' : 'chapter.generate',
+      type: isContinue ? 'chapter.continue' : 'chapter.generate',
       projectId: params.projectId,
       chapterId: params.chapterId,
       payload: {
@@ -294,9 +225,15 @@ export function useNovelWorkflow(mutations: WorkflowMutations): UseNovelWorkflow
         selectedText: params.selectedText,
         targetWordCount: params.targetWordCount,
         contextRefs: params.contextRefs,
+        // P3-B：continue 默认请求流式事件；agent-run Tool 会根据 gate 决定是否真实流式
+        stream: isContinue ? true : undefined,
       },
     };
     lastActionInput = input;
+    lastLLMTaskInput = {
+      text: params.text,
+      selectedText: params.selectedText,
+    };
 
     try {
       const actionResult = await dispatch(input);
@@ -308,10 +245,32 @@ export function useNovelWorkflow(mutations: WorkflowMutations): UseNovelWorkflow
       }
 
       const result = actionResult.result as NovelAgentResult;
-      const events = (actionResult.events ?? []) as NovelWorkflowEvent[];
+      const rawEvents = actionResult.events ?? [];
       const durationMs = result.durationMs ?? 0;
 
-      setCurrentTask({ result, events, durationMs });
+      // P3-B：对 continue 命令，若工作流返回了 LLMStreamEvent，则聚合成 AITask。
+      // 这样 UI 能在生成过程中看到实时 preview，而非只等待终态结果。
+      if (isContinue) {
+        const llmEvents = (rawEvents as unknown[]).filter(isLLMStreamEvent);
+        if (llmEvents.length > 0 && lastLLMTaskInput) {
+          await llmTask.startTask(
+            {
+              type: 'continue-writing',
+              chapterId: params.chapterId,
+              text: lastLLMTaskInput.text,
+              selectedText: lastLLMTaskInput.selectedText,
+            },
+            async function* (signal) {
+              for (const event of llmEvents) {
+                if (signal.aborted) break;
+                yield event;
+              }
+            },
+          );
+        }
+      }
+
+      setCurrentTask({ result, events: rawEvents as NovelWorkflowEvent[], durationMs });
       return result;
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
@@ -369,8 +328,12 @@ export function useNovelWorkflow(mutations: WorkflowMutations): UseNovelWorkflow
   /**
    * 取消当前任务。
    * 返修#4: 必须产出 status=cancelled 的 NovelAgentResult，不能仅清空状态或 clearEventLog。
+   *
+   * P3-B 补充：若当前存在流式 LLM 任务，先调用 AbortController.abort 取消底层事件流。
    */
   const cancelCurrentTask = (): NovelAgentResult | null => {
+    llmTask.cancel();
+
     const task = getCurrentTask();
     if (!task) return null;
 
@@ -434,6 +397,7 @@ export function useNovelWorkflow(mutations: WorkflowMutations): UseNovelWorkflow
     setError,
     currentInfoState: getCurrentInfoState,
     setCurrentInfoState,
+    streamingTask: llmTask.task,
     runChapterGeneration,
     runAIWritingCommand,
     runInfoExtract,

@@ -138,9 +138,20 @@ export function AIResultCard(props: AIResultCardProps) {
 
           {/* 运行中 */}
           <Show when={props.task.status === 'running'}>
-            <div class="flex items-center justify-center py-6">
-              <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mr-3" />
-              <span class="text-sm text-gray-600">AI 正在生成内容...</span>
+            <div class="flex flex-col gap-3 py-4">
+              <div class="flex items-center">
+                <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mr-3" />
+                <span class="text-sm text-gray-600">AI 正在生成内容...</span>
+              </div>
+              {/* P3-B：流式结果作为临时草稿展示，用户仍需点击采纳才会写入正文 */}
+              <Show when={props.task.preview}>
+                <div class="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                  <div class="text-xs text-blue-700 font-medium mb-1">实时预览：</div>
+                  <div class="text-sm text-gray-800 leading-relaxed whitespace-pre-wrap">
+                    {props.task.preview}
+                  </div>
+                </div>
+              </Show>
             </div>
           </Show>
 

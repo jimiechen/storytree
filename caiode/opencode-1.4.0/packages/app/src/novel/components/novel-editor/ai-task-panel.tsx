@@ -105,6 +105,13 @@ export function AITaskPanel(props: AITaskPanelProps) {
                         <span class="font-medium">输入:</span>
                         <span class="truncate block">{task.input.text.substring(0, 50)}...</span>
                       </div>
+                      {/* P3-B：流式生成过程中实时展示 preview，但 preview 只是临时草稿，不直接写入正文 */}
+                      <Show when={task.preview}>
+                        <div>
+                          <span class="font-medium">生成中:</span>
+                          <span class="block text-blue-600 italic">{task.preview}</span>
+                        </div>
+                      </Show>
                       <Show when={task.output}>
                         <div>
                           <span class="font-medium">输出:</span>

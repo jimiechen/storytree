@@ -58,7 +58,7 @@ describe('NovelWorkflowEngine', () => {
       results.push(result);
     }
 
-    const completed = results.find((r) => r.status === 'completed' && r.stepId === 'mock-wrapper');
+    const completed = results.find((r) => r.status === 'completed' && r.stepId === 'agent-run-continue');
     expect(completed).toBeDefined();
   });
 

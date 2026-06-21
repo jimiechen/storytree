@@ -31,8 +31,11 @@ export interface AdapterContext {
   modelRole?: 'draft' | 'rewrite' | 'audit' | 'outline' | 'summary' | 'critic';
 
   targetWordCount?: number;
+  selectedText?: string;
   genre?: string;
   dryRun?: boolean;
+  /** P3-B：是否请求流式执行；agent-run Tool 透传给 RealLLMExecutionAdapter */
+  stream?: boolean;
 }
 
 /**
