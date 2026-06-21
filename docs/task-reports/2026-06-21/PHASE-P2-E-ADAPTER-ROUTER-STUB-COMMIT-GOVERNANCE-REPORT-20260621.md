@@ -190,7 +190,7 @@ bun run novel:precommit
 
 ## 11. Git 提交结果
 
-- Git 提交哈希：`<待提交后回填>`
+- Git 提交哈希：`7bc5211c`
 - Git 提交信息：`feat(novel): P2-E adapter router stubs and commit governance hooks`
 - 提交包含范围：`.trae/hooks.json`、`scripts/trae-hooks/`、`packages/app/scripts/novel-precommit-check.ts`、`packages/app/src/novel/adapters/`、`packages/app/src/novel/plugins/core-writing-tools/agent-run.tool.ts`、相关测试与文档、`docs/task-reports/`、`workspaces/kimik27code/`。
 - 未提交文件：
