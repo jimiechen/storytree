@@ -22,16 +22,16 @@ P3-0 是在 P2 架构之上引入真实 LLM 前的**安全准备阶段**，目�
 
 P3-0 **只做准备，不发起真实 LLM 网络请求**。
 
-| 事项 | P3-0 | P3-A |
-|---|---|---|
-| 真实 LLM 请求 | ❌ 禁止 | ✅ 在双 gate 开启时允许 |
-| 密钥硬编码 | ❌ 禁止 | ❌ 禁止 |
-| 前端持有 API Key | ❌ 禁止 | ❌ 禁止 |
-| FeatureGate 设计 | ✅ 完成 | ✅ 执行 |
-| 流式事件协议 | ✅ 定义 | ✅ 消费 |
-| 安全日志脱敏 | ✅ 实现 | ✅ 使用 |
-| RealLLMAdapter 接口 | ✅ 扩展定义 | ✅ 实现 |
-| Client Stub | ✅ 实现 | ✅ 替换为真实 client |
+| 事项                | P3-0   | P3-A            |
+| ----------------- | ------ | --------------- |
+| 真实 LLM 请求         | ❌ 禁止   | ✅ 在双 gate 开启时允许 |
+| 密钥硬编码             | ❌ 禁止   | ❌ 禁止            |
+| 前端持有 API Key      | ❌ 禁止   | ❌ 禁止            |
+| FeatureGate 设计    | ✅ 完成   | ✅ 执行            |
+| 流式事件协议            | ✅ 定义   | ✅ 消费            |
+| 安全日志脱敏            | ✅ 实现   | ✅ 使用            |
+| RealLLMAdapter 接口 | ✅ 扩展定义 | ✅ 实现            |
+| Client Stub       | ✅ 实现   | ✅ 替换为真实 client  |
 
 ## 3. 阶段目标
 
@@ -455,24 +455,24 @@ chore(novel): prepare real llm adapter readiness
 
 ## 18. 时间计划
 
-| 阶段 | 预计时间 | 产出 |
-|---|---|---|
-| 文档与类型设计 | 2 小时 | FeatureGate、事件协议、请求类型、错误类型、安全日志 |
-| Adapter 接口扩展 | 1 小时 | `StreamingAgentExecutionAdapter`、`real-llm-client.stub.ts` |
-| 密钥策略与 precommit 更新 | 1 小时 | `llm-secret-policy.ts`、precommit 检查 |
-| 测试覆盖 | 2 小时 | llm 目录测试、adapters 回归 |
-| 验证与提交 | 1 小时 | typecheck / precommit / 测试 / Git |
-| 阶段报告 | 1 小时 | `PHASE-P3-0-REAL-LLM-READINESS-REPORT-20260621.md` |
+| 阶段                 | 预计时间 | 产出                                                         |
+| ------------------ | ---- | ---------------------------------------------------------- |
+| 文档与类型设计            | 2 小时 | FeatureGate、事件协议、请求类型、错误类型、安全日志                            |
+| Adapter 接口扩展       | 1 小时 | `StreamingAgentExecutionAdapter`、`real-llm-client.stub.ts` |
+| 密钥策略与 precommit 更新 | 1 小时 | `llm-secret-policy.ts`、precommit 检查                        |
+| 测试覆盖               | 2 小时 | llm 目录测试、adapters 回归                                       |
+| 验证与提交              | 1 小时 | typecheck / precommit / 测试 / Git                           |
+| 阶段报告               | 1 小时 | `PHASE-P3-0-REAL-LLM-READINESS-REPORT-20260621.md`         |
 
 ## 19. 风险清单
 
-| 风险 | 等级 | 说明 | 缓解措施 |
-|---|---|---|---|
-| 真实 LLM 冲动提前接入 | 高 | 团队可能在 P3-0 就尝试真实调用 | FeatureGate 默认关闭 + precommit 拦截 fetch / 硬编码 key |
-| 密钥管理环境未就绪 | 中 | 项目尚无后端代理 | P3-0 只定义策略与 client boundary，真实 transport 在 P3-A 注入 |
-| 日志脱敏规则遗漏 | 中 | 新字段可能绕过脱敏 | 测试覆盖 + precommit 静态扫描 |
-| 流式事件与现有 UI 冲突 | 低 | UI 尚未按统一事件消费 | P3-0 不修改 UI，仅定义协议 |
-| AdapterRouter 变更引入回归 | 低 | 新增 gate 检查可能影响 mock 链路 | 回归测试 adapter-router.test.ts |
+| 风险                   | 等级 | 说明                     | 缓解措施                                               |
+| -------------------- | -- | ---------------------- | -------------------------------------------------- |
+| 真实 LLM 冲动提前接入        | 高  | 团队可能在 P3-0 就尝试真实调用     | FeatureGate 默认关闭 + precommit 拦截 fetch / 硬编码 key    |
+| 密钥管理环境未就绪            | 中  | 项目尚无后端代理               | P3-0 只定义策略与 client boundary，真实 transport 在 P3-A 注入 |
+| 日志脱敏规则遗漏             | 中  | 新字段可能绕过脱敏              | 测试覆盖 + precommit 静态扫描                              |
+| 流式事件与现有 UI 冲突        | 低  | UI 尚未按统一事件消费           | P3-0 不修改 UI，仅定义协议                                  |
+| AdapterRouter 变更引入回归 | 低  | 新增 gate 检查可能影响 mock 链路 | 回归测试 adapter-router.test.ts                        |
 
 ## 20. P3-A 准入清单
 
@@ -515,3 +515,4 @@ P3-0 实施方案经主控评审通过后，进入实施阶段。实施完成并
 [PHASE_P3_0_PLAN_REJECTED]
 [NEED_REVISION_BEFORE_P3_0_IMPLEMENTATION]
 ```
+
