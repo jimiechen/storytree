@@ -107,11 +107,9 @@
 
 | 提交哈希 | 提交信息 |
 |---|---|
-| `待回填` | `feat(novel): add real llm adapter pilot with streaming echo` |
-| `待回填` | `docs(novel): add P3-A design docs and runner tests` |
-| `待回填` | `docs(novel): update Phase P3-A report with commit hashes` |
-| `待回填` | `docs(rules): update task source record for Phase P3-A` |
-| `待回填` | `docs(rules): update agent score record for Phase P3-A` |
+| `92db2690` | `feat(P3-A): add real llm adapter pilot with streaming echo` |
+| `988254c8` | `docs(P3-A): add Phase P3-A implementation report` |
+| `e0a80e72` | `docs(rules): update task source and score records for Phase P3-A` |
 
 ## 9. 完成标记
 
