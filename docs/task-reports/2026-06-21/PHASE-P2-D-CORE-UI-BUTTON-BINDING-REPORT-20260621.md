@@ -175,3 +175,85 @@ NovelActionResult
 ## 9. Chat Debug 兼容说明
 
 已采用方案 A：切换 Chat Debug Runner
+---
+
+## 10. BLACKBOX / SolidJS 状态规范说明
+
+- 本阶段未大规模修改 `workspace-view-model.ts`。
+- 在 `novel-editor/index.tsx` 中新增 `infoState` 等局部状态时优先使用 `createStore` 统一管理，避免多个独立 `createSignal` 维护同一组状态。
+- `useNovelWorkflow` 内部继续使用 `createStore` 维护 workflow 运行状态。
+- `workspace-view-model.ts` 中若仍存在多个相关 `createSignal`，记录为后续质量项，将在涉及工作台状态重构时统一修复。
+
+---
+
+## 11. 测试结果
+
+| 命令 | 结果 |
+|---|---|
+| `bun typecheck` | 0 errors |
+| `bun test src/novel/info-theory` | 通过 |
+| `bun test src/novel/plugins` | 通过 |
+| `bun test src/novel/workflows/engine` | 通过 |
+| `bun test src/novel/workflows` | 通过 |
+| `bun test src/novel` | **239 pass / 0 fail** |
+| `bunx playwright test e2e/novel/novel-mvp-flow.spec.ts` | 未执行；环境未配置 Playwright 浏览器依赖，已在单元/组件级补充覆盖 |
+
+说明：`novel:precommit` 脚本尚未在 `packages/app/package.json` 中定义，本次以 `bun typecheck` + `bun test src/novel` 作为等价审查。
+
+---
+
+## 12. Git 提交结果
+
+- **Git 提交哈希**：`f7be931d`（P2 代码与文档）；`5e2b6038`（本报告初始版本）
+- **Git 提交信息**：
+  - `feat(novel): P2-A~P2-D YAML workflow engine, tool registry, info-theory audit and UI action binding`
+  - `docs(novel): add Phase P2-D core UI button binding report`
+- **提交包含的阶段范围**：P2-A、P2-B、P2-C、P2-D 的积累代码与文档（因之前阶段未单独提交，本次一并规范提交）
+- **提交文件数**：73 files changed, 8844 insertions(+), 93 deletions(-) + 1 report file
+- **git status after commit**：
+  - 已提交：P2 阶段代码、阶段报告、扣分档案、P2 规划与设计文档。
+  - 未提交：
+    - `caiode/opencode-1.4.0/docs/reports/stitch-comparison/screenshots/*.png`（stitch 对比截图，二进制文件，不属于 P2 代码）。
+    - `caiode/docs/tabbit/06/*.md`（Tabbit 输入提示词文档，不进入代码库）。
+- **是否仍有未提交文件**：是，但均为非代码输入材料，未混入本次提交。
+
+---
+
+## 13. 风险与未完成项
+
+### 阻塞项
+
+无。
+
+### 非阻塞项
+
+- `novel:precommit` 脚本缺失，建议后续补齐或引用 P2-C1 提交治理任务。
+- Playwright E2E 未执行，当前依赖单元/组件测试保证质量。
+- `workspace-view-model.ts` 中可能仍存在多个独立 `createSignal`，后续涉及工作台状态重构时需统一为 `createStore`。
+- `task.cancel` 尚未接入 Engine 真正 cancellation，当前返回结构化 `NOT_CONNECTED_TO_ENGINE_CANCEL`。
+
+### 后续跟踪项
+
+- P2-E 可继续绑定剩余 AI 按钮（大纲生成、细纲生成）。
+- P2-E 可统一 Chat Debug 中 `rewrite` / `expand` / `polish` / `summarize` 到 YAML Engine。
+- P2-E 可引入真实 LLM Adapter 的 FeatureGate 与 provider 边界设计。
+- P2-E 可补充 E2E 覆盖核心 AI 按钮链路。
+
+---
+
+## 14. 下一阶段建议
+
+P2-D 已完成核心按钮与 YAML Engine 的统一接入，测试全绿，代码已提交。建议进入 P2-E：
+
+- 扩展 Action Dispatcher 覆盖更多 AI 按钮。
+- 引入真实 LLM / OpenCode Adapter 的接口边界（仍保持 FeatureGate 关闭）。
+- 完善 Chat Debug 全部命令的 YAML Engine 化。
+- 补充 E2E 与提交前 Hook。
+
+---
+
+## 15. 阶段完成标记
+
+测试通过、Git 提交完成、阶段报告已生成。
+
+[READY_FOR_P2E]
