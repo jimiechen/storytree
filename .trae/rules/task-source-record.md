@@ -49,7 +49,7 @@
    - 结论: `[READY_FOR_P3A_REAL_LLM_PILOT]`
    - 关键提交:
      - `4e7ddf07` chore(novel): prepare real llm adapter readiness
-     - `tbd` docs(novel): update Phase P3-0 report with commit hash
+     - `1d62b0c6` docs(novel): update Phase P3-0 report with commit hash
 
 2. **Phase P2 总体验收**
    - 来源: `caiode/docs/tabbit/06/P3P4P5阶段目标.md#L882-892`
