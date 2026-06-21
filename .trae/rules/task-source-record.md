@@ -85,6 +85,7 @@
    - 结论: `[READY_FOR_P3C_REAL_LLM_CHAPTER_GENERATION]`
    - 关键提交:
      - `2971437d` feat(novel): P3-B integrate real LLM UI continue writing
+     - `829ce41c` docs(novel): update Phase P3-B report and records with commit hash
    - 实施报告: `docs/task-reports/2026-06-21/PHASE-P3-B-REAL-LLM-UI-CONTINUE-IMPLEMENTATION-REPORT-20260621.md`
    - 验证结果: `bun typecheck` 0 errors，`bun test src/novel` 362 pass / 0 fail，`bun run novel:precommit` PASSED
 

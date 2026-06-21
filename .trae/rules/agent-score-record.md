@@ -25,7 +25,7 @@
 | 2 | agent-responsibility-boundary.md | 已在工作空间文件及报告首行声明角色与职责范围 | 0 |
 | 3 | code-file-limit.md | 拆分后最大文件 316 行，所有文件 < 500 行 | 0 |
 | 4 | claude-code-migration-rules.md | 不涉及移植 | 0 |
-| 5 | github-workflow-rules.md | 已执行 Git 提交（`2971437d`） | 0 |
+| 5 | github-workflow-rules.md | 已执行 Git 提交（`2971437d` / `829ce41c`） | 0 |
 | 6 | Ralph.md | 测试通过后输出 READY_FOR_P3C | 0 |
 | 7 | task-completion-report.md | 已生成 P3-B 实施报告 | 0 |
 | 8 | secretary-agent-rules.md | 不适用 | 0 |
@@ -36,7 +36,7 @@
 1. model-auto-file.md: 已更新 `workspaces/kimik27code/hellokimik27code.md`
 2. agent-responsibility-boundary.md: 工作空间文件及实施报告首行已声明角色为前端工程师 / Novel 模块开发 Agent
 3. code-file-limit.md: `use-novel-workflow.ts` 拆分为 316 行，新增 `use-novel-info-theory-mapper.ts` 88 行，均符合 < 500 行限制
-4. github-workflow-rules.md: 已提交 P3-B 代码（`2971437d`）与报告回填
+4. github-workflow-rules.md: 已提交 P3-B 代码（`2971437d`）与报告回填（`829ce41c`）
 5. Ralph.md: 已完成 typecheck、novel:precommit、全量 novel 测试验证后输出 [READY_FOR_P3C_REAL_LLM_CHAPTER_GENERATION]
 6. task-completion-report.md: 已生成 `docs/task-reports/2026-06-21/PHASE-P3-B-REAL-LLM-UI-CONTINUE-IMPLEMENTATION-REPORT-20260621.md`
 7. task-source-record.md: 已更新当前任务状态为 P3-B 已完成
