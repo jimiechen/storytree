@@ -13,6 +13,67 @@
 
 ## 扣分历史记录
 
+### 2026-06-21 扣分记录 (Session 13 - Kimi-K2.7-Code)
+
+**任务**: Phase P3-B Real LLM UI Continue Integration 实施
+**本次扣分**: 0分
+**扣分后积分**: 30分
+
+| 序号 | 规则文件 | 实际执行 | 扣分 |
+|------|---------|---------|------|
+| 1 | model-auto-file.md | 已创建/更新 `workspaces/kimik27code/hellokimik27code.md` | 0 |
+| 2 | agent-responsibility-boundary.md | 已在工作空间文件及报告首行声明角色与职责范围 | 0 |
+| 3 | code-file-limit.md | 拆分后最大文件 316 行，所有文件 < 500 行 | 0 |
+| 4 | claude-code-migration-rules.md | 不涉及移植 | 0 |
+| 5 | github-workflow-rules.md | 已执行 Git 提交（`2971437d`） | 0 |
+| 6 | Ralph.md | 测试通过后输出 READY_FOR_P3C | 0 |
+| 7 | task-completion-report.md | 已生成 P3-B 实施报告 | 0 |
+| 8 | secretary-agent-rules.md | 不适用 | 0 |
+| 9 | 测试执行检查 | bun typecheck 0 errors + bun test src/novel 362 pass / 0 fail + novel:precommit PASSED | 0 |
+| 10 | 文档完整性检查 | 报告含 Exit Criteria 和 READY_FOR_P3C 标记 | 0 |
+
+**合规详情**:
+1. model-auto-file.md: 已更新 `workspaces/kimik27code/hellokimik27code.md`
+2. agent-responsibility-boundary.md: 工作空间文件及实施报告首行已声明角色为前端工程师 / Novel 模块开发 Agent
+3. code-file-limit.md: `use-novel-workflow.ts` 拆分为 316 行，新增 `use-novel-info-theory-mapper.ts` 88 行，均符合 < 500 行限制
+4. github-workflow-rules.md: 已提交 P3-B 代码（`2971437d`）与报告回填
+5. Ralph.md: 已完成 typecheck、novel:precommit、全量 novel 测试验证后输出 [READY_FOR_P3C_REAL_LLM_CHAPTER_GENERATION]
+6. task-completion-report.md: 已生成 `docs/task-reports/2026-06-21/PHASE-P3-B-REAL-LLM-UI-CONTINUE-IMPLEMENTATION-REPORT-20260621.md`
+7. task-source-record.md: 已更新当前任务状态为 P3-B 已完成
+
+---
+
+### 2026-06-21 扣分记录 (Session 12 - Kimi-K2.7-Code)
+
+**任务**: Phase P3-B Real LLM UI Continue Integration 实施方案输出
+**本次扣分**: 0分
+**扣分后积分**: 30分
+
+| 序号 | 规则文件 | 实际执行 | 扣分 |
+|------|---------|---------|------|
+| 1 | model-auto-file.md | 已创建/更新 `workspaces/kimik27code/hellokimik27code.md` | 0 |
+| 2 | agent-responsibility-boundary.md | 已在工作空间文件首行声明角色与职责范围 | 0 |
+| 3 | code-file-limit.md | 规划阶段未新增代码文件；方案文档 < 500 行 | 0 |
+| 4 | claude-code-migration-rules.md | 不涉及移植 | 0 |
+| 5 | github-workflow-rules.md | 规划阶段未修改代码，无需提交 | 0 |
+| 6 | Ralph.md | 规划阶段输出方案并提交主控评审 | 0 |
+| 7 | task-completion-report.md | 已输出 P3-B 实施方案文档 | 0 |
+| 8 | secretary-agent-rules.md | 不适用 | 0 |
+| 9 | 测试执行检查 | 规划阶段未修改代码 | 0 |
+| 10 | 文档完整性检查 | 方案含范围、文件清单、实施步骤、测试计划、验收标准 | 0 |
+
+**合规详情**:
+1. model-auto-file.md: 已更新 `workspaces/kimik27code/hellokimik27code.md`
+2. agent-responsibility-boundary.md: 工作空间文件首行已声明角色为前端工程师 / Novel 模块开发 Agent
+3. github-workflow-rules.md: 当前为规划阶段，未产生代码变更，无需提交
+4. Ralph.md: 已按规划流程输出方案并提交主控评审
+5. task-completion-report.md: 已生成 `docs/task-reports/2026-06-21/PHASE-P3-B-REAL-LLM-UI-CONTINUE-PLAN-20260621.md`
+6. task-source-record.md: 已更新当前任务状态为 P3-B 方案待评审
+
+---
+
+## 扣分历史记录
+
 ### 2026-06-21 扣分记录 (Session 7 - Kimi-K2.7-Code)
 
 **任务**: Phase P2-B Plugin Tool Registry 实现与汇报
@@ -304,6 +365,8 @@
 | 2026-06-21 | Kimi-K2.7-Code | Phase P2-E Adapter Router + Stub + Commit Governance 实现与汇报 | 0 | 30 |
 | 2026-06-21 | Kimi-K2.7-Code | Phase P3-0 Real LLM Readiness 实现与汇报 | 0 | 30 |
 | 2026-06-21 | Kimi-K2.7-Code | Phase P3-A Real LLM Adapter Pilot 实现与汇报 | 0 | 30 |
+| 2026-06-21 | Kimi-K2.7-Code | Phase P3-B Real LLM UI Continue Integration 实施方案输出 | 0 | 30 |
+| 2026-06-21 | Kimi-K2.7-Code | Phase P3-B Real LLM UI Continue Integration 实施 | 0 | 30 |
 
 ## 积分状态说明
 
