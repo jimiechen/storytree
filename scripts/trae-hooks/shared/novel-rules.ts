@@ -22,6 +22,26 @@ export const BLOCKED_CODE_PATTERNS = [
   /api\.opencode\.ai/i,
 ];
 
+/** P3-0 禁止前端代码中硬编码 API Key / 直接读取 process.env 密钥 */
+export const CLIENT_SIDE_SECRET_PATTERNS = [
+  /process\.env\.[A-Z_]*(?:API_?KEY|TOKEN|SECRET)/i,
+  /['"`]sk-[a-zA-Z0-9]{20,}['"`]/i,
+  /['"`]Bearer\s+[a-zA-Z0-9\-_]{10,}['"`]/i,
+  /api[_-]?key\s*[:=]\s*['"`][a-zA-Z0-9]{10,}['"`]/i,
+];
+
+/** P3-0 禁止真实 LLM endpoint 硬编码 */
+export const LLM_ENDPOINT_PATTERNS = [
+  /fetch\([\s\S]{0,120}https?:\/\/(?:api\.)?(?:openai|anthropic|openrouter|claude|opencode)\.[^\s)]*/i,
+];
+
+/** P3-0 禁止在日志中输出完整 prompt / response */
+export const FULL_PROMPT_LOGGING_PATTERNS = [
+  /console\.(log|warn|error|info)\([^)]*prompt\)/i,
+  /console\.(log|warn|error|info)\([^)]*responseText\)/i,
+  /console\.(log|warn|error|info)\([^)]*fullPrompt\)/i,
+];
+
 /** 伪成功相关风险模式 */
 export const PSEUDO_SUCCESS_PATTERNS = [
   /onClick=\{\(\)\s*=>\s*\{\s*\}\}/,

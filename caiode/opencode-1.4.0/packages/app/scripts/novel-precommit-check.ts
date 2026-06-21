@@ -15,6 +15,9 @@ import {
   OPENCODE_CORE_PATHS,
   PSEUDO_SUCCESS_PATTERNS,
   BLOCKED_CODE_PATTERNS,
+  CLIENT_SIDE_SECRET_PATTERNS,
+  LLM_ENDPOINT_PATTERNS,
+  FULL_PROMPT_LOGGING_PATTERNS,
   COMPLEX_FILE_KEYWORDS,
   RELATED_VIEWMODEL_STATES,
 } from '../../../../../scripts/trae-hooks/shared/novel-rules';
@@ -113,6 +116,70 @@ function checkBlockedCode(issues: CheckIssue[], changedFiles: string[]): void {
           issues.push({
             level: 'error',
             message: `${file} 中出现真实外部服务 endpoint 硬编码：${pattern.source}`,
+          });
+        }
+      }
+    } catch {
+      // ignore
+    }
+  }
+}
+
+function checkClientSideSecrets(issues: CheckIssue[], changedFiles: string[]): void {
+  for (const file of changedFiles) {
+    if (!/\.tsx?$/.test(file)) continue;
+    // 测试文件可能故意包含风险字符串以验证检测逻辑，跳过
+    if (/\.(test|spec)\.(ts|tsx)$/.test(file)) continue;
+    const fullPath = join(APP_ROOT, file);
+    try {
+      const content = readFileSync(fullPath, 'utf-8');
+      for (const pattern of CLIENT_SIDE_SECRET_PATTERNS) {
+        if (pattern.test(content)) {
+          issues.push({
+            level: 'error',
+            message: `${file} 中存在前端密钥风险（禁止前端持有 API Key 或读取 process.env 密钥）：${pattern.source}`,
+          });
+        }
+      }
+    } catch {
+      // ignore
+    }
+  }
+}
+
+function checkLLMEndpoints(issues: CheckIssue[], changedFiles: string[]): void {
+  for (const file of changedFiles) {
+    if (!/\.tsx?$/.test(file)) continue;
+    if (/\.(test|spec)\.(ts|tsx)$/.test(file)) continue;
+    const fullPath = join(APP_ROOT, file);
+    try {
+      const content = readFileSync(fullPath, 'utf-8');
+      for (const pattern of LLM_ENDPOINT_PATTERNS) {
+        if (pattern.test(content)) {
+          issues.push({
+            level: 'error',
+            message: `${file} 中疑似硬编码真实 LLM endpoint fetch（P3-0 禁止真实请求）：${pattern.source}`,
+          });
+        }
+      }
+    } catch {
+      // ignore
+    }
+  }
+}
+
+function checkFullPromptLogging(issues: CheckIssue[], changedFiles: string[]): void {
+  for (const file of changedFiles) {
+    if (!/\.tsx?$/.test(file)) continue;
+    if (/\.(test|spec)\.(ts|tsx)$/.test(file)) continue;
+    const fullPath = join(APP_ROOT, file);
+    try {
+      const content = readFileSync(fullPath, 'utf-8');
+      for (const pattern of FULL_PROMPT_LOGGING_PATTERNS) {
+        if (pattern.test(content)) {
+          issues.push({
+            level: 'error',
+            message: `${file} 中疑似直接输出完整 prompt / response 到 console（必须使用安全日志脱敏）：${pattern.source}`,
           });
         }
       }
@@ -223,6 +290,9 @@ function main(): void {
     console.log(`Checking ${changedFiles.length} changed files...`);
     checkPseudoSuccess(issues, changedFiles);
     checkBlockedCode(issues, changedFiles);
+    checkClientSideSecrets(issues, changedFiles);
+    checkLLMEndpoints(issues, changedFiles);
+    checkFullPromptLogging(issues, changedFiles);
     checkOpenCodeCore(issues, changedFiles);
     checkChineseComments(issues, changedFiles);
     checkViewModelSignals(issues, changedFiles);

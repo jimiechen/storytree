@@ -77,6 +77,31 @@ describe('AdapterRouter', () => {
     expect('errorCode' in routed && routed.errorCode).toBe('ADAPTER_DISABLED');
   });
 
+  it('显式请求 real-llm 且 gate 关闭返回 ADAPTER_DISABLED', () => {
+    const router = createAdapterRouter();
+    router.register(new MockExecutionAdapter({ delayMultiplier: 0, silent: true }));
+
+    const routed = router.route('real-llm', makeCommand(), makeContext(), makeGates());
+    expect('success' in routed && routed.success).toBe(false);
+    expect('errorCode' in routed && routed.errorCode).toBe('ADAPTER_DISABLED');
+  });
+
+  it('gate 开启时可返回已注册的 real-llm adapter', () => {
+    const router = createAdapterRouter();
+    router.register(new MockExecutionAdapter({ delayMultiplier: 0, silent: true }));
+    router.register({
+      name: 'real-llm',
+      canHandle: () => true,
+      execute: async () => ({
+        success: true,
+        result: {} as unknown as import('../types/ai-task').NovelAgentResult,
+      }),
+    });
+
+    const routed = router.route('real-llm', makeCommand(), makeContext(), makeGates({ realLLMEnabled: true }));
+    expect('name' in routed && routed.name).toBe('real-llm');
+  });
+
   it('未注册 adapter 返回 ADAPTER_NOT_FOUND', () => {
     const router = createAdapterRouter();
     const routed = router.route('mock', makeCommand(), makeContext(), makeGates());

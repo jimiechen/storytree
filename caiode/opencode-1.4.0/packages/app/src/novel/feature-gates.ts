@@ -29,6 +29,13 @@ export interface NovelFeatureGates {
   batchGenerationEnabled: boolean;
   chatDebugEnabled: boolean;
   branchExperimentEnabled: boolean;
+
+  // P3-0 Real LLM Readiness gates
+  targetLLMAdapterEnabled: boolean;
+  llmStreamingEnabled: boolean;
+  llmRequestLogEnabled: boolean;
+  llmCostTrackingEnabled: boolean;
+  llmSafePromptLoggingEnabled: boolean;
 }
 
 /**
@@ -65,5 +72,12 @@ export function createDefaultNovelFeatureGates(): NovelFeatureGates {
     batchGenerationEnabled: false,
     chatDebugEnabled: false,
     branchExperimentEnabled: false,
+
+    // P3-0 Real LLM Readiness 默认全部关闭
+    targetLLMAdapterEnabled: false,
+    llmStreamingEnabled: false,
+    llmRequestLogEnabled: true,
+    llmCostTrackingEnabled: false,
+    llmSafePromptLoggingEnabled: false,
   };
 }

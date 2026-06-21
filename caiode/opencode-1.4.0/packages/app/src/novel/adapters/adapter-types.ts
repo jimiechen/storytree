@@ -10,8 +10,8 @@
 import type { NovelCommand } from '../workflows/novel-command';
 import type { NovelAgentResult } from '../types/ai-task';
 
-/** P2-E 支持的 Adapter 种类 */
-export type AdapterKind = 'mock' | 'opencode-stub' | 'claudecode-stub';
+/** P2-E 支持的 Adapter 种类；P3-0 预留 real-llm，默认被 FeatureGate 关闭 */
+export type AdapterKind = 'mock' | 'opencode-stub' | 'claudecode-stub' | 'real-llm';
 
 /**
  * Adapter 执行上下文。

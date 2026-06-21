@@ -55,14 +55,6 @@ export function createAdapterRouter(): AdapterRouter {
         return createAdapterRouterError('ADAPTER_NOT_FOUND', '未注册可用的 adapter');
       }
 
-      const adapter = adapters.get(requested);
-      if (!adapter) {
-        return createAdapterRouterError(
-          'ADAPTER_NOT_FOUND',
-          `Adapter "${requested}" 未注册`,
-        );
-      }
-
       if (requested === 'opencode-stub' && !gates.openCodeAdapterEnabled) {
         return createAdapterRouterError(
           'ADAPTER_DISABLED',
@@ -74,6 +66,21 @@ export function createAdapterRouter(): AdapterRouter {
         return createAdapterRouterError(
           'ADAPTER_DISABLED',
           `ClaudeCode adapter 已被 FeatureGate 关闭（claudeCodeAdapterEnabled=false）`,
+        );
+      }
+
+      if (requested === 'real-llm' && !gates.realLLMEnabled) {
+        return createAdapterRouterError(
+          'ADAPTER_DISABLED',
+          `Real LLM adapter 已被 FeatureGate 关闭（realLLMEnabled=false）`,
+        );
+      }
+
+      const adapter = adapters.get(requested);
+      if (!adapter) {
+        return createAdapterRouterError(
+          'ADAPTER_NOT_FOUND',
+          `Adapter "${requested}" 未注册`,
         );
       }
 
