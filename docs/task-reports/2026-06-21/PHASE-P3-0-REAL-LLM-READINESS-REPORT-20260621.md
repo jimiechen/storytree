@@ -101,8 +101,16 @@ P3-0 **不发起真实 LLM 请求**，仅完成 readiness 与治理边界。
 
 ## 8. Git 提交
 
-- 提交哈希：`4e7ddf07`
-- 提交信息：`chore(novel): prepare real llm adapter readiness`
+| 提交哈希 | 提交信息 |
+|---|---|
+| `4e7ddf07` | `chore(novel): prepare real llm adapter readiness` |
+| `1d62b0c6` | `docs(novel): update Phase P3-0 report with commit hash` |
+| `5662a4ab` | `docs(rules): update task source record for Phase P3-0` |
+| `c6d6419c` | `docs(rules): update agent score record for Phase P3-0` |
+| `66c99ddc` | `docs(novel): refine Phase P3-0 plan and P2 acceptance doc numbering` |
+| `3dd770af` | `docs(rules): fill Phase P3-0 commit hashes in task source record` |
+
+> 工作区剩余未提交文件仅为二进制截图与 Tabbit 输入文档，与 P3-0 代码无关。
 
 ## 9. 完成标记
 
