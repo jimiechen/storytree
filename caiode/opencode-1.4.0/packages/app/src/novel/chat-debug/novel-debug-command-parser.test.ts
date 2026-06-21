@@ -97,9 +97,36 @@ describe('NovelDebugCommandParser', () => {
     expect(result.command!.adapterKind).toBe('claudecode-stub');
   });
 
-  it('ignores invalid adapter parameter', () => {
+  it('parses adapter parameter for real-llm', () => {
     const result = parseNovelDebugCommand(
       '/novel run chapter.generate projectId=proj-1 chapterId=chapter-1 adapter=real-llm',
+    );
+    expect(result.success).toBe(true);
+    expect(result.command!.adapterKind).toBe('real-llm');
+  });
+
+  it('parses stream and dryRun parameters', () => {
+    const result = parseNovelDebugCommand(
+      '/novel run chapter.continue projectId=proj-1 chapterId=chapter-1 adapter=real-llm stream=true dryRun=true',
+    );
+    expect(result.success).toBe(true);
+    expect(result.command!.adapterKind).toBe('real-llm');
+    expect(result.stream).toBe(true);
+    expect(result.dryRun).toBe(true);
+  });
+
+  it('defaults stream and dryRun to false', () => {
+    const result = parseNovelDebugCommand(
+      '/novel run chapter.generate projectId=proj-1 chapterId=chapter-1',
+    );
+    expect(result.success).toBe(true);
+    expect(result.stream).toBe(false);
+    expect(result.dryRun).toBe(false);
+  });
+
+  it('ignores invalid adapter parameter', () => {
+    const result = parseNovelDebugCommand(
+      '/novel run chapter.generate projectId=proj-1 chapterId=chapter-1 adapter=unknown',
     );
     expect(result.success).toBe(true);
     expect(result.command!.adapterKind).toBeUndefined();

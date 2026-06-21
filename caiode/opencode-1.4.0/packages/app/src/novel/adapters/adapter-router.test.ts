@@ -1,6 +1,6 @@
 /**
  * @file adapters/adapter-router.test.ts
- * @description AdapterRouter 单元测试 — P2-E
+ * @description AdapterRouter 单元测试 — P2-E / P3-A
  */
 
 import { describe, it, expect } from 'vitest';
@@ -34,6 +34,7 @@ function makeContext(): AdapterContext {
 function makeGates(overrides?: Partial<AdapterFeatureGates>): AdapterFeatureGates {
   return {
     realLLMEnabled: false,
+    targetLLMAdapterEnabled: false,
     openCodeAdapterEnabled: false,
     claudeCodeAdapterEnabled: false,
     ...overrides,
@@ -77,7 +78,7 @@ describe('AdapterRouter', () => {
     expect('errorCode' in routed && routed.errorCode).toBe('ADAPTER_DISABLED');
   });
 
-  it('显式请求 real-llm 且 gate 关闭返回 ADAPTER_DISABLED', () => {
+  it('显式请求 real-llm 且 realLLMEnabled 关闭返回 ADAPTER_DISABLED', () => {
     const router = createAdapterRouter();
     router.register(new MockExecutionAdapter({ delayMultiplier: 0, silent: true }));
 
@@ -86,7 +87,21 @@ describe('AdapterRouter', () => {
     expect('errorCode' in routed && routed.errorCode).toBe('ADAPTER_DISABLED');
   });
 
-  it('gate 开启时可返回已注册的 real-llm adapter', () => {
+  it('显式请求 real-llm 且 targetLLMAdapterEnabled 关闭返回 ADAPTER_DISABLED', () => {
+    const router = createAdapterRouter();
+    router.register(new MockExecutionAdapter({ delayMultiplier: 0, silent: true }));
+
+    const routed = router.route(
+      'real-llm',
+      makeCommand(),
+      makeContext(),
+      makeGates({ realLLMEnabled: true }),
+    );
+    expect('success' in routed && routed.success).toBe(false);
+    expect('errorCode' in routed && routed.errorCode).toBe('ADAPTER_DISABLED');
+  });
+
+  it('双 gate 开启时可返回已注册的 real-llm adapter', () => {
     const router = createAdapterRouter();
     router.register(new MockExecutionAdapter({ delayMultiplier: 0, silent: true }));
     router.register({
@@ -98,7 +113,12 @@ describe('AdapterRouter', () => {
       }),
     });
 
-    const routed = router.route('real-llm', makeCommand(), makeContext(), makeGates({ realLLMEnabled: true }));
+    const routed = router.route(
+      'real-llm',
+      makeCommand(),
+      makeContext(),
+      makeGates({ realLLMEnabled: true, targetLLMAdapterEnabled: true }),
+    );
     expect('name' in routed && routed.name).toBe('real-llm');
   });
 

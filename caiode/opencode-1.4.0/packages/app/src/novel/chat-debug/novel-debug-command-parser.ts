@@ -1,6 +1,11 @@
 /**
  * @file chat-debug/novel-debug-command-parser.ts
- * @description Chat Debug Command 解析器 — P2-A0
+ * @description Chat Debug Command 解析器 — P2-A0 / P3-A
+ *
+ * P3-A 扩展：
+ * - adapter 增加 real-llm。
+ * - 增加 stream=true|false 参数。
+ * - 增加 dryRun=true|false 参数。
  */
 
 import type { NovelCommand } from '../workflows/novel-command';
@@ -86,7 +91,13 @@ export function parseNovelDebugCommand(input: string): NovelDebugParseResult {
 
   const command = buildNovelCommand(commandType, params);
 
-  return { success: true, kind: 'run', command };
+  return {
+    success: true,
+    kind: 'run',
+    command,
+    stream: parseBoolean(params.stream) ?? false,
+    dryRun: parseBoolean(params.dryRun) ?? false,
+  };
 }
 
 function parseParams(tokens: string[]): Record<string, string> {
@@ -106,6 +117,13 @@ function decodeValue(value: string): string {
     return value.slice(1, -1);
   }
   return value;
+}
+
+function parseBoolean(value: string | undefined): boolean | undefined {
+  if (value === undefined) return undefined;
+  if (value === 'true') return true;
+  if (value === 'false') return false;
+  return undefined;
 }
 
 function buildNovelCommand(
@@ -173,7 +191,7 @@ function parseNumber(value: string | undefined): number | undefined {
 }
 
 function parseAdapterKind(value: string | undefined): AdapterKind | undefined {
-  if (value === 'mock' || value === 'opencode-stub' || value === 'claudecode-stub') {
+  if (value === 'mock' || value === 'opencode-stub' || value === 'claudecode-stub' || value === 'real-llm') {
     return value;
   }
   return undefined;
@@ -188,14 +206,18 @@ export function getNovelDebugHelpText(): string {
     '',
     'Usage:',
     '  /novel help',
-    '  /novel run chapter.generate projectId=<id> chapterId=<id> [genre=<genre>] [targetWordCount=<n>] [adapter=mock|opencode-stub|claudecode-stub]',
-    '  /novel run chapter.continue projectId=<id> chapterId=<id> [selectedText=<text>] [adapter=mock|opencode-stub|claudecode-stub]',
-    '  /novel run chapter.rewrite projectId=<id> chapterId=<id> [selectedText=<text>] [adapter=mock|opencode-stub|claudecode-stub]',
-    '  /novel run chapter.expand projectId=<id> chapterId=<id> [selectedText=<text>] [adapter=mock|opencode-stub|claudecode-stub]',
-    '  /novel run chapter.polish projectId=<id> chapterId=<id> [selectedText=<text>] [adapter=mock|opencode-stub|claudecode-stub]',
-    '  /novel run chapter.summarize projectId=<id> chapterId=<id> [adapter=mock|opencode-stub|claudecode-stub]',
-    '  /novel run info.extract projectId=<id> chapterId=<id> [adapter=mock|opencode-stub|claudecode-stub]',
+    '  /novel run chapter.generate projectId=<id> chapterId=<id> [genre=<genre>] [targetWordCount=<n>] [adapter=mock|opencode-stub|claudecode-stub|real-llm] [stream=true|false] [dryRun=true|false]',
+    '  /novel run chapter.continue projectId=<id> chapterId=<id> [selectedText=<text>] [adapter=mock|opencode-stub|claudecode-stub|real-llm] [stream=true|false] [dryRun=true|false]',
+    '  /novel run chapter.rewrite projectId=<id> chapterId=<id> [selectedText=<text>] [adapter=mock|opencode-stub|claudecode-stub|real-llm]',
+    '  /novel run chapter.expand projectId=<id> chapterId=<id> [selectedText=<text>] [adapter=mock|opencode-stub|claudecode-stub|real-llm]',
+    '  /novel run chapter.polish projectId=<id> chapterId=<id> [selectedText=<text>] [adapter=mock|opencode-stub|claudecode-stub|real-llm]',
+    '  /novel run chapter.summarize projectId=<id> chapterId=<id> [adapter=mock|opencode-stub|claudecode-stub|real-llm]',
+    '  /novel run info.extract projectId=<id> chapterId=<id> [adapter=mock|opencode-stub|claudecode-stub|real-llm]',
     '',
-    'Note: opencode-stub / claudecode-stub are disabled in P2-E; they return ADAPTER_DISABLED.',
+    'Note:',
+    '  - opencode-stub / claudecode-stub are disabled in P2-E; they return ADAPTER_DISABLED.',
+    '  - real-llm requires realLLMEnabled=true AND targetLLMAdapterEnabled=true.',
+    '  - stream=true requires llmStreamingEnabled=true.',
+    '  - dryRun=true validates request construction without calling the real API.',
   ].join('\n');
 }

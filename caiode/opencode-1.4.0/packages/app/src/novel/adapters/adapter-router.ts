@@ -1,10 +1,11 @@
 /**
  * @file adapters/adapter-router.ts
- * @description Adapter Router 实现 — P2-E
+ * @description Adapter Router 实现 — P2-E / P3-A
  *
  * AdapterRouter 把"调用哪个执行器"从 Workflow Engine / Tool 中解耦。
  * P2-E 默认未指定 adapter 时路由到 mock；显式请求被 FeatureGate 关闭的 adapter 时返回结构化 ADAPTER_DISABLED 错误，
  * 避免 UI / 调试器误以为 OpenCode / ClaudeCode 已经真实可用。
+ * P3-A 对 real-llm 增加双 gate 校验：必须同时满足 realLLMEnabled 与 targetLLMAdapterEnabled。
  */
 
 import type { NovelCommand } from '../workflows/novel-command';
@@ -32,10 +33,11 @@ function createAdapterRouterError(
  * - 显式请求 mock → 直接返回 mock adapter。
  * - 显式请求 opencode-stub / claudecode-stub → 先检查对应 Gate，关闭则返回 ADAPTER_DISABLED；
  *   开启则返回对应 adapter；未注册则返回 ADAPTER_NOT_FOUND。
+ * - 显式请求 real-llm → 必须同时满足 realLLMEnabled 与 targetLLMAdapterEnabled，否则返回 ADAPTER_DISABLED。
  * - 未注册 adapter → ADAPTER_NOT_FOUND。
  *
  * 为什么 disabled 不 fallback 到 mock？
- * 因为 fallback 会让调用方误以为请求的是 OpenCode/ClaudeCode 并成功执行，属于伪成功。
+ * 因为 fallback 会让调用方误以为请求的是 OpenCode/ClaudeCode/RealLLM 并成功执行，属于伪成功。
  */
 export function createAdapterRouter(): AdapterRouter {
   const adapters = new Map<AdapterKind, AgentExecutionAdapter>();
@@ -69,11 +71,19 @@ export function createAdapterRouter(): AdapterRouter {
         );
       }
 
-      if (requested === 'real-llm' && !gates.realLLMEnabled) {
-        return createAdapterRouterError(
-          'ADAPTER_DISABLED',
-          `Real LLM adapter 已被 FeatureGate 关闭（realLLMEnabled=false）`,
-        );
+      if (requested === 'real-llm') {
+        if (!gates.realLLMEnabled) {
+          return createAdapterRouterError(
+            'ADAPTER_DISABLED',
+            `Real LLM adapter 已被 FeatureGate 关闭（realLLMEnabled=false）`,
+          );
+        }
+        if (!gates.targetLLMAdapterEnabled) {
+          return createAdapterRouterError(
+            'ADAPTER_DISABLED',
+            `Real LLM adapter 已被 FeatureGate 关闭（targetLLMAdapterEnabled=false）`,
+          );
+        }
       }
 
       const adapter = adapters.get(requested);

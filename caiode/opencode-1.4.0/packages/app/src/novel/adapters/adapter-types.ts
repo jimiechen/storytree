@@ -1,16 +1,15 @@
 /**
  * @file adapters/adapter-types.ts
- * @description Agent Execution Adapter 统一类型 — P2-E
+ * @description Agent Execution Adapter 统一类型 — P2-E / P3-A
  *
  * P2-E 引入 AdapterRouter，把"调用哪个执行器"从 Workflow Engine / Tool 中解耦出来。
- * 当前阶段只提供 mock、opencode-stub、claudecode-stub 三类执行器；
- * 真实 LLM / OpenCode / ClaudeCode 能力默认被 FeatureGate 关闭，P3 再逐步打开。
+ * P3-A 新增 real-llm adapter，需要同时满足 realLLMEnabled 与 targetLLMAdapterEnabled 双 gate。
  */
 
 import type { NovelCommand } from '../workflows/novel-command';
 import type { NovelAgentResult } from '../types/ai-task';
 
-/** P2-E 支持的 Adapter 种类；P3-0 预留 real-llm，默认被 FeatureGate 关闭 */
+/** P2-E / P3-A 支持的 Adapter 种类；real-llm 默认被 FeatureGate 关闭 */
 export type AdapterKind = 'mock' | 'opencode-stub' | 'claudecode-stub' | 'real-llm';
 
 /**
@@ -105,7 +104,10 @@ export interface AdapterRouterError {
 
 /** 控制 adapter 可见性的 FeatureGate */
 export interface AdapterFeatureGates {
+  /** 真实 LLM 能力总开关 */
   realLLMEnabled: boolean;
+  /** 是否允许显式路由到真实 LLM adapter（P3-A 新增双 gate） */
+  targetLLMAdapterEnabled: boolean;
   openCodeAdapterEnabled: boolean;
   claudeCodeAdapterEnabled: boolean;
 }

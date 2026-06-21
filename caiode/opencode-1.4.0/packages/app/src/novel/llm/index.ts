@@ -1,6 +1,6 @@
 /**
  * @file llm/index.ts
- * @description NovelForge 真实 LLM Readiness 模块导出 — P3-0
+ * @description NovelForge 真实 LLM 模块导出 — P3-0 / P3-A
  */
 
 export * from './llm-feature-gates';
@@ -11,3 +11,9 @@ export * from './llm-safe-logger';
 export * from './llm-secret-policy';
 export * from './real-llm-adapter-contract';
 export * from './real-llm-client.stub';
+
+// P3-A 新增导出
+export * from './target-llm-client';
+export * from './target-llm-stream-parser';
+export * from './target-llm-request-builder';
+export * from './deepseek-transport';

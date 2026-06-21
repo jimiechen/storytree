@@ -1,11 +1,16 @@
 /**
  * @file chat-debug/novel-debug-command-runner.ts
- * @description Chat Debug Command Runner — P2-A0 / P2-D
+ * @description Chat Debug Command Runner — P2-A0 / P2-D / P3-A
  *
  * P2-D 改造：chapter.generate / chapter.continue / info.extract 等核心命令
  * 不再走旧的 runMockGeneration 直接调用，而是通过 createNovelWorkflowEngine
  * 进入 YAML Workflow Engine，确保 Chat Debug 与 UI 使用统一执行路径。
  * rewrite / expand / polish / summarize 保持兼容行为。
+ *
+ * P3-A 扩展：
+ * - 显式 adapter=real-llm 时绕过 Workflow Engine，直接调用 RealLLMExecutionAdapter。
+ * - 支持 stream=true 流式事件回显。
+ * - 支持 dryRun=true 参数预览模式。
  */
 
 import type { NovelAgentAdapter } from '../adapters/novel-agent-adapter';
@@ -13,15 +18,20 @@ import { MockAgentAdapter } from '../adapters/mock-agent-adapter';
 import { createNovelWorkflowEngine } from '../workflows/engine/workflow-engine';
 import { parseNovelDebugCommand, getNovelDebugHelpText } from './novel-debug-command-parser';
 import { createNovelDebugLogStore } from './novel-debug-log-store';
+import { runRealLLMInDebug } from './novel-debug-llm-runner';
 import type {
   NovelDebugLogStore,
   NovelDebugRunResult,
   NovelDebugRunStatus,
 } from './novel-debug-log-types';
+import type { RealLLMExecutionAdapter } from '../adapters/real-llm-adapter';
+import type { NovelCommand } from '../workflows/novel-command';
 
 export interface NovelDebugRunnerOptions {
   logStore?: NovelDebugLogStore;
   adapter?: NovelAgentAdapter;
+  /** P3-A：真实 LLM adapter，未提供时 real-llm 命令返回配置错误 */
+  realLLMAdapter?: RealLLMExecutionAdapter;
 }
 
 const defaultAdapter = new MockAgentAdapter({ delayMultiplier: 0, silent: true });
@@ -104,6 +114,56 @@ export async function runNovelDebugCommand(
       events: [],
       errorCode: 'ADAPTER_DISABLED',
       message,
+    };
+  }
+
+  // P3-A：real-llm 绕过 Workflow Engine，直接走真实 LLM adapter
+  if (command.adapterKind === 'real-llm') {
+    const realLLMAdapter = options?.realLLMAdapter;
+    if (!realLLMAdapter) {
+      const message = 'real-llm adapter 未在 Chat Debug Runner 中配置';
+      const log = logStore.add({
+        id: createLogId(),
+        commandText,
+        command,
+        status: 'failed' as NovelDebugRunStatus,
+        startedAt: new Date(),
+        completedAt: new Date(),
+        events: [],
+        error: message,
+      });
+      return {
+        success: false,
+        logId: log.id,
+        command,
+        events: [],
+        errorCode: 'REAL_LLM_NOT_CONFIGURED',
+        message,
+      };
+    }
+
+    const context = buildAdapterContext(command);
+    const result = await runRealLLMInDebug(command, context, realLLMAdapter, {
+      stream: parseResult.stream,
+      dryRun: parseResult.dryRun,
+    });
+
+    const log = logStore.add({
+      id: result.logId,
+      commandText,
+      command,
+      status: result.success ? ('completed' as NovelDebugRunStatus) : ('failed' as NovelDebugRunStatus),
+      startedAt: new Date(),
+      completedAt: new Date(),
+      events: result.events,
+      llmEvents: result.llmEvents,
+      result: result.result,
+      error: result.success ? undefined : result.message,
+    });
+
+    return {
+      ...result,
+      logId: log.id,
     };
   }
 
@@ -212,4 +272,16 @@ export async function runNovelDebugCommand(
       message,
     };
   }
+}
+
+/**
+ * 从 NovelCommand 构造 AdapterContext。
+ */
+function buildAdapterContext(command: NovelCommand): import('../adapters/adapter-types').AdapterContext {
+  return {
+    projectId: command.projectId,
+    chapterId: command.chapterId,
+    genre: command.genre,
+    targetWordCount: command.targetWordCount,
+  };
 }

@@ -1,6 +1,6 @@
 /**
  * @file feature-gates.ts
- * @description NovelForge FeatureGate 默认值 — P2-E
+ * @description NovelForge FeatureGate 默认值 — P2-E / P3-A
  *
  * P2 阶段所有依赖真实外部服务的功能默认关闭，避免未实现功能伪装成功。
  * AdapterRouter 接收 AdapterFeatureGates；UI 组件通过 useFeatureGates 读取完整 Gate。
@@ -45,6 +45,7 @@ export interface NovelFeatureGates {
 export function createDefaultAdapterFeatureGates(): AdapterFeatureGates {
   return {
     realLLMEnabled: false,
+    targetLLMAdapterEnabled: false,
     openCodeAdapterEnabled: false,
     claudeCodeAdapterEnabled: false,
   };
