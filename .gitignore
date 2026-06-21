@@ -17,6 +17,8 @@ out/
 .env
 .env.local
 .env.*.local
+# Local LLM API key provided by user for manual testing; must never be committed
+docs/task-reports/2026-06-21/novel-deepseek-key.env
 
 # IDE
 .vscode/
