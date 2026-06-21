@@ -112,7 +112,7 @@
 | 2 | agent-responsibility-boundary.md | 已在工作空间文件首行声明角色与职责范围 | 0 |
 | 3 | code-file-limit.md | llm/ / adapters/ / scripts/ 下所有文件均 < 500 行 | 0 |
 | 4 | claude-code-migration-rules.md | 不涉及移植 | 0 |
-| 5 | github-workflow-rules.md | 已执行 Git 提交（4e7ddf07 / 1d62b0c6 / 5662a4ab） | 0 |
+| 5 | github-workflow-rules.md | 已执行 Git 提交（4e7ddf07 / 1d62b0c6 / 5662a4ab / c6d6419c / 66c99ddc / 3dd770af / 44148f69 / 6956fd42） | 0 |
 | 6 | Ralph.md | 测试通过后输出 READY_FOR_P3A_REAL_LLM_PILOT | 0 |
 | 7 | task-completion-report.md | 已生成 P3-0 阶段报告 | 0 |
 | 8 | secretary-agent-rules.md | 不适用 | 0 |
@@ -123,7 +123,7 @@
 1. model-auto-file.md: 已创建/更新 `workspaces/kimik27code/hellokimik27code.md`
 2. agent-responsibility-boundary.md: 工作空间文件首行已声明角色为前端工程师 / Novel 模块开发 Agent
 3. code-file-limit.md: `packages/app/src/novel/llm/llm-feature-gates.ts` 74 行等，符合 < 500 行限制
-4. github-workflow-rules.md: 已提交三笔 commit（`4e7ddf07` 代码 + `1d62b0c6` 报告回填 + `5662a4ab` 任务来源更新）
+4. github-workflow-rules.md: 已提交八笔 commit（`4e7ddf07` 代码 + `1d62b0c6`/`44148f69` 报告回填 + `5662a4ab`/`6956fd42` 任务来源更新 + `c6d6419c` 扣分档案更新 + `66c99ddc` 方案文档修正 + `3dd770af` 任务来源回填）
 5. Ralph.md: 已完成 typecheck、novel:precommit、全量 novel 测试验证后输出 [READY_FOR_P3A_REAL_LLM_PILOT]
 6. task-completion-report.md: 已生成 `docs/task-reports/2026-06-21/PHASE-P3-0-REAL-LLM-READINESS-REPORT-20260621.md`
 
