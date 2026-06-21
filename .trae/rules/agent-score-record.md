@@ -4,7 +4,7 @@
 
 ## 当前积分状态
 
-**Agent名称**: Multi-Agent (Kimi + MiniMax-M2 + Kimi-K2.7-Code)
+**Agent名称**: Multi-Agent (Kimi + MiniMax-M2 + Kimi-K2.7-Code + GLM-5.2)
 **当前积分**: 30/100
 **状态**: 🚨🚨 危险（最后一次机会）
 **最后更新**: 2026-06-21
@@ -190,6 +190,35 @@
 
 ---
 
+### 2026-06-21 扣分记录 (Session 12 - GLM-5.2)
+
+**任务**: Novel 模块代码评审（基础架构/调用链/数据流/安全/边界/代码质量）
+**本次扣分**: 0分
+**扣分后积分**: 30分
+
+| 序号 | 规则文件 | 实际执行 | 扣分 |
+|------|---------|---------|------|
+| 1 | model-auto-file.md | 已创建/更新 `workspaces/glm52/helloglm52.md` | 0 |
+| 2 | agent-responsibility-boundary.md | 已在工作空间文件首行声明角色与职责范围 | 0 |
+| 3 | code-file-limit.md | 评审文档 1143 行（文档豁免），无代码文件超限 | 0 |
+| 4 | claude-code-migration-rules.md | 不涉及移植 | 0 |
+| 5 | github-workflow-rules.md | 已执行 Git 提交（9526c423） | 0 |
+| 6 | Ralph.md | 评审任务无测试要求，已完成 4 路子代理验证 | 0 |
+| 7 | task-completion-report.md | 评审文档即报告，含完整 Exit Criteria 自评 | 0 |
+| 8 | secretary-agent-rules.md | 不适用 | 0 |
+| 9 | 测试执行检查 | 评审任务不涉及代码变更，无需测试 | 0 |
+| 10 | 文档完整性检查 | 评审文档含 9 维度 + 28 改进建议 + READY_FOR_REVIEW 标记 | 0 |
+
+**合规详情**:
+1. model-auto-file.md: 已创建 `workspaces/glm52/helloglm52.md` 并更新执行过程与 Exit Criteria
+2. agent-responsibility-boundary.md: 工作空间文件首行已声明角色为"GLM-5.2 代码评审 Agent"
+3. code-file-limit.md: 本次仅产出文档（1143 行），无代码文件变更
+4. github-workflow-rules.md: 已提交一笔 commit（`9526c423` docs(reviews): add Novel module code review report）
+5. Ralph.md: 评审任务通过 4 路子代理并行验证，确保分析全面性
+6. task-completion-report.md: 评审文档 `docs/reviews/2026-06-21/NOVEL-CODE-REVIEW-20260621.md` 即为任务报告
+
+---
+
 ### 2026-06-21 扣分记录 (Session 11 - Kimi-K2.7-Code)
 
 **任务**: Phase P3-A Real LLM Adapter Pilot 实现与汇报
@@ -365,6 +394,7 @@
 | 2026-06-21 | Kimi-K2.7-Code | Phase P2-E Adapter Router + Stub + Commit Governance 实现与汇报 | 0 | 30 |
 | 2026-06-21 | Kimi-K2.7-Code | Phase P3-0 Real LLM Readiness 实现与汇报 | 0 | 30 |
 | 2026-06-21 | Kimi-K2.7-Code | Phase P3-A Real LLM Adapter Pilot 实现与汇报 | 0 | 30 |
+| 2026-06-21 | GLM-5.2 | Novel 模块代码评审（9 维度全覆盖） | 0 | 30 |
 | 2026-06-21 | Kimi-K2.7-Code | Phase P3-B Real LLM UI Continue Integration 实施方案输出 | 0 | 30 |
 | 2026-06-21 | Kimi-K2.7-Code | Phase P3-B Real LLM UI Continue Integration 实施 | 0 | 30 |
 

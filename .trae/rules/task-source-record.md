@@ -108,6 +108,19 @@
      - `11f3425c` docs(novel): add Phase P2 Review plan and final acceptance baseline
      - `tbd` docs(novel): add Phase P2 Final Review report
 
+7. **Novel 模块代码评审（9 维度全覆盖）**
+   - 来源: 用户直接请求
+   - 任务ID: NOVEL-CODE-REVIEW-20260621
+   - 状态: ✅ 已完成
+   - 结论: `[READY_FOR_REVIEW]`（评审通过附条件，P0 问题须在 P3-B 启动前修复）
+   - 评审文档: `docs/reviews/2026-06-21/NOVEL-CODE-REVIEW-20260621.md`
+   - 工作空间记录: `workspaces/glm52/helloglm52.md`
+   - 关键提交:
+     - `9526c423` docs(reviews): add Novel module code review report for Phase P3-A
+   - 评审范围: 基础架构/模块依赖/调用链/数据流/通讯方式/状态管理/安全/边界/代码质量
+   - 发现问题: 2 高风险 + 5 中风险 + 4 低风险
+   - 改进建议: 28 条（P0-P3 优先级分级）
+
 ### 2026-05-15 完成任务
 
 1. **Phase 0 前置工作清单准备**
