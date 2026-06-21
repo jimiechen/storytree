@@ -71,6 +71,36 @@
 
 ---
 
+### 2026-06-21 扣分记录 (Session 9 - Kimi-K2.7-Code)
+
+**任务**: Phase P2-E Adapter Router + Stub + Commit Governance 实现与汇报
+**本次扣分**: 0分
+**扣分后积分**: 30分
+
+| 序号 | 规则文件 | 实际执行 | 扣分 |
+|------|---------|---------|------|
+| 1 | model-auto-file.md | 已创建/更新 `workspaces/kimik27code/hellokimik27code.md` | 0 |
+| 2 | agent-responsibility-boundary.md | 已在工作空间文件首行声明角色与职责范围 | 0 |
+| 3 | code-file-limit.md | adapters/ / plugins/ / hooks/ 下所有文件均 < 500 行 | 0 |
+| 4 | claude-code-migration-rules.md | 不涉及移植 | 0 |
+| 5 | github-workflow-rules.md | 已执行 Git 提交（7bc5211c / 81b0773e） | 0 |
+| 6 | Ralph.md | 测试通过后输出 READY_FOR_PHASE_P2_REVIEW | 0 |
+| 7 | task-completion-report.md | 已生成 P2-E 阶段报告 | 0 |
+| 8 | secretary-agent-rules.md | 不适用 | 0 |
+| 9 | 测试执行检查 | bun typecheck 0 errors + bun test src/novel 260 pass / 0 fail | 0 |
+| 10 | 文档完整性检查 | 报告含 Exit Criteria 和 READY_FOR_PHASE_P2_REVIEW 标记 | 0 |
+
+**合规详情**:
+1. model-auto-file.md: 已创建/更新 `workspaces/kimik27code/hellokimik27code.md`
+2. agent-responsibility-boundary.md: 工作空间文件首行已声明角色为前端工程师 / Novel 模块开发 Agent
+3. code-file-limit.md: `packages/app/src/novel/adapters/adapter-router.ts` 90 行等，符合 < 500 行限制
+4. github-workflow-rules.md: 已提交两笔 commit（`7bc5211c` 代码 + `81b0773e` 报告回填）
+5. Ralph.md: 已完成 typecheck、novel:precommit、全量 novel 测试验证后输出 [READY_FOR_PHASE_P2_REVIEW]
+6. task-completion-report.md: 已生成 `docs/task-reports/2026-06-21/PHASE-P2-E-ADAPTER-ROUTER-STUB-COMMIT-GOVERNANCE-REPORT-20260621.md`
+
+---
+
+## 历史扣分汇总
 ### 2026-06-20 扣分记录 (Session 6 - Kimi-K2.7-Code)
 
 **任务**: Phase P2-A Workspace-aware YAML Workflow Engine 验收与汇报
@@ -213,6 +243,7 @@
 | 2026-06-20 | Kimi-K2.7-Code | Phase P2-A Workspace-aware YAML Workflow Engine 验收与汇报 | 0 | 30 |
 | 2026-06-21 | Kimi-K2.7-Code | Phase P2-B Plugin Tool Registry 实现与汇报 | 0 | 30 |
 | 2026-06-21 | Kimi-K2.7-Code | Phase P2-C Info-Theory Audit Tool 验收与汇报 | 0 | 30 |
+| 2026-06-21 | Kimi-K2.7-Code | Phase P2-E Adapter Router + Stub + Commit Governance 实现与汇报 | 0 | 30 |
 
 ## 积分状态说明
 
