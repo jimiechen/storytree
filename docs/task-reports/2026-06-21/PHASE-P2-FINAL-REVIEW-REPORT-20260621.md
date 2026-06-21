@@ -137,7 +137,7 @@
 | `81b0773e` | docs(novel): update Phase P2-E report with commit hash | P2-E 报告回填 |
 | `762e837a` | docs(rules): update agent score record for Phase P2-E | 扣分档案更新 |
 | `11f3425c` | docs(novel): add Phase P2 Review plan and final acceptance baseline | P2 Review 方案与验收基准 |
-| `tbd` | docs(novel): add Phase P2 Final Review report | 本报告（待提交） |
+| `f9d4d102` | docs(novel): add Phase P2 Final Review report and acceptance conclusion | 本报告 |
 
 ## 8. 阶段切换
 
