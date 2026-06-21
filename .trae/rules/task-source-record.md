@@ -65,6 +65,7 @@
      - `92db2690` feat(P3-A): add real llm adapter pilot with streaming echo
      - `988254c8` docs(P3-A): add Phase P3-A implementation report
      - `e0a80e72` docs(rules): update task source and score records for Phase P3-A
+     - `55f9e11b` docs(P3-A): fill commit hashes in report and rules records
 
 3. **Phase P2 总体验收**
    - 来源: `caiode/docs/tabbit/06/P3P4P5阶段目标.md#L882-892`
