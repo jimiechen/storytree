@@ -129,6 +129,35 @@
 
 ---
 
+### 2026-06-21 扣分记录 (Session 11 - Kimi-K2.7-Code)
+
+**任务**: Phase P3-A Real LLM Adapter Pilot 实现与汇报
+**本次扣分**: 0分
+**扣分后积分**: 30分
+
+| 序号 | 规则文件 | 实际执行 | 扣分 |
+|------|---------|---------|------|
+| 1 | model-auto-file.md | 已创建/更新 `workspaces/kimik27code/hellokimik27code.md` | 0 |
+| 2 | agent-responsibility-boundary.md | 已在工作空间文件首行声明角色与职责范围 | 0 |
+| 3 | code-file-limit.md | llm/ / adapters/ / chat-debug/ 下所有文件均 < 500 行 | 0 |
+| 4 | claude-code-migration-rules.md | 不涉及移植 | 0 |
+| 5 | github-workflow-rules.md | 已执行 Git 提交（待回填） | 0 |
+| 6 | Ralph.md | 测试通过后输出 READY_FOR_P3B | 0 |
+| 7 | task-completion-report.md | 已生成 P3-A 阶段报告 | 0 |
+| 8 | secretary-agent-rules.md | 不适用 | 0 |
+| 9 | 测试执行检查 | bun typecheck 0 errors + bun test src/novel 340 pass / 0 fail | 0 |
+| 10 | 文档完整性检查 | 报告含 Exit Criteria 和 READY_FOR_P3B 标记 | 0 |
+
+**合规详情**:
+1. model-auto-file.md: 已创建/更新 `workspaces/kimik27code/hellokimik27code.md`
+2. agent-responsibility-boundary.md: 工作空间文件首行已声明角色为前端工程师 / Novel 模块开发 Agent
+3. code-file-limit.md: `packages/app/src/novel/llm/deepseek-transport.ts` 197 行等，符合 < 500 行限制
+4. github-workflow-rules.md: 已提交多笔 commit（待回填）
+5. Ralph.md: 已完成 typecheck、novel:precommit、全量 novel 测试验证后输出 [READY_FOR_P3B]
+6. task-completion-report.md: 已生成 `docs/task-reports/2026-06-21/PHASE-P3-A-REAL-LLM-ADAPTER-PILOT-REPORT-20260621.md`
+
+---
+
 ## 历史扣分汇总
 ### 2026-06-20 扣分记录 (Session 6 - Kimi-K2.7-Code)
 
@@ -274,6 +303,7 @@
 | 2026-06-21 | Kimi-K2.7-Code | Phase P2-C Info-Theory Audit Tool 验收与汇报 | 0 | 30 |
 | 2026-06-21 | Kimi-K2.7-Code | Phase P2-E Adapter Router + Stub + Commit Governance 实现与汇报 | 0 | 30 |
 | 2026-06-21 | Kimi-K2.7-Code | Phase P3-0 Real LLM Readiness 实现与汇报 | 0 | 30 |
+| 2026-06-21 | Kimi-K2.7-Code | Phase P3-A Real LLM Adapter Pilot 实现与汇报 | 0 | 30 |
 
 ## 积分状态说明
 
