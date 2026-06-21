@@ -102,4 +102,35 @@ describe('NovelDebugCommandRunner', () => {
     expect(log!.status).toBe('completed');
     expect(log!.completedAt).toBeInstanceOf(Date);
   });
+
+  it('returns ADAPTER_DISABLED for opencode-stub without running engine', async () => {
+    const result = await runNovelDebugCommand(
+      '/novel run chapter.generate projectId=proj-1 chapterId=chapter-1 adapter=opencode-stub',
+      { logStore: store, adapter: testAdapter },
+    );
+
+    expect(result.success).toBe(false);
+    expect(result.errorCode).toBe('ADAPTER_DISABLED');
+    expect(result.command?.adapterKind).toBe('opencode-stub');
+  });
+
+  it('returns ADAPTER_DISABLED for claudecode-stub without running engine', async () => {
+    const result = await runNovelDebugCommand(
+      '/novel run chapter.generate projectId=proj-1 chapterId=chapter-1 adapter=claudecode-stub',
+      { logStore: store, adapter: testAdapter },
+    );
+
+    expect(result.success).toBe(false);
+    expect(result.errorCode).toBe('ADAPTER_DISABLED');
+  });
+
+  it('runs chapter.generate with adapter=mock', async () => {
+    const result = await runNovelDebugCommand(
+      '/novel run chapter.generate projectId=proj-1 chapterId=chapter-1 adapter=mock dryRun=true',
+      { logStore: store, adapter: testAdapter },
+    );
+
+    expect(result.success).toBe(true);
+    expect(result.command?.adapterKind).toBe('mock');
+  });
 });

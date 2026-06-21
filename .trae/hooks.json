@@ -1,0 +1,52 @@
+{
+  "version": 1,
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bun scripts/trae-hooks/session-start-context.ts",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "RunCommand",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bun scripts/trae-hooks/pretool-guard.ts",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bun scripts/trae-hooks/posttool-novel-review.ts",
+            "timeout": 20
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "loop_limit": 3,
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bun scripts/trae-hooks/stop-acceptance.ts",
+            "timeout": 180
+          }
+        ]
+      }
+    ]
+  }
+}

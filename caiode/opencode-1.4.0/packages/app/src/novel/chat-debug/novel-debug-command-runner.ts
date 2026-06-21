@@ -82,6 +82,31 @@ export async function runNovelDebugCommand(
   }
 
   const command = parseResult.command!;
+
+  // P2-E：Chat Debug 可显式指定 adapter 做路由边界验证，
+  // opencode-stub / claudecode-stub 默认被 FeatureGate 关闭，直接返回结构化错误，不进入 Engine。
+  if (command.adapterKind === 'opencode-stub' || command.adapterKind === 'claudecode-stub') {
+    const message = `Adapter "${command.adapterKind}" 已被 FeatureGate 关闭（ADAPTER_DISABLED）`;
+    const log = logStore.add({
+      id: createLogId(),
+      commandText,
+      command,
+      status: 'failed' as NovelDebugRunStatus,
+      startedAt: new Date(),
+      completedAt: new Date(),
+      events: [],
+      error: message,
+    });
+    return {
+      success: false,
+      logId: log.id,
+      command,
+      events: [],
+      errorCode: 'ADAPTER_DISABLED',
+      message,
+    };
+  }
+
   const log = logStore.add({
     id: createLogId(),
     commandText,

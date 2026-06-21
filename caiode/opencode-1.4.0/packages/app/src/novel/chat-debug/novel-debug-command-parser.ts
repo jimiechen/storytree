@@ -6,6 +6,7 @@
 import type { NovelCommand } from '../workflows/novel-command';
 import type { AIWritingCommand } from '../types/editor';
 import type { NovelDebugParseResult } from './novel-debug-log-types';
+import type { AdapterKind } from '../adapters/adapter-types';
 
 type DebugCommandType =
   | 'chapter.generate'
@@ -118,6 +119,7 @@ function buildNovelCommand(
   const targetWordCount = parseNumber(params.targetWordCount);
   const selectedText = params.selectedText;
   const text = selectedText || params.text || '';
+  const adapterKind = parseAdapterKind(params.adapter);
 
   const base = {
     projectId,
@@ -127,6 +129,7 @@ function buildNovelCommand(
     text,
     selectedText,
     targetWordCount,
+    adapterKind,
     createdAt: new Date(),
   };
 
@@ -169,6 +172,13 @@ function parseNumber(value: string | undefined): number | undefined {
   return parsed;
 }
 
+function parseAdapterKind(value: string | undefined): AdapterKind | undefined {
+  if (value === 'mock' || value === 'opencode-stub' || value === 'claudecode-stub') {
+    return value;
+  }
+  return undefined;
+}
+
 /**
  * 返回帮助文本。
  */
@@ -178,14 +188,14 @@ export function getNovelDebugHelpText(): string {
     '',
     'Usage:',
     '  /novel help',
-    '  /novel run chapter.generate projectId=<id> chapterId=<id> [genre=<genre>] [targetWordCount=<n>] [dryRun=true]',
-    '  /novel run chapter.continue projectId=<id> chapterId=<id> [selectedText=<text>] [dryRun=true]',
-    '  /novel run chapter.rewrite projectId=<id> chapterId=<id> [selectedText=<text>] [dryRun=true]',
-    '  /novel run chapter.expand projectId=<id> chapterId=<id> [selectedText=<text>] [dryRun=true]',
-    '  /novel run chapter.polish projectId=<id> chapterId=<id> [selectedText=<text>] [dryRun=true]',
-    '  /novel run chapter.summarize projectId=<id> chapterId=<id> [dryRun=true]',
-    '  /novel run info.extract projectId=<id> chapterId=<id> [dryRun=true]',
+    '  /novel run chapter.generate projectId=<id> chapterId=<id> [genre=<genre>] [targetWordCount=<n>] [adapter=mock|opencode-stub|claudecode-stub]',
+    '  /novel run chapter.continue projectId=<id> chapterId=<id> [selectedText=<text>] [adapter=mock|opencode-stub|claudecode-stub]',
+    '  /novel run chapter.rewrite projectId=<id> chapterId=<id> [selectedText=<text>] [adapter=mock|opencode-stub|claudecode-stub]',
+    '  /novel run chapter.expand projectId=<id> chapterId=<id> [selectedText=<text>] [adapter=mock|opencode-stub|claudecode-stub]',
+    '  /novel run chapter.polish projectId=<id> chapterId=<id> [selectedText=<text>] [adapter=mock|opencode-stub|claudecode-stub]',
+    '  /novel run chapter.summarize projectId=<id> chapterId=<id> [adapter=mock|opencode-stub|claudecode-stub]',
+    '  /novel run info.extract projectId=<id> chapterId=<id> [adapter=mock|opencode-stub|claudecode-stub]',
     '',
-    'Note: dryRun is always true in P2-A0; real LLM adapters are disabled.',
+    'Note: opencode-stub / claudecode-stub are disabled in P2-E; they return ADAPTER_DISABLED.',
   ].join('\n');
 }

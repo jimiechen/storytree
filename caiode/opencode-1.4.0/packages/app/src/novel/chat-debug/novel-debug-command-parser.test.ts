@@ -80,4 +80,28 @@ describe('NovelDebugCommandParser', () => {
     expect(result.success).toBe(true);
     expect(result.command!.selectedText).toBe('他推开门');
   });
+
+  it('parses adapter parameter for opencode-stub', () => {
+    const result = parseNovelDebugCommand(
+      '/novel run chapter.generate projectId=proj-1 chapterId=chapter-1 adapter=opencode-stub',
+    );
+    expect(result.success).toBe(true);
+    expect(result.command!.adapterKind).toBe('opencode-stub');
+  });
+
+  it('parses adapter parameter for claudecode-stub', () => {
+    const result = parseNovelDebugCommand(
+      '/novel run chapter.generate projectId=proj-1 chapterId=chapter-1 adapter=claudecode-stub',
+    );
+    expect(result.success).toBe(true);
+    expect(result.command!.adapterKind).toBe('claudecode-stub');
+  });
+
+  it('ignores invalid adapter parameter', () => {
+    const result = parseNovelDebugCommand(
+      '/novel run chapter.generate projectId=proj-1 chapterId=chapter-1 adapter=real-llm',
+    );
+    expect(result.success).toBe(true);
+    expect(result.command!.adapterKind).toBeUndefined();
+  });
 });

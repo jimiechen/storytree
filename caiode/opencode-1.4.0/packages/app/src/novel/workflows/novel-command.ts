@@ -6,6 +6,7 @@
  */
 
 import type { AIWritingCommand } from '../types/editor';
+import type { AdapterKind } from '../adapters/adapter-types';
 
 // ─── 命令类型枚举 ───────────────────────────────────────────────────────
 
@@ -57,6 +58,12 @@ export interface NovelCommand {
   modelProfileId?: string;
   skillId?: string;
   workflowId?: string;
+
+  /**
+   * P2-E 扩展：Chat Debug 可显式指定 adapter。
+   * 仅用于调试路由边界；P2 阶段 opencode-stub / claudecode-stub 默认被 FeatureGate 关闭。
+   */
+  adapterKind?: AdapterKind;
 }
 
 // ─── 工厂函数 ───────────────────────────────────────────────────────────

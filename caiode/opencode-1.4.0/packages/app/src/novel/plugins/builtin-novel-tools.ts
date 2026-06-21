@@ -11,6 +11,7 @@ import { createContextAssembleTool } from './core-writing-tools/context-assemble
 import { createBuildWorkflowEventsTool } from './core-writing-tools/build-workflow-events.tool';
 import { createInfoExtractPlaceholderTool } from './core-info-theory-tools/info-extract-placeholder.tool';
 import { createInfoTheoryAuditTool } from './core-info-theory-tools/info-theory-audit.tool';
+import { createAgentRunTool } from './core-writing-tools/agent-run.tool';
 
 export const builtinNovelToolPlugin: NovelToolPlugin = {
   id: 'novelforge-core-tools',
@@ -22,6 +23,7 @@ export const builtinNovelToolPlugin: NovelToolPlugin = {
     createBuildWorkflowEventsTool(),
     createInfoExtractPlaceholderTool(),
     createInfoTheoryAuditTool(),
+    createAgentRunTool(),
   ],
 };
 
@@ -34,5 +36,6 @@ export function createBuiltinNovelToolRegistry(
   registry.register(createBuildWorkflowEventsTool());
   registry.register(createInfoExtractPlaceholderTool());
   registry.register(createInfoTheoryAuditTool());
+  registry.register(createAgentRunTool());
   return registry;
 }
