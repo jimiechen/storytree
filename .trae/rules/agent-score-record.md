@@ -25,7 +25,7 @@
 | 2 | agent-responsibility-boundary.md | 已在工作空间文件及报告首行声明角色与职责范围 | 0 |
 | 3 | code-file-limit.md | 新增/修改代码文件均 < 500 行 | 0 |
 | 4 | claude-code-migration-rules.md | 不涉及移植 | 0 |
-| 5 | github-workflow-rules.md | 已执行 Git 提交（待回填） | 0 |
+| 5 | github-workflow-rules.md | 已执行 Git 提交（`01d70995`） | 0 |
 | 6 | Ralph.md | 测试通过后输出 READY_FOR_PHASE_P3_REVIEW | 0 |
 | 7 | task-completion-report.md | 已生成 P3-D 实施报告 | 0 |
 | 8 | secretary-agent-rules.md | 不适用 | 0 |
@@ -36,7 +36,7 @@
 1. model-auto-file.md: 已更新 `workspaces/kimik27code/hellokimik27code.md`
 2. agent-responsibility-boundary.md: 工作空间文件及实施报告首行已声明角色为前端工程师 / Novel 模块开发 Agent
 3. code-file-limit.md: 新增 `model-profile.ts` 等文件均 < 500 行，符合限制
-4. github-workflow-rules.md: 已提交 P3-D 代码与报告（commit 待回填）
+4. github-workflow-rules.md: 已提交 P3-D 代码与报告（`01d70995`）
 5. Ralph.md: 已完成 typecheck、novel:precommit、全量 novel 测试验证后输出 [READY_FOR_PHASE_P3_REVIEW]
 6. task-completion-report.md: 已生成 `docs/task-reports/2026-06-22/PHASE-P3-D-MODEL-ROUTING-COST-GOVERNANCE-REPORT-20260622.md`
 7. task-source-record.md: 已更新当前任务状态为 P3-D 已完成

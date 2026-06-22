@@ -119,7 +119,9 @@
    - 实施报告: `docs/task-reports/2026-06-22/PHASE-P3-D-MODEL-ROUTING-COST-GOVERNANCE-REPORT-20260622.md`
    - 验证结果: `bun typecheck` 0 errors，`bun test src/novel` 424 pass / 0 fail / 2 skip，`bun run novel:precommit` PASSED
    - 关键提交:
-     - `7b255efb` docs(P3-D): add Phase P3-D model routing and cost governance plan
+    - `7b255efb` docs(P3-D): add Phase P3-D model routing and cost governance plan
+    - `22d18e55` docs(rules): fill Phase P3-D plan commit hash in task source record
+    - `01d70995` feat(P3-D): implement model routing and cost governance
 
 5. **Phase P2 总体验收**
    - 来源: `caiode/docs/tabbit/06/P3P4P5阶段目标.md#L882-892`

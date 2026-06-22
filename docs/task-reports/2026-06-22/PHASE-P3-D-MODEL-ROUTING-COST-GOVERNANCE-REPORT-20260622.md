@@ -71,9 +71,9 @@
 
 ## 五、Git 提交
 
-- **Commit Hash**: 待回填
-- **Commit Message**: 待回填
-- **分支**: 当前工作分支
+- **Commit Hash**: `01d70995`
+- **Commit Message**: `feat(P3-D): implement model routing and cost governance`
+- **分支**: `main`
 
 ## 六、遇到的问题与修复
 
