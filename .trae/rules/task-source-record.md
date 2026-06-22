@@ -110,6 +110,14 @@
    - 实施报告: `docs/task-reports/2026-06-21/PHASE-P3-C-REAL-LLM-CHAPTER-GENERATION-REPORT-20260621.md`
    - 验证结果: `bun typecheck` 0 errors，`bun test src/novel` 390 pass / 0 fail，`bun run novel:precommit` PASSED（含真实 DeepSeek 调用）
 
+8. **Phase P3-D Model Routing + Cost Governance 实施方案输出**
+   - 来源: `caiode/docs/tabbit/06/P3P4P5阶段目标.md`
+   - 任务ID: P3-D-MODEL-ROUTING-COST-GOVERNANCE-PLAN-20260622
+   - 状态: ✅ 方案已输出，待评审
+   - 结论: `[P3D_PLAN_OUTPUT_READY_FOR_REVIEW]` / `[READY_FOR_P3D_IMPLEMENTATION]`
+   - 方案文档: `docs/task-reports/2026-06-22/PHASE-P3-D-MODEL-ROUTING-COST-GOVERNANCE-PLAN-20260622.md`
+   - 关键提交: `tbd`
+
 5. **Phase P2 总体验收**
    - 来源: `caiode/docs/tabbit/06/P3P4P5阶段目标.md#L882-892`
    - 任务ID: REVIEW-P2-20260621
