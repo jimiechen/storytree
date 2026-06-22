@@ -105,7 +105,7 @@
    - 结论: `[READY_FOR_P3D_MODEL_ROUTING_AND_COST_GOVERNANCE]`
    - 关键提交:
      - `dfdd88c9` feat(novel): P3-C real LLM chapter generation with context budget and retry
-     - `TBD_DOCS_COMMIT` docs(novel): add Phase P3-C implementation report and records
+     - `2b1ddf70` docs(novel): add Phase P3-C implementation report and records
    - 实施报告: `docs/task-reports/2026-06-21/PHASE-P3-C-REAL-LLM-CHAPTER-GENERATION-REPORT-20260621.md`
    - 验证结果: `bun typecheck` 0 errors，`bun test src/novel` 390 pass / 0 fail，`bun run novel:precommit` PASSED（含真实 DeepSeek 调用）
 

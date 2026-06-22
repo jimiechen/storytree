@@ -80,7 +80,7 @@
 | 类型 | Commit | 说明 |
 |------|--------|------|
 | 代码 | `dfdd88c9` | feat(novel): P3-C real LLM chapter generation with context budget and retry |
-| 文档 | `TBD_DOCS_COMMIT` | docs(novel): add Phase P3-C implementation report and records |
+| 文档 | `2b1ddf70` | docs(novel): add Phase P3-C implementation report and records |
 
 ## 6. 阶段完成标记
 
