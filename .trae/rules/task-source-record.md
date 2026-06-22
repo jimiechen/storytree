@@ -6,8 +6,8 @@
 
 **最后更新时间**: 2026-06-22
 **当前任务来源**: `caiode/docs/tabbit/06/P3P4P5阶段目标.md#L356-385`
-**当前阶段**: Phase P3-C Real LLM Chapter Generation 实施中
-**下一步**: 完成代码修改、真实 LLM 集成测试验证与 Git 提交
+**当前阶段**: Phase P3-C Real LLM Chapter Generation 已完成
+**下一步**: Phase P3-D Model Routing + Cost Governance
 
 ---
 
@@ -97,6 +97,17 @@
    - 方案文档: `docs/task-reports/2026-06-21/PHASE-P3-C-REAL-LLM-CHAPTER-GENERATION-PLAN-20260621.md`
    - 关键提交:
      - `d337dee5` docs(novel): add Phase P3-C real LLM chapter generation plan
+
+7. **Phase P3-C Real LLM Chapter Generation 实施**
+   - 来源: `caiode/docs/tabbit/06/P3P4P5阶段目标.md#L356-385`
+   - 任务ID: P3-C-REAL-LLM-CHAPTER-GENERATION-IMPLEMENTATION-20260621
+   - 状态: ✅ 已完成
+   - 结论: `[READY_FOR_P3D_MODEL_ROUTING_AND_COST_GOVERNANCE]`
+   - 关键提交:
+     - `dfdd88c9` feat(novel): P3-C real LLM chapter generation with context budget and retry
+     - `TBD_DOCS_COMMIT` docs(novel): add Phase P3-C implementation report and records
+   - 实施报告: `docs/task-reports/2026-06-21/PHASE-P3-C-REAL-LLM-CHAPTER-GENERATION-REPORT-20260621.md`
+   - 验证结果: `bun typecheck` 0 errors，`bun test src/novel` 390 pass / 0 fail，`bun run novel:precommit` PASSED（含真实 DeepSeek 调用）
 
 5. **Phase P2 总体验收**
    - 来源: `caiode/docs/tabbit/06/P3P4P5阶段目标.md#L882-892`
