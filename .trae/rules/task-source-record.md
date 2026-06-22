@@ -116,7 +116,8 @@
    - 状态: ✅ 方案已输出，待评审
    - 结论: `[P3D_PLAN_OUTPUT_READY_FOR_REVIEW]` / `[READY_FOR_P3D_IMPLEMENTATION]`
    - 方案文档: `docs/task-reports/2026-06-22/PHASE-P3-D-MODEL-ROUTING-COST-GOVERNANCE-PLAN-20260622.md`
-   - 关键提交: `tbd`
+   - 关键提交:
+     - `7b255efb` docs(P3-D): add Phase P3-D model routing and cost governance plan
 
 5. **Phase P2 总体验收**
    - 来源: `caiode/docs/tabbit/06/P3P4P5阶段目标.md#L882-892`
