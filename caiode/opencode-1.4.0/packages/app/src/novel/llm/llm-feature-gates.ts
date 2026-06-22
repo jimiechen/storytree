@@ -17,6 +17,9 @@ import type { LLMErrorCode } from './llm-error-types';
  * - llmRequestLogEnabled：是否允许记录请求元数据，默认 true（只记录脱敏信息）。
  * - llmCostTrackingEnabled：是否启用费用追踪，默认 false。
  * - llmSafePromptLoggingEnabled：是否允许记录完整 prompt，默认 false（不允许）。
+ * - modelRoutingEnabled：是否启用多模型路由，默认 false（P3-D）。
+ * - llmFallbackToMockEnabled：真实失败是否允许回退 mock，默认 false（P3-D）。
+ * - modelSelectionUIEnabled：是否显示模型选择面板，默认 false（P3-D）。
  */
 export interface RealLLMFeatureGates {
   realLLMEnabled: boolean;
@@ -25,6 +28,9 @@ export interface RealLLMFeatureGates {
   llmRequestLogEnabled: boolean;
   llmCostTrackingEnabled: boolean;
   llmSafePromptLoggingEnabled: boolean;
+  modelRoutingEnabled: boolean;
+  llmFallbackToMockEnabled: boolean;
+  modelSelectionUIEnabled: boolean;
 }
 
 /**
@@ -38,6 +44,9 @@ export function createDefaultRealLLMFeatureGates(): RealLLMFeatureGates {
     llmRequestLogEnabled: true,
     llmCostTrackingEnabled: false,
     llmSafePromptLoggingEnabled: false,
+    modelRoutingEnabled: false,
+    llmFallbackToMockEnabled: false,
+    modelSelectionUIEnabled: false,
   };
 }
 

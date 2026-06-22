@@ -18,6 +18,7 @@ import type { AIWritingCommand } from '../../types/editor';
 import type { WorkflowMutations } from '../../workflows/workflow-events';
 import type { ChapterInformationState } from '../../types/information-flow';
 import type { GenerationIssue } from '../../llm/generation-result-validator';
+import type { AITaskCostEstimate, NovelAgentResult } from '../../types/ai-task';
 
 /**
  * 创建 NovelEditor 内的 WorkflowMutations。
@@ -50,6 +51,26 @@ function createEditorMutations(chapters: ReturnType<typeof useNovelChapters>): W
   };
 }
 
+/**
+ * P3-D：将 NovelAgentResult 中的模型策略与 fallback 信息同步到 UI 信号。
+ */
+function applyModelMetadataFromResult(
+  result: NovelAgentResult,
+  setters: {
+    setModelProfileId: (v: string | undefined) => void;
+    setModelId: (v: string | undefined) => void;
+    setEstimatedCost: (v: AITaskCostEstimate | undefined) => void;
+    setFallback: (v: boolean | undefined) => void;
+    setOriginalErrorCode: (v: string | undefined) => void;
+  },
+): void {
+  setters.setModelProfileId(result.metadata?.modelProfileId);
+  setters.setModelId(result.metadata?.modelId);
+  setters.setEstimatedCost(result.metadata?.estimatedCost as AITaskCostEstimate | undefined);
+  setters.setFallback(result.fallback);
+  setters.setOriginalErrorCode(result.originalErrorCode);
+}
+
 export function NovelEditor() {
   const nav = useNovelNavigation();
   const { project } = useNovelProject();
@@ -71,6 +92,12 @@ export function NovelEditor() {
   // P3-C：保存当前 workflow 结果的校验信息，用于 AIResultCard 展示
   const [validationIssues, setValidationIssues] = createSignal<GenerationIssue[] | undefined>(undefined);
   const [wasTrimmed, setWasTrimmed] = createSignal<boolean | undefined>(undefined);
+  // P3-D：保存当前 workflow 结果的模型策略与 fallback 信息，用于 AIResultCard 展示
+  const [modelProfileId, setModelProfileId] = createSignal<string | undefined>(undefined);
+  const [modelId, setModelId] = createSignal<string | undefined>(undefined);
+  const [estimatedCost, setEstimatedCost] = createSignal<AITaskCostEstimate | undefined>(undefined);
+  const [fallback, setFallback] = createSignal<boolean | undefined>(undefined);
+  const [originalErrorCode, setOriginalErrorCode] = createSignal<string | undefined>(undefined);
 
   const currentProjectId = () => nav.projectId() ?? 'proj-001';
 
@@ -138,6 +165,14 @@ export function NovelEditor() {
       // P3-C：保存校验信息供 AIResultCard 展示
       setValidationIssues(result.validationIssues);
       setWasTrimmed(result.wasTrimmed);
+      // P3-D：保存模型策略与 fallback 信息供 AIResultCard 展示
+      applyModelMetadataFromResult(result, {
+        setModelProfileId,
+        setModelId,
+        setEstimatedCost,
+        setFallback,
+        setOriginalErrorCode,
+      });
       // 将生成结果同步到本地编辑器，避免 EditorCanvas 因只按 chapterId 重置而错过更新
       if (result.text) {
         setLocalContent(result.text);
@@ -174,6 +209,14 @@ export function NovelEditor() {
       // P3-C：保存校验信息供 AIResultCard 展示
       setValidationIssues(result.validationIssues);
       setWasTrimmed(result.wasTrimmed);
+      // P3-D：保存模型策略与 fallback 信息供 AIResultCard 展示
+      applyModelMetadataFromResult(result, {
+        setModelProfileId,
+        setModelId,
+        setEstimatedCost,
+        setFallback,
+        setOriginalErrorCode,
+      });
       if (result.text) {
         setLocalContent(result.text);
         editor.setContent(result.text);
@@ -288,6 +331,11 @@ export function NovelEditor() {
                               onDiscard={() => {}}
                               validationIssues={isLast() ? validationIssues() : undefined}
                               wasTrimmed={isLast() ? wasTrimmed() : undefined}
+                              modelProfileId={isLast() ? modelProfileId() : undefined}
+                              modelId={isLast() ? modelId() : undefined}
+                              estimatedCost={isLast() ? estimatedCost() : undefined}
+                              fallback={isLast() ? fallback() : undefined}
+                              originalErrorCode={isLast() ? originalErrorCode() : undefined}
                             />
                           );
                         }}

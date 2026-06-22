@@ -86,6 +86,10 @@ export class FakeAgentProvider implements INovelAgentProvider {
     } else {
       task.status = 'completed';
       task.output = this.generateMockOutput(task);
+      // P3-D：模拟模型策略与成本元数据，供 UI 展示
+      task.modelProfileId = 'mock-default';
+      task.modelId = 'mock';
+      task.estimatedCost = { promptCost: 0, completionCost: 0, totalCost: 0, currency: 'CNY-CENT' };
     }
 
     task.completedAt = new Date();

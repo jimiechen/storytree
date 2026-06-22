@@ -29,6 +29,9 @@ export interface AdapterContext {
 
   modelProfileId?: string;
   modelRole?: 'draft' | 'rewrite' | 'audit' | 'outline' | 'summary' | 'critic';
+  /** P3-D：fallback 后标记原始错误码，供 UI 提示 */
+  fallback?: boolean;
+  originalErrorCode?: string;
 
   targetWordCount?: number;
   selectedText?: string;
@@ -113,4 +116,6 @@ export interface AdapterFeatureGates {
   targetLLMAdapterEnabled: boolean;
   openCodeAdapterEnabled: boolean;
   claudeCodeAdapterEnabled: boolean;
+  /** P3-D：是否启用模型路由（未指定 adapter 时优先尝试 real-llm） */
+  modelRoutingEnabled: boolean;
 }

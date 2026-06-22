@@ -37,6 +37,9 @@ import { createTargetLLMClient } from '../../llm/target-llm-client';
 import type { LLMStreamEvent } from '../../llm/llm-stream-events';
 import { collectLLMText } from '../../llm/llm-stream-events';
 import { validateGenerationResult } from '../../llm/generation-result-validator';
+import type { ModelProfileRegistry } from '../../llm/model-profile-registry';
+import type { UsageTracker } from '../../llm/usage-tracker';
+import type { ModelProfile } from '../../llm/model-profile';
 import type { NovelTool, ToolContext, ToolResult } from '../novel-tool-types';
 
 function isAdapterRouterError(
@@ -57,11 +60,16 @@ function isAdapterRouterError(
  * P3-B 新增透传：
  * - stream：是否请求流式事件；RealLLMExecutionAdapter 据此决定调用 executeStream 还是 execute。
  * - targetWordCount / selectedText：供 prompt builder 构建更精确的续写请求。
+ * - modelProfileId / modelRole：P3-D 模型路由参数。
  */
 function buildAdapterContext(
   command: NovelCommand,
   context: ToolContext,
-  stream?: boolean,
+  overrides?: {
+    stream?: boolean;
+    modelProfileId?: string;
+    modelRole?: AdapterContext['modelRole'];
+  },
 ): AdapterContext {
   return {
     workspaceId: context.workspaceId,
@@ -69,12 +77,13 @@ function buildAdapterContext(
     chapterId: context.chapterId,
     branchId: context.branchId,
     worktreeId: context.worktreeId,
-    modelProfileId: context.modelProfileId,
+    modelProfileId: overrides?.modelProfileId ?? context.modelProfileId,
+    modelRole: overrides?.modelRole,
     genre: command.genre,
     targetWordCount: command.targetWordCount,
     selectedText: command.selectedText,
     dryRun: false,
-    stream: stream ?? false,
+    stream: overrides?.stream ?? false,
   };
 }
 
@@ -90,6 +99,8 @@ function defaultAdapterForGates(gates: AdapterFeatureGates): AdapterKind {
 }
 
 const VALID_ADAPTER_KINDS: AdapterKind[] = ['mock', 'opencode-stub', 'claudecode-stub', 'real-llm'];
+
+const VALID_MODEL_ROLES: AdapterContext['modelRole'][] = ['draft', 'rewrite', 'audit', 'outline', 'summary', 'critic'];
 
 /**
  * 解析 Tool 输入中的 adapter 字段。
@@ -121,6 +132,31 @@ function parseStreamInput(value: unknown): boolean {
     return trimmed === 'true';
   }
   return false;
+}
+
+/**
+ * 解析 Tool 输入中的 modelProfileId 字段。
+ *
+ * YAML 占位符、空字符串视为未指定；将透传给 ModelRouter。
+ */
+function parseModelProfileIdInput(value: unknown): string | undefined {
+  if (typeof value !== 'string') return undefined;
+  const trimmed = value.trim();
+  if (trimmed === '' || /^\{\{.*\}\}$/.test(trimmed)) return undefined;
+  return trimmed;
+}
+
+/**
+ * 解析 Tool 输入中的 modelRole 字段。
+ *
+ * 仅接受已定义的 ModelRole；未指定或非法值时由 Router 按 command 推断。
+ */
+function parseModelRoleInput(value: unknown): AdapterContext['modelRole'] | undefined {
+  if (typeof value !== 'string') return undefined;
+  const trimmed = value.trim();
+  if (trimmed === '' || /^\{\{.*\}\}$/.test(trimmed)) return undefined;
+  if (VALID_MODEL_ROLES.includes(trimmed as AdapterContext['modelRole'])) return trimmed as AdapterContext['modelRole'];
+  return undefined;
 }
 
 /**
@@ -232,6 +268,8 @@ export function createAgentRunTool(options?: CreateAgentRunToolOptions): NovelTo
       const typedInput = {
         adapter: parseAdapterInput(rawInput.adapter),
         stream: parseStreamInput(rawInput.stream),
+        modelProfileId: parseModelProfileIdInput(rawInput.modelProfileId),
+        modelRole: parseModelRoleInput(rawInput.modelRole),
         gates: rawInput.gates as AdapterFeatureGates | undefined,
       };
 
@@ -239,7 +277,11 @@ export function createAgentRunTool(options?: CreateAgentRunToolOptions): NovelTo
       const router = options?.router ?? createDefaultRouter(gates).router;
       const selectedAdapter = typedInput.adapter ?? defaultAdapterForGates(gates);
       const streamRequested = typedInput.stream;
-      const adapterContext = buildAdapterContext(command, context, streamRequested);
+      const adapterContext = buildAdapterContext(command, context, {
+        stream: streamRequested,
+        modelProfileId: typedInput.modelProfileId,
+        modelRole: typedInput.modelRole,
+      });
       const routed = router.route(selectedAdapter, command, adapterContext, gates);
 
       if (isAdapterRouterError(routed)) {

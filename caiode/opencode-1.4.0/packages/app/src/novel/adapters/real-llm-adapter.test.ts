@@ -7,6 +7,8 @@ import { describe, it, expect } from 'vitest';
 import { RealLLMExecutionAdapter } from './real-llm-adapter';
 import { createTargetLLMClient, type LLMTransport } from '../llm/target-llm-client';
 import { createDefaultRealLLMFeatureGates, type RealLLMFeatureGates } from '../llm/llm-feature-gates';
+import { createUsageTracker } from '../llm/usage-tracker';
+import { MockExecutionAdapter } from './mock-execution-adapter';
 import { createChapterGenerateCommand, createAIWritingCommand } from '../workflows/novel-command';
 import type { AdapterContext } from './adapter-types';
 import type { LLMRequest, LLMResponse } from '../llm/llm-request-types';
@@ -285,5 +287,163 @@ describe('RealLLMExecutionAdapter', () => {
 
     expect(events[0]?.type).toBe('llm.request.started');
     expect(events.at(-1)?.type).toBe('llm.request.completed');
+  });
+
+  it('P3-D：按 modelProfileId 选择模型配置并写入 metadata', async () => {
+    const adapter = new RealLLMExecutionAdapter({
+      client: createTargetLLMClient({ transport: createMockTransport('选中 deepseek-chat') }),
+      gates: makeGates({ realLLMEnabled: true, targetLLMAdapterEnabled: true }),
+    });
+
+    const result = await adapter.execute(
+      createChapterGenerateCommand({
+        projectId: 'p',
+        chapterId: 'c',
+        chapterIndex: 1,
+        genre: '玄幻',
+        text: '测试',
+      }),
+      makeContext({ modelProfileId: 'deepseek-chat' }),
+    );
+
+    expect(result.success).toBe(true);
+    expect(result.result?.metadata?.modelProfileId).toBe('deepseek-chat');
+    expect(result.result?.metadata?.modelId).toBe('deepseek-chat');
+    expect(result.result?.metadata?.estimatedCost).toBeUndefined();
+  });
+
+  it('P3-D：按 modelRole 推断模型配置', async () => {
+    const adapter = new RealLLMExecutionAdapter({
+      client: createTargetLLMClient({ transport: createMockTransport('按角色路由') }),
+      gates: makeGates({ realLLMEnabled: true, targetLLMAdapterEnabled: true }),
+    });
+
+    const result = await adapter.execute(
+      createAIWritingCommand({
+        projectId: 'p',
+        chapterId: 'c',
+        chapterIndex: 1,
+        genre: '玄幻',
+        command: 'polish',
+        text: '测试',
+      }),
+      makeContext({ modelRole: 'rewrite' }),
+    );
+
+    expect(result.success).toBe(true);
+    expect(result.result?.metadata?.modelProfileId).toBe('deepseek-chat');
+  });
+
+  it('P3-D：返回 usage 时估算成本', async () => {
+    const transport: LLMTransport = {
+      name: 'usage-mock',
+      async complete(request: LLMRequest): Promise<LLMResponse> {
+        return {
+          requestId: request.requestId,
+          text: '带用量正文',
+          usage: { promptTokens: 1000, completionTokens: 500, totalTokens: 1500 },
+        };
+      },
+      async *stream(): AsyncGenerator<LLMStreamEvent> {
+        yield { type: 'llm.request.completed', requestId: 'x', completedAt: new Date().toISOString() };
+      },
+    };
+
+    const adapter = new RealLLMExecutionAdapter({
+      client: createTargetLLMClient({ transport }),
+      gates: makeGates({ realLLMEnabled: true, targetLLMAdapterEnabled: true }),
+    });
+
+    const result = await adapter.execute(
+      createChapterGenerateCommand({
+        projectId: 'p',
+        chapterId: 'c',
+        chapterIndex: 1,
+        genre: '玄幻',
+        text: '测试',
+      }),
+      makeContext(),
+    );
+
+    expect(result.success).toBe(true);
+    expect(result.result?.metadata?.estimatedCost).toBeDefined();
+    expect(result.result?.metadata?.estimatedCost?.currency).toBe('CNY-CENT');
+  });
+
+  it('P3-D：记录用量到 UsageTracker', async () => {
+    const transport: LLMTransport = {
+      name: 'tracker-mock',
+      async complete(request: LLMRequest): Promise<LLMResponse> {
+        return {
+          requestId: request.requestId,
+          text: 'tracker 正文',
+          usage: { promptTokens: 100, completionTokens: 50, totalTokens: 150 },
+        };
+      },
+      async *stream(): AsyncGenerator<LLMStreamEvent> {
+        yield { type: 'llm.request.completed', requestId: 'x', completedAt: new Date().toISOString() };
+      },
+    };
+
+    const tracker = createUsageTracker();
+    const adapter = new RealLLMExecutionAdapter({
+      client: createTargetLLMClient({ transport }),
+      gates: makeGates({ realLLMEnabled: true, targetLLMAdapterEnabled: true }),
+      tracker,
+    });
+
+    await adapter.execute(
+      createChapterGenerateCommand({
+        projectId: 'p',
+        chapterId: 'c',
+        chapterIndex: 1,
+        genre: '玄幻',
+        text: '测试',
+      }),
+      makeContext(),
+    );
+
+    expect(tracker.getTotalTokens()).toBe(150);
+    expect(tracker.getPromptTokens()).toBe(100);
+    expect(tracker.getCompletionTokens()).toBe(50);
+  });
+
+  it('P3-D：真实调用失败时回退到 mock adapter', async () => {
+    const failingTransport: LLMTransport = {
+      name: 'failing',
+      async complete(): Promise<LLMResponse> {
+        throw new Error('timeout');
+      },
+      async *stream(): AsyncGenerator<LLMStreamEvent> {
+        yield { type: 'llm.request.completed', requestId: 'x', completedAt: new Date().toISOString() };
+      },
+    };
+
+    const adapter = new RealLLMExecutionAdapter({
+      client: createTargetLLMClient({ transport: failingTransport }),
+      gates: makeGates({
+        realLLMEnabled: true,
+        targetLLMAdapterEnabled: true,
+        llmFallbackToMockEnabled: true,
+      }),
+      retryPolicy: { maxAttempts: 1, backoffMs: 0, retryableErrorCodes: [] },
+      fallbackAdapter: new MockExecutionAdapter({ delayMultiplier: 0, silent: true }),
+    });
+
+    const result = await adapter.execute(
+      createChapterGenerateCommand({
+        projectId: 'p',
+        chapterId: 'c',
+        chapterIndex: 1,
+        genre: '玄幻',
+        text: '测试',
+      }),
+      makeContext(),
+    );
+
+    expect(result.success).toBe(true);
+    expect(result.result?.fallback).toBe(true);
+    expect(result.result?.originalErrorCode).toBe('LLM_NETWORK_ERROR');
+    expect(result.result?.metadata?.fallback).toBe(true);
   });
 });

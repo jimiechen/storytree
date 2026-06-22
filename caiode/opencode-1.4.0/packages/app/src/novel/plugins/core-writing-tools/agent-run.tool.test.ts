@@ -85,6 +85,7 @@ describe('agent-run Tool', () => {
           realLLMEnabled: false,
           openCodeAdapterEnabled: true,
           claudeCodeAdapterEnabled: false,
+          modelRoutingEnabled: false,
         },
       },
       context,
@@ -137,6 +138,7 @@ describe('agent-run Tool', () => {
           targetLLMAdapterEnabled: false,
           openCodeAdapterEnabled: false,
           claudeCodeAdapterEnabled: false,
+          modelRoutingEnabled: false,
         },
       },
       context,
@@ -155,6 +157,7 @@ describe('agent-run Tool', () => {
           targetLLMAdapterEnabled: true,
           openCodeAdapterEnabled: false,
           claudeCodeAdapterEnabled: false,
+          modelRoutingEnabled: false,
         },
       },
       context,
@@ -175,6 +178,7 @@ describe('agent-run Tool', () => {
           targetLLMAdapterEnabled: false,
           openCodeAdapterEnabled: false,
           claudeCodeAdapterEnabled: false,
+          modelRoutingEnabled: false,
         },
       },
       context,
@@ -203,12 +207,59 @@ describe('agent-run Tool', () => {
           targetLLMAdapterEnabled: false,
           openCodeAdapterEnabled: false,
           claudeCodeAdapterEnabled: false,
+          modelRoutingEnabled: false,
         },
       },
       context,
     );
 
     expect(result.success).toBe(true);
+  });
+
+  it('P3-D：modelProfileId 与 modelRole 透传到 AdapterContext 并影响路由结果', async () => {
+    const mockTransport: LLMTransport = {
+      name: 'mock-routing',
+      async complete(request: LLMRequest): Promise<LLMResponse> {
+        return { requestId: request.requestId, text: '路由正文' };
+      },
+      async *stream(request: LLMRequest): AsyncGenerator<LLMStreamEvent> {
+        yield* createMockTokenStream(request.requestId, '路由正文');
+      },
+    };
+
+    const router = createAdapterRouter();
+    router.register(
+      new RealLLMExecutionAdapter({
+        client: createTargetLLMClient({ transport: mockTransport }),
+        gates: {
+          ...createDefaultRealLLMFeatureGates(),
+          realLLMEnabled: true,
+          targetLLMAdapterEnabled: true,
+        },
+      }),
+    );
+    const tool = createAgentRunTool({
+      router,
+      gates: {
+        realLLMEnabled: true,
+        targetLLMAdapterEnabled: true,
+        openCodeAdapterEnabled: false,
+        claudeCodeAdapterEnabled: false,
+      },
+    });
+    const context = makeContext();
+    const result = await tool.execute(
+      {
+        adapter: 'real-llm',
+        modelProfileId: 'deepseek-chat',
+        modelRole: 'rewrite',
+      },
+      context,
+    );
+
+    expect(result.success).toBe(true);
+    expect(result.data?.result.metadata?.modelProfileId).toBe('deepseek-chat');
+    expect(result.data?.result.metadata?.modelId).toBe('deepseek-chat');
   });
 
   it('P3-C：流式执行返回 events 且 result 包含 validationIssues', async () => {

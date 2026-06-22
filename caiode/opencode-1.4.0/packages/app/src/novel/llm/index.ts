@@ -17,3 +17,11 @@ export * from './target-llm-client';
 export * from './target-llm-stream-parser';
 export * from './target-llm-request-builder';
 export * from './deepseek-transport';
+
+// P3-D 新增导出
+export * from './model-profile';
+export * from './model-profile-registry';
+export * from './model-router';
+export * from './usage-tracker';
+export * from './cost-estimator';
+export * from './fallback-handler';

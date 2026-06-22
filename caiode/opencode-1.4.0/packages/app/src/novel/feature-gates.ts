@@ -36,6 +36,11 @@ export interface NovelFeatureGates {
   llmRequestLogEnabled: boolean;
   llmCostTrackingEnabled: boolean;
   llmSafePromptLoggingEnabled: boolean;
+
+  // P3-D Model Routing + Cost Governance gates
+  modelRoutingEnabled: boolean;
+  llmFallbackToMockEnabled: boolean;
+  modelSelectionUIEnabled: boolean;
 }
 
 /**
@@ -48,6 +53,7 @@ export function createDefaultAdapterFeatureGates(): AdapterFeatureGates {
     targetLLMAdapterEnabled: false,
     openCodeAdapterEnabled: false,
     claudeCodeAdapterEnabled: false,
+    modelRoutingEnabled: false,
   };
 }
 
@@ -80,5 +86,10 @@ export function createDefaultNovelFeatureGates(): NovelFeatureGates {
     llmRequestLogEnabled: true,
     llmCostTrackingEnabled: false,
     llmSafePromptLoggingEnabled: false,
+
+    // P3-D 默认关闭
+    modelRoutingEnabled: false,
+    llmFallbackToMockEnabled: false,
+    modelSelectionUIEnabled: false,
   };
 }

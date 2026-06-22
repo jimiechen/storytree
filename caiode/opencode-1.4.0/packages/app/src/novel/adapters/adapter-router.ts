@@ -29,7 +29,8 @@ function createAdapterRouterError(
  * 创建 AdapterRouter 实例。
  *
  * 路由策略：
- * - 未指定 requested → 优先返回第一个能处理命令的已注册 adapter（P2 通常是 mock）。
+ * - 未指定 requested → 若 modelRoutingEnabled 且双 gate 开启，优先尝试 real-llm；
+ *   否则返回第一个能处理命令的已注册 adapter（P2 通常是 mock）。
  * - 显式请求 mock → 直接返回 mock adapter。
  * - 显式请求 opencode-stub / claudecode-stub → 先检查对应 Gate，关闭则返回 ADAPTER_DISABLED；
  *   开启则返回对应 adapter；未注册则返回 ADAPTER_NOT_FOUND。
@@ -49,6 +50,13 @@ export function createAdapterRouter(): AdapterRouter {
 
     route(requested, command, context, gates) {
       if (!requested) {
+        const realLLM = adapters.get('real-llm');
+        const routingEnabled =
+          gates.modelRoutingEnabled && gates.realLLMEnabled && gates.targetLLMAdapterEnabled;
+        if (realLLM && routingEnabled && realLLM.canHandle(command, context)) {
+          return realLLM;
+        }
+
         for (const adapter of adapters.values()) {
           if (adapter.canHandle(command, context)) {
             return adapter;

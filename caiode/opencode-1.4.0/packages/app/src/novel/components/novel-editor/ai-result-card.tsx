@@ -1,5 +1,5 @@
 import { createSignal, For, Show } from 'solid-js';
-import type { AITask, AITaskStatus } from '../../types/ai-task';
+import type { AITask, AITaskCostEstimate, AITaskStatus } from '../../types/ai-task';
 import type { GenerationIssue } from '../../llm/generation-result-validator';
 
 interface AIResultCardProps {
@@ -11,6 +11,12 @@ interface AIResultCardProps {
   validationIssues?: GenerationIssue[];
   /** P3-C：prompt 上下文是否被裁剪 */
   wasTrimmed?: boolean;
+  /** P3-D：模型策略与成本（优先使用外部传入，否则取 task 自带） */
+  modelProfileId?: string;
+  modelId?: string;
+  estimatedCost?: AITaskCostEstimate;
+  fallback?: boolean;
+  originalErrorCode?: string;
 }
 
 const statusConfig: Record<AITaskStatus, { label: string; color: string; bg: string; icon: string }> = {
@@ -30,6 +36,15 @@ const taskTypeLabels: Record<string, string> = {
   'summarize-chapter': 'AI 总结',
   'character-voice': '角色配音'
 };
+
+/** P3-D：格式化成本估算。货币 CNY-CENT 表示人民币分。 */
+function formatCost(cost: AITaskCostEstimate | undefined): string {
+  if (!cost) return '—';
+  if (cost.currency === 'CNY-CENT') {
+    return `¥${(cost.totalCost / 100).toFixed(2)}`;
+  }
+  return `${cost.totalCost.toFixed(4)} ${cost.currency}`;
+}
 
 export function AIResultCard(props: AIResultCardProps) {
   const [isExpanded, setIsExpanded] = createSignal(true);
@@ -107,6 +122,32 @@ export function AIResultCard(props: AIResultCardProps) {
               <div class="mt-2 text-xs text-gray-500">
                 {props.task.output?.wordCount} 字
               </div>
+
+              {/* P3-D：模型策略与成本 */}
+              <Show when={props.task.modelProfileId || props.modelProfileId}>
+                <div class="mt-2 text-xs text-blue-700 bg-blue-50 border border-blue-100 rounded px-2 py-1">
+                  <span class="font-medium">模型策略：</span>
+                  {props.modelProfileId ?? props.task.modelProfileId}
+                  <Show when={props.modelId ?? props.task.modelId}>
+                    <span class="text-gray-500 ml-1">({props.modelId ?? props.task.modelId})</span>
+                  </Show>
+                  <Show when={props.estimatedCost ?? props.task.estimatedCost}>
+                    <span class="ml-2">
+                      预估成本：
+                      {formatCost(props.estimatedCost ?? props.task.estimatedCost!)}
+                    </span>
+                  </Show>
+                </div>
+              </Show>
+              <Show when={props.fallback ?? props.task.fallback}>
+                <div class="mt-2 text-xs text-orange-700 bg-orange-50 border border-orange-100 rounded px-2 py-1">
+                  <span class="font-medium">已回退到 mock：</span>
+                  真实模型调用失败，当前结果为模拟生成。
+                  <Show when={props.originalErrorCode ?? props.task.originalErrorCode}>
+                    （原错误：{props.originalErrorCode ?? props.task.originalErrorCode}）
+                  </Show>
+                </div>
+              </Show>
 
               {/* P3-C：校验信息提示 */}
               <Show when={props.wasTrimmed}>

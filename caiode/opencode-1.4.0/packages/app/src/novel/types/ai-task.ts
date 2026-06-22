@@ -30,6 +30,14 @@ export interface AITaskOutput {
   wordCount: number;
 }
 
+/** P3-D：模型成本估算。 */
+export interface AITaskCostEstimate {
+  promptCost: number;
+  completionCost: number;
+  totalCost: number;
+  currency: string;
+}
+
 export interface AITask {
   id: string;
   type: AITaskType;
@@ -47,6 +55,14 @@ export interface AITask {
   duration?: number;
   createdAt: Date;
   completedAt?: Date;
+
+  /** P3-D：模型策略与成本元数据 */
+  modelProfileId?: string;
+  modelId?: string;
+  estimatedCost?: AITaskCostEstimate;
+  /** P3-D：是否由 fallback 产生，以及原始错误码 */
+  fallback?: boolean;
+  originalErrorCode?: string;
 }
 
 // ─── NovelAgentResult（Agent 终态结果）───────────────────────────────────
@@ -83,4 +99,25 @@ export interface NovelAgentResult {
 
   /** P3-C：prompt 上下文是否被裁剪 */
   wasTrimmed?: boolean;
+
+  /** P3-D：fallback 标记与原始错误码 */
+  fallback?: boolean;
+  originalErrorCode?: string;
+
+  /** P3-D：模型路由/成本元数据 */
+  metadata?: NovelAgentResultMetadata;
+}
+
+/** P3-D：Agent 结果元数据。 */
+export interface NovelAgentResultMetadata {
+  modelProfileId?: string;
+  modelId?: string;
+  estimatedCost?: {
+    promptCost: number;
+    completionCost: number;
+    totalCost: number;
+    currency: string;
+  };
+  fallback?: boolean;
+  [key: string]: unknown;
 }
