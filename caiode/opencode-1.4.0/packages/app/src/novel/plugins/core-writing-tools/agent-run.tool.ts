@@ -36,6 +36,7 @@ import {
 import { createTargetLLMClient } from '../../llm/target-llm-client';
 import type { LLMStreamEvent } from '../../llm/llm-stream-events';
 import { collectLLMText } from '../../llm/llm-stream-events';
+import { validateGenerationResult } from '../../llm/generation-result-validator';
 import type { NovelTool, ToolContext, ToolResult } from '../novel-tool-types';
 
 function isAdapterRouterError(
@@ -144,6 +145,9 @@ function createDefaultRouter(gates?: AdapterFeatureGates) {
 
 /**
  * 消费 RealLLMExecutionAdapter 的流式事件，返回聚合结果与事件列表。
+ *
+ * P3-C：对最终文本做基础质量校验，issues 写入 result.validationIssues，
+ * 让 UI 在展示结果时提示用户检查。
  */
 async function runRealLLMStream(
   adapter: RealLLMExecutionAdapter,
@@ -163,16 +167,22 @@ async function runRealLLMStream(
       }
     }
     const text = collectLLMText(events);
+    const targetWordCount = command.targetWordCount ?? context.targetWordCount ?? 0;
+    const validation = targetWordCount > 0
+      ? validateGenerationResult(text, targetWordCount)
+      : validateGenerationResult(text, 0, { minWordCount: 0, minRatioOfTarget: 0 });
+
     return {
       success: true,
       result: {
         taskId: `${command.type}:${command.chapterId ?? context.chapterId ?? 'unknown'}`,
         attemptId: 1,
         status: 'completed',
-        text,
-        wordCount: text.length,
-        summary: '',
+        text: validation.text,
+        wordCount: validation.wordCount,
+        summary: validation.valid ? '' : validation.issues.map((i) => i.message).join('；'),
         durationMs: 0,
+        validationIssues: validation.issues,
       },
       events,
     };
@@ -187,6 +197,16 @@ async function runRealLLMStream(
 }
 
 /**
+ * agent-run Tool 选项。
+ */
+export interface CreateAgentRunToolOptions {
+  /** 测试注入用：自定义已配置好 adapter 的 router */
+  router?: ReturnType<typeof createAdapterRouter>;
+  /** 测试注入用：与 router 配套的 gates */
+  gates?: AdapterFeatureGates;
+}
+
+/**
  * 创建 agent-run Tool。
  *
  * 输入可包含：
@@ -194,7 +214,7 @@ async function runRealLLMStream(
  * - stream?: boolean（true 时若 adapter 为 real-llm 则走 executeStream）
  * - gates?: AdapterFeatureGates（测试注入用）
  */
-export function createAgentRunTool(): NovelTool {
+export function createAgentRunTool(options?: CreateAgentRunToolOptions): NovelTool {
   return {
     name: 'agent-run',
     description: 'Route a NovelCommand through AdapterRouter and execute the selected adapter',
@@ -215,7 +235,8 @@ export function createAgentRunTool(): NovelTool {
         gates: rawInput.gates as AdapterFeatureGates | undefined,
       };
 
-      const { router, gates } = createDefaultRouter(typedInput.gates);
+      const gates = typedInput.gates ?? options?.gates ?? createDefaultAdapterFeatureGates();
+      const router = options?.router ?? createDefaultRouter(gates).router;
       const selectedAdapter = typedInput.adapter ?? defaultAdapterForGates(gates);
       const streamRequested = typedInput.stream;
       const adapterContext = buildAdapterContext(command, context, streamRequested);

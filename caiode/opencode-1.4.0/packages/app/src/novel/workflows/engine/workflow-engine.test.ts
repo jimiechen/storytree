@@ -42,7 +42,7 @@ describe('NovelWorkflowEngine', () => {
     }
 
     const started = results.find((r) => r.status === 'started');
-    const completed = results.find((r) => r.status === 'completed' && r.stepId === 'mock-wrapper');
+    const completed = results.find((r) => r.status === 'completed' && r.stepId === 'agent-run-generate');
     expect(started).toBeDefined();
     expect(completed).toBeDefined();
     expect(completed!.output).toBeDefined();
@@ -120,7 +120,7 @@ describe('NovelWorkflowEngine', () => {
       results.push(result);
     }
 
-    const completed = results.find((r) => r.status === 'completed' && r.stepId === 'mock-wrapper');
+    const completed = results.find((r) => r.status === 'completed' && r.stepId === 'agent-run-generate');
     expect(completed).toBeDefined();
   });
 
@@ -162,7 +162,7 @@ describe('NovelWorkflowEngine', () => {
       results.push(result);
     }
 
-    const completed = results.find((r) => r.status === 'completed' && r.stepId === 'mock-wrapper');
+    const completed = results.find((r) => r.status === 'completed' && r.stepId === 'agent-run-generate');
     expect(completed).toBeDefined();
     expect((completed!.output as { echoed: unknown }).echoed).toBeDefined();
   });

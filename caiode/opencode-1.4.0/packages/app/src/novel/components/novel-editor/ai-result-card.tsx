@@ -1,11 +1,16 @@
-import { createSignal, Show } from 'solid-js';
+import { createSignal, For, Show } from 'solid-js';
 import type { AITask, AITaskStatus } from '../../types/ai-task';
+import type { GenerationIssue } from '../../llm/generation-result-validator';
 
 interface AIResultCardProps {
   task: AITask;
   onAccept: (text: string) => void;
   onSave: (text: string) => void;
   onDiscard: () => void;
+  /** P3-C：生成结果校验问题列表 */
+  validationIssues?: GenerationIssue[];
+  /** P3-C：prompt 上下文是否被裁剪 */
+  wasTrimmed?: boolean;
 }
 
 const statusConfig: Record<AITaskStatus, { label: string; color: string; bg: string; icon: string }> = {
@@ -20,6 +25,7 @@ const statusConfig: Record<AITaskStatus, { label: string; color: string; bg: str
 
 const taskTypeLabels: Record<string, string> = {
   'continue-writing': 'AI 续写',
+  'chapter-generation': 'AI 生成',
   'rewrite-selection': 'AI 改写',
   'summarize-chapter': 'AI 总结',
   'character-voice': '角色配音'
@@ -101,6 +107,23 @@ export function AIResultCard(props: AIResultCardProps) {
               <div class="mt-2 text-xs text-gray-500">
                 {props.task.output?.wordCount} 字
               </div>
+
+              {/* P3-C：校验信息提示 */}
+              <Show when={props.wasTrimmed}>
+                <div class="mt-2 text-xs text-orange-600 bg-orange-50 border border-orange-100 rounded px-2 py-1">
+                  提示：上下文较长，系统已自动裁剪，请重点检查生成内容是否连贯。
+                </div>
+              </Show>
+              <Show when={props.validationIssues && props.validationIssues.length > 0}>
+                <div class="mt-2 text-xs text-yellow-700 bg-yellow-50 border border-yellow-100 rounded px-2 py-1">
+                  <div class="font-medium mb-0.5">生成结果校验提示：</div>
+                  <ul class="list-disc pl-4 space-y-0.5">
+                    <For each={props.validationIssues!}>
+                      {(issue) => <li>{issue.message}</li>}
+                    </For>
+                  </ul>
+                </div>
+              </Show>
             </div>
 
             {/* 操作按钮 */}

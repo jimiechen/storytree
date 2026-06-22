@@ -15,7 +15,7 @@ import { useNovelActionDispatcher } from './use-novel-action-dispatcher';
 import { useNovelLLMTask } from './use-novel-llm-task';
 import { mapInfoTheoryToInfoFlow } from './use-novel-info-theory-mapper';
 import type { NovelActionInput, NovelActionResult } from '../actions/novel-action-types';
-import type { AITask, NovelAgentResult } from '../types/ai-task';
+import type { AITask, AITaskInput, NovelAgentResult } from '../types/ai-task';
 import type { LLMStreamEvent } from '../llm/llm-stream-events';
 import type {
   ChapterInformationState as InfoTheoryChapterState,
@@ -146,11 +146,35 @@ export function useNovelWorkflow(
 
   // 返修#5: 保存上次执行的 NovelActionInput，用于重试
   let lastActionInput: NovelActionInput | null = null;
-  // P3-B: 保存上次流式任务输入，用于取消/重试
-  let lastLLMTaskInput: AITask['input'] | null = null;
+  // P3-B / P3-C: 保存上次流式任务输入，用于取消/重试/展示
+  let lastLLMTaskInput: AITaskInput | null = null;
+
+  /**
+   * 把 Workflow 返回的原始事件中的 LLMStreamEvent 聚合成 AITask。
+   */
+  async function aggregateLLMEvents(
+    events: unknown[],
+    input: AITaskInput,
+    type: AITask['type'],
+  ): Promise<void> {
+    const llmEvents = events.filter(isLLMStreamEvent);
+    if (llmEvents.length === 0) return;
+
+    await llmTask.startTask(
+      { ...input, type },
+      async function* (signal) {
+        for (const event of llmEvents) {
+          if (signal.aborted) break;
+          yield event;
+        }
+      },
+    );
+  }
 
   /**
    * 执行章节生成工作流。
+   *
+   * P3-C：默认请求流式事件，让 AI Task Panel / Result Card 实时展示生成过程。
    */
   const runChapterGeneration = async (
     params: RunGenerationParams,
@@ -169,9 +193,16 @@ export function useNovelWorkflow(
         text: params.text,
         targetWordCount: params.targetWordCount,
         contextRefs: params.contextRefs,
+        // P3-C：chapter.generate 默认请求流式事件
+        stream: true,
       },
     };
     lastActionInput = input;
+    lastLLMTaskInput = {
+      type: 'chapter-generation',
+      chapterId: params.chapterId,
+      text: params.text,
+    };
 
     try {
       const actionResult = await dispatch(input);
@@ -183,10 +214,15 @@ export function useNovelWorkflow(
       }
 
       const result = actionResult.result as NovelAgentResult;
-      const events = (actionResult.events ?? []) as NovelWorkflowEvent[];
+      const rawEvents = actionResult.events ?? [];
       const durationMs = result.durationMs ?? 0;
 
-      setCurrentTask({ result, events, durationMs });
+      // P3-C：对 chapter.generate 也聚合 LLMStreamEvent，UI 可实时预览
+      if (lastLLMTaskInput) {
+        await aggregateLLMEvents(rawEvents, lastLLMTaskInput, 'chapter-generation');
+      }
+
+      setCurrentTask({ result, events: rawEvents as NovelWorkflowEvent[], durationMs });
       return result;
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
@@ -231,6 +267,8 @@ export function useNovelWorkflow(
     };
     lastActionInput = input;
     lastLLMTaskInput = {
+      type: isContinue ? 'continue-writing' : 'rewrite-selection',
+      chapterId: params.chapterId,
       text: params.text,
       selectedText: params.selectedText,
     };
@@ -248,26 +286,14 @@ export function useNovelWorkflow(
       const rawEvents = actionResult.events ?? [];
       const durationMs = result.durationMs ?? 0;
 
-      // P3-B：对 continue 命令，若工作流返回了 LLMStreamEvent，则聚合成 AITask。
+      // P3-B / P3-C：若工作流返回了 LLMStreamEvent，则聚合成 AITask。
       // 这样 UI 能在生成过程中看到实时 preview，而非只等待终态结果。
-      if (isContinue) {
-        const llmEvents = (rawEvents as unknown[]).filter(isLLMStreamEvent);
-        if (llmEvents.length > 0 && lastLLMTaskInput) {
-          await llmTask.startTask(
-            {
-              type: 'continue-writing',
-              chapterId: params.chapterId,
-              text: lastLLMTaskInput.text,
-              selectedText: lastLLMTaskInput.selectedText,
-            },
-            async function* (signal) {
-              for (const event of llmEvents) {
-                if (signal.aborted) break;
-                yield event;
-              }
-            },
-          );
-        }
+      if (lastLLMTaskInput) {
+        await aggregateLLMEvents(
+          rawEvents,
+          lastLLMTaskInput,
+          isContinue ? 'continue-writing' : 'rewrite-selection',
+        );
       }
 
       setCurrentTask({ result, events: rawEvents as NovelWorkflowEvent[], durationMs });

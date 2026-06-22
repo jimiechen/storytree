@@ -9,6 +9,7 @@ interface AITaskPanelProps {
 
 const taskTypeLabels: Record<AITaskType, string> = {
   'continue-writing': '续写',
+  'chapter-generation': '生成',
   'rewrite-selection': '改写',
   'summarize-chapter': '总结',
   'character-voice': '角色配音'

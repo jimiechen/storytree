@@ -7,6 +7,13 @@ import { describe, it, expect } from 'vitest';
 import { createAgentRunTool } from './agent-run.tool';
 import { createChapterGenerateCommand } from '../../workflows/novel-command';
 import type { ToolContext } from '../novel-tool-types';
+import { createAdapterRouter } from '../../adapters/adapter-router';
+import { RealLLMExecutionAdapter } from '../../adapters/real-llm-adapter';
+import { createTargetLLMClient, type LLMTransport } from '../../llm/target-llm-client';
+import { createDefaultRealLLMFeatureGates } from '../../llm/llm-feature-gates';
+import { createMockTokenStream } from '../../llm/target-llm-stream-parser';
+import type { LLMRequest, LLMResponse } from '../../llm/llm-request-types';
+import type { LLMStreamEvent } from '../../llm/llm-stream-events';
 
 function makeCommand() {
   return createChapterGenerateCommand({
@@ -202,5 +209,46 @@ describe('agent-run Tool', () => {
     );
 
     expect(result.success).toBe(true);
+  });
+
+  it('P3-C：流式执行返回 events 且 result 包含 validationIssues', async () => {
+    const mockTransport: LLMTransport = {
+      name: 'mock-stream',
+      async complete(request: LLMRequest): Promise<LLMResponse> {
+        return { requestId: request.requestId, text: '流式正文' };
+      },
+      async *stream(request: LLMRequest): AsyncGenerator<LLMStreamEvent> {
+        yield* createMockTokenStream(request.requestId, '流式正文');
+      },
+    };
+
+    const router = createAdapterRouter();
+    router.register(
+      new RealLLMExecutionAdapter({
+        client: createTargetLLMClient({ transport: mockTransport }),
+        gates: {
+          ...createDefaultRealLLMFeatureGates(),
+          realLLMEnabled: true,
+          targetLLMAdapterEnabled: true,
+          llmStreamingEnabled: true,
+        },
+      }),
+    );
+    const tool = createAgentRunTool({
+      router,
+      gates: {
+        realLLMEnabled: true,
+        targetLLMAdapterEnabled: true,
+        openCodeAdapterEnabled: false,
+        claudeCodeAdapterEnabled: false,
+      },
+    });
+    const context = makeContext();
+    const result = await tool.execute({ adapter: 'real-llm', stream: true }, context);
+
+    expect(result.success).toBe(true);
+    expect(result.events).toBeDefined();
+    expect((result.events ?? []).length).toBeGreaterThan(0);
+    expect(result.data?.result.validationIssues).toBeDefined();
   });
 });

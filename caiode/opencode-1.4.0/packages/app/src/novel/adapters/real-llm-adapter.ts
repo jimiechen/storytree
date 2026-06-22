@@ -37,6 +37,8 @@ import {
   createLLMTokenDeltaEvent,
   createLLMRequestCompletedEvent,
 } from '../llm/llm-stream-events';
+import { withRetry, type RetryPolicy, DEFAULT_GENERATION_RETRY_POLICY } from '../llm/retry-policy';
+import { validateGenerationResult, type GenerationValidationResult } from '../llm/generation-result-validator';
 
 /**
  * Real LLM Adapter 选项。
@@ -44,6 +46,8 @@ import {
 export interface RealLLMExecutionAdapterOptions {
   client: TargetLLMClient;
   gates: RealLLMFeatureGates;
+  /** P3-C：可选重试策略，未指定则使用默认策略 */
+  retryPolicy?: RetryPolicy;
 }
 
 /**
@@ -59,9 +63,12 @@ export class RealLLMExecutionAdapter implements AgentExecutionAdapter {
 
   private readonly gates: RealLLMFeatureGates;
 
+  private readonly retryPolicy: RetryPolicy;
+
   constructor(options: RealLLMExecutionAdapterOptions) {
     this.client = options.client;
     this.gates = options.gates;
+    this.retryPolicy = options.retryPolicy ?? DEFAULT_GENERATION_RETRY_POLICY;
   }
 
   /**
@@ -108,17 +115,24 @@ export class RealLLMExecutionAdapter implements AgentExecutionAdapter {
     }
 
     try {
-      const response = await this.client.complete(llmRequest);
-      this.logSafe(requestId, llmRequest.prompt, response.text, undefined);
+      const response = await withRetry(
+        () => this.client.complete(llmRequest),
+        this.retryPolicy,
+      );
+
+      const validation = this.validateResult(response.text, llmRequest);
+      this.logSafe(requestId, llmRequest.prompt, validation.text, undefined);
 
       const result: NovelAgentResult = {
         taskId: `${command.type}:${command.chapterId}`,
         attemptId: 1,
         status: 'completed',
-        text: response.text,
-        wordCount: response.text.length,
-        summary: '',
+        text: validation.text,
+        wordCount: validation.wordCount,
+        summary: validation.valid ? '' : this.formatValidationSummary(validation),
         durationMs: 0,
+        validationIssues: validation.issues,
+        wasTrimmed: Boolean(llmRequest.metadata?.wasTrimmed),
       };
       return { success: true, result };
     } catch (error) {
@@ -149,6 +163,27 @@ export class RealLLMExecutionAdapter implements AgentExecutionAdapter {
       `hasSystemPrompt: ${Boolean(llmRequest.systemPrompt)}`,
       `metadata: ${JSON.stringify(llmRequest.metadata)}`,
     ].join('\n');
+  }
+
+  /**
+   * P3-C：对生成结果做基础质量校验。
+   *
+   * chapter.generate 使用 metadata.targetWordCount；其他命令不做字数要求。
+   */
+  private validateResult(rawText: string, llmRequest: LLMRequest): GenerationValidationResult {
+    const targetWordCount = llmRequest.metadata?.targetWordCount as number | undefined;
+    if (typeof targetWordCount === 'number' && targetWordCount > 0) {
+      return validateGenerationResult(rawText, targetWordCount);
+    }
+    return validateGenerationResult(rawText, 0, { minWordCount: 0, minRatioOfTarget: 0 });
+  }
+
+  /**
+   * 将校验问题列表格式化为简短摘要。
+   */
+  private formatValidationSummary(validation: GenerationValidationResult): string {
+    const messages = validation.issues.map((issue) => issue.message);
+    return `生成结果存在以下问题，请检查后再采纳：${messages.join('；')}`;
   }
 
   /**

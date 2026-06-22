@@ -25,6 +25,10 @@ export interface LLMRequestMetadata {
   modelRole?: string;
   skillId?: string;
   workflowId?: string;
+  /** P3-C：prompt 上下文是否被裁剪 */
+  wasTrimmed?: boolean;
+  /** P3-C：chapter.generate 的目标字数，供结果校验使用 */
+  targetWordCount?: number;
 }
 
 /**

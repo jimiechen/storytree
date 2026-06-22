@@ -1,17 +1,22 @@
 id: chapter.generate
-version: 1
+version: 2
 commandType: chapter.generate
-description: Generate a chapter using the current mock workflow wrapper.
+description: Generate a chapter through agent-run tool, route to real-llm when gate enabled.
 steps:
-  - id: mock-wrapper
-    name: Mock Chapter Generation Wrapper
-    tool: mock-generation-wrapper
-    adapter: mock
+  - id: agent-run-generate
+    name: Agent Run Chapter Generation
+    tool: agent-run
     inputs:
+      adapter: "{{adapter}}"
+      stream: "{{stream}}"
       projectId: "{{projectId}}"
       chapterId: "{{chapterId}}"
       branchId: "{{branchId}}"
       modelProfileId: "{{modelProfileId}}"
+      text: "{{text}}"
+      targetWordCount: "{{targetWordCount}}"
+      genre: "{{genre}}"
+      style: "{{style}}"
     outputs:
       result: result
       events: events

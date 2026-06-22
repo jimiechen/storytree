@@ -17,6 +17,7 @@ import { ChapterInfoPanel } from './chapter-info-panel';
 import type { AIWritingCommand } from '../../types/editor';
 import type { WorkflowMutations } from '../../workflows/workflow-events';
 import type { ChapterInformationState } from '../../types/information-flow';
+import type { GenerationIssue } from '../../llm/generation-result-validator';
 
 /**
  * 创建 NovelEditor 内的 WorkflowMutations。
@@ -67,6 +68,9 @@ export function NovelEditor() {
   const [localContent, setLocalContent] = createSignal('');
   const [wordCount, setWordCount] = createSignal(0);
   const [infoState, setInfoState] = createSignal<ChapterInformationState | undefined>(undefined);
+  // P3-C：保存当前 workflow 结果的校验信息，用于 AIResultCard 展示
+  const [validationIssues, setValidationIssues] = createSignal<GenerationIssue[] | undefined>(undefined);
+  const [wasTrimmed, setWasTrimmed] = createSignal<boolean | undefined>(undefined);
 
   const currentProjectId = () => nav.projectId() ?? 'proj-001';
 
@@ -131,6 +135,9 @@ export function NovelEditor() {
         command: 'continue',
         text: localContent(),
       });
+      // P3-C：保存校验信息供 AIResultCard 展示
+      setValidationIssues(result.validationIssues);
+      setWasTrimmed(result.wasTrimmed);
       // 将生成结果同步到本地编辑器，避免 EditorCanvas 因只按 chapterId 重置而错过更新
       if (result.text) {
         setLocalContent(result.text);
@@ -164,6 +171,9 @@ export function NovelEditor() {
         text: localContent(),
         selectedText,
       });
+      // P3-C：保存校验信息供 AIResultCard 展示
+      setValidationIssues(result.validationIssues);
+      setWasTrimmed(result.wasTrimmed);
       if (result.text) {
         setLocalContent(result.text);
         editor.setContent(result.text);
@@ -268,14 +278,19 @@ export function NovelEditor() {
                   <div class="bg-[#f8f9ff] px-10 pb-6 overflow-y-auto max-h-[300px] shrink-0">
                     <div class="max-w-[800px] mx-auto space-y-3">
                       <For each={chapterTasks()}>
-                        {(task) => (
-                          <AIResultCard
-                            task={task}
-                            onAccept={handleAcceptAIResult}
-                            onSave={handleSaveAIResult}
-                            onDiscard={() => {}}
-                          />
-                        )}
+                        {(task, index) => {
+                          const isLast = () => index() === chapterTasks().length - 1;
+                          return (
+                            <AIResultCard
+                              task={task}
+                              onAccept={handleAcceptAIResult}
+                              onSave={handleSaveAIResult}
+                              onDiscard={() => {}}
+                              validationIssues={isLast() ? validationIssues() : undefined}
+                              wasTrimmed={isLast() ? wasTrimmed() : undefined}
+                            />
+                          );
+                        }}
                       </For>
                     </div>
                   </div>

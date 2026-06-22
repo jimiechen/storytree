@@ -1,4 +1,5 @@
 import type { ChapterInformationState } from './information-flow';
+import type { GenerationIssue } from '../llm/generation-result-validator';
 
 export type AITaskStatus =
   | 'pending'
@@ -11,6 +12,7 @@ export type AITaskStatus =
 
 export type AITaskType =
   | 'continue-writing'
+  | 'chapter-generation'
   | 'rewrite-selection'
   | 'summarize-chapter'
   | 'character-voice';
@@ -75,4 +77,10 @@ export interface NovelAgentResult {
   durationMs: number;
   /** Info-Lite 信息审计状态 */
   informationState?: ChapterInformationState;
+
+  /** P3-C：生成结果校验问题列表（空表示无问题） */
+  validationIssues?: GenerationIssue[];
+
+  /** P3-C：prompt 上下文是否被裁剪 */
+  wasTrimmed?: boolean;
 }

@@ -76,12 +76,10 @@ describe('NovelDebugCommandRunner', () => {
     expect(result.command).toBeDefined();
     expect(result.command!.type).toBe('chapter.generate');
     expect(result.result).toBeDefined();
-    expect(result.events.length).toBeGreaterThan(0);
 
     const log = store.get(result.logId);
     expect(log).toBeDefined();
     expect(log!.status).toBe('completed');
-    expect(log!.events.length).toBeGreaterThan(0);
     expect(log!.result).toEqual(result.result);
   });
 

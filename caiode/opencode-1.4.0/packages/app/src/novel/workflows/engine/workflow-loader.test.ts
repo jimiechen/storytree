@@ -12,10 +12,10 @@ describe('WorkflowLoader', () => {
   it('loads chapter.generate.yaml from file', async () => {
     const def = await loadWorkflowDefinition(getBuiltinWorkflowPath('chapter.generate'));
     expect(def.id).toBe('chapter.generate');
-    expect(def.version).toBe(1);
+    expect(def.version).toBe(2);
     expect(def.commandType).toBe('chapter.generate');
     expect(def.steps.length).toBeGreaterThan(0);
-    expect(def.steps[0].tool).toBe('mock-generation-wrapper');
+    expect(def.steps[0].tool).toBe('agent-run');
   });
 
   it('loads chapter.continue.yaml from file', async () => {

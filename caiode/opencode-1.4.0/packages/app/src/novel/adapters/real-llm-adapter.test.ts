@@ -118,7 +118,7 @@ describe('RealLLMExecutionAdapter', () => {
     expect(result.result?.text).toContain('transport: mock');
   });
 
-  it('execute 正常返回 LLM 正文', async () => {
+  it('execute 正常返回 LLM 正文并附带校验信息', async () => {
     const adapter = new RealLLMExecutionAdapter({
       client: createTargetLLMClient({ transport: createMockTransport('生成的正文') }),
       gates: makeGates({ realLLMEnabled: true, targetLLMAdapterEnabled: true }),
@@ -131,6 +131,7 @@ describe('RealLLMExecutionAdapter', () => {
         chapterIndex: 1,
         genre: '玄幻',
         text: '测试',
+        targetWordCount: 800,
       }),
       makeContext(),
     );
@@ -138,6 +139,9 @@ describe('RealLLMExecutionAdapter', () => {
     expect(result.success).toBe(true);
     expect(result.result?.text).toBe('生成的正文');
     expect(result.result?.status).toBe('completed');
+    // P3-C：短文本会触发 RESULT_TOO_SHORT
+    expect(result.result?.validationIssues).toBeDefined();
+    expect(result.result?.validationIssues?.some((i) => i.code === 'RESULT_TOO_SHORT')).toBe(true);
   });
 
   it('execute 将 LLMError 转为结构化错误', async () => {
@@ -154,6 +158,7 @@ describe('RealLLMExecutionAdapter', () => {
     const adapter = new RealLLMExecutionAdapter({
       client: createTargetLLMClient({ transport: failingTransport }),
       gates: makeGates({ realLLMEnabled: true, targetLLMAdapterEnabled: true }),
+      retryPolicy: { maxAttempts: 1, backoffMs: 0, retryableErrorCodes: [] },
     });
 
     const result = await adapter.execute(
@@ -169,6 +174,44 @@ describe('RealLLMExecutionAdapter', () => {
 
     expect(result.success).toBe(false);
     expect(result.errorCode).toBe('LLM_NETWORK_ERROR');
+  });
+
+  it('execute 对可重试错误执行重试并最终成功', async () => {
+    let attempts = 0;
+    const flakyTransport: LLMTransport = {
+      name: 'flaky',
+      async complete(request: LLMRequest): Promise<LLMResponse> {
+        attempts += 1;
+        if (attempts === 1) {
+          throw new Error('timeout');
+        }
+        return { requestId: request.requestId, text: '重试后成功' };
+      },
+      async *stream(): AsyncGenerator<LLMStreamEvent> {
+        yield { type: 'llm.request.completed', requestId: 'x', completedAt: new Date().toISOString() };
+      },
+    };
+
+    const adapter = new RealLLMExecutionAdapter({
+      client: createTargetLLMClient({ transport: flakyTransport }),
+      gates: makeGates({ realLLMEnabled: true, targetLLMAdapterEnabled: true }),
+      retryPolicy: { maxAttempts: 2, backoffMs: 10, retryableErrorCodes: ['LLM_NETWORK_ERROR'] },
+    });
+
+    const result = await adapter.execute(
+      createChapterGenerateCommand({
+        projectId: 'p',
+        chapterId: 'c',
+        chapterIndex: 1,
+        genre: '玄幻',
+        text: '测试',
+      }),
+      makeContext(),
+    );
+
+    expect(result.success).toBe(true);
+    expect(result.result?.text).toBe('重试后成功');
+    expect(attempts).toBe(2);
   });
 
   it('executeStream gate 未开启时第一个事件为 failed', async () => {

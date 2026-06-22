@@ -9,6 +9,7 @@
 import type { NovelCommand } from '../workflows/novel-command';
 import type { AdapterContext } from '../adapters/adapter-types';
 import type { LLMRequest, LLMRequestMetadata } from './llm-request-types';
+import { buildChapterGenerationPrompt } from './chapter-prompt-builder';
 
 /**
  * 判断当前命令是否为 AI 续写（chapter.continue）。
@@ -36,17 +37,21 @@ export function isRealLLMSupportedCommand(command: NovelCommand): boolean {
 /**
  * 根据命令类型构建用户 prompt。
  *
- * Pilot 版本使用简单系统提示 + 用户请求，P3-B 再引入上下文压缩与角色模板。
+ * - chapter.generate：P3-C 使用 chapter-prompt-builder，带 token 预算、上下文裁剪与生成约束。
+ * - chapter.continue：保持 P3-A 简洁续写 prompt。
+ * - 其他：兜底。
  */
-function buildPrompt(command: NovelCommand, context: AdapterContext): { prompt: string; systemPrompt: string } {
+function buildPrompt(command: NovelCommand, context: AdapterContext): { prompt: string; systemPrompt: string; wasTrimmed?: boolean; targetWordCount?: number } {
   const systemPrompt =
     '你是一位中文小说写作助手。请根据用户提供的上下文续写或生成正文，保持风格一致，只输出正文内容，不要输出解释、总结或 Markdown 格式。';
 
   if (command.type === 'chapter.generate') {
-    const genreHint = context.genre ?? command.genre ?? '小说';
+    const chapterPrompt = buildChapterGenerationPrompt(command, context);
     return {
-      systemPrompt,
-      prompt: `请为${genreHint}生成一段开头。\n\n已有信息：\n${command.text}`,
+      systemPrompt: chapterPrompt.systemPrompt,
+      prompt: chapterPrompt.prompt,
+      wasTrimmed: chapterPrompt.wasTrimmed,
+      targetWordCount: chapterPrompt.targetWordCount,
     };
   }
 
@@ -87,6 +92,7 @@ function buildMetadata(command: NovelCommand, context: AdapterContext): LLMReque
  * - requestId 由调用方生成，保证一次命令对应一次请求可追踪。
  * - 默认 stream=false，避免未显式开启流式时产生流式事件。
  * - 默认 timeoutMs=30_000，P3-A 真实调用先使用较短超时。
+ * - P3-C chapter.generate 的 metadata 携带 wasTrimmed / targetWordCount，供结果校验使用。
  */
 export function buildLLMRequest(
   requestId: string,
@@ -94,7 +100,7 @@ export function buildLLMRequest(
   context: AdapterContext,
   options?: { stream?: boolean; timeoutMs?: number },
 ): LLMRequest {
-  const { prompt, systemPrompt } = buildPrompt(command, context);
+  const { prompt, systemPrompt, wasTrimmed, targetWordCount } = buildPrompt(command, context);
 
   return {
     requestId,
@@ -105,6 +111,10 @@ export function buildLLMRequest(
     systemPrompt,
     stream: options?.stream ?? false,
     timeoutMs: options?.timeoutMs ?? 30_000,
-    metadata: buildMetadata(command, context),
+    metadata: {
+      ...buildMetadata(command, context),
+      wasTrimmed,
+      targetWordCount,
+    },
   };
 }
