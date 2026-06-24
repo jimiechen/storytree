@@ -4,10 +4,10 @@
 
 ## **当前任务状态**
 
-**最后更新时间**: 2026-06-22
-**当前任务来源**: `caiode/docs/tabbit/06/P3P4P5阶段目标.md#L356-385`
-**当前阶段**: Phase P3-D Model Routing + Cost Governance 已完成
-**下一步**: Phase P3 总体验收 / 进入 Phase P4
+**最后更新时间**: 2026-06-24
+**当前任务来源**: 用户直接反馈（P3 真实 DeepSeek 端到端验收）
+**当前阶段**: P3 真实 DeepSeek 端到端验收与测试报告补全 已完成
+**下一步**: P3 总体验收 Review / 处理 AIResultCard mock-default 与 MockMode 横幅问题 / 进入 Phase P4
 
 ---
 
@@ -122,6 +122,16 @@
     - `7b255efb` docs(P3-D): add Phase P3-D model routing and cost governance plan
     - `22d18e55` docs(rules): fill Phase P3-D plan commit hash in task source record
     - `01d70995` feat(P3-D): implement model routing and cost governance
+
+9. **P3 真实 DeepSeek 端到端验收与测试报告补全**
+   - 来源: 用户直接反馈（P3-D 后端到端测试超时无反应、测试报告未更新、无 DeepSeek 日志、看不到续写入口）
+   - 任务ID: P3-REAL-DEEPSEEK-E2E-ACCEPTANCE-20260624
+   - 状态: ✅ 已完成
+   - 结论: `[READY_FOR_PHASE_P3_REVIEW]`
+   - 验收报告: `docs/task-reports/2026-06-22/P3-REAL-LLM-MANUAL-TEST-CASES-20260622.md`
+   - 验证结果: `bun typecheck` 0 errors，`bun test src/novel` 424 pass / 0 fail / 2 skip，`bun run novel:precommit` PASSED，Playwright E2E 15/15 passed（含真实 DeepSeek 调用与录屏）
+   - 关键提交:
+     - `9ccd6d98` test(novel): P3 真实 DeepSeek 端到端验收与录屏
 
 5. **Phase P2 总体验收**
    - 来源: `caiode/docs/tabbit/06/P3P4P5阶段目标.md#L882-892`
