@@ -55,7 +55,7 @@
 | 2 | agent-responsibility-boundary.md | 已在工作空间文件首行声明角色与职责范围 | 0 |
 | 3 | code-file-limit.md | 新增/修改代码文件均 < 500 行 | 0 |
 | 4 | claude-code-migration-rules.md | 不涉及移植 | 0 |
-| 5 | github-workflow-rules.md | 已执行 Git 提交（待回填） | 0 |
+| 5 | github-workflow-rules.md | 已执行 Git 提交（`e2e8bf60` 代码 + `b2ade32d` 档案回填） | 0 |
 | 6 | Ralph.md | 测试通过后输出 READY_FOR_PHASE_P3_REVIEW | 0 |
 | 7 | task-completion-report.md | 工作空间文件含修复说明与验证结果 | 0 |
 | 8 | secretary-agent-rules.md | 不适用 | 0 |
@@ -66,7 +66,7 @@
 1. model-auto-file.md: 已更新 `workspaces/kimik27code/hellokimik27code.md`
 2. agent-responsibility-boundary.md: 工作空间文件首行已声明角色为前端工程师 / Novel 模块开发 Agent
 3. code-file-limit.md: `mock-mode-banner.tsx` 24 行等，所有新增/修改代码文件符合 < 500 行限制
-4. github-workflow-rules.md: 待提交 Mock 横幅与默认 mock profile 修复代码
+4. github-workflow-rules.md: 已提交 Mock 横幅与默认 mock profile 修复代码（`e2e8bf60`）与档案回填（`b2ade32d`）
 5. Ralph.md: 已完成 typecheck、novel:precommit、全量 novel 测试验证后输出 [READY_FOR_PHASE_P3_REVIEW]
 6. task-source-record.md: 已更新当前任务状态为 Mock 横幅与默认 mock profile 问题已修复
 
