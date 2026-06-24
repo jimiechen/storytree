@@ -33,9 +33,9 @@ describe('normalizeNovelCommand', () => {
     expect(normalized.branchId).toBe('main');
   });
 
-  it('defaults modelProfileId to mock-default', () => {
+  it('leaves modelProfileId undefined by default', () => {
     const normalized = normalizeNovelCommand(makeCommand());
-    expect(normalized.modelProfileId).toBe('mock-default');
+    expect(normalized.modelProfileId).toBeUndefined();
   });
 
   it('infers workflowId for chapter.generate', () => {

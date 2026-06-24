@@ -76,7 +76,7 @@ export function normalizeNovelCommand(command: ExtendableNovelCommand): Normaliz
 
     branchId: command.branchId ?? 'main',
     worktreeId: command.worktreeId,
-    modelProfileId: command.modelProfileId ?? 'mock-default',
+    modelProfileId: command.modelProfileId,
     skillId: command.skillId ?? inferSkillId(command.type),
     workflowId: command.workflowId ?? inferWorkflowId(command.type),
 

@@ -64,7 +64,7 @@ export interface NormalizedNovelCommand {
 
   branchId: string;
   worktreeId?: string;
-  modelProfileId: string;
+  modelProfileId?: string;
   skillId: string;
   workflowId: string;
 
