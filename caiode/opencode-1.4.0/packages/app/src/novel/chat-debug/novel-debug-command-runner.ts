@@ -26,6 +26,7 @@ import type {
 } from './novel-debug-log-types';
 import type { RealLLMExecutionAdapter } from '../adapters/real-llm-adapter';
 import type { NovelCommand } from '../workflows/novel-command';
+import type { AdapterFeatureGates } from '../adapters/adapter-types';
 
 export interface NovelDebugRunnerOptions {
   logStore?: NovelDebugLogStore;
@@ -35,6 +36,15 @@ export interface NovelDebugRunnerOptions {
 }
 
 const defaultAdapter = new MockAgentAdapter({ delayMultiplier: 0, silent: true });
+
+/** Chat Debug 默认使用 mock 路由，避免真实 LLM gate 开启时工作流测试超时。 */
+const defaultDebugGates: AdapterFeatureGates = {
+  realLLMEnabled: false,
+  targetLLMAdapterEnabled: false,
+  openCodeAdapterEnabled: false,
+  claudeCodeAdapterEnabled: false,
+  modelRoutingEnabled: false,
+};
 
 function createLogId(): string {
   return `ndl-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
@@ -206,7 +216,7 @@ export async function runNovelDebugCommand(
   }
 
   try {
-    const engine = createNovelWorkflowEngine({ adapter });
+    const engine = createNovelWorkflowEngine({ adapter, gates: defaultDebugGates });
 
     let finalOutput: unknown;
     let hasFailed = false;

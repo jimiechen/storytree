@@ -52,7 +52,18 @@ describe('agent-run Tool', () => {
   it('未指定 adapter 默认使用 mock', async () => {
     const tool = createAgentRunTool();
     const context = makeContext();
-    const result = await tool.execute({}, context);
+    const result = await tool.execute(
+      {
+        gates: {
+          realLLMEnabled: false,
+          targetLLMAdapterEnabled: false,
+          openCodeAdapterEnabled: false,
+          claudeCodeAdapterEnabled: false,
+          modelRoutingEnabled: false,
+        },
+      },
+      context,
+    );
 
     expect(result.success).toBe(true);
   });

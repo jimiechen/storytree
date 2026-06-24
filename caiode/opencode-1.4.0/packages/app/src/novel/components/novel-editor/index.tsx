@@ -1,11 +1,11 @@
-import { createSignal, Show, For, createEffect } from 'solid-js';
+import { createSignal, Show, For, createEffect, createMemo } from 'solid-js';
 import { useNovelNavigation } from '../../hooks/use-novel-navigation';
 import { useNovelProject } from '../../hooks/use-novel-project';
 import { useNovelChapters } from '../../hooks/use-novel-chapters';
-import { useAITask } from '../../hooks/use-ai-task';
 import { useAILog } from '../../hooks/use-ai-log';
 import { useChapterEditor } from '../../hooks/use-chapter-editor';
 import { useNovelWorkflow } from '../../hooks/use-novel-workflow';
+import type { AITask, AITaskInput, AITaskType, AITaskCostEstimate, NovelAgentResult } from '../../types/ai-task';
 import { MockModeBanner } from '../mock-mode-banner';
 import { EditorToolbar } from './editor-toolbar';
 import { EditorCanvas } from './editor-canvas';
@@ -18,7 +18,6 @@ import type { AIWritingCommand } from '../../types/editor';
 import type { WorkflowMutations } from '../../workflows/workflow-events';
 import type { ChapterInformationState } from '../../types/information-flow';
 import type { GenerationIssue } from '../../llm/generation-result-validator';
-import type { AITaskCostEstimate, NovelAgentResult } from '../../types/ai-task';
 
 /**
  * 创建 NovelEditor 内的 WorkflowMutations。
@@ -51,6 +50,47 @@ function createEditorMutations(chapters: ReturnType<typeof useNovelChapters>): W
   };
 }
 
+/** 把 UI command 映射为 AITaskType。 */
+function taskTypeFromCommand(command: 'continue' | 'rewrite' | 'expand' | 'polish' | 'summarize'): AITaskType {
+  switch (command) {
+    case 'continue':
+      return 'continue-writing';
+    case 'summarize':
+      return 'summarize-chapter';
+    case 'rewrite':
+    case 'expand':
+    case 'polish':
+    default:
+      return 'rewrite-selection';
+  }
+}
+
+/** 把 workflow 终态结果转换为 AIResultCard 可消费的 AITask。 */
+function resultToAITask(result: NovelAgentResult, input: AITaskInput): AITask {
+  return {
+    id: result.taskId,
+    type: input.type,
+    chapterId: input.chapterId,
+    status: result.status,
+    input: {
+      text: input.text,
+      selectedText: input.selectedText,
+    },
+    output: result.text
+      ? { text: result.text, wordCount: result.wordCount }
+      : undefined,
+    error: result.error,
+    duration: result.durationMs,
+    createdAt: new Date(),
+    completedAt: result.status === 'completed' ? new Date() : undefined,
+    modelProfileId: result.metadata?.modelProfileId,
+    modelId: result.metadata?.modelId,
+    estimatedCost: result.metadata?.estimatedCost as AITask['estimatedCost'],
+    fallback: result.fallback,
+    originalErrorCode: result.originalErrorCode,
+  };
+}
+
 /**
  * P3-D：将 NovelAgentResult 中的模型策略与 fallback 信息同步到 UI 信号。
  */
@@ -77,8 +117,9 @@ export function NovelEditor() {
   const chaptersHook = useNovelChapters(() => nav.projectId() ?? 'proj-001');
   const mutations = createEditorMutations(chaptersHook);
   const workflow = useNovelWorkflow(mutations);
-  const { tasks } = useAITask();
   const { logs, refetch: refetchLogs } = useAILog();
+  // P3-B / P3-C：记录最近一次 AI 命令的输入，用于把 workflow 结果渲染为 AIResultCard
+  const [lastTaskInput, setLastTaskInput] = createSignal<AITaskInput | null>(null);
   const editor = useChapterEditor(
     chaptersHook.selectedChapter()?.id ?? ''
   );
@@ -153,6 +194,12 @@ export function NovelEditor() {
   const handleAIContinue = async () => {
     const ch = chaptersHook.selectedChapter();
     if (!ch) return;
+    const input: AITaskInput = {
+      type: 'continue-writing',
+      chapterId: ch.id,
+      text: localContent(),
+    };
+    setLastTaskInput(input);
     try {
       const result = await workflow.runAIWritingCommand({
         chapterId: ch.id,
@@ -196,6 +243,13 @@ export function NovelEditor() {
     if (!ch) return;
 
     const selectedText = window.getSelection()?.toString() || undefined;
+    const input: AITaskInput = {
+      type: taskTypeFromCommand(cmd),
+      chapterId: ch.id,
+      text: localContent(),
+      selectedText,
+    };
+    setLastTaskInput(input);
     try {
       const result = await workflow.runAIWritingCommand({
         chapterId: ch.id,
@@ -226,12 +280,15 @@ export function NovelEditor() {
     }
   };
 
+  const currentTaskId = () =>
+    workflow.currentTask()?.result?.taskId ?? workflow.streamingTask()?.id ?? `task-${Date.now()}`;
+
   const handleAcceptAIResult = async (text: string) => {
     const ch = chaptersHook.selectedChapter();
     if (!ch) return;
     const suggestion = {
       id: `suggestion-${Date.now()}`,
-      taskId: tasks().at(-1)?.id ?? `task-${Date.now()}`,
+      taskId: currentTaskId(),
       text,
       status: 'accepted' as const,
       createdAt: new Date(),
@@ -245,15 +302,32 @@ export function NovelEditor() {
     if (!ch) return;
     await chaptersHook.addAISuggestion(ch.id, {
       id: `suggestion-save-${Date.now()}`,
-      taskId: tasks().at(-1)?.id ?? `task-${Date.now()}`,
+      taskId: currentTaskId(),
       text,
       status: 'saved' as const,
       createdAt: new Date(),
     });
   };
 
-  const chapterTasks = () =>
-    tasks().filter((t) => t.chapterId === chaptersHook.selectedChapter()?.id);
+  // P3-B / P3-C：AIResultCard 改为消费 workflow 任务，而非旧的 FakeAgentProvider。
+  // 运行中展示流式 preview；完成后展示带模型策略/fallback 元数据的终态结果卡片。
+  const chapterTasks = createMemo(() => {
+    const selectedId = chaptersHook.selectedChapter()?.id;
+    if (!selectedId) return [];
+
+    const streaming = workflow.streamingTask();
+    if (streaming && streaming.chapterId === selectedId && streaming.status === 'running') {
+      return [streaming];
+    }
+
+    const current = workflow.currentTask();
+    const input = lastTaskInput();
+    if (current?.result && input?.chapterId === selectedId) {
+      return [resultToAITask(current.result, input)];
+    }
+
+    return [];
+  });
 
   /** 格式化相对时间 */
   function formatRelativeTime(dateStr: string): string {

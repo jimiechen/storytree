@@ -66,7 +66,7 @@ export function AIResultCard(props: AIResultCardProps) {
   };
 
   return (
-    <div class="mx-6 my-3 bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+    <div data-testid="ai-result-card" class="mx-6 my-3 bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
       {/* 头部 */}
       <div class="px-4 py-3 flex items-center justify-between bg-gray-50 border-b border-gray-100">
         <div class="flex items-center gap-2">

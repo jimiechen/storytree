@@ -4,6 +4,7 @@
  */
 
 import type { NovelAgentAdapter } from '../../adapters/novel-agent-adapter';
+import type { AdapterFeatureGates } from '../../adapters/adapter-types';
 import type { NovelCommand } from '../novel-command';
 import type {
   NormalizedNovelCommand,
@@ -27,6 +28,8 @@ export interface NovelWorkflowEngine {
 export interface WorkflowEngineOptions {
   adapter?: NovelAgentAdapter;
   registry?: NovelToolRegistry;
+  /** 测试注入用：控制 agent-run 默认路由，避免真实 LLM gate 开启时测试超时 */
+  gates?: AdapterFeatureGates;
 }
 
 function createExecutionContext(
@@ -124,7 +127,12 @@ function applyStepOutputs(
 }
 
 export function createNovelWorkflowEngine(options?: WorkflowEngineOptions): NovelWorkflowEngine {
-  const registry = options?.registry ?? createBuiltinNovelToolRegistry(options?.adapter);
+  const registry =
+    options?.registry ??
+    createBuiltinNovelToolRegistry({
+      adapter: options?.adapter,
+      gates: options?.gates,
+    });
 
   return {
     async load(workflowId) {

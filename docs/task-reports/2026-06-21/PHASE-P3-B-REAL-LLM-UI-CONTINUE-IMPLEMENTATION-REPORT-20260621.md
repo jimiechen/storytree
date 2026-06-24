@@ -86,6 +86,10 @@
 - `bun test src/novel`: 362 pass / 0 fail
 - `bun run novel:precommit`: PASSED
 
+## 关键提交
+
+- `2971437d` feat(novel): P3-B integrate real LLM UI continue writing
+
 ## 未提交说明
 
 以下文件属于历史遗留或未跟踪文档，未纳入本次 P3-B 提交：

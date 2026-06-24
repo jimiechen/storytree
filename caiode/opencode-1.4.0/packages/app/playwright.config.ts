@@ -16,7 +16,7 @@ if (process.env.PLAYWRIGHT_JUNIT_OUTPUT) {
 export default defineConfig({
   testDir: "./e2e",
   outputDir: "./e2e/test-results",
-  timeout: 60_000,
+  timeout: 180_000,  // 2026-06-24: 真实 DeepSeek E2E 首次冷启动 + 网络往返需要更长时间
   expect: {
     timeout: 10_000,
   },
@@ -39,7 +39,7 @@ export default defineConfig({
     baseURL,
     trace: "on-first-retry",
     screenshot: "only-on-failure",
-    video: "retain-on-failure",
+    video: "on",  // 2026-06-23: 全程录屏记录测试验收过程
   },
   projects: [
     {

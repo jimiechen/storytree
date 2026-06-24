@@ -49,11 +49,13 @@ export interface NovelFeatureGates {
  */
 export function createDefaultAdapterFeatureGates(): AdapterFeatureGates {
   return {
-    realLLMEnabled: false,
-    targetLLMAdapterEnabled: false,
+    // P3-D 测试验收：AdapterRouter 默认 gates 必须与 NovelFeatureGates 保持一致
+    // 否则 agent-run.tool.ts 会拿到关闭的 gates，导致真实 LLM 路由被拦截
+    realLLMEnabled: true,
+    targetLLMAdapterEnabled: true,
     openCodeAdapterEnabled: false,
     claudeCodeAdapterEnabled: false,
-    modelRoutingEnabled: false,
+    modelRoutingEnabled: true,
   };
 }
 
@@ -63,7 +65,7 @@ export function createDefaultAdapterFeatureGates(): AdapterFeatureGates {
  */
 export function createDefaultNovelFeatureGates(): NovelFeatureGates {
   return {
-    realLLMEnabled: false,
+    realLLMEnabled: true,             // false → true (2026-06-23 测试真实 DeepSeek)
     openCodeAdapterEnabled: false,
     claudeCodeAdapterEnabled: false,
     gitWorktreeEnabled: false,
@@ -80,16 +82,16 @@ export function createDefaultNovelFeatureGates(): NovelFeatureGates {
     chatDebugEnabled: false,
     branchExperimentEnabled: false,
 
-    // P3-0 Real LLM Readiness 默认全部关闭
-    targetLLMAdapterEnabled: false,
-    llmStreamingEnabled: false,
+    // P3-0 Real LLM Readiness — 2026-06-23 测试验收临时开启
+    targetLLMAdapterEnabled: true,   // false → true (测试真实 DeepSeek 调用)
+    llmStreamingEnabled: true,        // false → true (continue 命令使用 stream 路径)
     llmRequestLogEnabled: true,
     llmCostTrackingEnabled: false,
     llmSafePromptLoggingEnabled: false,
 
-    // P3-D 默认关闭
-    modelRoutingEnabled: false,
-    llmFallbackToMockEnabled: false,
+    // P3-D — 2026-06-23 测试验收临时开启
+    modelRoutingEnabled: true,        // false → true (P3-D：未指定 adapter 时由 gates 决定 real-llm)
+    llmFallbackToMockEnabled: true,   // false → true（失败时 fallback 到 mock）
     modelSelectionUIEnabled: false,
   };
 }

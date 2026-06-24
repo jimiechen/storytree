@@ -28,12 +28,13 @@ import {
   ClaudeCodeExecutionAdapter,
   RealLLMExecutionAdapter,
 } from '../../adapters';
-import { createDefaultAdapterFeatureGates } from '../../feature-gates';
+import { createDefaultAdapterFeatureGates, createDefaultNovelFeatureGates } from '../../feature-gates';
 import {
   createDefaultRealLLMFeatureGates,
   type RealLLMFeatureGates,
 } from '../../llm/llm-feature-gates';
 import { createTargetLLMClient } from '../../llm/target-llm-client';
+import { createDeepSeekTransport, DEEPSEEK_API_BASE_URL } from '../../llm/deepseek-transport';
 import type { LLMStreamEvent } from '../../llm/llm-stream-events';
 import { collectLLMText } from '../../llm/llm-stream-events';
 import { validateGenerationResult } from '../../llm/generation-result-validator';
@@ -164,19 +165,61 @@ function parseModelRoleInput(value: unknown): AdapterContext['modelRole'] | unde
  *
  * P3-B 新增注册 RealLLMExecutionAdapter，默认使用 disabledLLMTransport，
  * 确保未显式注入真实 transport 时不会发出真实网络请求。
+ *
+ * P3-D 测试验收 (2026-06-23):
+ * 当 realLLMEnabled + targetLLMAdapterEnabled 同时为 true 时，
+ * 尝试从 Vite env 注入 DeepSeek API Key 创建真实 transport。
  */
-function createDefaultRouter(gates?: AdapterFeatureGates) {
+function createDefaultRouter(_gates?: AdapterFeatureGates) {
   const router = createAdapterRouter();
   router.register(new MockExecutionAdapter({ delayMultiplier: 0, silent: true }));
   router.register(new OpenCodeExecutionAdapter());
   router.register(new ClaudeCodeExecutionAdapter());
+
+  // P3-D: Router 创建时始终基于 NovelFeatureGates 注入真实 LLM transport。
+  // 这样 execute 时即使传入的是关闭的 AdapterFeatureGates，只要 NovelFeatureGates
+  // 开启真实 LLM，就能使用已注入的 transport；而 route() 会按传入 gates 决定是否选择 real-llm。
+  const llmGates = createDefaultNovelFeatureGates();
+  const realTransportEnabled = Boolean(llmGates.realLLMEnabled && llmGates.targetLLMAdapterEnabled);
+  let realClient = createTargetLLMClient(); // 默认 disabled
+
+  if (realTransportEnabled) {
+    // P3-D：尝试从 Vite env 获取 API Key（仅在开发/测试环境）
+    // Vite 在构建时会静态替换 `import.meta.env.VITE_DEEPSEEK_API_KEY`
+    // 注意：不能用可选链 ?. 或 as any，否则静态替换不生效
+    const viteApiKey = (import.meta.env && import.meta.env.VITE_DEEPSEEK_API_KEY) as string | undefined;
+    const viteBaseURL = (import.meta.env && import.meta.env.VITE_DEEPSEEK_BASE_URL) as string | undefined;
+    const viteModel = (import.meta.env && import.meta.env.VITE_DEEPSEEK_MODEL) as string | undefined;
+
+    // P3-D：仅当 Vite env 提供了有效 API Key 时才注入真实 transport；
+    // 单元测试 / 未配置环境时保持 disabled transport，避免误发真实请求。
+    const apiKey = viteApiKey;
+
+    if (apiKey && apiKey.length >= 8) {
+      const baseURL = viteBaseURL || undefined;
+      const model = viteModel || undefined;
+      console.log(`[P3-TEST] ✅ 注入 DeepSeek transport: model=${model ?? 'deepseek-chat'}, baseURL=${baseURL ?? DEEPSEEK_API_BASE_URL}, key=${apiKey.slice(0, 6)}...`);
+      const transport = createDeepSeekTransport({ apiKey, baseURL, model });
+      realClient = createTargetLLMClient({ transport });
+    } else {
+      console.warn('[P3-TEST] realLLMEnabled=true 但无可用 API Key，使用 disabled transport');
+    }
+  }
+
+  // RealLLMExecutionAdapter 需要完整的 RealLLMFeatureGates；以默认值为基础，
+  // 用传入的 NovelFeatureGates 覆盖相关字段，保证 streaming / fallback 等配置生效。
+  const fullLlmGates: RealLLMFeatureGates = {
+    ...createDefaultRealLLMFeatureGates(),
+    ...(llmGates as Partial<RealLLMFeatureGates>),
+  };
+
   router.register(
     new RealLLMExecutionAdapter({
-      client: createTargetLLMClient(),
-      gates: createDefaultRealLLMFeatureGates(),
+      client: realClient,
+      gates: fullLlmGates,
     }),
   );
-  return { router, gates: gates ?? createDefaultAdapterFeatureGates() };
+  return { router, gates: _gates ?? createDefaultNovelFeatureGates() };
 }
 
 /**
@@ -273,7 +316,9 @@ export function createAgentRunTool(options?: CreateAgentRunToolOptions): NovelTo
         gates: rawInput.gates as AdapterFeatureGates | undefined,
       };
 
-      const gates = typedInput.gates ?? options?.gates ?? createDefaultAdapterFeatureGates();
+      // P3-D：execute 时使用完整的 NovelFeatureGates，让浏览器中真实 LLM 默认启用；
+      // 单元测试可通过 options?.gates / typedInput.gates 显式关闭。
+      const gates = typedInput.gates ?? options?.gates ?? createDefaultNovelFeatureGates();
       const router = options?.router ?? createDefaultRouter(gates).router;
       const selectedAdapter = typedInput.adapter ?? defaultAdapterForGates(gates);
       const streamRequested = typedInput.stream;

@@ -3,7 +3,6 @@
  * @description Workflow Resolver：根据 NormalizedNovelCommand 找到 workflowId / 路径 — P2-A
  */
 
-import path from 'node:path';
 import type { NormalizedNovelCommand } from './workflow-definition-types';
 import { WorkflowResolveError } from './workflow-engine-errors';
 
@@ -32,15 +31,13 @@ export function resolveWorkflowId(command: NormalizedNovelCommand): string {
 }
 
 /**
- * 返回内置 YAML workflow 文件路径。
+ * 返回内置 YAML workflow 标识符。
+ *
+ * P3-D：浏览器环境不可用 node:path，改为返回 "${workflowId}.yaml" 字符串。
+ * loadWorkflowDefinition 已支持从该标识符解析 bundled YAML 或真实文件。
  */
 export function getBuiltinWorkflowPath(workflowId: string): string {
-  return path.resolve(
-    import.meta.dir,
-    '..',
-    'yaml',
-    `${workflowId}.yaml`,
-  );
+  return `${workflowId}.yaml`;
 }
 
 /**

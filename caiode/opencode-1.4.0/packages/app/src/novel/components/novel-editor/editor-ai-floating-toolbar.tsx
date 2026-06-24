@@ -23,6 +23,7 @@ export const EditorAIFloatingToolbar: Component<EditorAIFloatingToolbarProps> = 
 
   return (
     <div
+      data-testid="editor-ai-floating-toolbar"
       class="fixed z-50 bg-white border border-[#cbc3d7] rounded-xl shadow-[0_8px_24px_rgba(0,0,0,0.08)] px-3 py-2 flex items-center gap-1"
       style={{
         top: `${props.top}px`,

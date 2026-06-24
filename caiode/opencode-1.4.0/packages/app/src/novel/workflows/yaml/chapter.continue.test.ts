@@ -8,8 +8,11 @@ import { createNovelWorkflowEngine } from '../engine/workflow-engine';
 import { createNovelToolRegistry } from '../../plugins/novel-tool-registry';
 import { getBuiltinWorkflowPath } from '../engine/workflow-resolver';
 import { createAIWritingCommand } from '../novel-command';
+import { MockAgentAdapter } from '../../adapters/mock-agent-adapter';
 import type { NovelTool, ToolContext, ToolResult } from '../../plugins/novel-tool-types';
 import type { NovelAgentResult } from '../../types/ai-task';
+
+const testAdapter = new MockAgentAdapter({ delayMultiplier: 0, silent: true });
 
 describe('chapter.continue workflow', () => {
   it('P3-B 改造后通过 agent-run Tool 执行，并透传 adapter / stream / 上下文字段', async () => {
@@ -73,7 +76,7 @@ describe('chapter.continue workflow', () => {
   });
 
   it('YAML 文件加载为 agent-run Tool 与 version 2', async () => {
-    const engine = createNovelWorkflowEngine();
+    const engine = createNovelWorkflowEngine({ adapter: testAdapter });
     const def = await engine.load('chapter.continue');
     expect(def.id).toBe('chapter.continue');
     expect(def.version).toBe(2);
