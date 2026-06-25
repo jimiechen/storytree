@@ -6,8 +6,8 @@
 
 **最后更新时间**: 2026-06-25
 **当前任务来源**: 用户直接反馈（小说编辑器按钮交互割裂，按 PRD 逐页输出文档并修复 P0）
-**当前阶段**: PAGE-03 我的书架 E2E 验收测试已完成；下一页 PAGE-04 待启动
-**下一步**: PAGE-03 最终评审 / 进入 PAGE-04 创建新项目-基本信息
+**当前阶段**: PAGE-03 样式修复 + 后端数据存储方案已输出；待后端实施评审
+**下一步**: 后端数据存储方案评审 / 实施阶段 1（后端建表与路由）/ 进入 PAGE-04
 
 ---
 
@@ -125,7 +125,21 @@
 
 ### 2026-06-25 完成任务
 
-1. **PAGE-03 我的书架端到端真实交互实现**
+1. **PAGE-03 样式修复 + 后端数据存储方案输出**
+   - 来源: 用户直接反馈（先修复弹框样式：背景色/字体色/选中字体色，再输出后端数据存储方案）
+   - 任务ID: PAGE-03-STYLE-FIX-AND-BACKEND-STORAGE-PLAN-20260625
+   - 状态: ✅ 已完成
+   - 结论: `[READY_FOR_BACKEND_IMPLEMENTATION_REVIEW]`
+   - 方案文档: `docs/task-reports/2026-06-25/PAGE-03-BACKEND-STORAGE-PLAN-20260625.md`
+   - 调研报告: `docs/task-reports/2026-06-25/PAGE-03-REAL-DATA-INVESTIGATION-REPORT-20260625.md`
+   - 验证结果: `bun run typecheck` 通过（0 errors）
+   - 关键提交:
+     - `dd70fa1f` fix(PAGE-03): repair invisible modal/input styles and add backend storage plan（3 files, +1102/-33）
+   - 样式修复范围: 新建下拉容器、CreateMenuItem（hover 选中色 #6b38d4）、新建按钮、搜索框、ToolbarCircle、删除确认 Modal、撤销/签到 Toast、Skeleton/Error/NoMatch 状态组件
+   - 后端方案要点: 新建 `novel_project` 表（SQLite+drizzle）、8 个 REST API 端点（`/novel/project/*`）、FeatureGate 控制 mock→real 迁移、创建项目流程断裂修复方案
+   - 工作空间记录: `workspaces/kimik27code/hellokimik27code.md`
+
+2. **PAGE-03 我的书架端到端真实交互实现**
    - 来源: 用户直接反馈（小说编辑器按钮交互割裂，按 PRD 逐页输出文档并修复 P0）
    - 任务ID: PAGE-03-BOOKSHELF-E2E-20260625
    - 状态: ✅ 已完成
