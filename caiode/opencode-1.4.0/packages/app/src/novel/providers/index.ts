@@ -23,6 +23,12 @@ export interface INovelProjectProvider {
   getActiveProject(): Promise<Project | null>;
   searchProjects(keyword: string): Promise<Project[]>;
   createProject(input: CreateProjectInput): Promise<Project>;
+  /** 软删除项目（移入回收站） */
+  deleteProject(id: string): Promise<void>;
+  /** 恢复已删除项目 */
+  restoreProject(id: string): Promise<void>;
+  /** 列出已删除项目（回收站） */
+  listDeletedProjects(): Promise<Project[]>;
 }
 
 export interface INovelChapterProvider {

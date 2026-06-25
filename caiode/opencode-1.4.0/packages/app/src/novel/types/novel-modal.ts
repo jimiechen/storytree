@@ -13,4 +13,11 @@ export type NovelModal =
   | 'batch-generation'
   | 'settings'
   | 'guide-create'
-  | 'achievement-detail';
+  | 'achievement-detail'
+  | 'whats-new'
+  | 'ai-toolbox'
+  | 'trash'
+  | 'signin'
+  | 'activity'
+  | 'signing-review'
+  | 'delete-project-confirm';

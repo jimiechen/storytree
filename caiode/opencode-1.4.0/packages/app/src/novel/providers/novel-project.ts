@@ -8,6 +8,8 @@ export class NovelProjectProvider implements INovelProjectProvider {
   private projects = new Map<string, Project>(
     mockProjects.map(p => [p.id, { ...p }])
   );
+  /** 回收站：软删除的项目 */
+  private deletedProjects = new Map<string, Project>();
 
   async listProjects(): Promise<Project[]> {
     await mockDelay(100);
@@ -71,5 +73,34 @@ export class NovelProjectProvider implements INovelProjectProvider {
 
     this.projects.set(id, project);
     return { ...project };
+  }
+
+  async deleteProject(id: string): Promise<void> {
+    await mockDelay(120);
+    const project = this.projects.get(id);
+    if (!project) {
+      const e: ProviderError = { code: 'NOT_FOUND', message: `项目 ${id} 不存在` };
+      throw e;
+    }
+    this.projects.delete(id);
+    this.deletedProjects.set(id, { ...project, status: 'archived' });
+  }
+
+  async restoreProject(id: string): Promise<void> {
+    await mockDelay(100);
+    const project = this.deletedProjects.get(id);
+    if (!project) {
+      const e: ProviderError = { code: 'NOT_FOUND', message: `回收站中未找到项目 ${id}` };
+      throw e;
+    }
+    this.deletedProjects.delete(id);
+    this.projects.set(id, { ...project, status: project.status === 'archived' ? 'draft' : project.status });
+  }
+
+  async listDeletedProjects(): Promise<Project[]> {
+    await mockDelay(80);
+    return Array.from(this.deletedProjects.values())
+      .sort((a, b) => b.lastUpdated.getTime() - a.lastUpdated.getTime())
+      .map(p => ({ ...p }));
   }
 }

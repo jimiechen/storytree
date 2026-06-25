@@ -1,36 +1,112 @@
-import { Show, For } from 'solid-js';
+import { Show, For, createSignal, createMemo, onCleanup } from 'solid-js';
 import type { Component } from 'solid-js';
 import { useNovelProject } from '../../hooks/use-novel-project';
 import { useNovelView } from '../../hooks/use-novel-view';
 import { useNovelNavigation } from '../../hooks/use-novel-navigation';
+import { useAchievements } from '../../hooks/use-achievements';
+import { useProfile } from '../../hooks/use-profile';
+import { useFeatureGates } from '../../hooks/use-feature-gates';
 import type { Project } from '../../types';
 import { NovelAppLayout } from '../layout/novel-app-layout';
 import { NovelIcon } from '../layout/novel-icon';
 import { EmptyState } from './empty-state';
-import { FloatingWidgets } from './floating-widgets';
+import { FloatingWidgets, type FloatingWidgetData } from './floating-widgets';
+import { ProjectCard } from './project-card';
 
 /**
- * 书架页面 — Stitch 原型 02 返工版
+ * 书架页面 — PAGE-03 端到端实现
  *
- * 按 code.html 结构还原:
- * - SideNavBar + TopAppBar (via NovelAppLayout)
- * - 居中搜索框 + help 图标
- * - 工具栏圆形按钮 + 新建 + article/draft 徽标
- * - 大屏 2 列卡片网格 (grid-cols-1 lg:grid-cols-2)
- * - 右下角浮动组件
+ * 完整功能：加载/错误/无匹配三态、搜索防抖、4 彩圆 onClick、
+ * 新建下拉菜单、项目卡删除二次确认+撤销、浮动组件真实数据、响应式 4 列。
  */
 export const BookshelfPage: Component = () => {
-  const { filteredProjects, searchKeyword, setSearchKeyword, isLoadingList, refetchProjects } = useNovelProject();
+  const proj = useNovelProject();
   const { selectProject } = useNovelView();
   const nav = useNovelNavigation();
+  const ach = useAchievements();
+  const profile = useProfile();
+  const gates = useFeatureGates();
 
-  const projects = filteredProjects;
-  const isEmpty = () => projects().length === 0;
+  // 搜索防抖
+  const [searchInput, setSearchInput] = createSignal('');
+  let searchTimer: ReturnType<typeof setTimeout> | null = null;
+  const onSearchInput = (v: string) => {
+    setSearchInput(v);
+    if (searchTimer) clearTimeout(searchTimer);
+    searchTimer = setTimeout(() => proj.setSearchKeyword(v), 300);
+  };
+  onCleanup(() => { if (searchTimer) clearTimeout(searchTimer); });
 
-  const handleSelectProject = (projectId: string) => {
-    selectProject(projectId);
+  // 新建下拉菜单
+  const [createMenuOpen, setCreateMenuOpen] = createSignal(false);
+
+  // 删除确认 + 撤销 Toast
+  const [pendingDelete, setPendingDelete] = createSignal<Project | null>(null);
+  const [recentlyDeleted, setRecentlyDeleted] = createSignal<Project | null>(null);
+  let undoTimer: ReturnType<typeof setTimeout> | null = null;
+  onCleanup(() => { if (undoTimer) clearTimeout(undoTimer); });
+
+  // 签到反馈
+  const [signinToast, setSigninToast] = createSignal<string | null>(null);
+  let signinToastTimer: ReturnType<typeof setTimeout> | null = null;
+  onCleanup(() => { if (signinToastTimer) clearTimeout(signinToastTimer); });
+
+  const projects = proj.filteredProjects;
+  const isEmpty = createMemo(() => proj.allProjects().length === 0);
+  const isError = createMemo(() => proj.listError() !== null);
+
+  const handleSelectProject = (id: string) => {
+    selectProject(id);
     nav.openView('workspace');
   };
+
+  const handleDeleteClick = (id: string) => {
+    const target = proj.allProjects().find(p => p.id === id);
+    if (target) setPendingDelete(target);
+  };
+
+  const confirmDelete = async () => {
+    const target = pendingDelete();
+    if (!target) return;
+    try {
+      await proj.deleteProject(target.id);
+      setRecentlyDeleted(target);
+      setPendingDelete(null);
+      if (undoTimer) clearTimeout(undoTimer);
+      undoTimer = setTimeout(() => setRecentlyDeleted(null), 5000);
+    } catch {
+      // 错误已在 hook 中记录，Modal 不关闭让用户重试或取消
+    }
+  };
+
+  const handleUndoDelete = async () => {
+    const target = recentlyDeleted();
+    if (!target) return;
+    await proj.restoreProject(target.id);
+    setRecentlyDeleted(null);
+    if (undoTimer) clearTimeout(undoTimer);
+  };
+
+  const handleSignin = () => {
+    const reward = ach.signin();
+    if (reward > 0) {
+      setSigninToast(`签到成功！连续 ${ach.signinState().streak} 天，积分 +${reward}`);
+    } else {
+      setSigninToast('今日已签到，明日再来吧');
+    }
+    if (signinToastTimer) clearTimeout(signinToastTimer);
+    signinToastTimer = setTimeout(() => setSigninToast(null), 3000);
+  };
+
+  const floatingData = createMemo<FloatingWidgetData>(() => ({
+    signedToday: ach.signinState().signedToday,
+    signinStreak: ach.signinState().streak,
+    achievementCount: ach.stats().unlocked,
+    achievementTotal: ach.stats().total,
+    activityTitle: '活动 点击查看',
+    totalWords: (profile.user.stats.wordCount).toLocaleString(),
+    onlineUsers: '256',
+  }));
 
   const navItems = [
     { id: 'home', label: '首页', icon: 'home', onClick: () => {} },
@@ -46,217 +122,266 @@ export const BookshelfPage: Component = () => {
       topBar={{
         title: '我的书架',
         icon: 'book',
-        badge: `${projects().length}本`,
-        onRefresh: () => refetchProjects(),
+        badge: `${proj.allProjects().length}本`,
+        onRefresh: () => proj.refetchProjects(),
       }}
       onWriteNow={() => nav.openView('create-project')}
     >
-      {/* 搜索栏 */}
+      {/* 搜索栏 + 工具栏 */}
       <div class="mb-6 space-y-4">
         <div class="relative w-full max-w-2xl mx-auto">
-          <NovelIcon
-            name="search"
-            size={20}
-            class="absolute left-4 top-1/2 -translate-y-1/2 text-[#7b7486]"
-          />
+          <NovelIcon name="search" size={20} class="absolute left-4 top-1/2 -translate-y-1/2 text-[#7b7486]" />
           <input
             type="text"
             placeholder="搜索小说..."
-            value={searchKeyword()}
-            onInput={(e) => setSearchKeyword((e.target as HTMLInputElement).value)}
+            value={searchInput()}
+            onInput={(e) => onSearchInput((e.target as HTMLInputElement).value)}
+            onKeyDown={(e) => { if (e.key === 'Escape') { onSearchInput(''); } }}
             class="w-full bg-white border border-[#cbc3d7] rounded-full py-3 pl-12 pr-12 text-base focus:border-[#6b38d4] focus:ring-1 focus:ring-[#6b38d4] outline-none transition-all shadow-sm"
-            style={{ 'font-family': "'Work Sans', 'PingFang SC', sans-serif" }}
           />
-          <button class="absolute right-4 top-1/2 -translate-y-1/2 text-[#7b7486] hover:text-[#6b38d4] transition-colors">
+          <button
+            type="button"
+            onClick={() => nav.openView('tutorial')}
+            class="absolute right-4 top-1/2 -translate-y-1/2 text-[#7b7486] hover:text-[#6b38d4] transition-colors"
+            title="帮助教程"
+          >
             <NovelIcon name="help" size={20} />
           </button>
         </div>
 
         {/* 工具栏 */}
         <div class="flex flex-wrap items-center justify-center gap-3">
-          {/* 彩色圆形按钮 */}
-          <ToolbarCircle icon="bolt" bg="bg-[#e9ddff]" text="text-[#6b38d4]" />
-          <ToolbarCircle icon="grid_view" bg="bg-[#fff0e1]" text="text-[#9d4300]" />
-          <ToolbarCircle icon="description" bg="bg-[#e0ecff]" text="text-[#0058be]" />
-          <ToolbarCircle icon="check_circle" bg="bg-white" text="text-green-600" border />
+          <ToolbarCircle icon="bolt" bg="bg-[#e9ddff]" text="text-[#6b38d4]" title="更新内容" onClick={() => nav.openModal('whats-new')} />
+          <ToolbarCircle icon="grid_view" bg="bg-[#fff0e1]" text="text-[#9d4300]" title="教程" onClick={() => nav.openView('tutorial')} />
+          <ToolbarCircle
+            icon="description"
+            bg="bg-[#e0ecff]"
+            text="text-[#0058be]"
+            title="名字生成器"
+            disabled={!gates.nameGeneratorEnabled}
+            onClick={() => nav.openModal('settings')}
+          />
+          <ToolbarCircle
+            icon="auto_awesome"
+            bg="bg-white"
+            text="text-[#6b38d4]"
+            border
+            title="AI拆书工作室"
+            disabled={!gates.bookAnalysisEnabled}
+            onClick={() => nav.openModal('settings')}
+          />
 
-          {/* 新建按钮 */}
-          <button
-            onClick={() => nav.openView('create-project')}
-            class="bg-white border border-[#cbc3d7] text-[#6b38d4] rounded-full px-5 py-2 flex items-center gap-2 shadow-sm hover:shadow-md hover:border-[#6b38d4] transition-all text-sm font-medium ml-2 mr-2"
-          >
-            <NovelIcon name="add" size={16} />
-            新建
-          </button>
-
-          {/* AI 工具箱 */}
-          <ToolbarCircle icon="auto_awesome" bg="bg-white" text="text-[#6b38d4]" border />
-
-          {/* article / draft 双按钮带徽标 */}
-          <div class="flex items-center bg-white border border-[#cbc3d7] rounded-full p-1 shadow-sm">
-            <ToolbarMini icon="article" badge="2" badgeColor="bg-[#ba1a1a]" />
-            <div class="w-px h-4 bg-[#cbc3d7] mx-1" />
-            <ToolbarMini icon="draft" badge="5" badgeColor="bg-[#d5e3fd]" badgeText="text-[#494454]" />
+          {/* 新建下拉 */}
+          <div class="relative ml-2 mr-2">
+            <button
+              type="button"
+              onClick={() => setCreateMenuOpen(!createMenuOpen())}
+              class="bg-white border border-[#cbc3d7] text-[#6b38d4] rounded-full px-5 py-2 flex items-center gap-2 shadow-sm hover:shadow-md hover:border-[#6b38d4] transition-all text-sm font-medium"
+            >
+              <NovelIcon name="add" size={16} />
+              新建
+              <NovelIcon name={createMenuOpen() ? 'expand_less' : 'expand_more'} size={14} />
+            </button>
+            <Show when={createMenuOpen()}>
+              <div
+                class="absolute top-full mt-2 right-0 bg-white border border-[#cbc3d7] rounded-lg shadow-lg py-1 min-w-[160px] z-20"
+                onMouseLeave={() => setCreateMenuOpen(false)}
+              >
+                <CreateMenuItem label="简易创作 推荐" onClick={() => { setCreateMenuOpen(false); nav.openView('create-project'); }} />
+                <CreateMenuItem label="漫剧剧本" disabled={!gates.batchGenerationEnabled} onClick={() => { setCreateMenuOpen(false); nav.openView('create-project'); }} />
+                <CreateMenuItem label="短篇创作" disabled={!gates.batchGenerationEnabled} onClick={() => { setCreateMenuOpen(false); nav.openView('create-project'); }} />
+                <CreateMenuItem label="签约审核" disabled={!gates.paymentEnabled} onClick={() => { setCreateMenuOpen(false); nav.openModal('signing-review'); }} />
+              </div>
+            </Show>
           </div>
+
+          <ToolbarCircle icon="inventory_2" bg="bg-white" text="text-[#6b38d4]" border title="AI工具箱" onClick={() => nav.openModal('ai-toolbox')} />
+          <ToolbarCircle icon="delete_outline" bg="bg-white" text="text-[#7b7486]" border title="回收站" onClick={() => nav.openModal('trash')} />
         </div>
       </div>
 
       {/* 内容区 */}
-      <Show
-        when={!isEmpty()}
-        fallback={
-          <EmptyState
-            onCreateQuick={() => nav.openView('create-project')}
-            onCreateProject={() => nav.openView('create-project')}
-            onGuide={() => nav.openView('guide')}
-          />
-        }
-      >
-        {/* 2 列卡片网格 */}
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 max-w-5xl mx-auto pb-24">
-          <For each={projects()}>
-            {(project) => <ProjectCard project={project} onSelect={() => handleSelectProject(project.id)} />}
-          </For>
-        </div>
+      <Show when={!isError()} fallback={<ErrorState onRetry={() => proj.refetchProjects()} message={proj.listError()?.message ?? '加载失败'} />}>
+        <Show
+          when={proj.isLoadingList()}
+          fallback={
+            <Show
+              when={!isEmpty()}
+              fallback={
+                <Show
+                  when={!proj.isNoMatch()}
+                  fallback={<NoMatchState onClear={() => onSearchInput('')} />}
+                >
+                  <EmptyState
+                    onCreateQuick={() => nav.openView('create-project')}
+                    onCreateProject={() => nav.openView('create-project')}
+                    onGuide={() => nav.openView('guide')}
+                  />
+                </Show>
+              }
+            >
+              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 max-w-7xl mx-auto pb-24">
+                <For each={projects()}>
+                  {(project) => (
+                    <ProjectCard
+                      project={project}
+                      onSelect={handleSelectProject}
+                      onDelete={handleDeleteClick}
+                      isDeleting={proj.deleting() === project.id}
+                    />
+                  )}
+                </For>
+              </div>
+            </Show>
+          }
+        >
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 max-w-7xl mx-auto pb-24">
+            <For each={[1, 2, 3, 4, 5, 6, 7, 8]}>
+              {() => <SkeletonCard />}
+            </For>
+          </div>
+        </Show>
       </Show>
 
       {/* 浮动组件 */}
       <FloatingWidgets
-        data={{
-          signinDays: 1,
-          signinStreak: 7,
-          achievementCount: 12,
-          achievementTotal: 98,
-          activityTitle: '活动 点击查看',
-          totalWords: '134,053,060',
-          onlineUsers: '256',
-        }}
+        data={floatingData()}
+        onSignin={handleSignin}
+        onAchievements={() => nav.openView('achievements')}
+        onActivity={() => nav.openModal('activity')}
+        signing={false}
       />
+
+      {/* 删除确认 Modal */}
+      <Show when={pendingDelete()}>
+        {(target) => (
+          <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+            <div class="bg-white rounded-xl max-w-sm w-full mx-4 shadow-[0_8px_32px_rgba(0,0,0,0.12)]">
+              <header class="px-6 py-4 border-b border-[#cbc3d7]">
+                <h2 class="text-lg font-bold text-[#0d1c2f]">删除项目</h2>
+              </header>
+              <div class="p-6 text-sm text-[#494454]">
+                确定要删除《<span class="font-semibold text-[#0d1c2f]">{target().name}</span>》吗？
+                <p class="mt-2 text-xs text-[#7b7486]">项目将移入回收站，5 秒内可撤销。</p>
+              </div>
+              <footer class="px-6 py-4 border-t border-[#cbc3d7] flex justify-end gap-2">
+                <button type="button" onClick={() => setPendingDelete(null)} class="px-4 py-2 rounded-lg text-sm font-medium border border-[#cbc3d7] text-[#494454] hover:bg-[#f8f9ff]">
+                  取消
+                </button>
+                <button
+                  type="button"
+                  disabled={proj.deleting() === target().id}
+                  onClick={confirmDelete}
+                  class="px-4 py-2 rounded-lg text-sm font-medium bg-red-500 text-white hover:bg-red-600 disabled:opacity-50"
+                >
+                  <Show when={proj.deleting() !== target().id} fallback="删除中…">确认删除</Show>
+                </button>
+              </footer>
+            </div>
+          </div>
+        )}
+      </Show>
+
+      {/* 撤销 Toast */}
+      <Show when={recentlyDeleted()}>
+        {(target) => (
+          <div class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-[#1f1f2e] text-white px-4 py-3 rounded-lg shadow-lg flex items-center gap-3 text-sm">
+            <span>已删除《{target().name}》</span>
+            <button type="button" onClick={handleUndoDelete} class="text-[#a78bfa] font-medium hover:text-white">
+              撤销
+            </button>
+          </div>
+        )}
+      </Show>
+
+      {/* 签到 Toast */}
+      <Show when={signinToast()}>
+        <div class="fixed top-6 left-1/2 -translate-x-1/2 z-50 bg-[#6b38d4] text-white px-4 py-2 rounded-lg shadow-lg text-sm">
+          {signinToast()}
+        </div>
+      </Show>
     </NovelAppLayout>
   );
 };
 
 /* ---------- 子组件 ---------- */
 
-/** 工具栏圆形按钮 */
-function ToolbarCircle(props: { icon: string; bg: string; text: string; border?: boolean }) {
+function ToolbarCircle(props: { icon: string; bg: string; text: string; border?: boolean; title?: string; disabled?: boolean; onClick?: () => void }) {
   return (
     <button
+      type="button"
+      title={props.title}
+      disabled={props.disabled}
+      onClick={() => props.onClick?.()}
       class={`w-10 h-10 rounded-full flex items-center justify-center shadow-sm hover:shadow-md transition-all hover:-translate-y-0.5 ${props.bg} ${props.text} ${
         props.border ? 'border border-[#cbc3d7]' : ''
-      }`}
+      } disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:translate-y-0`}
     >
       <NovelIcon name={props.icon} size={18} />
     </button>
   );
 }
 
-/** 工具栏小型按钮（带徽标） */
-function ToolbarMini(props: {
-  icon: string;
-  badge: string;
-  badgeColor: string;
-  badgeText?: string;
-}) {
-  return (
-    <button class="w-8 h-8 rounded-full flex items-center justify-center hover:bg-[#eff4ff] text-[#494454] transition-colors relative">
-      <NovelIcon name={props.icon} size={14} />
-      <span
-        class={`absolute -top-1 -right-1 text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-bold ${props.badgeColor} ${
-          props.badgeText ?? 'text-white'
-        }`}
-      >
-        {props.badge}
-      </span>
-    </button>
-  );
-}
-
-/** 项目卡片 — Stitch 02 风格 */
-function ProjectCard(props: { project: Project; onSelect: () => void }) {
-  const p = props.project;
-  const genreColor = () => {
-    const map: Record<string, { from: string; to: string; text: string; border: string; bg: string }> = {
-      玄幻: { from: '#6b38d4', to: '#8455ef', text: '#6b38d4', border: '#6b38d4', bg: 'rgba(107,56,212,0.1)' },
-      奇幻: { from: '#0058be', to: '#2170e4', text: '#0058be', border: '#0058be', bg: 'rgba(0,88,190,0.1)' },
-      仙侠: { from: '#059669', to: '#34d399', text: '#059669', border: '#059669', bg: 'rgba(5,150,105,0.1)' },
-      科幻: { from: '#7c3aed', to: '#a78bfa', text: '#7c3aed', border: '#7c3aed', bg: 'rgba(124,58,237,0.1)' },
-      古言: { from: '#be185d', to: '#f472b6', text: '#be185d', border: '#be185d', bg: 'rgba(190,24,93,0.1)' },
-      都市: { from: '#0369a1', to: '#38bdf8', text: '#0369a1', border: '#0369a1', bg: 'rgba(3,105,161,0.1)' },
-      悬疑: { from: '#4338ca', to: '#818cf8', text: '#4338ca', border: '#4338ca', bg: 'rgba(67,56,202,0.1)' },
-      穿越: { from: '#c2410c', to: '#fb923c', text: '#c2410c', border: '#c2410c', bg: 'rgba(194,65,12,0.1)' },
-    };
-    return map[p.genre] ?? map['玄幻'];
-  };
-
-  const c = genreColor();
-  const firstChar = p.name.charAt(0);
-
+function CreateMenuItem(props: { label: string; onClick: () => void; disabled?: boolean }) {
   return (
     <button
-      data-testid="bookshelf-project-card"
-      onClick={props.onSelect}
-      class="bg-white rounded-xl border border-[#cbc3d7] shadow-sm hover:shadow-lg transition-all duration-300 p-4 flex gap-4 group text-left w-full"
+      type="button"
+      disabled={props.disabled}
+      onClick={props.onClick}
+      class="w-full text-left px-4 py-2 text-sm text-[#494454] hover:bg-[#eff4ff] hover:text-[#6b38d4] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
     >
-      {/* 封面 */}
-      <div
-        class="w-24 h-32 rounded-lg shadow-inner shrink-0 flex items-center justify-center overflow-hidden relative"
-        style={{ background: `linear-gradient(to bottom right, ${c.from}, ${c.to})` }}
-      >
-        <div class="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity" />
-        <span
-          class="text-white font-bold text-2xl opacity-50"
-          style={{ 'font-family': "'Plus Jakarta Sans', sans-serif" }}
-        >
-          {firstChar}
-        </span>
-      </div>
-
-      {/* 信息区 */}
-      <div class="flex flex-col flex-1 py-1">
-        <div class="flex justify-between items-start mb-1">
-          <h3
-            class="text-lg font-bold text-[#0d1c2f] group-hover:text-[#6b38d4] transition-colors"
-            style={{ 'font-family': "'Plus Jakarta Sans', sans-serif" }}
-          >
-            {p.name}
-          </h3>
-          <span
-            class="text-[10px] font-bold px-2 py-1 rounded-md border"
-            style={{ color: c.text, 'border-color': c.border, background: c.bg }}
-          >
-            {p.genre}
-          </span>
-        </div>
-
-        <p class="text-xs text-[#494454] mb-auto flex items-center gap-1">
-          <NovelIcon name="menu_book" size={14} />
-          共 {p.chapterCount} 章
-        </p>
-
-        <div class="flex items-center justify-between mt-4 pt-3 border-t border-[#d5e3fd]">
-          <div class="text-xs text-[#494454] flex items-center gap-1">
-            <NovelIcon name="text_snippet" size={16} />
-            {p.totalWordCount.toLocaleString()} 字
-          </div>
-          <div class="text-xs text-[#7b7486] flex items-center gap-1">
-            <NovelIcon name="history" size={14} />
-            {formatTime(p.lastUpdated)}
-          </div>
-        </div>
-      </div>
+      {props.label}
     </button>
   );
 }
 
-/** 格式化时间 */
-function formatTime(date: Date): string {
-  const now = new Date();
-  const diff = now.getTime() - new Date(date).getTime();
-  const hours = Math.floor(diff / (1000 * 60 * 60));
-  if (hours < 1) return '刚刚';
-  if (hours < 24) return `${hours}小时前`;
-  const days = Math.floor(hours / 24);
-  if (days < 30) return `${days}天前`;
-  return '很久以前';
+function SkeletonCard() {
+  return (
+    <div class="bg-white rounded-xl border border-[#cbc3d7] shadow-sm p-4 flex gap-4 animate-pulse">
+      <div class="w-24 h-32 rounded-lg bg-[#eff4ff] shrink-0" />
+      <div class="flex-1 space-y-2 py-1">
+        <div class="h-4 bg-[#eff4ff] rounded w-3/4" />
+        <div class="h-3 bg-[#eff4ff] rounded w-1/2" />
+        <div class="h-3 bg-[#eff4ff] rounded w-2/3 mt-auto" />
+      </div>
+    </div>
+  );
+}
+
+function ErrorState(props: { message: string; onRetry: () => void }) {
+  return (
+    <div class="flex flex-col items-center justify-center py-20 px-6" data-testid="bookshelf-error-state">
+      <div class="w-16 h-16 mb-4 rounded-full bg-red-50 flex items-center justify-center text-red-500">
+        <NovelIcon name="error" size={32} />
+      </div>
+      <h2 class="text-lg font-semibold text-[#0d1c2f] mb-1">加载失败</h2>
+      <p class="text-sm text-[#7b7486] mb-6">{props.message}</p>
+      <button
+        type="button"
+        onClick={props.onRetry}
+        class="px-5 py-2.5 rounded-lg text-white text-sm font-medium bg-[#6b38d4] hover:bg-[#8455ef] transition-colors"
+      >
+        重试
+      </button>
+    </div>
+  );
+}
+
+function NoMatchState(props: { onClear: () => void }) {
+  return (
+    <div class="flex flex-col items-center justify-center py-20 px-6" data-testid="bookshelf-no-match-state">
+      <div class="w-16 h-16 mb-4 rounded-full bg-[#eff4ff] flex items-center justify-center text-[#6b38d4]">
+        <NovelIcon name="search" size={32} />
+      </div>
+      <h2 class="text-lg font-semibold text-[#0d1c2f] mb-1">未匹配到相关小说</h2>
+      <p class="text-sm text-[#7b7486] mb-6">换个关键词试试吧</p>
+      <button
+        type="button"
+        onClick={props.onClear}
+        class="px-5 py-2.5 rounded-lg text-sm font-medium border border-[#cbc3d7] text-[#494454] bg-white hover:bg-[#f8f9ff] hover:border-[#6b38d4] transition-all"
+      >
+        清空搜索
+      </button>
+    </div>
+  );
 }
