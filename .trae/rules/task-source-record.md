@@ -6,8 +6,8 @@
 
 **最后更新时间**: 2026-06-25
 **当前任务来源**: 用户直接反馈（小说编辑器按钮交互割裂，按 PRD 逐页输出文档并修复 P0）
-**当前阶段**: PAGE-03 样式修复 + 后端数据存储方案已输出；待后端实施评审
-**下一步**: 后端数据存储方案评审 / 实施阶段 1（后端建表与路由）/ 进入 PAGE-04
+**当前阶段**: PAGE-03 后端阶段 1（建表与路由）已完成；待阶段 2（前端 HTTP Provider）
+**下一步**: 实施阶段 2（前端 HTTP Provider + FeatureGate + 创建项目流程修复）/ 进入 PAGE-04
 
 ---
 
@@ -125,7 +125,20 @@
 
 ### 2026-06-25 完成任务
 
-1. **PAGE-03 样式修复 + 后端数据存储方案输出**
+1. **PAGE-03 后端阶段 1 实施（建表与路由）**
+   - 来源: 用户确认方案，要求"开始实施方案阶段1"
+   - 任务ID: PAGE-03-BACKEND-PHASE1-20260625
+   - 状态: ✅ 已完成
+   - 结论: `[READY_FOR_PHASE_2_FRONTEND_HTTP_PROVIDER]`
+   - 验证结果: `bun run typecheck` 0 errors + `bun test src/novel/schema.test.ts` 18 pass / 0 fail
+   - 关键提交:
+     - `21f6f653` feat(novel): add backend novel project storage with REST API and DB schema（6 files, +609）
+   - 新建文件: novel-project.sql.ts（drizzle schema）、schema.ts（zod）、schema.test.ts（18 测试）、server/routes/novel-project.ts（8 API 端点）、migration.sql（建表）
+   - 修改文件: server/instance.ts（注册 /novel/project 路由）
+   - API 端点: GET /、GET /trash、GET /search、GET /:id、POST /、PATCH /:id、DELETE /:id、POST /:id/restore
+   - 工作空间记录: `workspaces/kimik27code/hellokimik27code.md`
+
+2. **PAGE-03 样式修复 + 后端数据存储方案输出**
    - 来源: 用户直接反馈（先修复弹框样式：背景色/字体色/选中字体色，再输出后端数据存储方案）
    - 任务ID: PAGE-03-STYLE-FIX-AND-BACKEND-STORAGE-PLAN-20260625
    - 状态: ✅ 已完成
