@@ -6,8 +6,8 @@
 
 **最后更新时间**: 2026-06-25
 **当前任务来源**: 用户直接反馈（小说编辑器按钮交互割裂，按 PRD 逐页输出文档并修复 P0）
-**当前阶段**: PAGE-03 我的书架端到端真实交互实现已完成；下一页 PAGE-04 待启动
-**下一步**: PAGE-03 评审 / 进入 PAGE-04 创建新项目-基本信息
+**当前阶段**: PAGE-03 我的书架 E2E 验收测试已完成；下一页 PAGE-04 待启动
+**下一步**: PAGE-03 最终评审 / 进入 PAGE-04 创建新项目-基本信息
 
 ---
 
@@ -136,6 +136,19 @@
      - `2fae5976` feat(PAGE-03): 实现我的书架页端到端真实交互（13 files, +1141/-428）
    - 工作空间记录: `workspaces/kimik27code/hellokimik27code.md`
    - 实施范围: 删除 4 个孤立组件、空态 onGuide 修复、4 彩圆 onClick、创建下拉菜单、删除流程+撤销 toast、浮动组件真实数据、三态+300ms 防抖、响应式 4 列
+
+2. **PAGE-03 我的书架 E2E 验收测试与录屏证据**
+   - 来源: 用户直接请求（执行 playwright 测试，输出测试证据录屏，验收 PAGE-03_bookshelf.md）
+   - 任务ID: PAGE-03-BOOKSHELF-E2E-ACCEPTANCE-20260625
+   - 状态: ✅ 已完成
+   - 结论: `[READY_FOR_PAGE-03_FINAL_REVIEW]`
+   - 验收报告: `docs/task-reports/2026-06-25/PAGE-03-E2E-ACCEPTANCE-REPORT-20260625.md`
+   - 验证结果: Playwright E2E 13/13 passed (3.0m) + .last-run.json status=passed + bun typecheck 0 errors + bun test src/novel 424 pass / 0 fail / 2 skip
+   - 测试证据: HTML 报告 `e2e/playwright-report/index.html`（含 13 个内嵌 .webm 录屏）+ 17 张关键步骤 PNG 截图
+   - 关键提交:
+     - `f207736d` test(PAGE-03): add E2E acceptance tests with video evidence and fix three-state bug（3 files, +574/-2）
+   - 测试覆盖: TC-BS-001/004/005/006/007/012/013/014/015/016/018/019 + 数据隔离性
+   - Bug 修复: 三态渲染逻辑 Bug（搜索无匹配时显示空白 grid）已修复并通过回归测试
 
 ### 2026-06-24 完成任务
 
