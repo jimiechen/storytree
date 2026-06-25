@@ -195,7 +195,7 @@ export const NovelProjectRoutes = lazy(() =>
             custom_settings: input.customSettings ?? null,
             time_created: now,
             time_updated: now,
-          }),
+          }).run(),
         )
         const created = Database.use((d) =>
           d.select().from(NovelProjectTable).where(eq(NovelProjectTable.id, id)).get(),
@@ -233,7 +233,7 @@ export const NovelProjectRoutes = lazy(() =>
         if (input.chapterCount !== undefined) update.chapter_count = input.chapterCount
         if (input.characterCount !== undefined) update.character_count = input.characterCount
         Database.use((d) =>
-          d.update(NovelProjectTable).set(update).where(eq(NovelProjectTable.id, id)),
+          d.update(NovelProjectTable).set(update).where(eq(NovelProjectTable.id, id)).run(),
         )
         const updated = Database.use((d) =>
           d.select().from(NovelProjectTable).where(eq(NovelProjectTable.id, id)).get(),
@@ -263,7 +263,8 @@ export const NovelProjectRoutes = lazy(() =>
           d
             .update(NovelProjectTable)
             .set({ deleted_at: now, status: "archived", time_updated: now })
-            .where(eq(NovelProjectTable.id, id)),
+            .where(eq(NovelProjectTable.id, id))
+            .run(),
         )
         return c.body(null, 204)
       },
@@ -293,7 +294,8 @@ export const NovelProjectRoutes = lazy(() =>
           d
             .update(NovelProjectTable)
             .set({ deleted_at: null, status: "draft", time_updated: now })
-            .where(eq(NovelProjectTable.id, id)),
+            .where(eq(NovelProjectTable.id, id))
+            .run(),
         )
         const restored = Database.use((d) =>
           d.select().from(NovelProjectTable).where(eq(NovelProjectTable.id, id)).get(),
