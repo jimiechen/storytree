@@ -206,10 +206,10 @@ export const BookshelfPage: Component = () => {
           when={proj.isLoadingList()}
           fallback={
             <Show
-              when={!isEmpty()}
+              when={!isEmpty() && !proj.isNoMatch()}
               fallback={
                 <Show
-                  when={!proj.isNoMatch()}
+                  when={isEmpty()}
                   fallback={<NoMatchState onClear={() => onSearchInput('')} />}
                 >
                   <EmptyState
