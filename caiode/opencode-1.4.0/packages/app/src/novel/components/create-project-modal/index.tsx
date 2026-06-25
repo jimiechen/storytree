@@ -119,7 +119,8 @@ export const CreateProjectModal: Component<CreateProjectModalProps> = (props) =>
       onClick={props.onCancel}
     >
       <div
-        class="bg-white w-full max-w-2xl rounded-xl shadow-[0_8px_24px_rgba(0,0,0,0.08)] border border-[#cbc3d7]/30 flex flex-col max-h-[90vh] overflow-hidden"
+        class="w-full max-w-2xl rounded-xl shadow-[0_8px_24px_rgba(0,0,0,0.08)] border border-[#cbc3d7]/30 flex flex-col max-h-[90vh] overflow-hidden"
+        style={{ 'background-color': '#ffffff' }}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}

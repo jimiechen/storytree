@@ -6,8 +6,8 @@
 
 **最后更新时间**: 2026-06-25
 **当前任务来源**: 用户直接反馈（小说编辑器按钮交互割裂，按 PRD 逐页输出文档并修复 P0）
-**当前阶段**: PAGE-03 后端阶段 1（建表与路由）已完成；待阶段 2（前端 HTTP Provider）
-**下一步**: 实施阶段 2（前端 HTTP Provider + FeatureGate + 创建项目流程修复）/ 进入 PAGE-04
+**当前阶段**: PAGE-03 后端阶段 3（Playwright E2E 测试 + FeatureGate 测试钩子 + 弹框样式 bug 修复）已完成
+**下一步**: PAGE-03 后端阶段 4（端到端真实后端集成验证，启动 opencode server + 前端）/ 进入 PAGE-04
 
 ---
 
@@ -176,6 +176,30 @@
      - `f207736d` test(PAGE-03): add E2E acceptance tests with video evidence and fix three-state bug（3 files, +574/-2）
    - 测试覆盖: TC-BS-001/004/005/006/007/012/013/014/015/016/018/019 + 数据隔离性
    - Bug 修复: 三态渲染逻辑 Bug（搜索无匹配时显示空白 grid）已修复并通过回归测试
+
+3. **PAGE-03 后端阶段 2 实施（前端 HTTP Provider + FeatureGate + 创建项目流程修复）**
+   - 来源: 用户要求"继续实施阶段2"
+   - 任务ID: PAGE-03-BACKEND-PHASE2-20260625
+   - 状态: ✅ 已完成
+   - 结论: `[READY_FOR_PHASE_3_E2E_INTEGRATION]`
+   - 验证结果: `bun run typecheck` 0 errors + `bun test src/novel` 424 pass / 0 fail / 2 skip / 1211 expect() calls + `bun run novel:precommit` PASSED
+   - 关键提交:
+     - `22eb113f` feat(novel): PAGE-03 backend phase 2 - HTTP provider + FeatureGate + create project flow fix（6 files, +198/-5）
+   - 新建文件: novel-project-http.ts（141 行，HTTP Provider，8 方法）
+   - 修改文件: feature-gates.ts（新增 realNovelBackendEnabled）、use-novel-project.ts（Provider 切换 + createProject）、novel-app-shell.tsx（创建项目流程修复）、providers-index.ts（导出）、provider-error.ts（REMOTE_ERROR）
+   - 工作空间记录: `workspaces/kimik27code/hellokimik27code.md`
+
+4. **PAGE-03 后端阶段 3 实施（Playwright E2E 测试 + FeatureGate 测试钩子 + 弹框样式 bug 修复）**
+   - 来源: 用户要求"继续阶段3"
+   - 任务ID: PAGE-03-BACKEND-PHASE3-20260625
+   - 状态: ✅ 已完成
+   - 结论: `[READY_FOR_PAGE-03_BACKEND_FINAL_REVIEW]`
+   - 验证结果: `bun run typecheck` 0 errors + `bun test src/novel` 424 pass / 0 fail / 2 skip / 1211 expect() calls + `bun run novel:precommit` PASSED + `bun test:e2e -- e2e/bookshelf/page-03-backend-integration.spec.ts` 7 passed (2.8m)
+   - 新建文件: e2e/bookshelf/page-03-backend-integration.spec.ts（387 行，7 个 E2E 测试用例）
+   - 修改文件: use-feature-gates.ts（E2E 测试钩子 window.__NOVEL_BACKEND_ENABLED__）、create-project-modal/index.tsx（修复弹框背景色 bug：bg-white 类因 Tailwind --color-*: initial 无效，改为内联样式）
+   - 测试覆盖: TC-BE-001~007（API 调用验证、持久化验证、视觉断言、回收站验证）
+   - Bug 修复: 3 个测试 bug（提交按钮选择器误匹配 TAB、弹框背景色查找逻辑、生产代码 bg-white 类无效）
+   - 工作空间记录: `workspaces/kimik27code/hellokimik27code.md`
 
 ### 2026-06-24 完成任务
 
