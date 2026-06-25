@@ -1,6 +1,9 @@
 import type { Component } from 'solid-js';
 import { Switch, Match } from 'solid-js';
 import { useNovelNavigation } from '../../hooks/use-novel-navigation';
+import { useNovelView } from '../../hooks/use-novel-view';
+import { useNovelProject } from '../../hooks/use-novel-project';
+import type { CreateProjectInput } from '../../types';
 import { BookshelfPage } from '../bookshelf';
 import { CreateProjectModal } from '../create-project-modal';
 import { Workspace } from '../novel-workspace';
@@ -15,6 +18,15 @@ import { NovelGuidePage } from '../novel-guide';
 
 export const NovelAppShell: Component = () => {
   const nav = useNovelNavigation();
+  const { selectProject } = useNovelView();
+  const { createProject } = useNovelProject();
+
+  /** 创建项目：调用 Provider 持久化 → 选中项目 → 跳转工作台 */
+  const handleCreateProject = async (input: CreateProjectInput) => {
+    const project = await createProject(input);
+    selectProject(project.id);
+    nav.openView('workspace');
+  };
 
   return (
     <div
@@ -34,7 +46,7 @@ export const NovelAppShell: Component = () => {
 
         <Match when={nav.currentView() === 'create-project'}>
           <CreateProjectModal
-            onSubmit={async () => nav.openView('workspace')}
+            onSubmit={handleCreateProject}
             onCancel={() => nav.openView('bookshelf')}
           />
           <div class="flex-1 opacity-30 pointer-events-none">

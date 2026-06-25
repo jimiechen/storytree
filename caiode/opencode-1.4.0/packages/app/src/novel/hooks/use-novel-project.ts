@@ -1,10 +1,33 @@
 import { createSignal, createResource, createMemo } from 'solid-js';
-import type { Project } from '../types';
-import { NovelProjectProvider } from '../providers/providers-index';
+import type { Project, CreateProjectInput } from '../types';
+import { NovelProjectProvider, NovelProjectHttpProvider } from '../providers/providers-index';
+import type { INovelProjectProvider } from '../providers/providers-index';
+import { useFeatureGates } from './use-feature-gates';
 
-const projectProvider = new NovelProjectProvider();
+/** Mock Provider 模块级单例（内存数据共享） */
+const mockProvider = new NovelProjectProvider();
+
+/** HTTP Provider 模块级单例（无状态，仅在 realNovelBackendEnabled 时使用） */
+let httpProvider: NovelProjectHttpProvider | null = null;
+
+function getHttpProvider(): NovelProjectHttpProvider {
+  if (!httpProvider) {
+    httpProvider = new NovelProjectHttpProvider({
+      baseURL: typeof window !== 'undefined' ? window.location.origin : 'http://localhost:4096',
+      directory: typeof window !== 'undefined'
+        ? new URLSearchParams(window.location.search).get('directory') ?? '.'
+        : '.',
+    });
+  }
+  return httpProvider;
+}
 
 export function useNovelProject() {
+  const gates = useFeatureGates();
+  const projectProvider: INovelProjectProvider = gates.realNovelBackendEnabled
+    ? getHttpProvider()
+    : mockProvider;
+
   const [projectId, setProjectId] = createSignal<string>('proj-001');
 
   const [project] = createResource(projectId, async (id) => {
@@ -41,6 +64,13 @@ export function useNovelProject() {
 
   const selectProject = (id: string) => setProjectId(id);
 
+  /** 创建项目 */
+  const createProject = async (input: CreateProjectInput): Promise<Project> => {
+    const created = await projectProvider.createProject(input);
+    await refetchProjects();
+    return created;
+  };
+
   /** 软删除项目：乐观更新 + 失败回滚 */
   const deleteProject = async (id: string): Promise<void> => {
     setDeleting(id);
@@ -76,6 +106,7 @@ export function useNovelProject() {
     setSearchKeyword,
     setProjectId,
     selectProject,
+    createProject,
     isLoading: () => project.loading,
     isLoadingList: () => projectsResource.loading,
     listError,

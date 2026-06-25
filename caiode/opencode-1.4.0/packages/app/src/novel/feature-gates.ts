@@ -41,6 +41,9 @@ export interface NovelFeatureGates {
   modelRoutingEnabled: boolean;
   llmFallbackToMockEnabled: boolean;
   modelSelectionUIEnabled: boolean;
+
+  // PAGE-03 Backend Storage — 后端真实数据存储
+  realNovelBackendEnabled: boolean;
 }
 
 /**
@@ -93,5 +96,8 @@ export function createDefaultNovelFeatureGates(): NovelFeatureGates {
     modelRoutingEnabled: true,        // false → true (P3-D：未指定 adapter 时由 gates 决定 real-llm)
     llmFallbackToMockEnabled: true,   // false → true（失败时 fallback 到 mock）
     modelSelectionUIEnabled: false,
+
+    // PAGE-03 Backend Storage — 默认关闭，开启后使用 HTTP Provider
+    realNovelBackendEnabled: false,
   };
 }

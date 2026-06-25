@@ -4,7 +4,8 @@ export type ProviderErrorCode =
   | 'DENIED'
   | 'QUOTA'
   | 'CONFLICT'
-  | 'UNAUTHORIZED';
+  | 'UNAUTHORIZED'
+  | 'REMOTE_ERROR';
 
 export interface ProviderError {
   code: ProviderErrorCode;
