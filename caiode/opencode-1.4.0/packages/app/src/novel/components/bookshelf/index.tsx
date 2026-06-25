@@ -137,7 +137,13 @@ export const BookshelfPage: Component = () => {
             value={searchInput()}
             onInput={(e) => onSearchInput((e.target as HTMLInputElement).value)}
             onKeyDown={(e) => { if (e.key === 'Escape') { onSearchInput(''); } }}
-            class="w-full bg-white border border-[#cbc3d7] rounded-full py-3 pl-12 pr-12 text-base focus:border-[#6b38d4] focus:ring-1 focus:ring-[#6b38d4] outline-none transition-all shadow-sm"
+            class="w-full rounded-full py-3 pl-12 pr-12 text-base outline-none transition-all"
+            style={{
+              'background-color': '#ffffff',
+              'border': '1px solid #cbc3d7',
+              'color': '#0d1c2f',
+              'box-shadow': '0 1px 2px 0 rgba(0,0,0,0.05)',
+            }}
           />
           <button
             type="button"
@@ -176,7 +182,13 @@ export const BookshelfPage: Component = () => {
             <button
               type="button"
               onClick={() => setCreateMenuOpen(!createMenuOpen())}
-              class="bg-white border border-[#cbc3d7] text-[#6b38d4] rounded-full px-5 py-2 flex items-center gap-2 shadow-sm hover:shadow-md hover:border-[#6b38d4] transition-all text-sm font-medium"
+              class="rounded-full px-5 py-2 flex items-center gap-2 transition-all text-sm font-medium"
+              style={{
+                'background-color': '#ffffff',
+                'border': '1px solid #cbc3d7',
+                'color': '#6b38d4',
+                'box-shadow': '0 1px 2px 0 rgba(0,0,0,0.05)',
+              }}
             >
               <NovelIcon name="add" size={16} />
               新建
@@ -184,7 +196,12 @@ export const BookshelfPage: Component = () => {
             </button>
             <Show when={createMenuOpen()}>
               <div
-                class="absolute top-full mt-2 right-0 bg-white border border-[#cbc3d7] rounded-lg shadow-lg py-1 min-w-[160px] z-20"
+                class="absolute top-full mt-2 right-0 rounded-lg py-1 min-w-[160px] z-20"
+                style={{
+                  'background-color': '#ffffff',
+                  'border': '1px solid #cbc3d7',
+                  'box-shadow': '0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05)',
+                }}
                 onMouseLeave={() => setCreateMenuOpen(false)}
               >
                 <CreateMenuItem label="简易创作 推荐" onClick={() => { setCreateMenuOpen(false); nav.openView('create-project'); }} />
@@ -255,24 +272,25 @@ export const BookshelfPage: Component = () => {
       {/* 删除确认 Modal */}
       <Show when={pendingDelete()}>
         {(target) => (
-          <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-            <div class="bg-white rounded-xl max-w-sm w-full mx-4 shadow-[0_8px_32px_rgba(0,0,0,0.12)]">
-              <header class="px-6 py-4 border-b border-[#cbc3d7]">
-                <h2 class="text-lg font-bold text-[#0d1c2f]">删除项目</h2>
+          <div class="fixed inset-0 z-50 flex items-center justify-center" style={{ 'background-color': 'rgba(0,0,0,0.4)', 'backdrop-filter': 'blur(4px)' }}>
+            <div class="rounded-xl max-w-sm w-full mx-4" style={{ 'background-color': '#ffffff', 'box-shadow': '0 8px 32px rgba(0,0,0,0.12)' }}>
+              <header class="px-6 py-4" style={{ 'border-bottom': '1px solid #cbc3d7' }}>
+                <h2 class="text-lg font-bold" style={{ color: '#0d1c2f' }}>删除项目</h2>
               </header>
-              <div class="p-6 text-sm text-[#494454]">
-                确定要删除《<span class="font-semibold text-[#0d1c2f]">{target().name}</span>》吗？
-                <p class="mt-2 text-xs text-[#7b7486]">项目将移入回收站，5 秒内可撤销。</p>
+              <div class="p-6 text-sm" style={{ color: '#494454' }}>
+                确定要删除《<span class="font-semibold" style={{ color: '#0d1c2f' }}>{target().name}</span>》吗？
+                <p class="mt-2 text-xs" style={{ color: '#7b7486' }}>项目将移入回收站，5 秒内可撤销。</p>
               </div>
-              <footer class="px-6 py-4 border-t border-[#cbc3d7] flex justify-end gap-2">
-                <button type="button" onClick={() => setPendingDelete(null)} class="px-4 py-2 rounded-lg text-sm font-medium border border-[#cbc3d7] text-[#494454] hover:bg-[#f8f9ff]">
+              <footer class="px-6 py-4 flex justify-end gap-2" style={{ 'border-top': '1px solid #cbc3d7' }}>
+                <button type="button" onClick={() => setPendingDelete(null)} class="px-4 py-2 rounded-lg text-sm font-medium" style={{ border: '1px solid #cbc3d7', color: '#494454', 'background-color': '#ffffff' }}>
                   取消
                 </button>
                 <button
                   type="button"
                   disabled={proj.deleting() === target().id}
                   onClick={confirmDelete}
-                  class="px-4 py-2 rounded-lg text-sm font-medium bg-red-500 text-white hover:bg-red-600 disabled:opacity-50"
+                  class="px-4 py-2 rounded-lg text-sm font-medium disabled:opacity-50"
+                  style={{ 'background-color': '#ef4444', color: '#ffffff' }}
                 >
                   <Show when={proj.deleting() !== target().id} fallback="删除中…">确认删除</Show>
                 </button>
@@ -285,9 +303,9 @@ export const BookshelfPage: Component = () => {
       {/* 撤销 Toast */}
       <Show when={recentlyDeleted()}>
         {(target) => (
-          <div class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-[#1f1f2e] text-white px-4 py-3 rounded-lg shadow-lg flex items-center gap-3 text-sm">
+          <div class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 px-4 py-3 rounded-lg flex items-center gap-3 text-sm" style={{ 'background-color': '#1f1f2e', color: '#ffffff', 'box-shadow': '0 10px 15px -3px rgba(0,0,0,0.1)' }}>
             <span>已删除《{target().name}》</span>
-            <button type="button" onClick={handleUndoDelete} class="text-[#a78bfa] font-medium hover:text-white">
+            <button type="button" onClick={handleUndoDelete} class="font-medium" style={{ color: '#a78bfa' }}>
               撤销
             </button>
           </div>
@@ -296,7 +314,7 @@ export const BookshelfPage: Component = () => {
 
       {/* 签到 Toast */}
       <Show when={signinToast()}>
-        <div class="fixed top-6 left-1/2 -translate-x-1/2 z-50 bg-[#6b38d4] text-white px-4 py-2 rounded-lg shadow-lg text-sm">
+        <div class="fixed top-6 left-1/2 -translate-x-1/2 z-50 px-4 py-2 rounded-lg text-sm" style={{ 'background-color': '#6b38d4', color: '#ffffff', 'box-shadow': '0 10px 15px -3px rgba(0,0,0,0.1)' }}>
           {signinToast()}
         </div>
       </Show>
@@ -307,15 +325,32 @@ export const BookshelfPage: Component = () => {
 /* ---------- 子组件 ---------- */
 
 function ToolbarCircle(props: { icon: string; bg: string; text: string; border?: boolean; title?: string; disabled?: boolean; onClick?: () => void }) {
+  // 颜色映射：从 Tailwind arbitrary value class 解析为 inline style
+  const colorMap: Record<string, string> = {
+    'text-[#6b38d4]': '#6b38d4',
+    'text-[#9d4300]': '#9d4300',
+    'text-[#0058be]': '#0058be',
+    'text-[#7b7486]': '#7b7486',
+  };
+  const bgMap: Record<string, string> = {
+    'bg-[#e9ddff]': '#e9ddff',
+    'bg-[#fff0e1]': '#fff0e1',
+    'bg-[#e0ecff]': '#e0ecff',
+    'bg-white': '#ffffff',
+  };
   return (
     <button
       type="button"
       title={props.title}
       disabled={props.disabled}
       onClick={() => props.onClick?.()}
-      class={`w-10 h-10 rounded-full flex items-center justify-center shadow-sm hover:shadow-md transition-all hover:-translate-y-0.5 ${props.bg} ${props.text} ${
-        props.border ? 'border border-[#cbc3d7]' : ''
-      } disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:translate-y-0`}
+      class="w-10 h-10 rounded-full flex items-center justify-center transition-all hover:-translate-y-0.5 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:translate-y-0"
+      style={{
+        'background-color': bgMap[props.bg] ?? '#ffffff',
+        'color': colorMap[props.text] ?? '#494454',
+        'border': props.border ? '1px solid #cbc3d7' : 'none',
+        'box-shadow': '0 1px 2px 0 rgba(0,0,0,0.05)',
+      }}
     >
       <NovelIcon name={props.icon} size={18} />
     </button>
@@ -323,12 +358,19 @@ function ToolbarCircle(props: { icon: string; bg: string; text: string; border?:
 }
 
 function CreateMenuItem(props: { label: string; onClick: () => void; disabled?: boolean }) {
+  const [hovered, setHovered] = createSignal(false);
   return (
     <button
       type="button"
       disabled={props.disabled}
       onClick={props.onClick}
-      class="w-full text-left px-4 py-2 text-sm text-[#494454] hover:bg-[#eff4ff] hover:text-[#6b38d4] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      class="w-full text-left px-4 py-2 text-sm transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+      style={{
+        'color': props.disabled ? '#7b7486' : (hovered() ? '#6b38d4' : '#494454'),
+        'background-color': hovered() && !props.disabled ? '#eff4ff' : 'transparent',
+      }}
     >
       {props.label}
     </button>
@@ -337,12 +379,12 @@ function CreateMenuItem(props: { label: string; onClick: () => void; disabled?: 
 
 function SkeletonCard() {
   return (
-    <div class="bg-white rounded-xl border border-[#cbc3d7] shadow-sm p-4 flex gap-4 animate-pulse">
-      <div class="w-24 h-32 rounded-lg bg-[#eff4ff] shrink-0" />
+    <div class="rounded-xl p-4 flex gap-4 animate-pulse" style={{ 'background-color': '#ffffff', border: '1px solid #cbc3d7', 'box-shadow': '0 1px 2px 0 rgba(0,0,0,0.05)' }}>
+      <div class="w-24 h-32 rounded-lg shrink-0" style={{ 'background-color': '#eff4ff' }} />
       <div class="flex-1 space-y-2 py-1">
-        <div class="h-4 bg-[#eff4ff] rounded w-3/4" />
-        <div class="h-3 bg-[#eff4ff] rounded w-1/2" />
-        <div class="h-3 bg-[#eff4ff] rounded w-2/3 mt-auto" />
+        <div class="h-4 rounded w-3/4" style={{ 'background-color': '#eff4ff' }} />
+        <div class="h-3 rounded w-1/2" style={{ 'background-color': '#eff4ff' }} />
+        <div class="h-3 rounded w-2/3 mt-auto" style={{ 'background-color': '#eff4ff' }} />
       </div>
     </div>
   );
@@ -351,15 +393,16 @@ function SkeletonCard() {
 function ErrorState(props: { message: string; onRetry: () => void }) {
   return (
     <div class="flex flex-col items-center justify-center py-20 px-6" data-testid="bookshelf-error-state">
-      <div class="w-16 h-16 mb-4 rounded-full bg-red-50 flex items-center justify-center text-red-500">
+      <div class="w-16 h-16 mb-4 rounded-full flex items-center justify-center" style={{ 'background-color': '#fef2f2', color: '#ef4444' }}>
         <NovelIcon name="error" size={32} />
       </div>
-      <h2 class="text-lg font-semibold text-[#0d1c2f] mb-1">加载失败</h2>
-      <p class="text-sm text-[#7b7486] mb-6">{props.message}</p>
+      <h2 class="text-lg font-semibold mb-1" style={{ color: '#0d1c2f' }}>加载失败</h2>
+      <p class="text-sm mb-6" style={{ color: '#7b7486' }}>{props.message}</p>
       <button
         type="button"
         onClick={props.onRetry}
-        class="px-5 py-2.5 rounded-lg text-white text-sm font-medium bg-[#6b38d4] hover:bg-[#8455ef] transition-colors"
+        class="px-5 py-2.5 rounded-lg text-sm font-medium transition-colors"
+        style={{ 'background-color': '#6b38d4', color: '#ffffff' }}
       >
         重试
       </button>
@@ -370,15 +413,16 @@ function ErrorState(props: { message: string; onRetry: () => void }) {
 function NoMatchState(props: { onClear: () => void }) {
   return (
     <div class="flex flex-col items-center justify-center py-20 px-6" data-testid="bookshelf-no-match-state">
-      <div class="w-16 h-16 mb-4 rounded-full bg-[#eff4ff] flex items-center justify-center text-[#6b38d4]">
+      <div class="w-16 h-16 mb-4 rounded-full flex items-center justify-center" style={{ 'background-color': '#eff4ff', color: '#6b38d4' }}>
         <NovelIcon name="search" size={32} />
       </div>
-      <h2 class="text-lg font-semibold text-[#0d1c2f] mb-1">未匹配到相关小说</h2>
-      <p class="text-sm text-[#7b7486] mb-6">换个关键词试试吧</p>
+      <h2 class="text-lg font-semibold mb-1" style={{ color: '#0d1c2f' }}>未匹配到相关小说</h2>
+      <p class="text-sm mb-6" style={{ color: '#7b7486' }}>换个关键词试试吧</p>
       <button
         type="button"
         onClick={props.onClear}
-        class="px-5 py-2.5 rounded-lg text-sm font-medium border border-[#cbc3d7] text-[#494454] bg-white hover:bg-[#f8f9ff] hover:border-[#6b38d4] transition-all"
+        class="px-5 py-2.5 rounded-lg text-sm font-medium transition-all"
+        style={{ border: '1px solid #cbc3d7', color: '#494454', 'background-color': '#ffffff' }}
       >
         清空搜索
       </button>
