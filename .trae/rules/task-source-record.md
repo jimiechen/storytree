@@ -6,8 +6,8 @@
 
 **最后更新时间**: 2026-06-25
 **当前任务来源**: 用户直接反馈（小说编辑器按钮交互割裂，按 PRD 逐页输出文档并修复 P0）
-**当前阶段**: PAGE-03 后端阶段 3（Playwright E2E 测试 + FeatureGate 测试钩子 + 弹框样式 bug 修复）已完成
-**下一步**: PAGE-03 后端阶段 4（端到端真实后端集成验证，启动 opencode server + 前端）/ 进入 PAGE-04
+**当前阶段**: PAGE-03 后端阶段 4（端到端真实后端集成验证 + drizzle-orm `.run()` 生产 bug 修复）已完成
+**下一步**: 进入 PAGE-04（创建新项目-基本信息）/ 用户确认
 
 ---
 
@@ -201,6 +201,19 @@
    - Bug 修复: 3 个测试 bug（提交按钮选择器误匹配 TAB、弹框背景色查找逻辑、生产代码 bg-white 类无效）
    - 关键提交:
      - `e16fa096` feat(novel): PAGE-03 backend phase 3 - E2E tests + FeatureGate test hook + modal bg fix（5 files, +486/-5）
+   - 工作空间记录: `workspaces/kimik27code/hellokimik27code.md`
+
+5. **PAGE-03 后端阶段 4 端到端真实后端集成验证**
+   - 来源: 用户要求"PAGE-03 后端阶段 4 — 启动 opencode server + 前端，端到端真实后端集成验证"
+   - 任务ID: PAGE-03-BACKEND-PHASE4-20260625
+   - 状态: ✅ 已完成
+   - 结论: `[READY_FOR_PAGE-04_REVIEW]`
+   - 验证结果: `bun run typecheck` 0 errors + `bun test src/novel` 424 pass / 0 fail / 2 skip / 1211 expect() calls + `bun run novel:precommit` PASSED + `bun run test:e2e -- --grep "TC-BE"` 7 passed (2.2m) + 真实 server CRUD 全部通过（端口 4096）
+   - 关键 bug 修复: drizzle-orm bun-sqlite `.run()` 缺失 — `db.insert().values()` 和 `db.update().set().where()` 返回查询构建器不执行 SQL，必须链式 `.run()`；4 处 mutation 全部修复（INSERT/UPDATE/DELETE/RESTORE）
+   - 真实 CRUD 验证: GET 200 / PATCH 200 / DELETE 204 / 双重删除 404 / 回收站列表 / restore 200
+   - 修改文件: novel-project.ts（4 处 `.run()` 添加）
+   - 关键提交:
+     - `54b5dfe7` fix(novel): add missing .run() to drizzle-orm mutations in novel-project routes（1 file, +6/-4）
    - 工作空间记录: `workspaces/kimik27code/hellokimik27code.md`
 
 ### 2026-06-24 完成任务
