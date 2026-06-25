@@ -199,6 +199,8 @@
    - 修改文件: use-feature-gates.ts（E2E 测试钩子 window.__NOVEL_BACKEND_ENABLED__）、create-project-modal/index.tsx（修复弹框背景色 bug：bg-white 类因 Tailwind --color-*: initial 无效，改为内联样式）
    - 测试覆盖: TC-BE-001~007（API 调用验证、持久化验证、视觉断言、回收站验证）
    - Bug 修复: 3 个测试 bug（提交按钮选择器误匹配 TAB、弹框背景色查找逻辑、生产代码 bg-white 类无效）
+   - 关键提交:
+     - `e16fa096` feat(novel): PAGE-03 backend phase 3 - E2E tests + FeatureGate test hook + modal bg fix（5 files, +486/-5）
    - 工作空间记录: `workspaces/kimik27code/hellokimik27code.md`
 
 ### 2026-06-24 完成任务

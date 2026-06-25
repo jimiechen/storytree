@@ -25,7 +25,7 @@
 | 2 | agent-responsibility-boundary.md | 已在工作空间文件首行声明角色为全栈工程师 / Novel 模块开发 Agent，职责范围明确 | 0 |
 | 3 | code-file-limit.md | 所有新建/修改代码文件均 < 500 行（最大 `page-03-backend-integration.spec.ts` 387 行 / `create-project-modal/index.tsx` 406 行） | 0 |
 | 4 | claude-code-migration-rules.md | 不涉及移植 | 0 |
-| 5 | github-workflow-rules.md | 待执行 Git 提交（本次会话内完成） | 0 |
+| 5 | github-workflow-rules.md | 已执行 Git 提交（`e16fa096`，5 files, +486/-5） | 0 |
 | 6 | Ralph.md | typecheck + 单元测试 + precommit + E2E 7/7 passed 通过后输出 [READY_FOR_PAGE-03_BACKEND_FINAL_REVIEW] | 0 |
 | 7 | task-completion-report.md | 工作空间文件含阶段 3 实施详情、文件清单、Exit Criteria 自评 | 0 |
 | 8 | secretary-agent-rules.md | 不适用 | 0 |
@@ -36,9 +36,9 @@
 1. model-auto-file.md: 已 prepend 阶段 3 实施 section 到 `workspaces/kimik27code/hellokimik27code.md`
 2. agent-responsibility-boundary.md: 工作空间文件首行声明角色为全栈工程师 / Novel 模块开发 Agent，越界写入 `packages/app/e2e/bookshelf/` 已申请
 3. code-file-limit.md: `page-03-backend-integration.spec.ts` 387 行（最大），所有文件 < 500 行
-4. github-workflow-rules.md: 待执行 Git 提交
+4. github-workflow-rules.md: 已提交（`e16fa096`），commit message 符合 conventional commits + novel scope；无关变更（screenshots/P3 测试报告/tabbit 文档）已正确排除
 5. Ralph.md: 已完成 typecheck、单元测试、precommit、E2E 7/7 验证后输出 [READY_FOR_PAGE-03_BACKEND_FINAL_REVIEW]
-6. task-source-record.md: 待更新当前阶段为阶段 3 已完成
+6. task-source-record.md: 已更新当前阶段为阶段 3 已完成并回填 commit hash
 
 ---
 
