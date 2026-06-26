@@ -148,6 +148,33 @@ async function waitForBookshelf(page: Page) {
   await page.waitForSelector(PROJECT_CARD, { timeout: 30_000 });
 }
 
+/**
+ * 在 6-Tab 创建项目弹窗中填写基本信息并导航到最后的"选择文件"Tab，
+ * 使"创建"提交按钮出现（仅在最后一个 Tab 显示）。
+ *
+ * 流程：简易创作 → 填书名+类型 → 点击"下一步" 5 次 → 到达"选择文件"Tab
+ */
+async function fillBasicInfoAndNavigateToLastTab(page: Page, name: string, genre: string) {
+  // 点击新建 → 简易创作
+  await page.locator(NEW_BUTTON).click();
+  await page.waitForTimeout(STEP_DELAY);
+  await page.getByRole('button', { name: /简易创作/ }).click();
+  await page.waitForTimeout(STEP_DELAY);
+
+  // 填写基本信息
+  await page.locator('input[placeholder="给你的小说起个名字"]').fill(name);
+  await page.waitForTimeout(STEP_DELAY);
+  await page.locator('select').first().selectOption(genre);
+  await page.waitForTimeout(STEP_DELAY);
+
+  // 导航 6-Tab：基本信息 → 主角设定 → 世界观 → 剧情总纲 → 自定义设定 → 选择文件
+  // 需点击"下一步" 5 次到达最后一个 Tab（选择文件），此时"创建"提交按钮才显示
+  for (let i = 0; i < 5; i++) {
+    await page.getByRole('button', { name: /下一步/ }).click();
+    await page.waitForTimeout(STEP_DELAY);
+  }
+}
+
 // ─── 测试套件 ────────────────────────────────────────────────
 test.describe('PAGE-03 后端集成 E2E', () => {
 
@@ -191,21 +218,11 @@ test.describe('PAGE-03 后端集成 E2E', () => {
       }
     });
 
-    // 点击新建 → 简易创作
-    await page.locator(NEW_BUTTON).click();
-    await page.waitForTimeout(STEP_DELAY);
-    await page.getByRole('button', { name: /简易创作/ }).click();
-    await page.waitForTimeout(STEP_DELAY);
+    // 6-Tab 弹窗：填写基本信息 + 导航到最后一个 Tab（选择文件）
+    await fillBasicInfoAndNavigateToLastTab(page, 'E2E测试小说', '科幻');
 
-    // 填写表单
-    await page.locator('input[placeholder="给你的小说起个名字"]').fill('E2E测试小说');
-    await page.waitForTimeout(STEP_DELAY);
-    await page.locator('select').first().selectOption('科幻');
-    await page.waitForTimeout(STEP_DELAY);
-
-    // 提交：使用 .last() 因为弹框内 TAB 按钮"创建新项目"也匹配 /创建/，
-    // 但提交按钮"auto_awesome 创建"在 DOM 中位于 TAB 按钮之后
-    await page.getByRole('button', { name: /创建|确定|提交|开始/ }).last().click();
+    // 提交：在最后一个 Tab 上，"创建"提交按钮才显示
+    await page.getByRole('button', { name: /创建$/ }).click();
     await page.waitForTimeout(STEP_DELAY);
 
     // 验证 POST 请求已发起
@@ -313,17 +330,11 @@ test.describe('PAGE-03 后端集成 E2E', () => {
   test('TC-BE-006 持久化：创建项目后刷新页面项目仍在', async ({ page }) => {
     await waitForBookshelf(page);
 
-    // 创建项目
-    await page.locator(NEW_BUTTON).click();
-    await page.waitForTimeout(STEP_DELAY);
-    await page.getByRole('button', { name: /简易创作/ }).click();
-    await page.waitForTimeout(STEP_DELAY);
-    await page.locator('input[placeholder="给你的小说起个名字"]').fill('持久化测试');
-    await page.waitForTimeout(STEP_DELAY);
-    await page.locator('select').first().selectOption('仙侠');
-    await page.waitForTimeout(STEP_DELAY);
-    // 提交按钮使用 .last()（与 TC-BE-002 相同原因：TAB 按钮"创建新项目"先匹配）
-    await page.getByRole('button', { name: /创建|确定|提交|开始/ }).last().click();
+    // 6-Tab 弹窗：填写基本信息 + 导航到最后一个 Tab（选择文件）
+    await fillBasicInfoAndNavigateToLastTab(page, '持久化测试', '仙侠');
+
+    // 提交：在最后一个 Tab 上，"创建"提交按钮才显示
+    await page.getByRole('button', { name: /创建$/ }).click();
     await page.waitForTimeout(STEP_DELAY);
 
     // 回到书架
@@ -374,9 +385,10 @@ test.describe('PAGE-03 后端集成 E2E', () => {
       .evaluate((el) => window.getComputedStyle(el).color);
     expect(labelColor).toBe('rgb(13, 28, 47)');
 
-    // 视觉断言：简易创作 tab 选中色 #6b38d4（text-[#6b38d4]）
-    const simpleTab = page.getByRole('button', { name: /简易创作/ }).first();
-    const tabColor = await simpleTab.evaluate((el) => {
+    // 视觉断言：基本信息 tab 选中色 #6b38d4（text-[#6b38d4]）
+    // 6-Tab 弹窗中默认激活第一个 Tab "基本信息"
+    const basicTab = page.getByRole('button', { name: /基本信息/ }).first();
+    const tabColor = await basicTab.evaluate((el) => {
       return window.getComputedStyle(el).color;
     });
     // 选中态字体色应为 #6b38d4 = rgb(107, 56, 212)

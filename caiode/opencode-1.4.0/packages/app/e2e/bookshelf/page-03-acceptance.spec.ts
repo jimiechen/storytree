@@ -88,21 +88,22 @@ test.describe('PAGE-03 我的书架 端到端验收', () => {
 
     const input = page.locator(SEARCH_INPUT);
     await input.fill('异兽');
-    await page.waitForTimeout(STEP_DELAY);
 
-    // 防抖期内（< 300ms）列表尚未变化
-    await page.waitForTimeout(100);
+    // 防抖期内（< 300ms）立即检查：列表尚未变化
     const beforeDebounce = await page.locator(PROJECT_CARD).count();
     // 防抖前过滤尚未触发（应保持原数量）
     expect(beforeDebounce).toBe(initialCount);
 
-    // 等待防抖结束（300ms + 余量）
-    await page.waitForTimeout(500);
+    // 等待防抖结束（300ms + 余量 = 800ms）
+    await page.waitForTimeout(800);
     await snapshot(page, 'tc-004-search-filtered');
 
     // 过滤后卡片数应 ≤ 初始数
     const afterDebounce = await page.locator(PROJECT_CARD).count();
     expect(afterDebounce).toBeLessThanOrEqual(initialCount);
+
+    // 录屏保留
+    await page.waitForTimeout(STEP_DELAY);
   });
 
   // ─── TC-BS-005 搜索无匹配显示无匹配态 ──────────────────────

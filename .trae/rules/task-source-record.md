@@ -5,9 +5,9 @@
 ## **当前任务状态**
 
 **最后更新时间**: 2026-06-26
-**当前任务来源**: 用户要求"先执行整体回测试，确保数据准确入库，开启有头浏览器，每一步录屏截图，输出测试报告"
-**当前阶段**: 创建新项目弹窗 6-Tab 整体回归 E2E 测试已完成（67 tests / 62 passed / 5 failed / 19.0m / 有头浏览器 + 全程录屏截图 + 测试报告）
-**下一步**: 用户确认是否修复 5 个失败测试 / 启动后端 opencode server 验证真实数据库入库 / 进入下一阶段（如章节编辑器）
+**当前任务来源**: 用户要求"修复 5 个失败测试的选择器/白名单/防抖时序问题 + 启动后端 opencode server 验证真实数据库入库"
+**当前阶段**: 5 个失败测试全部修复（5 passed, 3.1m）+ 真实数据库 CRUD 7 API 端点全部验证通过（GET/POST/PATCH/DELETE/trash/restore/双重删除404）
+**下一步**: 用户确认是否进入下一阶段（如章节编辑器）或其他优化任务
 
 ---
 
@@ -42,7 +42,23 @@
 
 ### 2026-06-26 完成任务
 
-1. **创建新项目弹窗 6-Tab 整体回归 E2E 测试**
+1. **5 个失败测试修复 + 真实数据库 CRUD 验证**
+   - 来源: 用户要求"修复 5 个失败测试的选择器/白名单/防抖时序问题 + 启动后端 opencode server 验证真实数据库入库"
+   - 任务ID: FIX-5-FAILED-TESTS-AND-REALDB-CRUD-20260626
+   - 状态: ✅ 已完成
+   - 结论: `[READY_FOR_FIX_REVIEW]`
+   - 验证结果:
+     - `bun run test:e2e -- --headed --workers=2 --grep "TC-BS-004|TC-BE-002|TC-BE-006|TC-BE-007|不应发起真实网络请求"` 5 passed (3.1m)
+     - 真实 server CRUD 全部通过（GET 200 / POST 201 / PATCH 200 / DELETE 204 / restore 200 / 双重删除 404）
+   - 修复内容:
+     - TC-BE-002/006: 选择器 `/^创建$/` → `/创建$/`（按钮 accessible name 含 NovelIcon 图标文本 "auto_awesome 创建"）
+     - TC-BS-004: 防抖时序（移除 fill 后 STEP_DELAY，防抖后等 800ms）
+     - TC-BE-007: "简易创作" tab 断言改为"基本信息" tab 断言
+     - bookshelf.spec.ts: Google Fonts 白名单（fonts.googleapis.com / fonts.gstatic.com / data:）
+   - 真实数据库验证: opencode server (端口 4096) + bun:sqlite + drizzle-orm，7 API 端点全部通过
+   - 修改文件: `page-03-backend-integration.spec.ts`（2 处选择器修复）
+
+2. **创建新项目弹窗 6-Tab 整体回归 E2E 测试**
    - 来源: 用户要求"先执行整体回测试，确保数据准确入库，开启有头浏览器，每一步录屏截图，输出测试报告"
    - 任务ID: E2E-REGRESSION-CREATE-PROJECT-20260626
    - 状态: ✅ 已完成

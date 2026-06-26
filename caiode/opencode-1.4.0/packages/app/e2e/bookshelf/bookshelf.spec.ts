@@ -143,7 +143,10 @@ test.describe("bookshelf - 数据隔离性验证", () => {
         !url.includes("127.0.0.1") &&
         !url.includes("localhost") &&
         !url.includes("vite") &&
-        !url.includes("node_modules")
+        !url.includes("node_modules") &&
+        !url.includes("fonts.googleapis.com") &&
+        !url.includes("fonts.gstatic.com") &&
+        !url.includes("data:")
       ) {
         externalRequests.push(url)
       }
@@ -154,10 +157,13 @@ test.describe("bookshelf - 数据隔离性验证", () => {
 
     // 书架使用 mock provider，不应请求外部 AI/后端服务
     // 注意：OpenCode 自身可能请求后端 health check 等，排除已知内部域名
+    // 白名单：Google Fonts / 静态资源 CDN / data URI 不算外部业务 API
     const suspicious = externalRequests.filter(
       (u) =>
         !u.includes("/global/") &&
-        !u.includes("/session/")
+        !u.includes("/session/") &&
+        !u.includes("fonts.googleapis.com") &&
+        !u.includes("fonts.gstatic.com")
     )
     expect(suspicious).toHaveLength(0)
   })

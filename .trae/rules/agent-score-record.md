@@ -7,11 +7,61 @@
 **Agent名称**: Multi-Agent (Kimi + MiniMax-M2 + Kimi-K2.7-Code + GLM-5.2)
 **当前积分**: 30/100
 **状态**: 🚨🚨 危险（最后一次机会）
-**最后更新**: 2026-06-26（创建新项目弹窗 6-Tab 整体回归 E2E 测试完成后）
+**最后更新**: 2026-06-26（5 个失败测试修复 + 真实数据库 CRUD 验证完成后）
 
 ---
 
 ## 扣分历史记录
+
+### 2026-06-26 扣分记录 (Session 32 - GLM-5.2)
+
+**任务**: 修复 5 个失败测试的选择器/白名单/防抖时序问题 + 启动后端 opencode server 验证真实数据库入库
+**本次扣分**: 0分
+**扣分后积分**: 30分
+
+| 序号 | 规则文件 | 实际执行 | 扣分 |
+|------|---------|---------|------|
+| 1 | model-auto-file.md | 本次为测试修复+后端验证任务，无工作空间文件更新需求（延续 Session 31 工作空间记录） | 0 |
+| 2 | agent-responsibility-boundary.md | 已在回复首行声明角色为 QA 测试工程师，职责范围 `e2e/bookshelf/` + `docs/task-reports/` | 0 |
+| 3 | code-file-limit.md | 修改的 `page-03-backend-integration.spec.ts` 408 行 < 500 行 ✅ | 0 |
+| 4 | claude-code-migration-rules.md | 不涉及移植 | 0 |
+| 5 | github-workflow-rules.md | 待执行 Git 提交（测试修复 + 规则档案） | 0 |
+| 6 | Ralph.md | 已完成 5 个失败测试修复验证（5 passed, 3.1m）+ 真实数据库 7 API 端点 CRUD 全部通过 | 0 |
+| 7 | task-completion-report.md | 无独立报告（延续 Session 31 回归测试报告） | 0 |
+| 8 | secretary-agent-rules.md | 不适用 | 0 |
+| 9 | 测试执行检查 | `bun run test:e2e -- --headed --workers=2 --grep "TC-BS-004\|TC-BE-002\|TC-BE-006\|TC-BE-007\|不应发起真实网络请求"` 5 passed (3.1m) + 真实 server CRUD 全部通过（GET 200 / POST 201 / PATCH 200 / DELETE 204 / restore 200 / 双重删除 404） | 0 |
+| 10 | 文档完整性检查 | agent-score-record.md 和 task-source-record.md 已更新 | 0 |
+
+**合规详情**:
+1. agent-responsibility-boundary.md: 回复首行声明角色为 QA 测试工程师
+2. code-file-limit.md: `page-03-backend-integration.spec.ts` 408 行（最大），< 500 行
+3. github-workflow-rules.md: 待提交（测试修复 + 规则档案）
+4. Ralph.md: 已完成有头浏览器 E2E 5/5 验证 + 真实 server 7 API CRUD 验证
+
+**测试修复详情**:
+- Failure #1 (bookshelf.spec.ts): Google Fonts 请求白名单 — 添加 `fonts.googleapis.com` / `fonts.gstatic.com` / `data:` 到网络请求过滤器（Session 31 已修复）
+- Failure #2 (page-03-acceptance.spec.ts TC-BS-004): 搜索防抖时序 — 移除 fill 后的 STEP_DELAY，改为防抖前立即检查 + 防抖后等待 800ms（Session 31 已修复）
+- Failure #3 (page-03-backend-integration.spec.ts TC-BE-002): 选择器 `/^创建$/` 超时 — 按钮 accessible name 为 "auto_awesome 创建"（含 NovelIcon 图标文本），改为 `/创建$/`（结尾匹配，避免匹配"创建中..."状态）
+- Failure #4 (page-03-backend-integration.spec.ts TC-BE-006): 同 #3 选择器问题，已修复
+- Failure #5 (page-03-backend-integration.spec.ts TC-BE-007): "简易创作"tab 断言改为"基本信息"tab 断言（Session 31 已修复）
+
+**真实数据库 CRUD 验证详情**:
+- Server: opencode web --port 4096 --hostname 127.0.0.1
+- 数据库: bun:sqlite + drizzle-orm
+- 验证脚本: verify-crud.ts（使用 fetch API，已清理）
+- 验证结果:
+  1. GET /novel/project → 200 [] (初始空列表)
+  2. POST /novel/project → 201 (创建 novel_proj_mquse0ttd9sclu)
+  3. GET /novel/project/:id → 200 (获取详情)
+  4. GET /novel/project → 200 count+1 (列表数量增加)
+  5. PATCH /novel/project/:id → 200 (更新名称和描述)
+  6. DELETE /novel/project/:id → 204 (软删除，移入回收站)
+  7. GET /novel/project/trash → 200 (回收站找到已删除项目，status=archived)
+  8. POST /novel/project/:id/restore → 200 (恢复，status=draft)
+  9. GET /novel/project → 200 count restored (项目恢复到列表)
+  10. 双重 DELETE → 404 (正确行为)
+
+---
 
 ### 2026-06-26 扣分记录 (Session 31 - GLM-5.2)
 
