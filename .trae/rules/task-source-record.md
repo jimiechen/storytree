@@ -4,10 +4,10 @@
 
 ## **当前任务状态**
 
-**最后更新时间**: 2026-06-25
-**当前任务来源**: 用户直接反馈（小说编辑器按钮交互割裂，按 PRD 逐页输出文档并修复 P0）
-**当前阶段**: PAGE-04 创建新项目-基本信息已完成（6-Tab 严格顺序导航 + 封面 localStorage + LLM 生成）
-**下一步**: 进入 PAGE-05（主角设定）/ 用户确认
+**最后更新时间**: 2026-06-26
+**当前任务来源**: 用户要求"继续，完成的时候E2E测试的时候，开启有头浏览器，测试playwright"
+**当前阶段**: PAGE-06 创建新项目-世界观已完成（3 下拉框 + LLM 生成 + 有头 E2E 10/10）
+**下一步**: 进入 PAGE-07（剧情总纲）/ 用户确认
 
 ---
 
@@ -40,7 +40,42 @@
 
 ## 已完成的任务
 
-### 2026-06-21 完成任务
+### 2026-06-26 完成任务
+
+1. **E2E 录屏优化（STEP_DELAY=2000 统一延迟）**
+   - 来源: 用户反馈"每个按钮操作，输入框输入文本都保留2秒，现在都是一闪而过，录屏完全看不清楚"
+   - 任务ID: E2E-RECORDING-OPT-20260626
+   - 状态: ✅ 已完成
+   - 结论: `[READY_FOR_E2E_RECORDING_OPT_REVIEW]`
+   - 修改范围: 4 个 E2E 测试文件添加 `STEP_DELAY=2000` 常量 + 每个用户操作（fill/click/selectOption/press/hover）后添加 2 秒延迟 + page-04/05 添加 vite 冷启动重试机制
+   - 验证结果: `bun run typecheck` 0 errors + 有头浏览器 E2E 16/16 passed（首次 14 pass/2 fail → 添加重试机制后 2 fail 全部 pass）
+   - 工作空间记录: `workspaces/kimik27code/hellokimik27code.md`
+
+2. **PAGE-06 创建新项目-世界观**
+   - 来源: 用户要求"继续，完成的时候E2E测试的时候，开启有头浏览器，测试playwright"（PAGE-05 完成后继续 PAGE-06）
+   - 任务ID: PAGE-06-CREATE-PROJECT-WORLDVIEW-20260626
+   - 状态: ✅ 已完成
+   - 结论: `[READY_FOR_PAGE-06_REVIEW]`
+   - 页级规范: `caiode/opencode-1.4.0/packages/app/src/novel/docs/page-specs/PAGE-06_create_project_worldview.md`
+   - 验证结果: `bun run typecheck` 0 errors + `bun test src/novel` 424 pass / 0 fail / 2 skip / 1211 expect() calls + `bun run novel:precommit` PASSED + `bun run test:e2e -- --headed` 10 passed (6.4m)
+   - 关键提交:
+     - `55314cd4` feat(novel): PAGE-06 创建新项目-世界观 3 下拉框 + LLM 生成 + 有头 E2E（6 files, +596/-7）
+   - 实施范围: PRD §3.6 全部 4 个元素（世界类型下拉框7选项/时代背景下拉框10选项/社会制度下拉框8选项/世界观描述）、WorldType/Era/SocialSystem 类型扩展、worldview-tab.tsx 组件化、LLM context 增强、录屏优化（每操作 2 秒延迟）、vite 冷启动重试机制、10 个有头浏览器 E2E 测试
+   - 工作空间记录: `workspaces/kimik27code/hellokimik27code.md`
+
+2. **PAGE-05 创建新项目-主角设定**
+   - 来源: 用户要求"继续，完成的时候E2E测试的时候，开启有头浏览器，测试playwright"
+   - 任务ID: PAGE-05-CREATE-PROJECT-PROTAGONIST-20260626
+   - 状态: ✅ 已完成
+   - 结论: `[READY_FOR_PAGE-05_REVIEW]`
+   - 页级规范: `caiode/opencode-1.4.0/packages/app/src/novel/docs/page-specs/PAGE-05_create_project_protagonist.md`
+   - 验证结果: `bun run typecheck` 0 errors + `bun test src/novel` 424 pass / 0 fail / 2 skip / 1211 expect() calls + `bun run novel:precommit` PASSED + `bun run test:e2e -- --headed` 8 passed (2.3m)
+   - 关键提交:
+     - `8f4344ca` feat(novel): PAGE-05 创建新项目-主角设定 9 元素 + 随机姓名 + 有头 E2E（6 files, +486/-43）
+   - 实施范围: PRD §3.5 全部 9 个元素（姓名+随机按钮/性别下拉男/女/其他/年龄/性格/外貌/背景/动机/软肋）、Gender 类型扩展、protagonist-tab.tsx 组件化、随机姓名生成器、8 个有头浏览器 E2E 测试
+   - 工作空间记录: `workspaces/kimik27code/hellokimik27code.md`
+
+### 2026-06-25 完成任务
 
 1. **Phase P3-0 Real LLM Readiness 实施**
    - 来源: `caiode/docs/tabbit/06/Phase P30+P3A.md`

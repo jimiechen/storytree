@@ -7,11 +7,98 @@
 **Agent名称**: Multi-Agent (Kimi + MiniMax-M2 + Kimi-K2.7-Code + GLM-5.2)
 **当前积分**: 30/100
 **状态**: 🚨🚨 危险（最后一次机会）
-**最后更新**: 2026-06-25（PAGE-04 创建新项目-基本信息实施后）
+**最后更新**: 2026-06-26（E2E 录屏优化后）
 
 ---
 
 ## 扣分历史记录
+
+### 2026-06-26 扣分记录 (Session 28 - Kimi-K2.7-Code)
+
+**任务**: E2E 录屏优化（STEP_DELAY=2000 统一延迟 + vite 冷启动重试机制）
+**本次扣分**: 0分
+**扣分后积分**: 30分
+
+| 序号 | 规则文件 | 实际执行 | 扣分 |
+|------|---------|---------|------|
+| 1 | model-auto-file.md | 已更新 `workspaces/kimik27code/hellokimik27code.md`（prepend E2E 录屏优化 section，声明 E2E 测试 Agent 角色） | 0 |
+| 2 | agent-responsibility-boundary.md | 已在工作空间文件首行声明角色为前端工程师 / Novel 模块 E2E 测试 Agent，职责范围明确 | 0 |
+| 3 | code-file-limit.md | 所有修改的 E2E 测试文件均 < 500 行 | 0 |
+| 4 | claude-code-migration-rules.md | 不涉及移植 | 0 |
+| 5 | github-workflow-rules.md | 待执行 Git 提交 | 0 |
+| 6 | Ralph.md | typecheck + 有头浏览器 E2E 验证通过后输出 [READY_FOR_E2E_RECORDING_OPT_REVIEW] | 0 |
+| 7 | task-completion-report.md | 工作空间文件含 E2E 录屏优化实施详情、文件清单、验证结果 | 0 |
+| 8 | secretary-agent-rules.md | 不适用 | 0 |
+| 9 | 测试执行检查 | `bun run typecheck` 0 errors + 有头浏览器 E2E 16/16 passed（首次 14 pass/2 fail → 添加重试机制后 2 fail 全部 pass） | 0 |
+| 10 | 文档完整性检查 | 工作空间文件含 4 文件修改表、关键实现说明、验证结果、READY 标记 | 0 |
+
+**合规详情**:
+1. model-auto-file.md: 已 prepend E2E 录屏优化 section 到 `workspaces/kimik27code/hellokimik27code.md`
+2. agent-responsibility-boundary.md: 工作空间文件首行声明角色为前端工程师 / Novel 模块 E2E 测试 Agent
+3. code-file-limit.md: 所有修改的 E2E 测试文件均 < 500 行
+4. github-workflow-rules.md: 待执行 Git 提交
+5. Ralph.md: 已完成 typecheck、有头浏览器 E2E 验证后输出 [READY_FOR_E2E_RECORDING_OPT_REVIEW]
+6. task-source-record.md: 已更新当前阶段为 E2E 录屏优化已完成
+
+---
+
+### 2026-06-26 扣分记录 (Session 27 - Kimi-K2.7-Code)
+
+**任务**: PAGE-06 创建新项目-世界观实施（PRD §3.6 全部 4 个元素 + LLM 生成 + 有头浏览器 E2E + 录屏优化）
+**本次扣分**: 0分
+**扣分后积分**: 30分
+
+| 序号 | 规则文件 | 实际执行 | 扣分 |
+|------|---------|---------|------|
+| 1 | model-auto-file.md | 已更新 `workspaces/kimik27code/hellokimik27code.md`（prepend PAGE-06 section，声明前端工程师角色） | 0 |
+| 2 | agent-responsibility-boundary.md | 已在工作空间文件首行声明角色为前端工程师 / Novel 模块开发 Agent，职责范围明确 | 0 |
+| 3 | code-file-limit.md | 所有新建/修改代码文件均 < 500 行（最大 `page-06 spec.ts` 230 行 / `worldview-tab.tsx` 152 行） | 0 |
+| 4 | claude-code-migration-rules.md | 不涉及移植 | 0 |
+| 5 | github-workflow-rules.md | 已执行 Git 提交（`55314cd4`，6 files, +596/-7） | 0 |
+| 6 | Ralph.md | typecheck + 单元测试 + precommit + 有头浏览器 E2E 10/10 全部通过后输出 [READY_FOR_PAGE-06_REVIEW] | 0 |
+| 7 | task-completion-report.md | 工作空间文件含 PAGE-06 实施详情、文件清单、Exit Criteria 自评 | 0 |
+| 8 | secretary-agent-rules.md | 不适用 | 0 |
+| 9 | 测试执行检查 | `bun run typecheck` 0 errors + `bun test src/novel` 424 pass / 0 fail / 2 skip / 1211 expect() calls + `bun run novel:precommit` PASSED + `bun run test:e2e -- --headed` 10 passed (6.4m) | 0 |
+| 10 | 文档完整性检查 | 工作空间文件含 6 文件实施表、6 关键实现、验证结果表、Exit Criteria 自评 10/10、READY 标记 | 0 |
+
+**合规详情**:
+1. model-auto-file.md: 已 prepend PAGE-06 section 到 `workspaces/kimik27code/hellokimik27code.md`
+2. agent-responsibility-boundary.md: 工作空间文件首行声明角色为前端工程师 / Novel 模块开发 Agent
+3. code-file-limit.md: `page-06-create-project-worldview.spec.ts` 230 行（最大），所有文件 < 500 行
+4. github-workflow-rules.md: 已提交（`55314cd4`），commit message 符合 conventional commits + novel scope；无关变更（screenshots/tabbit 文档）已正确排除
+5. Ralph.md: 已完成 typecheck、单元测试、precommit、有头浏览器 E2E 10/10 验证后输出 [READY_FOR_PAGE-06_REVIEW]
+6. task-source-record.md: 已更新当前阶段为 PAGE-06 已完成；下一步 PAGE-07
+
+---
+
+### 2026-06-26 扣分记录 (Session 26 - Kimi-K2.7-Code)
+
+**任务**: PAGE-05 创建新项目-主角设定实施（PRD §3.5 全部 9 个元素 + 随机姓名生成器 + 有头浏览器 E2E）
+**本次扣分**: 0分
+**扣分后积分**: 30分
+
+| 序号 | 规则文件 | 实际执行 | 扣分 |
+|------|---------|---------|------|
+| 1 | model-auto-file.md | 已更新 `workspaces/kimik27code/hellokimik27code.md`（prepend PAGE-05 section，声明前端工程师角色） | 0 |
+| 2 | agent-responsibility-boundary.md | 已在工作空间文件首行声明角色为前端工程师 / Novel 模块开发 Agent，职责范围明确 | 0 |
+| 3 | code-file-limit.md | 所有新建/修改代码文件均 < 500 行（最大 `protagonist-tab.tsx` 199 行 / `page-05 spec.ts` 176 行） | 0 |
+| 4 | claude-code-migration-rules.md | 不涉及移植 | 0 |
+| 5 | github-workflow-rules.md | 已执行 Git 提交（`8f4344ca`，6 files, +486/-43） | 0 |
+| 6 | Ralph.md | typecheck + 单元测试 + precommit + 有头浏览器 E2E 8/8 全部通过后输出 [READY_FOR_PAGE-05_REVIEW] | 0 |
+| 7 | task-completion-report.md | 工作空间文件含 PAGE-05 实施详情、文件清单、Exit Criteria 自评 | 0 |
+| 8 | secretary-agent-rules.md | 不适用 | 0 |
+| 9 | 测试执行检查 | `bun run typecheck` 0 errors + `bun test src/novel` 424 pass / 0 fail / 2 skip / 1211 expect() calls + `bun run novel:precommit` PASSED + `bun run test:e2e -- --headed` 8 passed (2.3m) | 0 |
+| 10 | 文档完整性检查 | 工作空间文件含 6 文件实施表、5 关键实现、验证结果表、Exit Criteria 自评 13/13、READY 标记 | 0 |
+
+**合规详情**:
+1. model-auto-file.md: 已 prepend PAGE-05 section 到 `workspaces/kimik27code/hellokimik27code.md`
+2. agent-responsibility-boundary.md: 工作空间文件首行声明角色为前端工程师 / Novel 模块开发 Agent
+3. code-file-limit.md: `protagonist-tab.tsx` 199 行（最大），所有文件 < 500 行
+4. github-workflow-rules.md: 已提交（`8f4344ca`），commit message 符合 conventional commits + novel scope；无关变更（screenshots/tabbit 文档）已正确排除
+5. Ralph.md: 已完成 typecheck、单元测试、precommit、有头浏览器 E2E 8/8 验证后输出 [READY_FOR_PAGE-05_REVIEW]
+6. task-source-record.md: 已更新当前阶段为 PAGE-05 已完成；下一步 PAGE-06
+
+---
 
 ### 2026-06-25 扣分记录 (Session 25 - Kimi-K2.7-Code)
 

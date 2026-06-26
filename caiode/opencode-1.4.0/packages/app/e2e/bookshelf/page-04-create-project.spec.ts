@@ -19,12 +19,24 @@ import { test, expect, type Page } from '@playwright/test';
  */
 
 const CREATE_PROJECT_URL = '/novel?view=create-project';
+const STEP_DELAY = 2000; // 每个操作后保留 2 秒，确保录屏清晰
 
 // ─── Helper ──────────────────────────────────────────────────
 async function gotoCreateProject(page: Page) {
-  await page.goto(CREATE_PROJECT_URL);
-  await page.waitForLoadState('domcontentloaded');
+  // 重试机制：vite dev server 冷启动时首次访问可能 ERR_ABORTED
+  let retries = 3;
+  while (retries > 0) {
+    try {
+      await page.goto(CREATE_PROJECT_URL, { waitUntil: 'domcontentloaded', timeout: 60_000 });
+      break;
+    } catch (e) {
+      retries--;
+      if (retries === 0) throw e;
+      await page.waitForTimeout(3000);
+    }
+  }
   await page.waitForSelector('h2:has-text("创建新项目")', { timeout: 30_000 });
+  await page.waitForTimeout(STEP_DELAY);
 }
 
 async function snapshot(page: Page, name: string) {
@@ -95,7 +107,7 @@ test.describe('PAGE-04 创建新项目-基本信息 端到端验收', () => {
   test('TC-P04-005 书名必填校验：空名无法进入下一步', async ({ page }) => {
     // 直接点击下一步（不填书名）
     await page.getByRole('button', { name: '下一步' }).click();
-    await page.waitForTimeout(300);
+    await page.waitForTimeout(STEP_DELAY);
     // 仍然停留在基本信息 Tab，书名输入可见
     await expect(page.locator('input[placeholder="给你的小说起个名字"]')).toBeVisible();
     // 错误提示
@@ -107,9 +119,10 @@ test.describe('PAGE-04 创建新项目-基本信息 端到端验收', () => {
   test('TC-P04-006 填写后下一步切换到主角设定 Tab', async ({ page }) => {
     // 填写书名
     await page.locator('input[placeholder="给你的小说起个名字"]').fill('E2E测试小说');
+    await page.waitForTimeout(STEP_DELAY);
     // 点击下一步
     await page.getByRole('button', { name: '下一步' }).click();
-    await page.waitForTimeout(300);
+    await page.waitForTimeout(STEP_DELAY);
     // 切换到主角设定 Tab，应显示姓名输入
     await expect(page.locator('input[placeholder="主角名字"]')).toBeVisible();
     // 主角设定 Tab 应可点击（已到达）
@@ -123,15 +136,16 @@ test.describe('PAGE-04 创建新项目-基本信息 端到端验收', () => {
   test('TC-P04-007 上一步按钮返回基本信息', async ({ page }) => {
     // 填写书名 → 下一步 → 上一步
     await page.locator('input[placeholder="给你的小说起个名字"]').fill('E2E测试小说');
+    await page.waitForTimeout(STEP_DELAY);
     await page.getByRole('button', { name: '下一步' }).click();
-    await page.waitForTimeout(300);
+    await page.waitForTimeout(STEP_DELAY);
     await expect(page.locator('input[placeholder="主角名字"]')).toBeVisible();
 
     // 上一步按钮应可用
     const prevButton = page.getByRole('button', { name: '上一步' });
     await expect(prevButton).toBeEnabled();
     await prevButton.click();
-    await page.waitForTimeout(300);
+    await page.waitForTimeout(STEP_DELAY);
     // 回到基本信息，书名输入可见
     await expect(page.locator('input[placeholder="给你的小说起个名字"]')).toBeVisible();
     // 书名应保留
@@ -142,7 +156,7 @@ test.describe('PAGE-04 创建新项目-基本信息 端到端验收', () => {
   // ─── TC-P04-008 取消按钮返回书架 ──────────────────────────
   test('TC-P04-008 取消按钮返回书架', async ({ page }) => {
     await page.getByRole('button', { name: '取消' }).click();
-    await page.waitForTimeout(500);
+    await page.waitForTimeout(STEP_DELAY);
     // URL 回到 bookshelf
     await expect(page).toHaveURL(/view=bookshelf/, { timeout: 10_000 });
     await snapshot(page, 'tc-008-cancel');

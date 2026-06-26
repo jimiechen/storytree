@@ -42,6 +42,7 @@ const TOOLBAR_BOOK_ANALYSIS = 'button[title="AI拆书工作室"]';
 const TOOLBAR_AI_TOOLBOX = 'button[title="AI工具箱"]';
 const TOOLBAR_TRASH = 'button[title="回收站"]';
 const HELP_BUTTON = 'button[title="帮助教程"]';
+const STEP_DELAY = 2000; // 每个操作后保留 2 秒，确保录屏清晰
 
 // ─── Helper ──────────────────────────────────────────────────
 async function gotoBookshelf(page: Page) {
@@ -87,6 +88,7 @@ test.describe('PAGE-03 我的书架 端到端验收', () => {
 
     const input = page.locator(SEARCH_INPUT);
     await input.fill('异兽');
+    await page.waitForTimeout(STEP_DELAY);
 
     // 防抖期内（< 300ms）列表尚未变化
     await page.waitForTimeout(100);
@@ -107,7 +109,7 @@ test.describe('PAGE-03 我的书架 端到端验收', () => {
   test('TC-BS-005 搜索无匹配显示无匹配态', async ({ page }) => {
     await page.locator(SEARCH_INPUT).fill('zzz_no_such_novel_zzz');
     // 等待防抖 + 渲染
-    await page.waitForTimeout(500);
+    await page.waitForTimeout(STEP_DELAY);
     await expect(page.locator(NO_MATCH_STATE)).toBeVisible({ timeout: 5_000 });
     await expect(page.locator(NO_MATCH_STATE)).toContainText('未匹配到相关小说');
     // 清空按钮可见
@@ -128,25 +130,25 @@ test.describe('PAGE-03 我的书架 端到端验收', () => {
 
     // 点击"更新内容"应弹出 Modal
     await page.locator(TOOLBAR_UPDATE).click();
-    await page.waitForTimeout(300);
+    await page.waitForTimeout(STEP_DELAY);
     await snapshot(page, 'tc-006-toolbar-update-modal');
     // Modal 占位实现有"关闭"按钮，点击关闭（而非 Escape）
     const closeModalBtn = page.getByRole('button', { name: '关闭' }).last();
     if (await closeModalBtn.isVisible({ timeout: 500 }).catch(() => false)) {
       await closeModalBtn.click();
-      await page.waitForTimeout(200);
+      await page.waitForTimeout(STEP_DELAY);
     }
 
     // 点击"教程"应触发视图切换
     await page.locator(TOOLBAR_TUTORIAL).click();
-    await page.waitForTimeout(500);
+    await page.waitForTimeout(STEP_DELAY);
     await snapshot(page, 'tc-006-toolbar-tutorial');
   });
 
   // ─── TC-BS-007 新建下拉 4 项 ──────────────────────────────
   test('TC-BS-007 新建按钮显示下拉菜单含 4 项', async ({ page }) => {
     await page.locator(NEW_BUTTON).click();
-    await page.waitForTimeout(300);
+    await page.waitForTimeout(STEP_DELAY);
 
     // 下拉应显示 4 项
     await expect(page.getByRole('button', { name: /简易创作/ })).toBeVisible();
@@ -157,7 +159,7 @@ test.describe('PAGE-03 我的书架 端到端验收', () => {
 
     // 点击"简易创作"应跳转 create-project 视图
     await page.getByRole('button', { name: /简易创作/ }).click();
-    await page.waitForTimeout(500);
+    await page.waitForTimeout(STEP_DELAY);
     // URL 应包含 view=create-project
     await expect(page).toHaveURL(/view=create-project/, { timeout: 5_000 });
     await snapshot(page, 'tc-007-after-create-quick');
@@ -167,10 +169,12 @@ test.describe('PAGE-03 我的书架 端到端验收', () => {
   test('TC-BS-012 项目卡删除弹二次确认 Modal', async ({ page }) => {
     const firstCard = page.locator(PROJECT_CARD).first();
     await firstCard.hover();
+    await page.waitForTimeout(STEP_DELAY);
     // 悬停后显示删除按钮
     const deleteBtn = firstCard.getByRole('button', { name: '删除' });
     await expect(deleteBtn).toBeVisible({ timeout: 3_000 });
     await deleteBtn.click();
+    await page.waitForTimeout(STEP_DELAY);
 
     // 应弹出确认 Modal
     await expect(page.locator('h2', { hasText: '删除项目' })).toBeVisible({ timeout: 3_000 });
@@ -181,7 +185,7 @@ test.describe('PAGE-03 我的书架 端到端验收', () => {
 
     // 点击取消，Modal 关闭
     await page.getByRole('button', { name: '取消' }).click();
-    await page.waitForTimeout(300);
+    await page.waitForTimeout(STEP_DELAY);
     await expect(page.locator('h2', { hasText: '删除项目' })).not.toBeVisible();
   });
 
@@ -192,8 +196,11 @@ test.describe('PAGE-03 我的书架 端到端验收', () => {
 
     const firstCard = page.locator(PROJECT_CARD).first();
     await firstCard.hover();
+    await page.waitForTimeout(STEP_DELAY);
     await firstCard.getByRole('button', { name: '删除' }).click();
+    await page.waitForTimeout(STEP_DELAY);
     await page.getByRole('button', { name: '确认删除' }).click();
+    await page.waitForTimeout(STEP_DELAY);
 
     // 撤销 toast 出现
     await expect(page.getByText(/已删除|撤销/).first()).toBeVisible({ timeout: 5_000 });
@@ -206,7 +213,7 @@ test.describe('PAGE-03 我的书架 端到端验收', () => {
 
     // 点撤销
     await page.getByRole('button', { name: '撤销' }).click();
-    await page.waitForTimeout(500);
+    await page.waitForTimeout(STEP_DELAY);
     // 列表恢复
     const afterUndo = await page.locator(PROJECT_CARD).count();
     expect(afterUndo).toBe(initialCount);
@@ -220,6 +227,7 @@ test.describe('PAGE-03 我的书架 端到端验收', () => {
     await snapshot(page, 'tc-014-before-signin');
 
     await signinBtn.click();
+    await page.waitForTimeout(STEP_DELAY);
     // 签到 toast 出现（包含"签到成功"或"今日已签到"）
     await expect(page.getByText(/签到成功|今日已签到/).first()).toBeVisible({ timeout: 3_000 });
     await snapshot(page, 'tc-014-signin-toast');
@@ -230,7 +238,7 @@ test.describe('PAGE-03 我的书架 端到端验收', () => {
     const achBtn = page.locator(ACHIEVEMENT_BUTTON);
     await expect(achBtn).toBeVisible();
     await achBtn.click();
-    await page.waitForTimeout(500);
+    await page.waitForTimeout(STEP_DELAY);
     // URL 应包含 view=achievements
     await expect(page).toHaveURL(/view=achievements/, { timeout: 5_000 });
     await snapshot(page, 'tc-015-achievements-view');
@@ -261,24 +269,24 @@ test.describe('PAGE-03 我的书架 端到端验收', () => {
   test('TC-BS-018 响应式 4 列断点（仅验证 grid 类切换）', async ({ page }) => {
     // desktop 1280px+ 应是 4 列
     await page.setViewportSize({ width: 1400, height: 900 });
-    await page.waitForTimeout(300);
+    await page.waitForTimeout(STEP_DELAY);
     const gridXl = page.locator('.grid.grid-cols-1.sm\\:grid-cols-2.lg\\:grid-cols-3.xl\\:grid-cols-4').first();
     await expect(gridXl).toBeVisible();
     await snapshot(page, 'tc-018-responsive-xl-4cols');
 
     // lg 1024-1280px 应是 3 列
     await page.setViewportSize({ width: 1100, height: 800 });
-    await page.waitForTimeout(300);
+    await page.waitForTimeout(STEP_DELAY);
     await snapshot(page, 'tc-018-responsive-lg-3cols');
 
     // md 640-1024px 应是 2 列
     await page.setViewportSize({ width: 800, height: 700 });
-    await page.waitForTimeout(300);
+    await page.waitForTimeout(STEP_DELAY);
     await snapshot(page, 'tc-018-responsive-md-2cols');
 
     // sm <640px 应是 1 列
     await page.setViewportSize({ width: 500, height: 600 });
-    await page.waitForTimeout(300);
+    await page.waitForTimeout(STEP_DELAY);
     await snapshot(page, 'tc-018-responsive-sm-1col');
   });
 
@@ -286,10 +294,12 @@ test.describe('PAGE-03 我的书架 端到端验收', () => {
   test('TC-BS-019 Esc 键清空搜索框', async ({ page }) => {
     const input = page.locator(SEARCH_INPUT);
     await input.fill('异兽');
+    await page.waitForTimeout(STEP_DELAY);
     await expect(input).toHaveValue('异兽');
 
     // 按 Esc 应清空
     await input.press('Escape');
+    await page.waitForTimeout(STEP_DELAY);
     await expect(input).toHaveValue('');
     await snapshot(page, 'tc-019-after-esc');
   });

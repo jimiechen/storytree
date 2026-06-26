@@ -21,20 +21,33 @@ import { test, expect, type Page } from '@playwright/test';
  */
 
 const CREATE_PROJECT_URL = '/novel?view=create-project';
+const STEP_DELAY = 2000; // 每个操作后保留 2 秒，确保录屏清晰
 
 // ─── Helper ──────────────────────────────────────────────────
 async function gotoCreateProject(page: Page) {
-  await page.goto(CREATE_PROJECT_URL);
-  await page.waitForLoadState('domcontentloaded');
+  // 重试机制：vite dev server 冷启动时首次访问可能 ERR_ABORTED
+  let retries = 3;
+  while (retries > 0) {
+    try {
+      await page.goto(CREATE_PROJECT_URL, { waitUntil: 'domcontentloaded', timeout: 60_000 });
+      break;
+    } catch (e) {
+      retries--;
+      if (retries === 0) throw e;
+      await page.waitForTimeout(3000);
+    }
+  }
   await page.waitForSelector('h2:has-text("创建新项目")', { timeout: 30_000 });
+  await page.waitForTimeout(STEP_DELAY);
 }
 
 async function gotoProtagonistTab(page: Page) {
   await gotoCreateProject(page);
   // 填写书名并进入下一步
   await page.locator('input[placeholder="给你的小说起个名字"]').fill('E2E主角设定测试');
+  await page.waitForTimeout(STEP_DELAY);
   await page.getByRole('button', { name: '下一步' }).click();
-  await page.waitForTimeout(300);
+  await page.waitForTimeout(STEP_DELAY);
   // 确认到达主角设定 Tab
   await expect(page.locator('input[placeholder="主角名字"]')).toBeVisible();
 }
@@ -88,7 +101,7 @@ test.describe('PAGE-05 创建新项目-主角设定 端到端验收', () => {
     await expect(nameInput).toHaveValue('');
     // 点击随机按钮
     await page.locator('button[title="随机生成姓名"]').click();
-    await page.waitForTimeout(200);
+    await page.waitForTimeout(STEP_DELAY);
     // 姓名应非空（2-3 字中文）
     const value = await nameInput.inputValue();
     expect(value.length).toBeGreaterThanOrEqual(2);
@@ -115,6 +128,7 @@ test.describe('PAGE-05 创建新项目-主角设定 端到端验收', () => {
     await gotoProtagonistTab(page);
     const genderSelect = page.locator('select').first();
     await genderSelect.selectOption('other');
+    await page.waitForTimeout(STEP_DELAY);
     await expect(genderSelect).toHaveValue('other');
     await snapshot(page, 'tc-005-gender-other');
   });
@@ -124,17 +138,25 @@ test.describe('PAGE-05 创建新项目-主角设定 端到端验收', () => {
     await gotoProtagonistTab(page);
     // 填写所有字段
     await page.locator('input[placeholder="主角名字"]').fill('林墨渊');
+    await page.waitForTimeout(STEP_DELAY);
     await page.locator('select').first().selectOption('male');
+    await page.waitForTimeout(STEP_DELAY);
     await page.locator('input[type="number"]').fill('25');
+    await page.waitForTimeout(STEP_DELAY);
     await page.locator('textarea[placeholder*="性格特点"]').fill('外冷内热、机智果断');
+    await page.waitForTimeout(STEP_DELAY);
     await page.locator('textarea[placeholder*="外貌特征"]').fill('剑眉星目、身形修长');
+    await page.waitForTimeout(STEP_DELAY);
     await page.locator('textarea[placeholder*="身世背景"]').fill('出身名门却家道中落');
+    await page.waitForTimeout(STEP_DELAY);
     await page.locator('textarea[placeholder*="主角的目标"]').fill('复仇');
+    await page.waitForTimeout(STEP_DELAY);
     await page.locator('textarea[placeholder*="主角的弱点"]').fill('亲人被威胁时失控');
+    await page.waitForTimeout(STEP_DELAY);
     await snapshot(page, 'tc-006-all-filled');
     // 下一步
     await page.getByRole('button', { name: '下一步' }).click();
-    await page.waitForTimeout(300);
+    await page.waitForTimeout(STEP_DELAY);
     // 切换到世界观 Tab
     await expect(page.getByRole('button', { name: '世界观' })).not.toBeDisabled();
     // 世界观 Tab 已激活 — LLMGenerationTab 的 h3 标题 "世界观" 可见
@@ -149,15 +171,19 @@ test.describe('PAGE-05 创建新项目-主角设定 端到端验收', () => {
     await gotoProtagonistTab(page);
     // 填写部分字段
     await page.locator('input[placeholder="主角名字"]').fill('苏雪瑶');
+    await page.waitForTimeout(STEP_DELAY);
     await page.locator('select').first().selectOption('female');
+    await page.waitForTimeout(STEP_DELAY);
     await page.locator('input[type="number"]').fill('18');
+    await page.waitForTimeout(STEP_DELAY);
     await page.locator('textarea[placeholder*="性格特点"]').fill('聪慧机敏、外柔内刚');
+    await page.waitForTimeout(STEP_DELAY);
     // 下一步
     await page.getByRole('button', { name: '下一步' }).click();
-    await page.waitForTimeout(300);
+    await page.waitForTimeout(STEP_DELAY);
     // 上一步
     await page.getByRole('button', { name: '上一步' }).click();
-    await page.waitForTimeout(300);
+    await page.waitForTimeout(STEP_DELAY);
     // 数据应保留
     await expect(page.locator('input[placeholder="主角名字"]')).toHaveValue('苏雪瑶');
     await expect(page.locator('select').first()).toHaveValue('female');
@@ -170,7 +196,7 @@ test.describe('PAGE-05 创建新项目-主角设定 端到端验收', () => {
   test('TC-P05-008 取消按钮返回书架', async ({ page }) => {
     await gotoProtagonistTab(page);
     await page.getByRole('button', { name: '取消' }).click();
-    await page.waitForTimeout(500);
+    await page.waitForTimeout(STEP_DELAY);
     await expect(page).toHaveURL(/view=bookshelf/, { timeout: 10_000 });
     await snapshot(page, 'tc-008-cancel');
   });

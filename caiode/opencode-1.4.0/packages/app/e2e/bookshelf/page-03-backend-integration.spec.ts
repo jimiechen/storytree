@@ -22,6 +22,7 @@ const BOOKSHELF_URL = '/novel?view=bookshelf';
 const PROJECT_CARD = '[data-testid="bookshelf-project-card"]';
 const SEARCH_INPUT = 'input[placeholder="搜索小说..."]';
 const NEW_BUTTON = 'button:has-text("新建")';
+const STEP_DELAY = 2000; // 每个操作后保留 2 秒，确保录屏清晰
 
 /** RemoteProject 格式（camelCase，匹配 HTTP Provider 的 adapt 输入） */
 interface MockProject {
@@ -192,18 +193,20 @@ test.describe('PAGE-03 后端集成 E2E', () => {
 
     // 点击新建 → 简易创作
     await page.locator(NEW_BUTTON).click();
-    await page.waitForTimeout(300);
+    await page.waitForTimeout(STEP_DELAY);
     await page.getByRole('button', { name: /简易创作/ }).click();
-    await page.waitForTimeout(500);
+    await page.waitForTimeout(STEP_DELAY);
 
     // 填写表单
     await page.locator('input[placeholder="给你的小说起个名字"]').fill('E2E测试小说');
+    await page.waitForTimeout(STEP_DELAY);
     await page.locator('select').first().selectOption('科幻');
+    await page.waitForTimeout(STEP_DELAY);
 
     // 提交：使用 .last() 因为弹框内 TAB 按钮"创建新项目"也匹配 /创建/，
     // 但提交按钮"auto_awesome 创建"在 DOM 中位于 TAB 按钮之后
     await page.getByRole('button', { name: /创建|确定|提交|开始/ }).last().click();
-    await page.waitForTimeout(1000);
+    await page.waitForTimeout(STEP_DELAY);
 
     // 验证 POST 请求已发起
     expect(postCalled).toBe(true);
@@ -231,9 +234,11 @@ test.describe('PAGE-03 后端集成 E2E', () => {
 
     const firstCard = page.locator(PROJECT_CARD).first();
     await firstCard.hover();
+    await page.waitForTimeout(STEP_DELAY);
     await firstCard.getByRole('button', { name: '删除' }).click();
+    await page.waitForTimeout(STEP_DELAY);
     await page.getByRole('button', { name: '确认删除' }).click();
-    await page.waitForTimeout(1000);
+    await page.waitForTimeout(STEP_DELAY);
 
     // 验证 DELETE 请求已发起
     expect(deleteCalled).toBe(true);
@@ -248,9 +253,11 @@ test.describe('PAGE-03 后端集成 E2E', () => {
     // 先删除
     const firstCard = page.locator(PROJECT_CARD).first();
     await firstCard.hover();
+    await page.waitForTimeout(STEP_DELAY);
     await firstCard.getByRole('button', { name: '删除' }).click();
+    await page.waitForTimeout(STEP_DELAY);
     await page.getByRole('button', { name: '确认删除' }).click();
-    await page.waitForTimeout(500);
+    await page.waitForTimeout(STEP_DELAY);
 
     let restoreCalled = false;
     page.on('request', (req) => {
@@ -261,7 +268,7 @@ test.describe('PAGE-03 后端集成 E2E', () => {
 
     // 点撤销
     await page.getByRole('button', { name: '撤销' }).click();
-    await page.waitForTimeout(1000);
+    await page.waitForTimeout(STEP_DELAY);
 
     // 验证 restore 请求已发起
     expect(restoreCalled).toBe(true);
@@ -288,7 +295,7 @@ test.describe('PAGE-03 后端集成 E2E', () => {
     // 注意：当前前端搜索是客户端过滤（allProjects.filter），不发 search API
     // 仅验证搜索功能正常工作
     await page.locator(SEARCH_INPUT).fill('玄幻');
-    await page.waitForTimeout(500);
+    await page.waitForTimeout(STEP_DELAY);
 
     // 验证过滤结果正确（客户端过滤）
     const cards = page.locator(PROJECT_CARD);
@@ -308,14 +315,16 @@ test.describe('PAGE-03 后端集成 E2E', () => {
 
     // 创建项目
     await page.locator(NEW_BUTTON).click();
-    await page.waitForTimeout(300);
+    await page.waitForTimeout(STEP_DELAY);
     await page.getByRole('button', { name: /简易创作/ }).click();
-    await page.waitForTimeout(500);
+    await page.waitForTimeout(STEP_DELAY);
     await page.locator('input[placeholder="给你的小说起个名字"]').fill('持久化测试');
+    await page.waitForTimeout(STEP_DELAY);
     await page.locator('select').first().selectOption('仙侠');
+    await page.waitForTimeout(STEP_DELAY);
     // 提交按钮使用 .last()（与 TC-BE-002 相同原因：TAB 按钮"创建新项目"先匹配）
     await page.getByRole('button', { name: /创建|确定|提交|开始/ }).last().click();
-    await page.waitForTimeout(1500);
+    await page.waitForTimeout(STEP_DELAY);
 
     // 回到书架
     await page.goto(BOOKSHELF_URL);
@@ -334,9 +343,9 @@ test.describe('PAGE-03 后端集成 E2E', () => {
 
     // 打开创建项目弹框
     await page.locator(NEW_BUTTON).click();
-    await page.waitForTimeout(300);
+    await page.waitForTimeout(STEP_DELAY);
     await page.getByRole('button', { name: /简易创作/ }).click();
-    await page.waitForTimeout(500);
+    await page.waitForTimeout(STEP_DELAY);
 
     // 验证弹框可见
     await expect(page.locator('h2', { hasText: '创建新项目' })).toBeVisible({ timeout: 5_000 });
@@ -376,7 +385,7 @@ test.describe('PAGE-03 后端集成 E2E', () => {
     // 视觉断言：书名输入框 focus 时 border 色 #6b38d4
     const nameInput = page.locator('input[placeholder="给你的小说起个名字"]');
     await nameInput.focus();
-    await page.waitForTimeout(200);
+    await page.waitForTimeout(STEP_DELAY);
     const focusBorder = await nameInput.evaluate((el) => {
       return window.getComputedStyle(el).borderColor;
     });
