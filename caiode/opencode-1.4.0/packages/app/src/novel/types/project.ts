@@ -54,6 +54,10 @@ export interface CreateProjectInput {
   writingStyle?: WritingStyle;
   storyTheme?: StoryTheme;
   customSettings?: string;
+  estimatedChapters?: number;
+  coverUrl?: string;
+  worldview?: string;
+  plotOutline?: string;
 }
 
 /** 主角设定输入 */

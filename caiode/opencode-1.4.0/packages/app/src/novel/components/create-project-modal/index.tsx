@@ -1,3 +1,11 @@
+/**
+ * @file create-project-modal/index.tsx
+ * @description 创建项目弹窗 — 6-Tab 严格顺序导航
+ *
+ * Tab 顺序：基本信息 → 主角设定 → 世界观 → 剧情总纲 → 自定义设定 → 选择文件
+ * 导航规则：严格顺序，不能跳过未完成的 Tab
+ */
+
 import { createSignal, Show, For } from 'solid-js';
 import type { Component } from 'solid-js';
 import type {
@@ -8,80 +16,85 @@ import type {
   WritingStyle,
   StoryTheme,
 } from '../../types';
-import { GENRE_OPTIONS } from '../../types';
 import { NovelIcon } from '../layout/novel-icon';
+import { BasicInfoTab } from './basic-info-tab';
+import { LLMGenerationTab } from './llm-generation-tab';
 
 interface CreateProjectModalProps {
   onSubmit: (input: CreateProjectInput) => Promise<void>;
   onCancel: () => void;
 }
 
-const TARGET_AUDIENCE_OPTIONS: { value: TargetAudience; label: string }[] = [
-  { value: 'general', label: '大众（通用）' },
-  { value: 'male', label: '男频（热血、升级、爽文）' },
-  { value: 'female', label: '女频（言情、情感、细腻）' },
+type TabId = 'basic' | 'protagonist' | 'worldview' | 'plot' | 'custom' | 'file';
+
+const TABS: { id: TabId; label: string; icon: string }[] = [
+  { id: 'basic', label: '基本信息', icon: 'info' },
+  { id: 'protagonist', label: '主角设定', icon: 'person' },
+  { id: 'worldview', label: '世界观', icon: 'public' },
+  { id: 'plot', label: '剧情总纲', icon: 'auto_stories' },
+  { id: 'custom', label: '自定义设定', icon: 'tune' },
+  { id: 'file', label: '选择文件', icon: 'upload_file' },
 ];
 
-const WRITING_STYLE_OPTIONS: { value: WritingStyle; label: string }[] = [
-  { value: 'default', label: '默认' },
-  { value: 'humorous', label: '诙谐幽默' },
-  { value: 'dark', label: '人性黑暗' },
-  { value: 'decisive', label: '杀伐果断' },
-  { value: 'literary', label: '文学性强' },
-  { value: 'fast-paced', label: '快节奏' },
-  { value: 'slow-paced', label: '慢节奏' },
-  { value: 'mystery', label: '悬疑' },
-  { value: 'passionate', label: '热血' },
-  { value: 'light', label: '轻松' },
-  { value: 'heartbreaking', label: '虐心' },
-  { value: 'custom', label: '自定义' },
-];
-
-const STORY_THEME_OPTIONS: { value: StoryTheme; label: string }[] = [
-  { value: 'default', label: '默认' },
-  { value: 'revenge', label: '复仇' },
-  { value: 'growth', label: '成长' },
-  { value: 'love', label: '爱情' },
-  { value: 'adventure', label: '冒险' },
-  { value: 'redemption', label: '救赎' },
-  { value: 'power', label: '权力' },
-  { value: 'friendship', label: '友情' },
-  { value: 'survival', label: '生存' },
-  { value: 'exploration', label: '探索' },
-  { value: 'competition', label: '竞争' },
-  { value: 'family', label: '家庭' },
-  { value: 'custom', label: '自定义' },
-];
-
-/** 创建项目弹窗 — 按 Stitch 03 code.html 还原 */
 export const CreateProjectModal: Component<CreateProjectModalProps> = (props) => {
+  // 基本信息
   const [name, setName] = createSignal('');
   const [genre, setGenre] = createSignal<GenreOption>('玄幻');
   const [description, setDescription] = createSignal('');
-  const [protagonistName, setProtagonistName] = createSignal('');
-  const [protagonistGender, setProtagonistGender] = createSignal<'male' | 'female'>('male');
-  const [protagonistAge, setProtagonistAge] = createSignal<string>('');
-  const [protagonistPersonality, setProtagonistPersonality] = createSignal('');
   const [targetAudience, setTargetAudience] = createSignal<TargetAudience>('general');
   const [writingStyle, setWritingStyle] = createSignal<WritingStyle>('default');
   const [storyTheme, setStoryTheme] = createSignal<StoryTheme>('default');
+  const [estimatedChapters, setEstimatedChapters] = createSignal('');
+  const [coverUrl, setCoverUrl] = createSignal('');
+  // 主角设定
+  const [protagonistName, setProtagonistName] = createSignal('');
+  const [protagonistGender, setProtagonistGender] = createSignal<'male' | 'female'>('male');
+  const [protagonistAge, setProtagonistAge] = createSignal('');
+  const [protagonistPersonality, setProtagonistPersonality] = createSignal('');
+  // 世界观 / 剧情
+  const [worldview, setWorldview] = createSignal('');
+  const [plotOutline, setPlotOutline] = createSignal('');
+  // 自定义设定
   const [customSettings, setCustomSettings] = createSignal('');
-  const [activeTab, setActiveTab] = createSignal<'simple' | 'full'>('simple');
+  // 导航状态
+  const [activeTab, setActiveTab] = createSignal<TabId>('basic');
+  const [maxReachedTab, setMaxReachedTab] = createSignal(0);
   const [isSubmitting, setIsSubmitting] = createSignal(false);
   const [errors, setErrors] = createSignal<Record<string, string>>({});
 
-  const isValid = () => {
+  const currentTabIndex = () => TABS.findIndex((t) => t.id === activeTab());
+
+  const validateTab = (tab: TabId): boolean => {
     const e: Record<string, string> = {};
-    if (!name().trim()) e.name = '请输入书名';
-    if (!genre()) e.genre = '请选择类型';
+    if (tab === 'basic') {
+      if (!name().trim()) e.name = '请输入书名';
+      if (!genre()) e.genre = '请选择类型';
+    }
     setErrors(e);
     return Object.keys(e).length === 0;
   };
 
-  const handleSubmit = async () => {
-    if (!isValid()) return;
-    setIsSubmitting(true);
+  const handleNext = () => {
+    if (!validateTab(activeTab())) return;
+    const idx = currentTabIndex();
+    if (idx < TABS.length - 1) {
+      const nextTab = TABS[idx + 1];
+      setActiveTab(nextTab.id);
+      setMaxReachedTab(Math.max(maxReachedTab(), idx + 1));
+    }
+  };
 
+  const handlePrev = () => {
+    const idx = currentTabIndex();
+    if (idx > 0) setActiveTab(TABS[idx - 1].id);
+  };
+
+  const handleSubmit = async () => {
+    if (!validateTab('basic')) {
+      setActiveTab('basic');
+      return;
+    }
+    setIsSubmitting(true);
     const protagonist: ProtagonistInput | undefined = protagonistName().trim()
       ? {
           name: protagonistName().trim(),
@@ -90,7 +103,6 @@ export const CreateProjectModal: Component<CreateProjectModalProps> = (props) =>
           personality: protagonistPersonality().trim() || undefined,
         }
       : undefined;
-
     try {
       await props.onSubmit({
         name: name().trim(),
@@ -101,15 +113,24 @@ export const CreateProjectModal: Component<CreateProjectModalProps> = (props) =>
         writingStyle: writingStyle(),
         storyTheme: storyTheme(),
         customSettings: customSettings().trim() || undefined,
+        estimatedChapters: estimatedChapters() ? Number(estimatedChapters()) : undefined,
+        coverUrl: coverUrl() || undefined,
+        worldview: worldview().trim() || undefined,
+        plotOutline: plotOutline().trim() || undefined,
       });
     } finally {
       setIsSubmitting(false);
     }
   };
 
+  const canClickTab = (idx: number): boolean => idx <= maxReachedTab();
+  const isLastTab = () => currentTabIndex() === TABS.length - 1;
+
+  const llmContext = () =>
+    `小说名称：${name() || '未设定'}\n类型：${genre()}\n简介：${description() || '无'}\n写作风格：${writingStyle()}\n故事主题：${storyTheme()}`;
+
   const inputBase =
     'w-full bg-[#f8f9ff] border border-[#cbc3d7] rounded-lg px-4 py-3 text-base focus:outline-none focus:border-[#6b38d4] focus:ring-1 focus:ring-[#6b38d4] transition-colors';
-  const inputError = 'border-[#ba1a1a] bg-[#ffdad6]/30';
   const labelBase = 'block text-sm font-medium text-[#0d1c2f] mb-1';
   const sectionTitle = 'text-sm font-medium text-[#0d1c2f] font-bold flex items-center gap-2';
 
@@ -139,267 +160,165 @@ export const CreateProjectModal: Component<CreateProjectModalProps> = (props) =>
           </button>
         </div>
 
+        {/* 提示文案 */}
+        <div class="px-6 py-2 text-xs text-[#494454] bg-[#f8f9ff] border-b border-[#cbc3d7]/30">
+          完善的小说设定可以让AI创作出更符合预期的内容
+        </div>
+
+        {/* TabBar（严格顺序：未到达的 Tab 禁用） */}
+        <div class="flex gap-1 px-6 py-3 border-b border-[#cbc3d7] overflow-x-auto">
+          <For each={TABS}>
+            {(tab, idx) => (
+              <button
+                disabled={!canClickTab(idx())}
+                class={`pb-2 border-b-2 text-sm font-medium flex items-center gap-1 whitespace-nowrap transition-colors px-2 ${
+                  activeTab() === tab.id
+                    ? 'border-[#6b38d4] text-[#6b38d4] font-bold'
+                    : canClickTab(idx())
+                    ? 'border-transparent text-[#494454] hover:text-[#0d1c2f]'
+                    : 'border-transparent text-[#cbc3d7] cursor-not-allowed'
+                }`}
+                onClick={() => canClickTab(idx()) && setActiveTab(tab.id)}
+              >
+                <NovelIcon name={tab.icon} size={16} />
+                {tab.label}
+              </button>
+            )}
+          </For>
+        </div>
+
         {/* Content */}
         <div class="flex-1 overflow-y-auto px-6 py-6">
-          {/* Tabs */}
-          <div class="flex gap-4 border-b border-[#cbc3d7] mb-6">
-            <button
-              class={`pb-2 border-b-2 text-sm font-medium flex items-center gap-2 transition-colors ${
-                activeTab() === 'simple'
-                  ? 'border-[#6b38d4] text-[#6b38d4] font-bold'
-                  : 'border-transparent text-[#494454] hover:text-[#0d1c2f]'
-              }`}
-              onClick={() => setActiveTab('simple')}
-            >
-              简易创作
-              <span class="bg-[#ffdad6] text-[#93000a] text-[10px] px-2 py-0.5 rounded-full font-bold">
-                推荐
-              </span>
-            </button>
-            <button
-              class={`pb-2 border-b-2 text-sm font-medium transition-colors ${
-                activeTab() === 'full'
-                  ? 'border-[#6b38d4] text-[#6b38d4] font-bold'
-                  : 'border-transparent text-[#494454] hover:text-[#0d1c2f]'
-              }`}
-              onClick={() => setActiveTab('full')}
-            >
-              创建新项目
-            </button>
-          </div>
+          <Show when={activeTab() === 'basic'}>
+            <BasicInfoTab
+              name={name} setName={setName}
+              genre={genre} setGenre={setGenre}
+              description={description} setDescription={setDescription}
+              targetAudience={targetAudience} setTargetAudience={setTargetAudience}
+              writingStyle={writingStyle} setWritingStyle={setWritingStyle}
+              storyTheme={storyTheme} setStoryTheme={setStoryTheme}
+              estimatedChapters={estimatedChapters} setEstimatedChapters={setEstimatedChapters}
+              coverUrl={coverUrl} setCoverUrl={setCoverUrl}
+              errors={errors}
+            />
+          </Show>
 
-          <div class="space-y-6">
-            {/* 基本信息 */}
+          <Show when={activeTab() === 'protagonist'}>
             <div class="space-y-4">
-              <div>
-                <label class={labelBase}>
-                  书名 <span class="text-[#ba1a1a]">*</span>
-                </label>
-                <input
-                  type="text"
-                  placeholder="给你的小说起个名字"
-                  value={name()}
-                  onInput={(e) => setName((e.target as HTMLInputElement).value)}
-                  class={`${inputBase} ${errors().name ? inputError : ''}`}
-                  style={{ 'font-family': "'Work Sans', 'PingFang SC', sans-serif" }}
-                />
-                {errors().name && <p class="mt-1 text-xs text-[#ba1a1a]">{errors().name}</p>}
-              </div>
-
-              <div>
-                <label class={labelBase}>
-                  类型 <span class="text-[#ba1a1a]">*</span>
-                </label>
-                <div class="relative">
-                  <select
-                    value={genre()}
-                    onChange={(e) => setGenre((e.target as HTMLSelectElement).value as GenreOption)}
-                    class={`${inputBase} appearance-none ${errors().genre ? inputError : ''}`}
-                  >
-                    <For each={GENRE_OPTIONS}>
-                      {(g) => <option value={g}>{g}</option>}
-                    </For>
-                  </select>
-                  <NovelIcon
-                    name="expand_more"
-                    size={20}
-                    class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-[#494454]"
-                  />
+              <h3 class={sectionTitle}>
+                <NovelIcon name="person" size={20} class="text-[#6b38d4]" />
+                主角设定
+              </h3>
+              <div class="grid grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-xs font-medium text-[#494454] mb-1">姓名</label>
+                  <input type="text" placeholder="主角名字" value={protagonistName()}
+                    onInput={(e) => setProtagonistName((e.target as HTMLInputElement).value)} class={inputBase} />
                 </div>
-                {errors().genre && <p class="mt-1 text-xs text-[#ba1a1a]">{errors().genre}</p>}
+                <div>
+                  <label class="block text-xs font-medium text-[#494454] mb-1">年龄</label>
+                  <input type="number" placeholder="如：18" value={protagonistAge()}
+                    onInput={(e) => setProtagonistAge((e.target as HTMLInputElement).value)} class={inputBase} />
+                </div>
               </div>
-
               <div>
-                <label class={labelBase}>简介</label>
-                <textarea
-                  placeholder="简单描述小说要讲什么故事..."
-                  value={description()}
-                  onInput={(e) => setDescription((e.target as HTMLTextAreaElement).value)}
-                  rows={3}
-                  class={`${inputBase} resize-none`}
-                />
+                <label class="block text-xs font-medium text-[#494454] mb-2">性别</label>
+                <div class="flex gap-4">
+                  <label class="flex items-center gap-2 cursor-pointer">
+                    <input type="radio" name="gender" checked={protagonistGender() === 'male'}
+                      onChange={() => setProtagonistGender('male')} class="text-[#6b38d4] focus:ring-[#6b38d4] w-4 h-4" />
+                    <span class="text-base text-[#0d1c2f]">男</span>
+                  </label>
+                  <label class="flex items-center gap-2 cursor-pointer">
+                    <input type="radio" name="gender" checked={protagonistGender() === 'female'}
+                      onChange={() => setProtagonistGender('female')} class="text-[#6b38d4] focus:ring-[#6b38d4] w-4 h-4" />
+                    <span class="text-base text-[#0d1c2f]">女</span>
+                  </label>
+                </div>
+              </div>
+              <div>
+                <label class="block text-xs font-medium text-[#494454] mb-1">性格</label>
+                <textarea placeholder="描述主角的性格特点..." value={protagonistPersonality()}
+                  onInput={(e) => setProtagonistPersonality((e.target as HTMLTextAreaElement).value)}
+                  rows={2} class={`${inputBase} resize-none`} />
               </div>
             </div>
+          </Show>
 
-            <Show when={activeTab() === 'full'}>
-              <hr class="border-[#cbc3d7] border-dashed" />
+          <Show when={activeTab() === 'worldview'}>
+            <LLMGenerationTab
+              label="世界观" icon="public"
+              placeholder="描述小说的世界观设定，如修炼体系、科技水平、社会结构等..."
+              promptPlaceholder="输入关键词，如：修仙世界、九重天、灵气复苏..."
+              value={worldview()} onInput={setWorldview} context={llmContext()}
+            />
+          </Show>
 
-              {/* 主角设定 */}
-              <div class="space-y-4">
-                <h3 class={sectionTitle}>
-                  <NovelIcon name="person" size={20} class="text-[#6b38d4]" />
-                  主角设定
-                </h3>
-                <div class="grid grid-cols-2 gap-4">
-                  <div>
-                    <label class="block text-xs font-medium text-[#494454] mb-1">姓名</label>
-                    <input
-                      type="text"
-                      placeholder="主角名字"
-                      value={protagonistName()}
-                      onInput={(e) => setProtagonistName((e.target as HTMLInputElement).value)}
-                      class={inputBase}
-                    />
-                  </div>
-                  <div>
-                    <label class="block text-xs font-medium text-[#494454] mb-1">年龄</label>
-                    <input
-                      type="number"
-                      placeholder="如：18"
-                      value={protagonistAge()}
-                      onInput={(e) => setProtagonistAge((e.target as HTMLInputElement).value)}
-                      class={inputBase}
-                    />
-                  </div>
-                </div>
+          <Show when={activeTab() === 'plot'}>
+            <LLMGenerationTab
+              label="剧情总纲" icon="auto_stories"
+              placeholder="描述小说的剧情大纲，包括开端、发展、高潮、结局..."
+              promptPlaceholder="输入关键词，如：少年逆袭、拜师学艺、大战魔族..."
+              value={plotOutline()} onInput={setPlotOutline} context={llmContext()}
+            />
+          </Show>
 
-                <div>
-                  <label class="block text-xs font-medium text-[#494454] mb-2">性别</label>
-                  <div class="flex gap-4">
-                    <label class="flex items-center gap-2 cursor-pointer">
-                      <input
-                        type="radio"
-                        name="gender"
-                        checked={protagonistGender() === 'male'}
-                        onChange={() => setProtagonistGender('male')}
-                        class="text-[#6b38d4] focus:ring-[#6b38d4] w-4 h-4"
-                      />
-                      <span class="text-base text-[#0d1c2f]">男</span>
-                    </label>
-                    <label class="flex items-center gap-2 cursor-pointer">
-                      <input
-                        type="radio"
-                        name="gender"
-                        checked={protagonistGender() === 'female'}
-                        onChange={() => setProtagonistGender('female')}
-                        class="text-[#6b38d4] focus:ring-[#6b38d4] w-4 h-4"
-                      />
-                      <span class="text-base text-[#0d1c2f]">女</span>
-                    </label>
-                  </div>
-                </div>
+          <Show when={activeTab() === 'custom'}>
+            <div class="space-y-4">
+              <h3 class={sectionTitle}>
+                <NovelIcon name="tune" size={20} class="text-[#6b38d4]" />
+                自定义设定
+              </h3>
+              <textarea placeholder="添加修仙体系、科技设定等自定义内容..."
+                value={customSettings()}
+                onInput={(e) => setCustomSettings((e.target as HTMLTextAreaElement).value)}
+                rows={8} class={`${inputBase} resize-none`} />
+            </div>
+          </Show>
 
-                <div>
-                  <label class="block text-xs font-medium text-[#494454] mb-1">性格</label>
-                  <textarea
-                    placeholder="描述主角的性格特点..."
-                    value={protagonistPersonality()}
-                    onInput={(e) => setProtagonistPersonality((e.target as HTMLTextAreaElement).value)}
-                    rows={2}
-                    class={`${inputBase} resize-none`}
-                  />
-                </div>
+          <Show when={activeTab() === 'file'}>
+            <div class="space-y-4">
+              <h3 class={sectionTitle}>
+                <NovelIcon name="upload_file" size={20} class="text-[#6b38d4]" />
+                选择文件
+              </h3>
+              <div class="border-2 border-dashed border-[#cbc3d7] rounded-lg bg-[#f8f9ff] p-8 text-center">
+                <NovelIcon name="cloud_upload" size={48} class="text-[#cbc3d7] mx-auto mb-2" />
+                <p class="text-sm text-[#494454]">支持导入 .txt / .md / .json 格式的小说文件</p>
+                <p class="text-xs text-[#cbc3d7] mt-1">导入时创建新项目，不覆盖现有项目</p>
               </div>
-
-              <hr class="border-[#cbc3d7] border-dashed" />
-
-              {/* 目标读者 */}
-              <div class="space-y-4">
-                <h3 class={sectionTitle}>
-                  <NovelIcon name="groups" size={20} class="text-[#6b38d4]" />
-                  目标读者
-                </h3>
-                <div class="flex gap-4 flex-wrap">
-                  <For each={TARGET_AUDIENCE_OPTIONS}>
-                    {(opt) => (
-                      <label class="flex items-center gap-2 cursor-pointer">
-                        <input
-                          type="radio"
-                          name="targetAudience"
-                          checked={targetAudience() === opt.value}
-                          onChange={() => setTargetAudience(opt.value)}
-                          class="text-[#6b38d4] focus:ring-[#6b38d4] w-4 h-4"
-                        />
-                        <span class="text-sm text-[#0d1c2f]">{opt.label}</span>
-                      </label>
-                    )}
-                  </For>
-                </div>
-              </div>
-
-              {/* 写作风格 */}
-              <div class="space-y-4">
-                <h3 class={sectionTitle}>
-                  <NovelIcon name="edit_note" size={20} class="text-[#6b38d4]" />
-                  写作风格
-                </h3>
-                <div class="relative">
-                  <select
-                    value={writingStyle()}
-                    onChange={(e) => setWritingStyle((e.target as HTMLSelectElement).value as WritingStyle)}
-                    class={`${inputBase} appearance-none`}
-                  >
-                    <For each={WRITING_STYLE_OPTIONS}>
-                      {(opt) => <option value={opt.value}>{opt.label}</option>}
-                    </For>
-                  </select>
-                  <NovelIcon
-                    name="expand_more"
-                    size={20}
-                    class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-[#494454]"
-                  />
-                </div>
-              </div>
-
-              {/* 故事主题 */}
-              <div class="space-y-4">
-                <h3 class={sectionTitle}>
-                  <NovelIcon name="auto_stories" size={20} class="text-[#6b38d4]" />
-                  故事主题
-                </h3>
-                <div class="relative">
-                  <select
-                    value={storyTheme()}
-                    onChange={(e) => setStoryTheme((e.target as HTMLSelectElement).value as StoryTheme)}
-                    class={`${inputBase} appearance-none`}
-                  >
-                    <For each={STORY_THEME_OPTIONS}>
-                      {(opt) => <option value={opt.value}>{opt.label}</option>}
-                    </For>
-                  </select>
-                  <NovelIcon
-                    name="expand_more"
-                    size={20}
-                    class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-[#494454]"
-                  />
-                </div>
-              </div>
-
-              {/* 自定义设定 */}
-              <div>
-                <h3 class={sectionTitle}>
-                  <NovelIcon name="tune" size={20} class="text-[#6b38d4]" />
-                  自定义设定
-                </h3>
-                <textarea
-                  placeholder="添加修仙体系、科技设定等自定义内容..."
-                  value={customSettings()}
-                  onInput={(e) => setCustomSettings((e.target as HTMLTextAreaElement).value)}
-                  rows={3}
-                  class={`${inputBase} resize-none mt-3`}
-                />
-              </div>
-            </Show>
-          </div>
+            </div>
+          </Show>
         </div>
 
         {/* Footer */}
-        <div class="px-6 py-4 border-t border-[#cbc3d7] flex justify-end gap-4 bg-[#f8f9ff]">
-          <button
-            onClick={props.onCancel}
-            disabled={isSubmitting()}
-            class="px-6 py-2 rounded-lg border border-[#cbc3d7] text-[#494454] text-sm font-medium hover:bg-[#eff4ff] transition-colors disabled:opacity-50"
-          >
-            取消
+        <div class="px-6 py-4 border-t border-[#cbc3d7] flex justify-between items-center bg-[#f8f9ff]">
+          <button onClick={handlePrev} disabled={currentTabIndex() === 0}
+            class="px-4 py-2 text-sm font-medium text-[#494454] hover:text-[#0d1c2f] disabled:opacity-30 disabled:cursor-not-allowed transition-colors flex items-center gap-1">
+            <NovelIcon name="arrow_back" size={16} />
+            上一步
           </button>
-          <button
-            onClick={handleSubmit}
-            disabled={isSubmitting()}
-            class="px-8 py-2 rounded-lg bg-gradient-to-r from-[#6b38d4] to-[#8455ef] text-white text-sm font-medium shadow-sm hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center gap-2"
-          >
-            <NovelIcon name="auto_awesome" size={16} />
-            {isSubmitting() ? '创建中...' : '创建'}
-          </button>
+          <div class="flex gap-4">
+            <button onClick={props.onCancel} disabled={isSubmitting()}
+              class="px-6 py-2 rounded-lg border border-[#cbc3d7] text-[#494454] text-sm font-medium hover:bg-[#eff4ff] transition-colors disabled:opacity-50">
+              取消
+            </button>
+            <Show when={!isLastTab()}
+              fallback={
+                <button onClick={handleSubmit} disabled={isSubmitting()}
+                  class="px-8 py-2 rounded-lg bg-gradient-to-r from-[#6b38d4] to-[#8455ef] text-white text-sm font-medium shadow-sm hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center gap-2">
+                  <NovelIcon name="auto_awesome" size={16} />
+                  {isSubmitting() ? '创建中...' : '创建'}
+                </button>
+              }
+            >
+              <button onClick={handleNext} disabled={isSubmitting()}
+                class="px-8 py-2 rounded-lg bg-gradient-to-r from-[#6b38d4] to-[#8455ef] text-white text-sm font-medium shadow-sm hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center gap-2">
+                下一步
+                <NovelIcon name="arrow_forward" size={16} />
+              </button>
+            </Show>
+          </div>
         </div>
       </div>
     </div>
