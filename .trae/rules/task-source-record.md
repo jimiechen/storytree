@@ -5,9 +5,9 @@
 ## **当前任务状态**
 
 **最后更新时间**: 2026-06-26
-**当前任务来源**: 用户要求"继续下一步"（PAGE-07 剧情总纲开发）
-**当前阶段**: PAGE-07 创建新项目-剧情总纲已完成（8 文本框 + LLM 生成 + 有头 E2E 7/7）
-**下一步**: 进入 PAGE-08（自定义设定）/ 用户确认
+**当前任务来源**: 用户要求"继续"（PAGE-08 自定义设定开发）
+**当前阶段**: PAGE-08 创建新项目-自定义设定已完成（4 预设模板 + 添加设定 + 有头 E2E 9/9）
+**下一步**: 创建新项目弹窗 6-Tab 全部完成 / 用户确认下一步
 
 ---
 
@@ -42,7 +42,19 @@
 
 ### 2026-06-26 完成任务
 
-1. **PAGE-07 创建新项目-剧情总纲**
+1. **PAGE-08 创建新项目-自定义设定**
+   - 来源: 用户要求"继续"（PAGE-07 完成后继续 PAGE-08）
+   - 任务ID: PAGE-08-CREATE-PROJECT-CUSTOM-SETTINGS-20260626
+   - 状态: ✅ 已完成
+   - 结论: `[READY_FOR_PAGE-08_REVIEW]`
+   - 页级规范: `caiode/opencode-1.4.0/packages/app/src/novel/docs/page-specs/PAGE-08_create_project_custom_settings.md`
+   - 验证结果: `bun run typecheck` 0 errors + `bun test src/novel` 424 pass / 0 fail / 2 skip / 1211 expect() calls + `bun run novel:precommit` PASSED + `bun run test:e2e -- --headed` 9 passed (5.7m)
+   - 关键提交:
+     - `c9d52eba` feat(novel): PAGE-08 创建新项目-自定义设定 4 预设模板 + 添加设定 + 有头 E2E（4 files, +418/-10）
+   - 实施范围: PRD §3.8 全部 5 个元素（修仙体系/西方贵族/科幻体系/都市体系预设按钮 + 添加设定按钮）、custom-settings-tab.tsx 组件化（PRESET_TEMPLATES 配置数组 + For 循环）、点击预设按钮追加模板到 textarea（不覆盖已有内容）、复用 customSettings 字段无需类型扩展、9 个有头浏览器 E2E 测试（含录屏优化 STEP_DELAY=2000 + vite 冷启动重试）
+   - 工作空间记录: `workspaces/kimik27code/hellokimik27code.md`
+
+2. **PAGE-07 创建新项目-剧情总纲**
    - 来源: 用户要求"继续下一步"（PAGE-06 完成后继续 PAGE-07）
    - 任务ID: PAGE-07-CREATE-PROJECT-PLOT-OUTLINE-20260626
    - 状态: ✅ 已完成
