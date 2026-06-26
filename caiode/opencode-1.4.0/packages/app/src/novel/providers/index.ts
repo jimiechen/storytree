@@ -42,6 +42,15 @@ export interface INovelChapterProvider {
   updateChapterStatus(id: string, status: ChapterStatus): Promise<void>;
   addAISuggestion(chapterId: string, suggestion: AISuggestion): Promise<void>;
   acceptSuggestion(chapterId: string, suggestionId: string): Promise<void>;
+  // ─── PAGE-10 扩展：CRUD 完整接口 ─────────────────────────────
+  /** 创建新章节 */
+  createChapter(projectId: string, input: { title: string; orderIndex?: number; content?: string }): Promise<Chapter>;
+  /** 软删除章节（移入回收站） */
+  deleteChapter(id: string): Promise<void>;
+  /** 列出已删除章节（回收站） */
+  listDeletedChapters(projectId: string): Promise<Chapter[]>;
+  /** 恢复已删除章节 */
+  restoreChapter(id: string): Promise<void>;
 }
 
 export interface INovelCharacterProvider {

@@ -6,7 +6,6 @@ import { useNovelProject } from '../../hooks/use-novel-project';
 import type { CreateProjectInput } from '../../types';
 import { BookshelfPage } from '../bookshelf';
 import { CreateProjectModal } from '../create-project-modal';
-import { Workspace } from '../novel-workspace';
 import { NovelEditor } from '../novel-editor';
 import { NovelModalHost } from './novel-modal-host';
 import { PlaceholderPage } from './placeholder-page';
@@ -55,7 +54,7 @@ export const NovelAppShell: Component = () => {
         </Match>
 
         <Match when={nav.currentView() === 'workspace'}>
-          <Workspace projectId={nav.projectId} />
+          <NovelEditor />
         </Match>
 
         <Match when={nav.currentView() === 'editor'}>

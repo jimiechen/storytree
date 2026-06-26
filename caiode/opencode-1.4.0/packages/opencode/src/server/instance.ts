@@ -27,6 +27,7 @@ import { ConfigRoutes } from "./routes/config"
 import { ExperimentalRoutes } from "./routes/experimental"
 import { ProviderRoutes } from "./routes/provider"
 import { NovelProjectRoutes } from "./routes/novel-project"
+import { NovelChapterRoutes } from "./routes/novel-chapter"
 import { EventRoutes } from "./routes/event"
 import { errorHandler } from "./middleware"
 
@@ -48,6 +49,7 @@ export const InstanceRoutes = (upgrade: UpgradeWebSocket, app: Hono = new Hono()
     .onError(errorHandler(log))
     .route("/project", ProjectRoutes())
     .route("/novel/project", NovelProjectRoutes())
+    .route("/novel/project/:projectId/chapter", NovelChapterRoutes())
     .route("/pty", PtyRoutes(upgrade))
     .route("/config", ConfigRoutes())
     .route("/experimental", ExperimentalRoutes())

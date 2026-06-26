@@ -1,11 +1,34 @@
 import { createSignal, createMemo, createEffect } from 'solid-js';
 import type { Chapter, AISuggestion, ChapterExtractedInfo } from '../types';
 import type { ChapterInformationState } from '../types/information-flow';
-import { NovelChapterProvider } from '../providers/providers-index';
+import { NovelChapterProvider, NovelChapterHttpProvider } from '../providers/providers-index';
+import type { INovelChapterProvider } from '../providers/providers-index';
+import { useFeatureGates } from './use-feature-gates';
 
-const chapterProvider = new NovelChapterProvider();
+/** Mock Provider 模块级单例（内存数据共享） */
+const mockProvider = new NovelChapterProvider();
+
+/** HTTP Provider 模块级单例（无状态，仅在 realNovelBackendEnabled 时使用） */
+let httpProvider: NovelChapterHttpProvider | null = null;
+
+function getHttpProvider(): NovelChapterHttpProvider {
+  if (!httpProvider) {
+    httpProvider = new NovelChapterHttpProvider({
+      baseURL: typeof window !== 'undefined' ? window.location.origin : 'http://localhost:4096',
+      directory: typeof window !== 'undefined'
+        ? new URLSearchParams(window.location.search).get('directory') ?? '.'
+        : '.',
+    });
+  }
+  return httpProvider;
+}
 
 export function useNovelChapters(projectId: () => string) {
+  const gates = useFeatureGates();
+  const chapterProvider: INovelChapterProvider = gates.realNovelBackendEnabled
+    ? getHttpProvider()
+    : mockProvider;
+
   const [selectedChapterId, setSelectedChapterId] = createSignal<string>('');
 
   // 章节列表用普通 signal 管理，避免 createResource refetch 不触发下游 memo 的问题
@@ -82,6 +105,29 @@ export function useNovelChapters(projectId: () => string) {
     await loadChapters();
   };
 
+  // ─── PAGE-10 扩展：CRUD 方法 ─────────────────────────────────
+
+  /** 创建新章节 */
+  const createChapter = async (input: { title: string; orderIndex?: number; content?: string }): Promise<Chapter> => {
+    const created = await chapterProvider.createChapter(projectId(), input);
+    await loadChapters();
+    return created;
+  };
+
+  /** 软删除章节（移入回收站） */
+  const deleteChapter = async (id: string): Promise<void> => {
+    await chapterProvider.deleteChapter(id);
+    setChapters(prev => prev.filter(c => c.id !== id));
+    // 如果删除的是当前选中章节，清除选中
+    if (selectedChapterId() === id) setSelectedChapterId('');
+  };
+
+  /** 恢复已删除章节 */
+  const restoreChapter = async (id: string): Promise<void> => {
+    await chapterProvider.restoreChapter(id);
+    await loadChapters();
+  };
+
   // 切换选中章节
   const selectChapter = (id: string) => {
     setSelectedChapterId(id);
@@ -101,6 +147,10 @@ export function useNovelChapters(projectId: () => string) {
     saveChapterExtractedInfo,
     acceptSuggestion,
     addAISuggestion,
+    // PAGE-10 新增
+    createChapter,
+    deleteChapter,
+    restoreChapter,
     refetch: loadChapters,
   };
 }

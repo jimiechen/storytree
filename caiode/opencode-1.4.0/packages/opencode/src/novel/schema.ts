@@ -84,3 +84,38 @@ export const UpdateNovelProjectInput = z.object({
   chapterCount: z.number().int().min(0).optional(),
   characterCount: z.number().int().min(0).optional(),
 })
+
+// ─── Chapter Schema (PAGE-10) ───────────────────────────────
+
+export const NovelChapterID = z.string().regex(/^novel_chap_[a-zA-Z0-9_-]+$/)
+
+export const ChapterStatus = z.enum(["draft", "revising", "completed", "published"])
+
+export const NovelChapter = z.object({
+  id: NovelChapterID,
+  projectId: NovelProjectID,
+  title: z.string(),
+  orderIndex: z.number().int().min(0),
+  status: ChapterStatus,
+  wordCount: z.number().int().min(0),
+  content: z.string(),
+  summary: z.string().optional(),
+  createdAt: z.number(),
+  updatedAt: z.number(),
+  lastEditedAt: z.number().optional(),
+})
+
+export const CreateNovelChapterInput = z.object({
+  title: z.string().min(1).max(200),
+  orderIndex: z.number().int().min(0).optional(),
+  content: z.string().optional(),
+})
+
+export const UpdateNovelChapterInput = z.object({
+  title: z.string().min(1).max(200).optional(),
+  content: z.string().optional(),
+  status: ChapterStatus.optional(),
+  summary: z.string().max(5000).optional(),
+  wordCount: z.number().int().min(0).optional(),
+  orderIndex: z.number().int().min(0).optional(),
+})

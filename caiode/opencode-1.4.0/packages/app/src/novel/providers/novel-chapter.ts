@@ -111,4 +111,47 @@ export class NovelChapterProvider implements INovelChapterProvider {
     chapter.wordCount = chapter.content.length;
     await mockDelay(100);
   }
+
+  // ─── PAGE-10 扩展：CRUD 完整接口（Mock 实现） ─────────────────
+
+  async createChapter(projectId: string, input: { title: string; orderIndex?: number; content?: string }): Promise<Chapter> {
+    const id = `ch-mock-${Date.now().toString(36)}`;
+    const now = new Date().toISOString();
+    const chapter: Chapter = {
+      id,
+      projectId,
+      title: input.title,
+      orderIndex: input.orderIndex ?? this.chapters.size + 1,
+      status: 'draft',
+      wordCount: input.content?.length ?? 0,
+      content: input.content ?? '',
+      outline: { goal: '', conflict: '', keyPlot: '' },
+      createdAt: now,
+      updatedAt: now,
+    };
+    this.chapters.set(id, { ...chapter, aiSuggestions: [] });
+    await mockDelay(100);
+    return { ...chapter };
+  }
+
+  async deleteChapter(id: string): Promise<void> {
+    const chapter = this.chapters.get(id);
+    if (!chapter) {
+      throw { code: 'NOT_FOUND', message: `Chapter ${id} not found` } as ProviderError;
+    }
+    // Mock: 标记为已删除（从 Map 中移除，模拟软删除）
+    this.chapters.delete(id);
+    await mockDelay(100);
+  }
+
+  async listDeletedChapters(_projectId: string): Promise<Chapter[]> {
+    // Mock 不维护回收站，返回空列表
+    await mockDelay(100);
+    return [];
+  }
+
+  async restoreChapter(_id: string): Promise<void> {
+    // Mock 不维护回收站，无操作
+    await mockDelay(100);
+  }
 }

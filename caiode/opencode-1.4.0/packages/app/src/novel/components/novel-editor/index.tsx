@@ -14,6 +14,7 @@ import { EditorAIFloatingToolbar } from './editor-ai-floating-toolbar';
 import { AIResultCard } from './ai-result-card';
 import { AILogDrawer } from './ai-log-drawer';
 import { ChapterInfoPanel } from './chapter-info-panel';
+import { EditorSideNav } from './editor-side-nav';
 import type { AIWritingCommand } from '../../types/editor';
 import type { WorkflowMutations } from '../../workflows/workflow-events';
 import type { ChapterInformationState } from '../../types/information-flow';
@@ -142,12 +143,37 @@ export function NovelEditor() {
 
   const currentProjectId = () => nav.projectId() ?? 'proj-001';
 
+  // PAGE-10：项目名（用于左侧导航显示）
+  const projectName = () => project()?.name ?? '未命名项目';
+
   createEffect(() => {
     const loaded = chaptersHook.chapters();
     if (loaded && loaded.length > 0 && !chaptersHook.selectedChapterId()) {
       chaptersHook.selectChapter(loaded[0].id);
     }
   });
+
+  // PAGE-10：创建新章节
+  const handleCreateChapter = async () => {
+    const orderIndex = chaptersHook.chapters().length;
+    const created = await chaptersHook.createChapter({ title: `第${orderIndex + 1}章`, orderIndex });
+    chaptersHook.selectChapter(created.id);
+  };
+
+  // PAGE-10：删除章节
+  const handleDeleteChapter = async (id: string) => { await chaptersHook.deleteChapter(id); };
+
+  /** 格式化相对时间 */
+  function formatRelativeTime(dateStr: string): string {
+    const now = Date.now();
+    const diff = now - new Date(dateStr).getTime();
+    const hours = Math.floor(diff / (1000 * 60 * 60));
+    if (hours < 1) return '刚刚';
+    if (hours < 24) return `${hours}小时前`;
+    const days = Math.floor(hours / 24);
+    if (days < 30) return `${days}天前`;
+    return new Date(dateStr).toLocaleDateString('zh-CN');
+  }
 
   /**
    * P2-D：通过 YAML Workflow Engine 重新提取章节信息。
@@ -329,119 +355,131 @@ export function NovelEditor() {
     return [];
   });
 
-  /** 格式化相对时间 */
-  function formatRelativeTime(dateStr: string): string {
-    const now = Date.now();
-    const diff = now - new Date(dateStr).getTime();
-    const hours = Math.floor(diff / (1000 * 60 * 60));
-    if (hours < 1) return '刚刚';
-    if (hours < 24) return `${hours}小时前`;
-    const days = Math.floor(hours / 24);
-    if (days < 30) return `${days}天前`;
-    return new Date(dateStr).toLocaleDateString('zh-CN');
-  }
-
   return (
     <div class="flex flex-col h-screen bg-[#f8f9ff] overflow-hidden text-[#0d1c2f]">
       <MockModeBanner />
 
-      <Show
-        when={chaptersHook.selectedChapter()}
-        fallback={
-          <div class="flex-1 flex items-center justify-center text-[#7b7486]">
-            <Show
-              when={chaptersHook.loading}
-              fallback="请选择一个章节"
-            >
-              加载中...
-            </Show>
-          </div>
-        }
-      >
-        {(ch) => (
-          <>
-            <EditorToolbar
-              chapterTitle={localTitle() || ch().title}
-              orderIndex={ch().orderIndex}
-              wordCount={wordCount()}
-              targetWordCount={editor.targetWordCount}
-              onBack={() => nav.openView('workspace')}
-              onHistory={() => setIsLogDrawerOpen(true)}
-              onFullscreen={() =>
-                editor.setIsFullscreen(!editor.isFullscreen())
-              }
-              onPublish={() => editor.markComplete()}
-              onAIContinue={handleAIContinue}
-              onSave={handleSave}
-              saving={saving()}
-            />
+      <div class="flex flex-1 overflow-hidden">
+        {/* PAGE-10：左侧导航 — 合并 Workspace SideNav + 章节列表 */}
+        <aside class="w-[260px] shrink-0 h-full bg-white border-r border-[#cbc3d7] shadow-sm overflow-hidden">
+          <EditorSideNav
+            projectName={projectName()}
+            chapters={chaptersHook.chapters()}
+            selectedChapterId={chaptersHook.selectedChapterId()}
+            lastEdited={chaptersHook.selectedChapter()?.updatedAt ? formatRelativeTime(chaptersHook.selectedChapter()!.updatedAt) : undefined}
+            onSelectChapter={chaptersHook.selectChapter}
+            onCreateChapter={handleCreateChapter}
+            onDeleteChapter={handleDeleteChapter}
+            onOpenCharacters={() => nav.openView('character-panel')}
+            onOpenWorldSetting={() => nav.openView('world-setting')}
+            onOpenExport={() => nav.openView('bookshelf')}
+            onOpenHelp={() => nav.openView('tutorial')}
+            onOpenFeedback={() => nav.openView('bookshelf')}
+            onGenerateOutline={() => {}}
+          />
+        </aside>
 
-            <div class="flex flex-1 overflow-hidden">
-              <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
-                <EditorCanvas
-                  chapterId={ch().id}
-                  title={localTitle() || ch().title}
-                  initialContent={ch().content}
-                  onTitleChange={setLocalTitle}
-                  onContentChange={(v) => {
-                    setLocalContent(v);
-                    editor.setContent(v);
-                  }}
-                  onTextSelect={editor.onTextSelect}
-                  onWordCountChange={setWordCount}
-                />
-
-                <Show when={chapterTasks().length > 0}>
-                  <div class="bg-[#f8f9ff] px-10 pb-6 overflow-y-auto max-h-[300px] shrink-0">
-                    <div class="max-w-[800px] mx-auto space-y-3">
-                      <For each={chapterTasks()}>
-                        {(task, index) => {
-                          const isLast = () => index() === chapterTasks().length - 1;
-                          return (
-                            <AIResultCard
-                              task={task}
-                              onAccept={handleAcceptAIResult}
-                              onSave={handleSaveAIResult}
-                              onDiscard={() => {}}
-                              validationIssues={isLast() ? validationIssues() : undefined}
-                              wasTrimmed={isLast() ? wasTrimmed() : undefined}
-                              modelProfileId={isLast() ? modelProfileId() : undefined}
-                              modelId={isLast() ? modelId() : undefined}
-                              estimatedCost={isLast() ? estimatedCost() : undefined}
-                              fallback={isLast() ? fallback() : undefined}
-                              originalErrorCode={isLast() ? originalErrorCode() : undefined}
-                            />
-                          );
-                        }}
-                      </For>
-                    </div>
-                  </div>
+        {/* 中间 + 右侧 */}
+        <div class="flex flex-col flex-1 min-w-0">
+          <Show
+            when={chaptersHook.selectedChapter()}
+            fallback={
+              <div class="flex-1 flex items-center justify-center text-[#7b7486]">
+                <Show
+                  when={chaptersHook.loading}
+                  fallback="请选择一个章节"
+                >
+                  加载中...
                 </Show>
               </div>
+            }
+          >
+            {(ch) => (
+              <>
+                <EditorToolbar
+                  chapterTitle={localTitle() || ch().title}
+                  orderIndex={ch().orderIndex}
+                  wordCount={wordCount()}
+                  targetWordCount={editor.targetWordCount}
+                  onBack={() => nav.openView('bookshelf')}
+                  onHistory={() => setIsLogDrawerOpen(true)}
+                  onFullscreen={() =>
+                    editor.setIsFullscreen(!editor.isFullscreen())
+                  }
+                  onPublish={() => editor.markComplete()}
+                  onAIContinue={handleAIContinue}
+                  onSave={handleSave}
+                  saving={saving()}
+                />
 
-              <EditorRightPanel
-                chapterNumber={`#${ch().orderIndex + 1}`}
-                status={editor.chapterStatus()}
-                wordCount={wordCount()}
-                createdAt={ch().createdAt ? new Date(ch().createdAt).toLocaleDateString('zh-CN') : '—'}
-                lastModified={ch().updatedAt ? formatRelativeTime(ch().updatedAt) : '—'}
-                aiExtract={editor.aiExtract()}
-                onStatusChange={editor.setChapterStatus}
-                onRefreshAI={() => runInfoExtractForChapter(ch().orderIndex)}
-                onSaveDraft={editor.saveDraft}
-                onMarkComplete={editor.markComplete}
-              />
+                <div class="flex flex-1 overflow-hidden">
+                  <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
+                    <EditorCanvas
+                      chapterId={ch().id}
+                      title={localTitle() || ch().title}
+                      initialContent={ch().content}
+                      onTitleChange={setLocalTitle}
+                      onContentChange={(v) => {
+                        setLocalContent(v);
+                        editor.setContent(v);
+                      }}
+                      onTextSelect={editor.onTextSelect}
+                      onWordCountChange={setWordCount}
+                    />
 
-              {/* P2-D：信息审计块绑定真实 info.extract 结果 */}
-              <ChapterInfoPanel
-                chapter={ch()}
-                informationState={infoState()}
-                onReExtract={() => runInfoExtractForChapter(ch().orderIndex)}
-              />
-            </div>
-          </>
-        )}
-      </Show>
+                    <Show when={chapterTasks().length > 0}>
+                      <div class="bg-[#f8f9ff] px-10 pb-6 overflow-y-auto max-h-[300px] shrink-0">
+                        <div class="max-w-[800px] mx-auto space-y-3">
+                          <For each={chapterTasks()}>
+                            {(task, index) => {
+                              const isLast = () => index() === chapterTasks().length - 1;
+                              return (
+                                <AIResultCard
+                                  task={task}
+                                  onAccept={handleAcceptAIResult}
+                                  onSave={handleSaveAIResult}
+                                  onDiscard={() => {}}
+                                  validationIssues={isLast() ? validationIssues() : undefined}
+                                  wasTrimmed={isLast() ? wasTrimmed() : undefined}
+                                  modelProfileId={isLast() ? modelProfileId() : undefined}
+                                  modelId={isLast() ? modelId() : undefined}
+                                  estimatedCost={isLast() ? estimatedCost() : undefined}
+                                  fallback={isLast() ? fallback() : undefined}
+                                  originalErrorCode={isLast() ? originalErrorCode() : undefined}
+                                />
+                              );
+                            }}
+                          </For>
+                        </div>
+                      </div>
+                    </Show>
+                  </div>
+
+                  <EditorRightPanel
+                    chapterNumber={`#${ch().orderIndex + 1}`}
+                    status={editor.chapterStatus()}
+                    wordCount={wordCount()}
+                    createdAt={ch().createdAt ? new Date(ch().createdAt).toLocaleDateString('zh-CN') : '—'}
+                    lastModified={ch().updatedAt ? formatRelativeTime(ch().updatedAt) : '—'}
+                    aiExtract={editor.aiExtract()}
+                    onStatusChange={editor.setChapterStatus}
+                    onRefreshAI={() => runInfoExtractForChapter(ch().orderIndex)}
+                    onSaveDraft={editor.saveDraft}
+                    onMarkComplete={editor.markComplete}
+                  />
+
+                  {/* P2-D：信息审计块绑定真实 info.extract 结果 */}
+                  <ChapterInfoPanel
+                    chapter={ch()}
+                    informationState={infoState()}
+                    onReExtract={() => runInfoExtractForChapter(ch().orderIndex)}
+                  />
+                </div>
+              </>
+            )}
+          </Show>
+        </div>
+      </div>
 
       <AILogDrawer
         logs={logs() ?? []}
