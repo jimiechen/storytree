@@ -7,11 +7,38 @@
 **Agent名称**: Multi-Agent (Kimi + MiniMax-M2 + Kimi-K2.7-Code + GLM-5.2)
 **当前积分**: 30/100
 **状态**: 🚨🚨 危险（最后一次机会）
-**最后更新**: 2026-06-26（PAGE-11 AI 模型设置实施完成后）
+**最后更新**: 2026-06-26（PAGE-14 名字生成器实施完成后）
 
 ---
 
 ## 扣分历史记录
+
+### 2026-06-26 扣分记录 (Session 35 - GLM-5.2)
+
+**任务**: PAGE-14 名字生成器实施（2 Tab 随机/AI + 3 性别 + 6 风格 + 长度滑块 2-6 + 字库 + localStorage 历史 + FeatureGate 切换 + 路由集成 + 有头浏览器 E2E）
+**本次扣分**: 0分
+**扣分后积分**: 30分
+
+| 序号 | 规则文件 | 实际执行 | 扣分 |
+|------|---------|---------|------|
+| 1 | model-auto-file.md | 已更新工作空间文件（PAGE-14 section + 角色声明） | 0 |
+| 2 | agent-responsibility-boundary.md | 已声明角色为前端工程师 / Novel 模块开发 Agent | 0 |
+| 3 | code-file-limit.md | 所有文件 < 500 行（index.tsx 259 / name-bank.ts 136 / use-name-generator.ts 127 / spec.ts 147） | 0 |
+| 4 | claude-code-migration-rules.md | 不涉及 | 0 |
+| 5 | github-workflow-rules.md | 待执行 Git 提交 | 0 |
+| 6 | Ralph.md | typecheck + UT + precommit + E2E 9/9 全部通过 | 0 |
+| 7 | task-completion-report.md | 工作空间文件含实施详情 | 0 |
+| 8 | secretary-agent-rules.md | 不适用 | 0 |
+| 9 | 测试执行检查 | typecheck 0 errors + 424 UT pass + precommit PASSED + E2E 9/9 (3.7m) | 0 |
+| 10 | 文档完整性检查 | 规范文档 + 工作空间文件完整 | 0 |
+
+**PAGE-14 实施详情**:
+- 前端新建: name-generator/index.tsx（259 行 UI 组件：顶部栏/Tab/配置区/结果区/历史）+ name-bank.ts（136 行字库：6 风格 × 3 性别 × 8 姓氏 + 8 名字）+ use-name-generator.ts（127 行 Hook：localStorage 持久化 + AI 降级）+ types/name-generator.ts（21 行类型）+ PAGE-14_name_generator.md（109 行规范）+ page-14-name-generator.spec.ts（147 行 E2E 9 用例）
+- 前端修改: use-novel-view.tsx（EXTENDED_VIEWS 添加 name-generator）+ use-novel-navigation.tsx（ExtendedView 类型 + EXTENDED_VIEW_VALUES 添加）+ novel-app-shell.tsx（import NameGeneratorPage + Match 分支）+ feature-gates.ts（nameGeneratorEnabled: true）+ bookshelf/index.tsx（按钮 openModal → openView）+ use-novel-navigation.test.ts（扩展视图 9 → 10 项）
+- 关键修复: E2E 页面渲染 NovelEditor 而非 NameGeneratorPage — 根因为 EXTENDED_VIEW_VALUES 缺少 'name-generator'，导致 isExtendedViewValue 返回 false，resolveInitialView 返回 null，currentView 回退到 workspace
+- 验证: typecheck 0 errors + 424 UT pass / 0 fail / 2 skip + precommit PASSED + E2E 9/9 (3.7m)
+
+---
 
 ### 2026-06-26 扣分记录 (Session 34 - GLM-5.2)
 

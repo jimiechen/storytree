@@ -5,9 +5,9 @@
 ## **当前任务状态**
 
 **最后更新时间**: 2026-06-26
-**当前任务来源**: 用户要求"继续进入 PAGE-11"
-**当前阶段**: PAGE-11 AI 模型设置实施已完成（作者中心「AI模型」Tab：模型选择 + API Key + 端点 + 温度/maxTokens + 保存/重置 + localStorage 持久化 + 有头浏览器 E2E 5/5 passed）
-**下一步**: 用户确认 PAGE-11 验收后，进入下一阶段（如 PAGE-12 或其他优化任务）
+**当前任务来源**: 用户要求"进入 PAGE-14 名字生成器"
+**当前阶段**: PAGE-14 名字生成器实施已完成（2 Tab 随机/AI + 3 性别 + 6 风格 + 长度滑块 2-6 + 字库 + localStorage 历史 + FeatureGate 切换 + 有头浏览器 E2E 9/9 passed）
+**下一步**: 用户确认 PAGE-14 验收后，进入下一阶段（如 PAGE-12 或其他优化任务）
 
 ---
 
@@ -42,7 +42,18 @@
 
 ### 2026-06-26 完成任务
 
-1. **PAGE-11 AI 模型设置实施**
+1. **PAGE-14 名字生成器实施**
+   - 来源: 用户要求"进入 PAGE-14 名字生成器"
+   - 任务ID: PAGE-14-NAME-GENERATOR-20260626
+   - 状态: ✅ 已完成
+   - 结论: `[READY_FOR_PAGE-14_REVIEW]`
+   - 页级规范: `caiode/opencode-1.4.0/packages/app/src/novel/docs/page-specs/PAGE-14_name_generator.md`
+   - 验证结果: `bun run typecheck` 0 errors + `bun test src/novel` 424 pass / 0 fail / 2 skip + `bun run novel:precommit` PASSED + `bun run test:e2e -- --headed` 9 passed (3.7m)
+   - 实施范围:
+     - 前端新建: name-generator/index.tsx（259 行 UI 组件）+ name-bank.ts（136 行字库）+ use-name-generator.ts（127 行 Hook）+ types/name-generator.ts（21 行类型）+ PAGE-14_name_generator.md（109 行规范）+ page-14-name-generator.spec.ts（147 行 E2E 9 用例）
+     - 前端修改: use-novel-view.tsx（EXTENDED_VIEWS 添加 name-generator）+ use-novel-navigation.tsx（ExtendedView 类型 + EXTENDED_VIEW_VALUES 添加）+ novel-app-shell.tsx（import + Match 分支）+ feature-gates.ts（nameGeneratorEnabled: true）+ bookshelf/index.tsx（按钮 openModal → openView）+ use-novel-navigation.test.ts（扩展视图 9 → 10 项）
+
+2. **PAGE-11 AI 模型设置实施**
    - 来源: 用户要求"继续进入 PAGE-11"
    - 任务ID: PAGE-11-AI-MODEL-SETTINGS-20260626
    - 状态: ✅ 已完成
