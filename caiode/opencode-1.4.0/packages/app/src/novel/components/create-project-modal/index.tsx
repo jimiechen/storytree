@@ -10,6 +10,7 @@ import { createSignal, Show, For } from 'solid-js';
 import type { Component } from 'solid-js';
 import type {
   CreateProjectInput,
+  Gender,
   GenreOption,
   ProtagonistInput,
   TargetAudience,
@@ -19,6 +20,7 @@ import type {
 import { NovelIcon } from '../layout/novel-icon';
 import { BasicInfoTab } from './basic-info-tab';
 import { LLMGenerationTab } from './llm-generation-tab';
+import { ProtagonistTab } from './protagonist-tab';
 
 interface CreateProjectModalProps {
   onSubmit: (input: CreateProjectInput) => Promise<void>;
@@ -46,11 +48,15 @@ export const CreateProjectModal: Component<CreateProjectModalProps> = (props) =>
   const [storyTheme, setStoryTheme] = createSignal<StoryTheme>('default');
   const [estimatedChapters, setEstimatedChapters] = createSignal('');
   const [coverUrl, setCoverUrl] = createSignal('');
-  // 主角设定
+  // 主角设定 (PRD §3.5 — 9 个元素)
   const [protagonistName, setProtagonistName] = createSignal('');
-  const [protagonistGender, setProtagonistGender] = createSignal<'male' | 'female'>('male');
+  const [protagonistGender, setProtagonistGender] = createSignal<Gender>('male');
   const [protagonistAge, setProtagonistAge] = createSignal('');
   const [protagonistPersonality, setProtagonistPersonality] = createSignal('');
+  const [protagonistAppearance, setProtagonistAppearance] = createSignal('');
+  const [protagonistBackground, setProtagonistBackground] = createSignal('');
+  const [protagonistMotivation, setProtagonistMotivation] = createSignal('');
+  const [protagonistWeakness, setProtagonistWeakness] = createSignal('');
   // 世界观 / 剧情
   const [worldview, setWorldview] = createSignal('');
   const [plotOutline, setPlotOutline] = createSignal('');
@@ -101,6 +107,10 @@ export const CreateProjectModal: Component<CreateProjectModalProps> = (props) =>
           gender: protagonistGender(),
           age: protagonistAge() ? Number(protagonistAge()) : undefined,
           personality: protagonistPersonality().trim() || undefined,
+          appearance: protagonistAppearance().trim() || undefined,
+          background: protagonistBackground().trim() || undefined,
+          motivation: protagonistMotivation().trim() || undefined,
+          weakness: protagonistWeakness().trim() || undefined,
         }
       : undefined;
     try {
@@ -204,45 +214,16 @@ export const CreateProjectModal: Component<CreateProjectModalProps> = (props) =>
           </Show>
 
           <Show when={activeTab() === 'protagonist'}>
-            <div class="space-y-4">
-              <h3 class={sectionTitle}>
-                <NovelIcon name="person" size={20} class="text-[#6b38d4]" />
-                主角设定
-              </h3>
-              <div class="grid grid-cols-2 gap-4">
-                <div>
-                  <label class="block text-xs font-medium text-[#494454] mb-1">姓名</label>
-                  <input type="text" placeholder="主角名字" value={protagonistName()}
-                    onInput={(e) => setProtagonistName((e.target as HTMLInputElement).value)} class={inputBase} />
-                </div>
-                <div>
-                  <label class="block text-xs font-medium text-[#494454] mb-1">年龄</label>
-                  <input type="number" placeholder="如：18" value={protagonistAge()}
-                    onInput={(e) => setProtagonistAge((e.target as HTMLInputElement).value)} class={inputBase} />
-                </div>
-              </div>
-              <div>
-                <label class="block text-xs font-medium text-[#494454] mb-2">性别</label>
-                <div class="flex gap-4">
-                  <label class="flex items-center gap-2 cursor-pointer">
-                    <input type="radio" name="gender" checked={protagonistGender() === 'male'}
-                      onChange={() => setProtagonistGender('male')} class="text-[#6b38d4] focus:ring-[#6b38d4] w-4 h-4" />
-                    <span class="text-base text-[#0d1c2f]">男</span>
-                  </label>
-                  <label class="flex items-center gap-2 cursor-pointer">
-                    <input type="radio" name="gender" checked={protagonistGender() === 'female'}
-                      onChange={() => setProtagonistGender('female')} class="text-[#6b38d4] focus:ring-[#6b38d4] w-4 h-4" />
-                    <span class="text-base text-[#0d1c2f]">女</span>
-                  </label>
-                </div>
-              </div>
-              <div>
-                <label class="block text-xs font-medium text-[#494454] mb-1">性格</label>
-                <textarea placeholder="描述主角的性格特点..." value={protagonistPersonality()}
-                  onInput={(e) => setProtagonistPersonality((e.target as HTMLTextAreaElement).value)}
-                  rows={2} class={`${inputBase} resize-none`} />
-              </div>
-            </div>
+            <ProtagonistTab
+              name={protagonistName} setName={setProtagonistName}
+              gender={protagonistGender} setGender={setProtagonistGender}
+              age={protagonistAge} setAge={setProtagonistAge}
+              personality={protagonistPersonality} setPersonality={setProtagonistPersonality}
+              appearance={protagonistAppearance} setAppearance={setProtagonistAppearance}
+              background={protagonistBackground} setBackground={setProtagonistBackground}
+              motivation={protagonistMotivation} setMotivation={setProtagonistMotivation}
+              weakness={protagonistWeakness} setWeakness={setProtagonistWeakness}
+            />
           </Show>
 
           <Show when={activeTab() === 'worldview'}>

@@ -60,12 +60,19 @@ export interface CreateProjectInput {
   plotOutline?: string;
 }
 
+/** 主角性别 */
+export type Gender = 'male' | 'female' | 'other';
+
 /** 主角设定输入 */
 export interface ProtagonistInput {
   name: string;
-  gender: 'male' | 'female';
+  gender: Gender;
   age?: number;
   personality?: string;
+  appearance?: string;
+  background?: string;
+  motivation?: string;
+  weakness?: string;
 }
 
 /** 小说类型选项 */
