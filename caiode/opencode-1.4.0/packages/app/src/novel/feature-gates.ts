@@ -79,7 +79,7 @@ export function createDefaultNovelFeatureGates(): NovelFeatureGates {
     exportEnabled: false,
     importEnabled: false,
     bookAnalysisEnabled: false,
-    nameGeneratorEnabled: false,
+    nameGeneratorEnabled: true,   // false → true (PAGE-14: 名字生成器页面可见)
     guide25Enabled: false,
     batchGenerationEnabled: false,
     chatDebugEnabled: false,

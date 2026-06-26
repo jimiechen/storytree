@@ -165,7 +165,7 @@ export const BookshelfPage: Component = () => {
             text="text-[#0058be]"
             title="名字生成器"
             disabled={!gates.nameGeneratorEnabled}
-            onClick={() => nav.openModal('settings')}
+            onClick={() => nav.openView('name-generator')}
           />
           <ToolbarCircle
             icon="auto_awesome"

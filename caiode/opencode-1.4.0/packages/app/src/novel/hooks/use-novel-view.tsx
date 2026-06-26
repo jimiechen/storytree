@@ -9,7 +9,7 @@ const VALID_VIEWS: NovelView[] = [
 ];
 
 /** 扩展视图：不在 NovelView 类型中但需要路由支持的页面 */
-const EXTENDED_VIEWS = ['character-panel', 'world-setting', 'profile', 'tutorial'];
+const EXTENDED_VIEWS = ['character-panel', 'world-setting', 'profile', 'tutorial', 'name-generator'];
 
 /** 所有合法视图值（用于 URL 参数校验） */
 const ALL_VALID_VIEWS = [...VALID_VIEWS, ...EXTENDED_VIEWS];

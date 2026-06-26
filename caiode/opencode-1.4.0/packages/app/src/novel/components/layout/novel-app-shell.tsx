@@ -14,6 +14,7 @@ import { WorldSettingPage } from '../world-setting';
 import { ProfilePage } from '../profile';
 import { AchievementsPage } from '../achievements';
 import { NovelGuidePage } from '../novel-guide';
+import { NameGeneratorPage } from '../name-generator';
 
 export const NovelAppShell: Component = () => {
   const nav = useNovelNavigation();
@@ -91,6 +92,10 @@ export const NovelAppShell: Component = () => {
 
         <Match when={nav.currentView() === 'novel-guide'}>
           <NovelGuidePage />
+        </Match>
+
+        <Match when={nav.currentView() === 'name-generator'}>
+          <NameGeneratorPage />
         </Match>
       </Switch>
 

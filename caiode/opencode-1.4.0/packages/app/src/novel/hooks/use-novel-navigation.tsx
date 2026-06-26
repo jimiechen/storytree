@@ -5,7 +5,7 @@ import type { NovelView } from '../types/novel-view';
 import type { NovelModal } from '../types/novel-modal';
 
 /** 扩展视图：NovelView + 占位页面 */
-type ExtendedView = NovelView | 'character-panel' | 'world-setting' | 'profile' | 'tutorial';
+type ExtendedView = NovelView | 'character-panel' | 'world-setting' | 'profile' | 'tutorial' | 'name-generator';
 
 interface NovelNavigationState {
   currentView: () => ExtendedView;
@@ -21,7 +21,7 @@ const NovelNavigationContext = createContext<NovelNavigationState>();
 
 /** 所有扩展视图值（用于 URL 参数检测） */
 const EXTENDED_VIEW_VALUES: ExtendedView[] = [
-  'character-panel', 'world-setting', 'profile', 'tutorial',
+  'character-panel', 'world-setting', 'profile', 'tutorial', 'name-generator',
 ];
 
 function isExtendedViewValue(v: string): v is ExtendedView {

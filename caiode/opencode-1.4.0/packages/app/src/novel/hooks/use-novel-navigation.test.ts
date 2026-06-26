@@ -28,7 +28,7 @@ describe('useNovelNavigation 类型契约', () => {
   });
 
   it('扩展视图值应为 NovelView 的超集', () => {
-    // ExtendedView = NovelView | 'character-panel' | 'world-setting' | 'profile' | 'tutorial'
+    // ExtendedView = NovelView | 'character-panel' | 'world-setting' | 'profile' | 'tutorial' | 'name-generator'
     const extendedViews = [
       'bookshelf',
       'create-project',
@@ -39,9 +39,11 @@ describe('useNovelNavigation 类型契约', () => {
       'world-setting',
       'profile',
       'tutorial',
+      'name-generator',
     ];
     expect(extendedViews).toContain('workspace');
     expect(extendedViews).toContain('character-panel');
-    expect(extendedViews).toHaveLength(9);
+    expect(extendedViews).toContain('name-generator');
+    expect(extendedViews).toHaveLength(10);
   });
 });
