@@ -5,9 +5,9 @@
 ## **当前任务状态**
 
 **最后更新时间**: 2026-06-26
-**当前任务来源**: 用户要求"修复 5 个失败测试的选择器/白名单/防抖时序问题 + 启动后端 opencode server 验证真实数据库入库"
-**当前阶段**: 5 个失败测试全部修复（5 passed, 3.1m）+ 真实数据库 CRUD 7 API 端点全部验证通过（GET/POST/PATCH/DELETE/trash/restore/双重删除404）
-**下一步**: 用户确认是否进入下一阶段（如章节编辑器）或其他优化任务
+**当前任务来源**: 用户要求"下一步可进入章节编辑器阶段或其他优化任务"
+**当前阶段**: PAGE-10 章节编辑器统一工作台实施已完成（前端+后端完整实现：合并 Workspace SideNav + 章节编辑器三栏布局 + 后端 chapter CRUD 7 API + HTTP Provider + FeatureGate 切换 + 有头浏览器 E2E 7/7 passed）
+**下一步**: 用户确认 PAGE-10 验收后，进入下一阶段（如 PAGE-11 或其他优化任务）
 
 ---
 
@@ -42,7 +42,22 @@
 
 ### 2026-06-26 完成任务
 
-1. **5 个失败测试修复 + 真实数据库 CRUD 验证**
+1. **PAGE-10 章节编辑器统一工作台实施**
+   - 来源: 用户要求"下一步可进入章节编辑器阶段或其他优化任务"
+   - 任务ID: PAGE-10-CHAPTER-EDITOR-20260626
+   - 状态: ✅ 已完成
+   - 结论: `[READY_FOR_PAGE-10_REVIEW]`
+   - 页级规范: `caiode/opencode-1.4.0/packages/app/src/novel/docs/page-specs/PAGE-10_chapter_editor.md`
+   - 验证结果: `bun run typecheck` 0 errors + `bun test src/novel` 424 pass / 0 fail / 2 skip / 1211 expect() calls + `bun run novel:precommit` PASSED + `bun run test:e2e -- --headed` 7 passed (1.6m)
+   - 实施范围:
+     - 后端: novel-chapter.sql.ts（drizzle schema）+ migration.sql + schema.ts 扩展 + novel-chapter.ts Hono 路由（7 API 端点）+ instance.ts 路由注册
+     - 前端 Provider: novel-chapter-http.ts（229 行，14 方法）+ INovelChapterProvider 接口扩展（+4 CRUD）+ Mock Provider 新方法 + providers-index.ts 导出
+     - 前端 Hook: use-novel-chapters.ts 添加 FeatureGate 切换 + CRUD 方法
+     - 前端 UI: editor-side-nav.tsx（170 行，合并 SideNav）+ novel-editor/index.tsx 三栏布局（499 行）+ novel-app-shell.tsx 路由更新
+     - E2E: 7 个测试用例 + 修复选择器语法错误（Promise.race 替代逗号混用）
+   - 工作空间记录: `workspaces/kimik27code/hellokimik27code.md`
+
+2. **5 个失败测试修复 + 真实数据库 CRUD 验证**
    - 来源: 用户要求"修复 5 个失败测试的选择器/白名单/防抖时序问题 + 启动后端 opencode server 验证真实数据库入库"
    - 任务ID: FIX-5-FAILED-TESTS-AND-REALDB-CRUD-20260626
    - 状态: ✅ 已完成
