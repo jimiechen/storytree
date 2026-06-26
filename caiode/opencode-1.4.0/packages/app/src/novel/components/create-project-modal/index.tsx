@@ -27,6 +27,7 @@ import { LLMGenerationTab } from './llm-generation-tab';
 import { ProtagonistTab } from './protagonist-tab';
 import { WorldviewTab } from './worldview-tab';
 import { PlotOutlineTab, type PlotOutlineFields } from './plot-outline-tab';
+import { CustomSettingsTab } from './custom-settings-tab';
 
 interface CreateProjectModalProps {
   onSubmit: (input: CreateProjectInput) => Promise<void>;
@@ -271,16 +272,10 @@ export const CreateProjectModal: Component<CreateProjectModalProps> = (props) =>
           </Show>
 
           <Show when={activeTab() === 'custom'}>
-            <div class="space-y-4">
-              <h3 class={sectionTitle}>
-                <NovelIcon name="tune" size={20} class="text-[#6b38d4]" />
-                自定义设定
-              </h3>
-              <textarea placeholder="添加修仙体系、科技设定等自定义内容..."
-                value={customSettings()}
-                onInput={(e) => setCustomSettings((e.target as HTMLTextAreaElement).value)}
-                rows={8} class={`${inputBase} resize-none`} />
-            </div>
+            <CustomSettingsTab
+              value={customSettings()}
+              setValue={setCustomSettings}
+            />
           </Show>
 
           <Show when={activeTab() === 'file'}>
