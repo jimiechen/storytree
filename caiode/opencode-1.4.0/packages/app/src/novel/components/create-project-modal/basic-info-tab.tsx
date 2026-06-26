@@ -109,7 +109,7 @@ export const BasicInfoTab: Component<BasicInfoTabProps> = (props) => {
   };
 
   const inputBase =
-    'w-full bg-[#f8f9ff] border border-[#cbc3d7] rounded-lg px-4 py-3 text-base focus:outline-none focus:border-[#6b38d4] focus:ring-1 focus:ring-[#6b38d4] transition-colors';
+    'w-full bg-[#f8f9ff] border border-[#cbc3d7] rounded-lg px-4 py-3 text-base text-[#0d1c2f] focus:outline-none focus:border-[#6b38d4] focus:ring-1 focus:ring-[#6b38d4] transition-colors';
   const inputError = 'border-[#ba1a1a] bg-[#ffdad6]/30';
   const labelBase = 'block text-sm font-medium text-[#0d1c2f] mb-1';
 

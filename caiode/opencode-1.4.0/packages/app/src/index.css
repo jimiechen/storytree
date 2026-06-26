@@ -1,5 +1,14 @@
 @import "@opencode-ai/ui/styles/tailwind";
 
+/* 全局输入框字体颜色修复 — 确保所有输入框文字清晰可见 */
+input, textarea, select {
+  color: #0d1c2f;
+}
+input::placeholder, textarea::placeholder {
+  color: #7b7486;
+  opacity: 1;
+}
+
 @layer components {
   @keyframes session-progress-whip {
     0% {

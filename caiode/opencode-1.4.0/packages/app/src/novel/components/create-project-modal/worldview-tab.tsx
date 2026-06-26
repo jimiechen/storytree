@@ -49,9 +49,9 @@ export const WorldviewTab: Component<WorldviewTabProps> = (props) => {
   };
 
   const selectBase =
-    'w-full bg-[#f8f9ff] border border-[#cbc3d7] rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-[#6b38d4] focus:ring-1 focus:ring-[#6b38d4] transition-colors cursor-pointer';
+    'w-full bg-[#f8f9ff] border border-[#cbc3d7] rounded-lg px-3 py-2.5 text-sm text-[#0d1c2f] focus:outline-none focus:border-[#6b38d4] focus:ring-1 focus:ring-[#6b38d4] transition-colors cursor-pointer';
   const inputBase =
-    'w-full bg-[#f8f9ff] border border-[#cbc3d7] rounded-lg px-4 py-3 text-base focus:outline-none focus:border-[#6b38d4] focus:ring-1 focus:ring-[#6b38d4] transition-colors';
+    'w-full bg-[#f8f9ff] border border-[#cbc3d7] rounded-lg px-4 py-3 text-base text-[#0d1c2f] focus:outline-none focus:border-[#6b38d4] focus:ring-1 focus:ring-[#6b38d4] transition-colors';
   const labelBase = 'block text-xs font-medium text-[#494454] mb-1';
 
   return (

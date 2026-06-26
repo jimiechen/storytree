@@ -151,7 +151,7 @@ export const CreateProjectModal: Component<CreateProjectModalProps> = (props) =>
     `小说名称：${name() || '未设定'}\n类型：${genre()}\n简介：${description() || '无'}\n写作风格：${writingStyle()}\n故事主题：${storyTheme()}`;
 
   const inputBase =
-    'w-full bg-[#f8f9ff] border border-[#cbc3d7] rounded-lg px-4 py-3 text-base focus:outline-none focus:border-[#6b38d4] focus:ring-1 focus:ring-[#6b38d4] transition-colors';
+    'w-full bg-[#f8f9ff] border border-[#cbc3d7] rounded-lg px-4 py-3 text-base text-[#0d1c2f] focus:outline-none focus:border-[#6b38d4] focus:ring-1 focus:ring-[#6b38d4] transition-colors';
   const labelBase = 'block text-sm font-medium text-[#0d1c2f] mb-1';
   const sectionTitle = 'text-sm font-medium text-[#0d1c2f] font-bold flex items-center gap-2';
 
