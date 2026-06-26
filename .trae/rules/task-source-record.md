@@ -5,9 +5,9 @@
 ## **当前任务状态**
 
 **最后更新时间**: 2026-06-26
-**当前任务来源**: 用户要求"下一步可进入章节编辑器阶段或其他优化任务"
-**当前阶段**: PAGE-10 章节编辑器统一工作台实施已完成（前端+后端完整实现：合并 Workspace SideNav + 章节编辑器三栏布局 + 后端 chapter CRUD 7 API + HTTP Provider + FeatureGate 切换 + 有头浏览器 E2E 7/7 passed）
-**下一步**: 用户确认 PAGE-10 验收后，进入下一阶段（如 PAGE-11 或其他优化任务）
+**当前任务来源**: 用户要求"继续进入 PAGE-11"
+**当前阶段**: PAGE-11 AI 模型设置实施已完成（作者中心「AI模型」Tab：模型选择 + API Key + 端点 + 温度/maxTokens + 保存/重置 + localStorage 持久化 + 有头浏览器 E2E 5/5 passed）
+**下一步**: 用户确认 PAGE-11 验收后，进入下一阶段（如 PAGE-12 或其他优化任务）
 
 ---
 
@@ -42,7 +42,18 @@
 
 ### 2026-06-26 完成任务
 
-1. **PAGE-10 章节编辑器统一工作台实施**
+1. **PAGE-11 AI 模型设置实施**
+   - 来源: 用户要求"继续进入 PAGE-11"
+   - 任务ID: PAGE-11-AI-MODEL-SETTINGS-20260626
+   - 状态: ✅ 已完成
+   - 结论: `[READY_FOR_PAGE-11_REVIEW]`
+   - 页级规范: `caiode/opencode-1.4.0/packages/app/src/novel/docs/page-specs/PAGE-11_ai_model_settings.md`
+   - 验证结果: `bun run typecheck` 0 errors + `bun test src/novel` 424 pass / 0 fail / 2 skip + `bun run novel:precommit` PASSED + `bun run test:e2e -- --headed` 5 passed (2.2m)
+   - 实施范围:
+     - 前端新建: profile-ai-model-tab.tsx（193 行）+ use-ai-model-settings.ts（85 行）+ PAGE-11_ai_model_settings.md（264 行）+ page-11-ai-model-settings.spec.ts（E2E 5 用例）
+     - 前端修改: types/profile.ts（ProfileTab 扩展 + AIModelSettings 接口）+ feature-gates.ts（modelSelectionUIEnabled: true）+ profile-tab-nav.tsx（添加 AI模型 Tab）+ profile/index.tsx（Switch 分支 + hook 集成）
+
+2. **PAGE-10 章节编辑器统一工作台实施**
    - 来源: 用户要求"下一步可进入章节编辑器阶段或其他优化任务"
    - 任务ID: PAGE-10-CHAPTER-EDITOR-20260626
    - 状态: ✅ 已完成

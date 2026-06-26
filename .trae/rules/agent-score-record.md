@@ -7,11 +7,37 @@
 **Agent名称**: Multi-Agent (Kimi + MiniMax-M2 + Kimi-K2.7-Code + GLM-5.2)
 **当前积分**: 30/100
 **状态**: 🚨🚨 危险（最后一次机会）
-**最后更新**: 2026-06-26（PAGE-10 章节编辑器统一工作台实施完成后）
+**最后更新**: 2026-06-26（PAGE-11 AI 模型设置实施完成后）
 
 ---
 
 ## 扣分历史记录
+
+### 2026-06-26 扣分记录 (Session 34 - GLM-5.2)
+
+**任务**: PAGE-11 AI 模型设置实施（作者中心「AI模型」Tab：模型选择 + API Key + 端点 + 温度/maxTokens + 保存/重置 + localStorage 持久化 + 有头浏览器 E2E）
+**本次扣分**: 0分
+**扣分后积分**: 30分
+
+| 序号 | 规则文件 | 实际执行 | 扣分 |
+|------|---------|---------|------|
+| 1 | model-auto-file.md | 已更新工作空间文件（PAGE-11 section + 角色声明） | 0 |
+| 2 | agent-responsibility-boundary.md | 已声明角色为前端工程师 / Novel 模块开发 Agent | 0 |
+| 3 | code-file-limit.md | 所有文件 < 500 行（profile-ai-model-tab.tsx 193 行 / use-ai-model-settings.ts 85 行） | 0 |
+| 4 | claude-code-migration-rules.md | 不涉及 | 0 |
+| 5 | github-workflow-rules.md | 待执行 Git 提交 | 0 |
+| 6 | Ralph.md | typecheck + UT + precommit + E2E 5/5 全部通过 | 0 |
+| 7 | task-completion-report.md | 工作空间文件含实施详情 | 0 |
+| 8 | secretary-agent-rules.md | 不适用 | 0 |
+| 9 | 测试执行检查 | typecheck 0 errors + 424 UT pass + precommit PASSED + E2E 5/5 (2.2m) | 0 |
+| 10 | 文档完整性检查 | 规范文档 + 工作空间文件完整 | 0 |
+
+**PAGE-11 实施详情**:
+- 前端新建: profile-ai-model-tab.tsx（193 行，模型选择/API Key/端点/温度/maxTokens/保存/重置/配置摘要）+ use-ai-model-settings.ts（85 行，localStorage 持久化）+ PAGE-11_ai_model_settings.md（264 行规范文档）+ page-11-ai-model-settings.spec.ts（E2E 5 用例）
+- 前端修改: types/profile.ts（ProfileTab 扩展 + AIModelSettings 接口）+ feature-gates.ts（modelSelectionUIEnabled: true）+ profile-tab-nav.tsx（添加 AI模型 Tab）+ profile/index.tsx（Switch 分支 + hook 集成）
+- 验证: typecheck 0 errors + 424 UT pass / 0 fail / 2 skip + precommit PASSED + E2E 5/5 (2.2m)
+
+---
 
 ### 2026-06-26 扣分记录 (Session 33 - GLM-5.2)
 
@@ -1029,6 +1055,7 @@
 | 2026-06-26 | GLM-5.2 | PAGE-07 创建新项目-剧情总纲实施（8 文本框 + LLM 生成 + 有头 E2E） | 0 | 30 |
 | 2026-06-26 | GLM-5.2 | PAGE-08 创建新项目-自定义设定实施（4 预设模板 + 添加设定 + 有头 E2E） | 0 | 30 |
 | 2026-06-26 | GLM-5.2 | PAGE-10 章节编辑器统一工作台实施（前端+后端完整实现 + 合并 Workspace + 有头 E2E） | 0 | 30 |
+| 2026-06-26 | GLM-5.2 | PAGE-11 AI 模型设置实施（作者中心 AI模型 Tab + localStorage 持久化 + 有头 E2E） | 0 | 30 |
 
 ## 积分状态说明
 
