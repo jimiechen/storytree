@@ -7,11 +7,45 @@
 **Agent名称**: Multi-Agent (Kimi + MiniMax-M2 + Kimi-K2.7-Code + GLM-5.2)
 **当前积分**: 30/100
 **状态**: 🚨🚨 危险（最后一次机会）
-**最后更新**: 2026-06-26（PAGE-14 名字生成器实施完成后）
+**最后更新**: 2026-06-26（Session 36 Novel 模块调研 + CODE-WIKI 更新完成后）
 
 ---
 
 ## 扣分历史记录
+
+### 2026-06-26 扣分记录 (Session 36 - GLM-5.2)
+
+**任务**: Novel 模块二次开发调研（基于 opencode-1.4.0）+ 调研链/依赖链/当前进度输出 + CODE-WIKI 更新
+**本次扣分**: 0分
+**扣分后积分**: 30分
+
+| 序号 | 规则文件 | 实际执行 | 扣分 |
+|------|---------|---------|------|
+| 1 | model-auto-file.md | 本次为调研+文档更新任务，更新 docs/CODE_WIKI.md（v1.0→v1.1，追加第 9 章）+ docs/CODE_WIKI_INDEX.md（项目状态表 + Novel 进度表） | 0 |
+| 2 | agent-responsibility-boundary.md | 角色为代码调研 Agent / 文档维护 Agent，职责范围 docs/ 与 caiode/opencode-1.4.0/（只读） | 0 |
+| 3 | code-file-limit.md | CODE_WIKI.md 更新后 1343 行（文档豁免），CODE_WIKI_INDEX.md 194 行 | 0 |
+| 4 | claude-code-migration-rules.md | 不涉及移植 | 0 |
+| 5 | github-workflow-rules.md | 待执行 Git 提交（CODE_WIKI + 规则档案） | 0 |
+| 6 | Ralph.md | 调研任务无代码变更，无需测试；通过 search 子代理 + 直接读取关键文件完成深度调研 | 0 |
+| 7 | task-completion-report.md | CODE_WIKI 第 9 章即为调研报告（含调研链/模块结构/依赖链 4 个 mermaid 图/数据流时序/FeatureGate 矩阵/当前进度/文件索引） | 0 |
+| 8 | secretary-agent-rules.md | 不适用 | 0 |
+| 9 | 测试执行检查 | 调研任务不涉及代码变更，无需测试 | 0 |
+| 10 | 文档完整性检查 | CODE_WIKI 第 9 章含 7 个小节（调研链/模块结构/依赖链/数据流时序/FeatureGate 矩阵/当前进度/文件索引）+ 4 个 mermaid 图 + 10 张表 | 0 |
+
+**调研详情**:
+- 调研范围: `caiode/opencode-1.4.0/packages/app/src/novel/`（20+ 子目录）+ `packages/opencode/src/novel/` 后端 + `server/routes/novel-*.ts` + `server/instance.ts`
+- 调研方法: search 子代理深度调研（读取 20+ 关键文件 import 链）+ 直接读取入口/路由/schema 文件确认
+- 产出文档: `docs/CODE_WIKI.md` 第 9 章（470 行新增内容）
+  - 9.1 调研链（用户需求 → 13 份路书 → PRD §3.x → 9 份页级规范 → 阶段计划 → 代码评审）
+  - 9.2 模块结构与子目录职责（20+ 子目录树状图）
+  - 9.3 依赖链（4 个 mermaid 图：入口路由 / 前后端数据 / LLM 调用 / Workflow）+ 10 个 API 端点 + 21 个类型清单
+  - 9.4 数据流时序（创建项目 + 创建章节 2 个 sequenceDiagram）
+  - 9.5 FeatureGate 矩阵（22 个 gate 默认值表）
+  - 9.6 当前进度（21 行已完成阶段表 + 测试覆盖 + 14 个待执行任务 + 7 条架构观察）
+  - 9.7 关键文件索引（14 类文件路径）
+- 同步更新: `docs/CODE_WIKI_INDEX.md` 项目状态表（Creative Agent Runtime 改为"规划中"，新增 Novel Editor "主体完成" + 10 个子模块进度表）
+
+---
 
 ### 2026-06-26 扣分记录 (Session 35 - GLM-5.2)
 

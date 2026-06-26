@@ -1,8 +1,8 @@
 # StoryTree2 Code Wiki Index
 
 > **项目**: OpenCode Creative Studio (StoryTree2)  
-> **版本**: v1.0  
-> **最后更新**: 2026-05-31
+> **版本**: v1.1  
+> **最后更新**: 2026-06-26
 
 ---
 
@@ -157,11 +157,27 @@ npm run format
 
 | 模块 | 状态 | 说明 |
 |------|------|------|
-| Creative Agent Runtime | 🔄 开发中 | 11个核心模块定义完成 |
-| Creative Core | 🔄 开发中 | 业务抽象层设计完成 |
-| Novel Editor Core | 🔄 开发中 | 数据模型定义完成 |
+| Creative Agent Runtime | 📋 规划中 | 11 个核心模块接口定义完成，DEV-PHASE0-001~014 待实施 |
+| Creative Core | 📋 规划中 | 业务抽象层设计完成 |
+| **Novel Editor（opencode-1.4.0 二次开发）** | ✅ 主体完成 | SolidJS 实现，PAGE-03~14 + P2-A/B/C/E + P3-0/A/B/C/D 全部完成，424 UT + 67 E2E + 真实 DeepSeek 调用 |
 | Plugin System | 📋 规划中 | 扩展点规范完成 |
 | VS Code Extension | 🔄 开发中 | 核心功能实现中 |
+
+### 🆕 Novel 模块二次开发进度（详见 [Code Wiki 第 9 章](CODE_WIKI.md#9-novel-模块二次开发调研基于-opencode-140)）
+
+| 子模块 | 状态 | 关键产出 |
+|--------|------|---------|
+| YAML Workflow Engine | ✅ 完成 | `workflows/engine/` + 3 个内置 YAML |
+| Plugin Tool Registry | ✅ 完成 | `plugins/` + 6 个内置 Tool |
+| Info-Theory Audit | ✅ 完成 | `info-theory/` 熵/互信息/信息原子 |
+| Adapter Router | ✅ 完成 | `adapters/` mock/opencode/claudecode/real-llm |
+| Real LLM 全链路 | ✅ 完成 | `llm/` DeepSeek 真实调用 + 流式 + 重试 + 成本 |
+| 书架 + 后端存储 | ✅ 完成 | PAGE-03 + Hono API + drizzle-orm + SQLite |
+| 创建项目 6-Tab | ✅ 完成 | PAGE-04~08 基本信息/主角/世界观/剧情/自定义 |
+| 章节编辑器 | ✅ 完成 | PAGE-10 三栏布局 + 章节 CRUD |
+| AI 模型设置 | ✅ 完成 | PAGE-11 作者中心 Tab |
+| 名字生成器 | ✅ 完成 | PAGE-14 随机/AI 双 Tab |
+| 代码评审 | ✅ 完成 | 9 维度 28 改进建议 |
 
 ---
 
@@ -169,9 +185,10 @@ npm run format
 
 - **架构问题** → 查看 [docs/roadmap/](../roadmap/)
 - **代码问题** → 查看 [docs/CODE_WIKI.md](CODE_WIKI.md)
+- **Novel 模块二次开发** → 查看 [Code Wiki 第 9 章](CODE_WIKI.md#9-novel-模块二次开发调研基于-opencode-140)
 - **规划问题** → 查看 [docs/planning/](../planning/)
 - **Agent 规则** → 查看 [.trae/rules/](../../.trae/rules/)
 
 ---
 
-*最后更新: 2026-05-31*
+*最后更新: 2026-06-26*

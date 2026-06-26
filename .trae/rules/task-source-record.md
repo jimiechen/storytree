@@ -5,9 +5,9 @@
 ## **当前任务状态**
 
 **最后更新时间**: 2026-06-26
-**当前任务来源**: 用户要求"进入 PAGE-14 名字生成器"
-**当前阶段**: PAGE-14 名字生成器实施已完成（2 Tab 随机/AI + 3 性别 + 6 风格 + 长度滑块 2-6 + 字库 + localStorage 历史 + FeatureGate 切换 + 有头浏览器 E2E 9/9 passed）
-**下一步**: 用户确认 PAGE-14 验收后，进入下一阶段（如 PAGE-12 或其他优化任务）
+**当前任务来源**: 用户要求"调研基于 opencode-1.4.0 版本二次开发的小说编辑器相关模块，输出调研链，依赖链，当前的进度，更新 CODE-WIKE"
+**当前阶段**: Novel 模块二次开发调研已完成，CODE-WIKI 已更新（v1.0 → v1.1，追加第 9 章 470 行）
+**下一步**: 用户确认调研报告后，进入下一阶段（如 PAGE-12/13 或 DEV-PHASE0 Creative Agent Runtime 实施）
 
 ---
 
@@ -42,7 +42,24 @@
 
 ### 2026-06-26 完成任务
 
-1. **PAGE-14 名字生成器实施**
+1. **Novel 模块二次开发调研 + CODE-WIKI 更新**
+   - 来源: 用户要求"caiode\opencode-1.4.0\packages\app\src\novel，调研基于opencode-1.4.0版本二次开发的小说编辑器相关模块，输出调研链，依赖链，当前的进度，更新CODE-WIKE"
+   - 任务ID: NOVEL-MODULE-RESEARCH-CODEWIKI-20260626
+   - 状态: ✅ 已完成
+   - 结论: `[READY_FOR_RESEARCH_REVIEW]`
+   - 调研报告: `docs/CODE_WIKI.md` 第 9 章（470 行新增）+ `docs/CODE_WIKI_INDEX.md` 项目状态表更新
+   - 调研范围:
+     - 前端: `caiode/opencode-1.4.0/packages/app/src/novel/`（20+ 子目录，61 个测试文件）
+     - 后端: `caiode/opencode-1.4.0/packages/opencode/src/novel/`（schema + drizzle 表）+ `server/routes/novel-project.ts` + `novel-chapter.ts` + `instance.ts`
+   - 产出内容:
+     - 调研链: 用户需求 → 13 份架构路书 → PRD §3.x → 9 份页级规范 → 阶段计划 → 代码评审
+     - 依赖链: 4 个 mermaid 图（入口路由 / 前后端数据双轨 / LLM 调用 / Workflow）+ 10 个 API 端点 + 21 个类型清单
+     - 当前进度: 21 行已完成阶段表（Phase 0 + P2-A/B/C/E + P3-0/A/B/C/D + PAGE-03~14 + E2E 回归 + 代码评审）+ 14 个待执行任务（DEV-PHASE0-001~014）
+     - FeatureGate 矩阵: 22 个 gate 默认值
+     - 7 条关键架构观察（双轨数据源 / 统一执行路径 / FeatureGate 纪律 / 密钥安全 / 流式聚合边界 / 双环境 YAML 加载 / workspace 隔离）
+   - 验证: 无代码变更，调研任务无需测试
+
+2. **PAGE-14 名字生成器实施**
    - 来源: 用户要求"进入 PAGE-14 名字生成器"
    - 任务ID: PAGE-14-NAME-GENERATOR-20260626
    - 状态: ✅ 已完成
