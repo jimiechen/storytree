@@ -9,6 +9,7 @@ interface Props {
 const TABS: { value: ProfileTab; label: string }[] = [
   { value: 'credits', label: '积分' },
   { value: 'recharge', label: '充值' },
+  { value: 'ai-model', label: 'AI模型' },
   { value: 'export', label: '导出' },
   { value: 'import', label: '导入' },
 ];

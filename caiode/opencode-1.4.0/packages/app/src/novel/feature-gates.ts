@@ -95,7 +95,7 @@ export function createDefaultNovelFeatureGates(): NovelFeatureGates {
     // P3-D — 2026-06-23 测试验收临时开启
     modelRoutingEnabled: true,        // false → true (P3-D：未指定 adapter 时由 gates 决定 real-llm)
     llmFallbackToMockEnabled: true,   // false → true（失败时 fallback 到 mock）
-    modelSelectionUIEnabled: false,
+    modelSelectionUIEnabled: true,   // false → true (PAGE-11: AI 模型设置 Tab 可见)
 
     // PAGE-03 Backend Storage — 默认关闭，开启后使用 HTTP Provider
     realNovelBackendEnabled: false,
