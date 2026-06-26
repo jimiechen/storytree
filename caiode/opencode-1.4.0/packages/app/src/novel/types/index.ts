@@ -1,6 +1,6 @@
 export type { Project } from './project';
-export type { CreateProjectInput, ProtagonistInput, Gender, GenreOption, TargetAudience, WritingStyle, StoryTheme } from './project';
-export { GENRE_OPTIONS } from './project';
+export type { CreateProjectInput, ProtagonistInput, Gender, GenreOption, TargetAudience, WritingStyle, StoryTheme, WorldType, Era, SocialSystem } from './project';
+export { GENRE_OPTIONS, WORLD_TYPE_LABELS, ERA_LABELS, SOCIAL_SYSTEM_LABELS } from './project';
 export type { Chapter, ChapterOutline, AISuggestion, ChapterExtractedInfo } from './chapter';
 export type { ChapterStatus } from './editor';
 export type { Character, CharacterRelationship } from './character';

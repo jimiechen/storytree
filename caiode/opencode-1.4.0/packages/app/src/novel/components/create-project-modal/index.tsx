@@ -16,11 +16,15 @@ import type {
   TargetAudience,
   WritingStyle,
   StoryTheme,
+  WorldType,
+  Era,
+  SocialSystem,
 } from '../../types';
 import { NovelIcon } from '../layout/novel-icon';
 import { BasicInfoTab } from './basic-info-tab';
 import { LLMGenerationTab } from './llm-generation-tab';
 import { ProtagonistTab } from './protagonist-tab';
+import { WorldviewTab } from './worldview-tab';
 
 interface CreateProjectModalProps {
   onSubmit: (input: CreateProjectInput) => Promise<void>;
@@ -60,6 +64,10 @@ export const CreateProjectModal: Component<CreateProjectModalProps> = (props) =>
   // 世界观 / 剧情
   const [worldview, setWorldview] = createSignal('');
   const [plotOutline, setPlotOutline] = createSignal('');
+  // 世界观设定 (PRD §3.6 — 3 个下拉框)
+  const [worldType, setWorldType] = createSignal<WorldType | ''>('');
+  const [era, setEra] = createSignal<Era | ''>('');
+  const [socialSystem, setSocialSystem] = createSignal<SocialSystem | ''>('');
   // 自定义设定
   const [customSettings, setCustomSettings] = createSignal('');
   // 导航状态
@@ -127,6 +135,9 @@ export const CreateProjectModal: Component<CreateProjectModalProps> = (props) =>
         coverUrl: coverUrl() || undefined,
         worldview: worldview().trim() || undefined,
         plotOutline: plotOutline().trim() || undefined,
+        worldType: worldType() || undefined,
+        era: era() || undefined,
+        socialSystem: socialSystem() || undefined,
       });
     } finally {
       setIsSubmitting(false);
@@ -227,11 +238,12 @@ export const CreateProjectModal: Component<CreateProjectModalProps> = (props) =>
           </Show>
 
           <Show when={activeTab() === 'worldview'}>
-            <LLMGenerationTab
-              label="世界观" icon="public"
-              placeholder="描述小说的世界观设定，如修炼体系、科技水平、社会结构等..."
-              promptPlaceholder="输入关键词，如：修仙世界、九重天、灵气复苏..."
-              value={worldview()} onInput={setWorldview} context={llmContext()}
+            <WorldviewTab
+              worldType={worldType} setWorldType={setWorldType}
+              era={era} setEra={setEra}
+              socialSystem={socialSystem} setSocialSystem={setSocialSystem}
+              value={worldview} setValue={setWorldview}
+              context={llmContext()}
             />
           </Show>
 
