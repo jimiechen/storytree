@@ -7,6 +7,7 @@
  */
 
 import { createSignal, Show, For } from 'solid-js';
+import { createStore } from 'solid-js/store';
 import type { Component } from 'solid-js';
 import type {
   CreateProjectInput,
@@ -25,6 +26,7 @@ import { BasicInfoTab } from './basic-info-tab';
 import { LLMGenerationTab } from './llm-generation-tab';
 import { ProtagonistTab } from './protagonist-tab';
 import { WorldviewTab } from './worldview-tab';
+import { PlotOutlineTab, type PlotOutlineFields } from './plot-outline-tab';
 
 interface CreateProjectModalProps {
   onSubmit: (input: CreateProjectInput) => Promise<void>;
@@ -64,6 +66,11 @@ export const CreateProjectModal: Component<CreateProjectModalProps> = (props) =>
   // 世界观 / 剧情
   const [worldview, setWorldview] = createSignal('');
   const [plotOutline, setPlotOutline] = createSignal('');
+  // PAGE-07: 剧情总纲 8 个文本框（PRD §3.7）
+  const [plotFields, setPlotFields] = createStore<PlotOutlineFields>({
+    plotCore: '', plotBeginning: '', plotDevelopment: '', plotClimax: '',
+    plotBattle: '', plotEnding: '', plotFinale: '', plotConflict: '',
+  });
   // 世界观设定 (PRD §3.6 — 3 个下拉框)
   const [worldType, setWorldType] = createSignal<WorldType | ''>('');
   const [era, setEra] = createSignal<Era | ''>('');
@@ -135,6 +142,14 @@ export const CreateProjectModal: Component<CreateProjectModalProps> = (props) =>
         coverUrl: coverUrl() || undefined,
         worldview: worldview().trim() || undefined,
         plotOutline: plotOutline().trim() || undefined,
+        plotCore: plotFields.plotCore.trim() || undefined,
+        plotBeginning: plotFields.plotBeginning.trim() || undefined,
+        plotDevelopment: plotFields.plotDevelopment.trim() || undefined,
+        plotClimax: plotFields.plotClimax.trim() || undefined,
+        plotBattle: plotFields.plotBattle.trim() || undefined,
+        plotEnding: plotFields.plotEnding.trim() || undefined,
+        plotFinale: plotFields.plotFinale.trim() || undefined,
+        plotConflict: plotFields.plotConflict.trim() || undefined,
         worldType: worldType() || undefined,
         era: era() || undefined,
         socialSystem: socialSystem() || undefined,
@@ -248,11 +263,10 @@ export const CreateProjectModal: Component<CreateProjectModalProps> = (props) =>
           </Show>
 
           <Show when={activeTab() === 'plot'}>
-            <LLMGenerationTab
-              label="剧情总纲" icon="auto_stories"
-              placeholder="描述小说的剧情大纲，包括开端、发展、高潮、结局..."
-              promptPlaceholder="输入关键词，如：少年逆袭、拜师学艺、大战魔族..."
-              value={plotOutline()} onInput={setPlotOutline} context={llmContext()}
+            <PlotOutlineTab
+              fields={plotFields}
+              setField={(k, v) => setPlotFields(k as keyof PlotOutlineFields, v)}
+              context={llmContext()}
             />
           </Show>
 

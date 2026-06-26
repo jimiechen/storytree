@@ -61,6 +61,15 @@ export interface CreateProjectInput {
   worldType?: string;      // PAGE-06: 世界类型
   era?: string;            // PAGE-06: 时代背景
   socialSystem?: string;   // PAGE-06: 社会制度
+  // PAGE-07: 剧情总纲 8 个文本框（PRD §3.7）
+  plotCore?: string;        // 核心剧情线
+  plotBeginning?: string;  // 开端
+  plotDevelopment?: string; // 发展
+  plotClimax?: string;     // 高潮
+  plotBattle?: string;     // 决战
+  plotEnding?: string;     // 结局
+  plotFinale?: string;     // 最终走向
+  plotConflict?: string;   // 核心矛盾
 }
 
 /** 世界类型选项（PRD §3.6） */
