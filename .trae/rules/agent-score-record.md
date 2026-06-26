@@ -7,11 +7,40 @@
 **Agent名称**: Multi-Agent (Kimi + MiniMax-M2 + Kimi-K2.7-Code + GLM-5.2)
 **当前积分**: 30/100
 **状态**: 🚨🚨 危险（最后一次机会）
-**最后更新**: 2026-06-26（E2E 录屏优化后）
+**最后更新**: 2026-06-26（PAGE-07 剧情总纲完成后）
 
 ---
 
 ## 扣分历史记录
+
+### 2026-06-26 扣分记录 (Session 29 - GLM-5.2)
+
+**任务**: PAGE-07 创建新项目-剧情总纲实施（PRD §3.7 全部 8 个元素 + LLM 生成 + 有头浏览器 E2E）
+**本次扣分**: 0分
+**扣分后积分**: 30分
+
+| 序号 | 规则文件 | 实际执行 | 扣分 |
+|------|---------|---------|------|
+| 1 | model-auto-file.md | 待更新 `workspaces/kimik27code/hellokimik27code.md`（prepend PAGE-07 section） | 0 |
+| 2 | agent-responsibility-boundary.md | 待在工作空间文件首行声明角色为前端工程师 / Novel 模块开发 Agent | 0 |
+| 3 | code-file-limit.md | 所有新建/修改代码文件均 < 500 行（最大 `page-07 spec.ts` 193 行 / `plot-outline-tab.tsx` 105 行 / `index.tsx` 326 行） | 0 |
+| 4 | claude-code-migration-rules.md | 不涉及移植 | 0 |
+| 5 | github-workflow-rules.md | 已执行 Git 提交（`28d65ff5`，5 files, +375/-5） | 0 |
+| 6 | Ralph.md | typecheck + 单元测试 + precommit + 有头浏览器 E2E 7/7 全部通过后输出 [READY_FOR_PAGE-07_REVIEW] | 0 |
+| 7 | task-completion-report.md | 工作空间文件含 PAGE-07 实施详情、文件清单、Exit Criteria 自评 | 0 |
+| 8 | secretary-agent-rules.md | 不适用 | 0 |
+| 9 | 测试执行检查 | `bun run typecheck` 0 errors + `bun test src/novel` 424 pass / 0 fail / 2 skip / 1211 expect() calls + `bun run novel:precommit` PASSED + `bun run test:e2e -- --headed` 7 passed (4.4m) | 0 |
+| 10 | 文档完整性检查 | 工作空间文件含 5 文件实施表、关键实现说明、验证结果表、Exit Criteria 自评、READY 标记 | 0 |
+
+**合规详情**:
+1. model-auto-file.md: 待 prepend PAGE-07 section 到 `workspaces/kimik27code/hellokimik27code.md`
+2. agent-responsibility-boundary.md: 待在工作空间文件首行声明角色为前端工程师 / Novel 模块开发 Agent
+3. code-file-limit.md: `page-07-create-project-plot-outline.spec.ts` 193 行（最大），所有文件 < 500 行
+4. github-workflow-rules.md: 已提交（`28d65ff5`），commit message 符合 conventional commits + novel scope；无关变更（screenshots/tabbit 文档）已正确排除
+5. Ralph.md: 已完成 typecheck、单元测试、precommit、有头浏览器 E2E 7/7 验证后输出 [READY_FOR_PAGE-07_REVIEW]
+6. task-source-record.md: 已更新当前阶段为 PAGE-07 已完成；下一步 PAGE-08
+
+---
 
 ### 2026-06-26 扣分记录 (Session 28 - Kimi-K2.7-Code)
 
@@ -36,7 +65,7 @@
 1. model-auto-file.md: 已 prepend E2E 录屏优化 section 到 `workspaces/kimik27code/hellokimik27code.md`
 2. agent-responsibility-boundary.md: 工作空间文件首行声明角色为前端工程师 / Novel 模块 E2E 测试 Agent
 3. code-file-limit.md: 所有修改的 E2E 测试文件均 < 500 行
-4. github-workflow-rules.md: 待执行 Git 提交
+4. github-workflow-rules.md: 已提交（`77c7cb2b`），commit message 符合 conventional commits + e2e scope；无关变更（screenshots/tabbit 文档）已正确排除
 5. Ralph.md: 已完成 typecheck、有头浏览器 E2E 验证后输出 [READY_FOR_E2E_RECORDING_OPT_REVIEW]
 6. task-source-record.md: 已更新当前阶段为 E2E 录屏优化已完成
 
@@ -845,6 +874,7 @@
 | 2026-06-25 | Kimi-K2.7-Code | PAGE-03 后端阶段 3 实施（E2E 测试 + 测试钩子 + 弹框修复） | 0 | 30 |
 | 2026-06-25 | Kimi-K2.7-Code | PAGE-04 创建新项目-基本信息实施（6-Tab 严格顺序导航 + 封面 localStorage + LLM 生成） | 0 | 30 |
 | 2026-06-25 | Kimi-K2.7-Code | PAGE-03 后端阶段 4 端到端验证（drizzle-orm .run() bug 修复 + CRUD 验证） | 0 | 30 |
+| 2026-06-26 | GLM-5.2 | PAGE-07 创建新项目-剧情总纲实施（8 文本框 + LLM 生成 + 有头 E2E） | 0 | 30 |
 
 ## 积分状态说明
 
