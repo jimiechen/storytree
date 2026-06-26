@@ -5,9 +5,9 @@
 ## **当前任务状态**
 
 **最后更新时间**: 2026-06-26
-**当前任务来源**: 用户要求"继续"（PAGE-08 自定义设定开发）
-**当前阶段**: PAGE-08 创建新项目-自定义设定已完成（4 预设模板 + 添加设定 + 有头 E2E 9/9）
-**下一步**: 创建新项目弹窗 6-Tab 全部完成 / 用户确认下一步
+**当前任务来源**: 用户要求"先执行整体回测试，确保数据准确入库，开启有头浏览器，每一步录屏截图，输出测试报告"
+**当前阶段**: 创建新项目弹窗 6-Tab 整体回归 E2E 测试已完成（67 tests / 62 passed / 5 failed / 19.0m / 有头浏览器 + 全程录屏截图 + 测试报告）
+**下一步**: 用户确认是否修复 5 个失败测试 / 启动后端 opencode server 验证真实数据库入库 / 进入下一阶段（如章节编辑器）
 
 ---
 
@@ -42,7 +42,23 @@
 
 ### 2026-06-26 完成任务
 
-1. **PAGE-08 创建新项目-自定义设定**
+1. **创建新项目弹窗 6-Tab 整体回归 E2E 测试**
+   - 来源: 用户要求"先执行整体回测试，确保数据准确入库，开启有头浏览器，每一步录屏截图，输出测试报告"
+   - 任务ID: E2E-REGRESSION-CREATE-PROJECT-20260626
+   - 状态: ✅ 已完成
+   - 结论: `[READY_FOR_REGRESSION_REVIEW]`
+   - 测试报告: `docs/task-reports/2026-06-26/E2E-REGRESSION-REPORT-20260626.md`
+   - 验证结果: `bun run test:e2e -- --headed --workers=2` 62 passed / 5 failed / 67 total（19.0m）
+   - 测试范围: 8 个 E2E 测试文件（bookshelf + page-03-acceptance + page-03-backend-integration + page-04~08）
+   - 录屏证据: 67 个 video.webm + 83 张关键步骤 PNG 截图 + 5 张失败截图 + HTML 报告
+   - 关键结论:
+     - 6-Tab 主流程（PAGE-04~08）：42/42 全部通过 ✅
+     - 数据准确入库（Mock 层）：✅ 已验证（TC-BE-001/003/004/005 通过）
+     - 数据准确入库（真实后端）：⚠️ 代码链路完整但 opencode server 启动失败未验证
+     - 5 个失败测试均为 P3 旧测试次要问题（Google Fonts 白名单 / 防抖时序 / 选择器失效）
+   - 工作空间记录: `workspaces/kimik27code/hellokimik27code.md`（⚠️ 存在编码问题待修复）
+
+2. **PAGE-08 创建新项目-自定义设定**
    - 来源: 用户要求"继续"（PAGE-07 完成后继续 PAGE-08）
    - 任务ID: PAGE-08-CREATE-PROJECT-CUSTOM-SETTINGS-20260626
    - 状态: ✅ 已完成
